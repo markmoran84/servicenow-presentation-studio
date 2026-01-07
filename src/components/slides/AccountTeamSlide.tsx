@@ -30,6 +30,18 @@ const accountTeamMembers = {
       ],
       avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
     },
+    {
+      name: "Sarah Mitchell",
+      email: "sarah.mitchell@servicenow.com",
+      phone: "+44 7700 900123",
+      role: "Strategic Account Manager",
+      responsibilities: [
+        "Commercial strategy execution",
+        "Stakeholder alignment",
+        "Pipeline development",
+      ],
+      avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    },
   ],
   regional: [
     {
@@ -131,7 +143,7 @@ export const AccountTeamSlide = () => {
               delay={100}
             />
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-3 gap-3 mt-4">
               {accountTeamMembers.leadership.map((member, index) => (
                 <TeamMemberCard
                   key={member.email}
