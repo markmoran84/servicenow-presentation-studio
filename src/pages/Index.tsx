@@ -167,26 +167,20 @@ const Index = () => {
               {/* Regional row */}
               <div className="grid grid-cols-3 gap-3">
                 {accountTeamMembers.regional.map((member, index) => (
-                  <div key={member.email} className="flex flex-col items-center">
+                  <div key={member.email} className="flex flex-col">
                     <TeamMemberCard
                       {...member}
                       delay={500 + index * 100}
                     />
                     {member.subTeams && (
-                      <div className="flex flex-col items-center mt-0">
-                        {/* Vertical connector line */}
-                        <div className="w-0.5 h-4 bg-primary/40" />
-                        <div className="space-y-2">
-                          {member.subTeams.map((team, teamIndex) => (
-                            <div key={team} className="flex flex-col items-center">
-                              {teamIndex > 0 && <div className="w-0.5 h-2 bg-primary/40" />}
-                              <SubTeamBadge
-                                label={team}
-                                delay={700 + index * 100 + teamIndex * 50}
-                              />
-                            </div>
-                          ))}
-                        </div>
+                      <div className="mt-2 space-y-1.5">
+                        {member.subTeams.map((team, teamIndex) => (
+                          <SubTeamBadge
+                            key={team}
+                            label={team}
+                            delay={700 + index * 100 + teamIndex * 50}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -196,26 +190,20 @@ const Index = () => {
               {/* Consultants row */}
               <div className="grid grid-cols-3 gap-3 mt-3">
                 {accountTeamMembers.consultants.map((member, index) => (
-                  <div key={member.email} className="flex flex-col items-center">
+                  <div key={member.email} className="flex flex-col">
                     <TeamMemberCard
                       {...member}
                       delay={800 + index * 100}
                     />
                     {member.subTeams && (
-                      <div className="flex flex-col items-center mt-0">
-                        {/* Vertical connector line */}
-                        <div className="w-0.5 h-4 bg-primary/40" />
-                        <div className="space-y-2">
-                          {member.subTeams.map((team, teamIndex) => (
-                            <div key={team} className="flex flex-col items-center">
-                              {teamIndex > 0 && <div className="w-0.5 h-2 bg-primary/40" />}
-                              <SubTeamBadge
-                                label={team}
-                                delay={1000 + index * 100 + teamIndex * 50}
-                              />
-                            </div>
-                          ))}
-                        </div>
+                      <div className="mt-2 space-y-1.5">
+                        {member.subTeams.map((team, teamIndex) => (
+                          <SubTeamBadge
+                            key={team}
+                            label={team}
+                            delay={1000 + index * 100 + teamIndex * 50}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
