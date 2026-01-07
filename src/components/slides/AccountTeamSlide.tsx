@@ -43,7 +43,7 @@ const accountTeamMembers = {
       avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
     },
   ],
-  regional: [
+  extended: [
     {
       name: "Ciara Breslin",
       email: "ciara.breslin@servicenow.com",
@@ -76,38 +76,15 @@ const accountTeamMembers = {
       avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face",
       subTeams: ["Expert services, training", "Impact"],
     },
-  ],
-  consultants: [
     {
-      name: "Greg Pope",
-      email: "greg.pope@servicenow.com",
-      role: "Solution Consultant NA",
+      name: "Laura Chen",
+      email: "laura.chen@servicenow.com",
+      role: "Solution Consultant APAC",
       responsibilities: [
-        "Presales and value engineering",
-        "Leverages global synergies",
+        "Technical solutions for APAC region",
+        "Cross-regional alignment",
       ],
-      avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Brian Murchison",
-      email: "brian.murchison@servicenow.com",
-      role: "Customer Success Executive NA",
-      responsibilities: [
-        "Interlock to Post-Sales",
-        "Drives Business Value for customer",
-        "Delivery operating model governance",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop&crop=face",
-      subTeams: ["Product success teams", "Product management"],
-    },
-    {
-      name: "John Duker",
-      email: "john.duker@servicenow.com",
-      role: "Services Account Executive NA",
-      responsibilities: [
-        "Point of contact for Expert Services and Success offerings",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100&h=100&fit=crop&crop=face",
+      avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face",
     },
   ],
 };
@@ -157,14 +134,14 @@ export const AccountTeamSlide = () => {
               <ArrowLeft className="w-5 h-5 text-muted-foreground" />
               <div className="flex-1 connector-line" />
               <span className="text-muted-foreground text-sm font-medium px-4">
-                Regional point of contacts
+                Extended Account Team
               </span>
               <div className="flex-1 connector-line" />
               <ArrowRight className="w-5 h-5 text-muted-foreground" />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {accountTeamMembers.regional.map((member, index) => (
+            <div className="grid grid-cols-4 gap-3">
+              {accountTeamMembers.extended.map((member, index) => (
                 <div key={member.email} className="flex flex-col">
                   <TeamMemberCard
                     {...member}
@@ -185,27 +162,6 @@ export const AccountTeamSlide = () => {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mt-3">
-              {accountTeamMembers.consultants.map((member, index) => (
-                <div key={member.email} className="flex flex-col">
-                  <TeamMemberCard
-                    {...member}
-                    delay={800 + index * 100}
-                  />
-                  {member.subTeams && (
-                    <div className="mt-2 space-y-1.5">
-                      {member.subTeams.map((team, teamIndex) => (
-                        <SubTeamBadge
-                          key={team}
-                          label={team}
-                          delay={1000 + index * 100 + teamIndex * 50}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
