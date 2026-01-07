@@ -7,20 +7,12 @@ import { BusinessPerformanceSlide } from "@/components/slides/BusinessPerformanc
 import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { MarketingPlanSlide } from "@/components/slides/MarketingPlanSlide";
-import { StrategyMapSlide } from "@/components/slides/StrategyMapSlide";
-import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
-import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
-import { RiskMatrixSlide } from "@/components/slides/RiskMatrixSlide";
 
 const slides = [
   { component: AccountTeamSlide, label: "Account Team" },
   { component: CustomerOverviewSlide, label: "Customer Overview" },
   { component: BusinessPerformanceSlide, label: "Business Performance" },
   { component: StrategicPrioritiesSlide, label: "Strategic Priorities" },
-  { component: StrategyMapSlide, label: "Strategy Map" },
-  { component: RoadmapSlide, label: "Roadmap" },
-  { component: RiskMatrixSlide, label: "Risk Matrix" },
-  { component: ClosePlanSlide, label: "Close Plan" },
   { component: GovernanceSlide, label: "Governance" },
   { component: MarketingPlanSlide, label: "Marketing Plan" },
 ];
