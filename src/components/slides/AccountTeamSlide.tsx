@@ -146,8 +146,9 @@ const elevateTeam = [
 export const AccountTeamSlide = () => {
   return (
     <div className="px-8 pt-6 pb-40">
-      <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
-        Global Account Team
+      <h1 className="slide-title opacity-0 animate-fade-in">
+        <span className="highlight">Global Account</span>
+        <br />Team
       </h1>
 
       <div className="flex gap-8">
