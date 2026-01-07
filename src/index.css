@@ -156,4 +156,20 @@
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-accent);
   }
+
+  .text-wasabi {
+    color: hsl(var(--sn-green));
+  }
+
+  .slide-title {
+    @apply text-4xl font-bold mb-6;
+  }
+
+  .slide-title .highlight {
+    color: hsl(var(--sn-green));
+  }
+
+  .quote-block {
+    @apply text-lg italic text-muted-foreground border-l-4 border-primary pl-4 py-2;
+  }
 }
