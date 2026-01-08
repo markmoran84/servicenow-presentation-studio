@@ -48,12 +48,12 @@ export interface StrategicPainPoints {
   timeToValueIssues: string[];
 }
 
-// Section F — Opportunity Hypotheses
-export interface OpportunityHypotheses {
-  aiOpportunities: string[];
-  automationOpportunities: string[];
-  standardisationOpportunities: string[];
-  governanceOpportunities: string[];
+// Section F — Strategic Opportunities (ServiceNow perspective)
+export interface StrategicOpportunities {
+  serviceExcellence: string[];
+  operationalEfficiency: string[];
+  digitalTransformation: string[];
+  platformConsolidation: string[];
 }
 
 // Section G — Executive Engagement
@@ -89,7 +89,7 @@ export interface AccountData {
   financial: FinancialSnapshot;
   strategy: CustomerStrategy;
   painPoints: StrategicPainPoints;
-  opportunities: OpportunityHypotheses;
+  opportunities: StrategicOpportunities;
   engagement: ExecutiveEngagement;
   swot: SWOTAnalysis;
   annualReport: AnnualReportHighlights;
@@ -175,29 +175,25 @@ const defaultMaerskData: AccountData = {
     ],
   },
   opportunities: {
-    aiOpportunities: [
-      "Predictive case routing",
-      "Intelligent document processing",
-      "Customer sentiment analysis",
-      "AI-powered knowledge management",
+    serviceExcellence: [
+      "Transform customer experience with AI-powered self-service and intelligent case routing, driving NPS improvement of 15+ points",
+      "Reduce time-to-resolution by 50% through predictive case management and proactive customer notifications",
+      "Enable seamless omnichannel service delivery across 130+ countries with unified service catalog",
     ],
-    automationOpportunities: [
-      "Case auto-classification",
-      "Quote generation automation",
-      "Proactive customer notifications",
-      "Incident auto-resolution",
+    operationalEfficiency: [
+      "Reduce cost-to-serve by 30% through intelligent automation of case handling and document processing",
+      "Accelerate quote-to-cash cycle by 40% with automated quote generation and approval workflows",
+      "Eliminate $15M+ in redundant licensing through platform consolidation from 700+ applications",
     ],
-    standardisationOpportunities: [
-      "Global service catalog",
-      "Unified CRM platform",
-      "Single workflow backbone",
-      "Consolidated ITSM",
+    digitalTransformation: [
+      "Accelerate AI operationalisation from 18 months to 6 months through unified workflow orchestration layer",
+      "Enable AI-first strategy with production-ready model governance, deployment, and monitoring",
+      "Drive 5-7% annual productivity improvement through intelligent automation at scale",
     ],
-    governanceOpportunities: [
-      "AI model governance framework",
-      "Enterprise workflow orchestration",
-      "Cross-functional process ownership",
-      "Value realisation tracking",
+    platformConsolidation: [
+      "Unify fragmented CRM landscape onto single platform, reducing complexity and improving data quality",
+      "Consolidate multiple regional ITSM tools into enterprise-wide service management backbone",
+      "Create single source of truth for customer interactions, enabling 360° visibility across all touchpoints",
     ],
   },
   engagement: {

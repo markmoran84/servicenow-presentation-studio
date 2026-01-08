@@ -479,40 +479,44 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-accent" />
-                  Opportunity Hypotheses
+                  Strategic Opportunities
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Where AI Could Move the Needle (one per line)</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Service Excellence (one per line)</label>
                   <Textarea
-                    value={data.opportunities.aiOpportunities.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "aiOpportunities", e.target.value)}
+                    value={data.opportunities.serviceExcellence.join("\n")}
+                    onChange={(e) => handleArrayInput("opportunities", "serviceExcellence", e.target.value)}
                     rows={4}
+                    placeholder="Transform customer experience with AI-powered self-service..."
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Where Automation Removes Friction (one per line)</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Operational Efficiency (one per line)</label>
                   <Textarea
-                    value={data.opportunities.automationOpportunities.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "automationOpportunities", e.target.value)}
+                    value={data.opportunities.operationalEfficiency.join("\n")}
+                    onChange={(e) => handleArrayInput("opportunities", "operationalEfficiency", e.target.value)}
                     rows={4}
+                    placeholder="Reduce cost-to-serve by 30% through intelligent automation..."
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Where Standardisation Enables Scale (one per line)</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Digital Transformation (one per line)</label>
                   <Textarea
-                    value={data.opportunities.standardisationOpportunities.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "standardisationOpportunities", e.target.value)}
+                    value={data.opportunities.digitalTransformation.join("\n")}
+                    onChange={(e) => handleArrayInput("opportunities", "digitalTransformation", e.target.value)}
                     rows={4}
+                    placeholder="Accelerate AI operationalisation from 18 months to 6 months..."
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Where Governance Unlocks Trust (one per line)</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Platform Consolidation (one per line)</label>
                   <Textarea
-                    value={data.opportunities.governanceOpportunities.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "governanceOpportunities", e.target.value)}
+                    value={data.opportunities.platformConsolidation.join("\n")}
+                    onChange={(e) => handleArrayInput("opportunities", "platformConsolidation", e.target.value)}
                     rows={4}
+                    placeholder="Unify fragmented CRM landscape onto single platform..."
                   />
                 </div>
               </CardContent>
