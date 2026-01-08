@@ -5,8 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Fetch supplementary financial data from the web
-async function fetchFinancialData(companyName: string): Promise<string> {
+// Comprehensive web research for multiple data types
+async function searchCompanyInfo(companyName: string, searchType: string): Promise<string> {
   const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
   if (!apiKey) {
     console.log("Firecrawl not configured, skipping web search");
@@ -14,7 +14,18 @@ async function fetchFinancialData(companyName: string): Promise<string> {
   }
 
   try {
-    console.log(`Searching for financial data: ${companyName}`);
+    const queries: Record<string, string> = {
+      financial: `${companyName} annual report 2024 2025 revenue EBIT financial results earnings`,
+      strategy: `${companyName} strategic priorities 2024 2025 CEO vision transformation digital`,
+      leadership: `${companyName} CEO CIO CTO executive team leadership priorities investor day`,
+      competitors: `${companyName} competitors market share industry landscape competitive analysis`,
+      challenges: `${companyName} challenges risks pain points issues obstacles investor concerns`,
+      technology: `${companyName} technology stack digital transformation AI automation IT strategy`,
+    };
+
+    const query = queries[searchType] || `${companyName} business overview`;
+    console.log(`Searching ${searchType}: ${query}`);
+
     const response = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
       headers: {
@@ -22,8 +33,8 @@ async function fetchFinancialData(companyName: string): Promise<string> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        query: `${companyName} annual report 2024 revenue EBIT financial results`,
-        limit: 3,
+        query,
+        limit: 4,
         scrapeOptions: { formats: ["markdown"] },
       }),
     });
@@ -35,16 +46,38 @@ async function fetchFinancialData(companyName: string): Promise<string> {
 
     const data = await response.json();
     const results = data.data || [];
-    const combinedContent = results
+    const content = results
       .map((r: any) => r.markdown || r.description || "")
-      .join("\n\n");
+      .join("\n\n")
+      .slice(0, 8000);
 
-    console.log(`Found ${results.length} search results, content length: ${combinedContent.length}`);
-    return combinedContent;
+    console.log(`Found ${results.length} results for ${searchType}, length: ${content.length}`);
+    return content;
   } catch (error) {
-    console.error("Error fetching financial data:", error);
+    console.error(`Error searching ${searchType}:`, error);
     return "";
   }
+}
+
+// Fetch comprehensive web intelligence in parallel
+async function fetchComprehensiveWebData(companyName: string): Promise<{
+  financial: string;
+  strategy: string;
+  leadership: string;
+  competitors: string;
+  challenges: string;
+  technology: string;
+}> {
+  const [financial, strategy, leadership, competitors, challenges, technology] = await Promise.all([
+    searchCompanyInfo(companyName, "financial"),
+    searchCompanyInfo(companyName, "strategy"),
+    searchCompanyInfo(companyName, "leadership"),
+    searchCompanyInfo(companyName, "competitors"),
+    searchCompanyInfo(companyName, "challenges"),
+    searchCompanyInfo(companyName, "technology"),
+  ]);
+
+  return { financial, strategy, leadership, competitors, challenges, technology };
 }
 
 serve(async (req) => {
@@ -312,37 +345,61 @@ SWOT QUALITY STANDARDS:
     });
     documentFields.forEach(f => dataSources[f] = "document");
 
-    // Check if we need to fetch supplementary data
-    const needsFinancialData = 
-      !extractedData.revenue || 
-      extractedData.revenue === "N/A" || 
-      extractedData.revenue === "Not specified" ||
-      !extractedData.ebitImprovement ||
-      extractedData.ebitImprovement === "N/A";
-
+    // Always do comprehensive web research if company name is available
     let usedWebSearch = false;
 
-    if (needsFinancialData && companyName) {
-      console.log("Financial data missing, fetching from web...");
-      const supplementaryContent = await fetchFinancialData(companyName);
-
-      if (supplementaryContent) {
+    if (companyName) {
+      console.log("Fetching comprehensive web intelligence for:", companyName);
+      const webData = await fetchComprehensiveWebData(companyName);
+      
+      const hasWebData = Object.values(webData).some(v => v.length > 0);
+      
+      if (hasWebData) {
         usedWebSearch = true;
-        // Second pass with supplementary data - use pro model for best quality
-        const enrichPrompt = `You are a senior strategic analyst enriching an account analysis with additional financial intelligence.
+        
+        // Build comprehensive web intelligence context
+        const webIntelligence = `
+═══════════════════════════════════════════════════════════════
+SUPPLEMENTARY WEB INTELLIGENCE (Live Research)
+═══════════════════════════════════════════════════════════════
 
-ORIGINAL EXTRACTION:
+FINANCIAL DATA & EARNINGS:
+${webData.financial || "No additional financial data found"}
+
+STRATEGIC PRIORITIES & CEO VISION:
+${webData.strategy || "No additional strategy data found"}
+
+EXECUTIVE LEADERSHIP TEAM:
+${webData.leadership || "No leadership data found"}
+
+COMPETITIVE LANDSCAPE:
+${webData.competitors || "No competitor data found"}
+
+CHALLENGES & RISKS:
+${webData.challenges || "No challenges/risks data found"}
+
+TECHNOLOGY & DIGITAL TRANSFORMATION:
+${webData.technology || "No technology data found"}
+═══════════════════════════════════════════════════════════════`;
+
+        // Second pass with comprehensive web data - use pro model for best quality
+        const enrichPrompt = `You are a McKinsey-caliber strategic analyst enriching an account analysis with comprehensive web intelligence.
+
+ORIGINAL EXTRACTION (from annual report):
 ${JSON.stringify(extractedData, null, 2)}
 
-SUPPLEMENTARY WEB INTELLIGENCE:
-${supplementaryContent}
+${webIntelligence}
 
 ENRICHMENT INSTRUCTIONS:
-1. Update financial figures (revenue, EBIT, margins, growth) with the most recent and accurate data
-2. Enhance the executiveSummaryNarrative to be more compelling and board-ready
-3. Add any additional strategic pillars, achievements, or SWOT items discovered
-4. Maintain the executive-grade quality and ServiceNow strategic framing for all opportunities
-5. Preserve existing high-quality content - only enhance, don't diminish`;
+1. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data from web research
+2. STRATEGY: Enhance strategic pillars, CEO priorities, transformation themes with latest insights
+3. LEADERSHIP: Add any key executive information discovered
+4. COMPETITION: Incorporate competitive context into SWOT threats and market positioning
+5. CHALLENGES: Refine pain points with real-world challenges from news/analyst reports
+6. TECHNOLOGY: Enhance digital/AI ambitions with concrete technology initiatives discovered
+7. NARRATIVE: Make executiveSummaryNarrative more compelling using all available intelligence
+8. SWOT: Enrich all quadrants with evidence from both document AND web research
+9. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing high-quality content`;
 
         const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
