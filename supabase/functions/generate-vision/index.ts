@@ -64,19 +64,38 @@ TASK: Write ONE single sentence that defines ServiceNow's strategic role for ${c
 
 TONE: Strategic, precise, confident. No hype. No generic transformation language. Use the customer's own strategic terminology.
 
-FORMAT: Start with "To..." and complete in one clear, purposeful sentence.
+FORMAT: Start with "To..." and complete in one clear, purposeful sentence. Maximum 25 words.
 
-EXCELLENT EXAMPLES:
-• "To build the digital backbone that powers Maersk's Integrator Strategy to deliver seamless, integrated logistics across a connected global network."
-• "To become the enterprise automation layer that enables HSBC's cost transformation while accelerating customer-facing innovation."
-• "To serve as the AI orchestration platform that unifies Shell's operational technology and IT landscapes into a single intelligent enterprise."
+VISION THEMES TO DRAW FROM (pick the most relevant to their strategy):
 
-POOR EXAMPLES (NEVER DO THIS):
+Platform for Innovation:
+• "To be ${companyName}'s platform for innovation, unlocking value as a trusted partner, delivering best-in-class user experiences."
+
+Customer Experience:
+• "To enable seamless, end-to-end customer journeys across every interaction and channel."
+• "To connect customer experience, service delivery, and commercial execution into one flow."
+• "To power consistent, predictable customer outcomes at enterprise scale."
+
+AI at Scale:
+• "To operationalise AI at scale by embedding intelligence directly into enterprise workflows."
+• "To serve as the execution layer that turns AI ambition into measurable business outcomes."
+• "To enable intelligent operations where decisions are augmented, automated, and continuously improved."
+• "To provide the platform through which AI moves from pilots to production."
+
+Enterprise Backbone:
+• "To serve as the digital backbone that orchestrates enterprise execution across people, processes, and systems."
+• "To create a single operational nervous system that connects strategy to execution in real time."
+• "To unify fragmented operations into one governed, scalable execution platform."
+• "To provide a resilient enterprise backbone that enables consistent execution at global scale."
+• "To act as the control plane that aligns teams, workflows, and decisions across the enterprise."
+
+NEVER DO THIS:
 • "To help the customer with digital transformation." (too generic)
 • "To partner with the customer to drive value." (meaningless)
 • "ServiceNow will be instrumental in..." (weak, passive)
+• Listing multiple capabilities or using "and" excessively
 
-Generate ONE sentence. Be specific to their strategy. No fluff.`;
+Generate ONE sentence tailored to their specific strategy and priorities. Be precise. No fluff.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
