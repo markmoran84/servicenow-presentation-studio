@@ -7,99 +7,119 @@
 
 @layer base {
   :root {
-    /* ServiceNow Corporate Palette - Deep Ocean Gradient */
-    --background: 195 45% 8%;
+    /* ServiceNow Corporate Template - Exact Colors from PPTX */
+    /* Wasabi Green: #63DF4E = hsl(111, 72%, 59%) */
+    /* Deep Navy Background gradient */
+    
+    --background: 200 35% 8%;
     --foreground: 0 0% 100%;
 
-    --card: 195 40% 12%;
+    --card: 200 30% 12%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 195 40% 12%;
+    --popover: 200 30% 12%;
     --popover-foreground: 0 0% 100%;
 
-    /* ServiceNow Wasabi Green as primary */
-    --primary: 110 74% 55%;
-    --primary-foreground: 195 45% 8%;
+    /* ServiceNow Wasabi Green #63DF4E as primary */
+    --primary: 111 72% 59%;
+    --primary-foreground: 200 35% 8%;
 
-    --secondary: 195 35% 16%;
+    --secondary: 200 25% 16%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 195 30% 20%;
-    --muted-foreground: 195 20% 65%;
+    --muted: 200 20% 18%;
+    --muted-foreground: 200 15% 60%;
 
-    /* ServiceNow Blue as accent */
-    --accent: 200 85% 55%;
+    /* ServiceNow Blue #52B8FF as accent */
+    --accent: 205 100% 67%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 195 25% 22%;
-    --input: 195 25% 22%;
-    --ring: 110 74% 55%;
+    /* Warning/Amber #FFBC39 */
+    --warning: 40 100% 61%;
+    --warning-foreground: 0 0% 10%;
+
+    --border: 200 20% 20%;
+    --input: 200 20% 20%;
+    --ring: 111 72% 59%;
 
     --radius: 0.75rem;
 
-    /* ServiceNow Brand Colors */
-    --sn-wasabi: 110 74% 55%;
-    --sn-wasabi-light: 110 70% 65%;
-    --sn-wasabi-dark: 110 65% 35%;
+    /* ===== ServiceNow Brand Colors - EXACT from Template ===== */
+    /* Wasabi Green family */
+    --sn-wasabi: 111 72% 59%;           /* #63DF4E */
+    --sn-wasabi-light: 108 76% 93%;     /* #DEFFD9 - Basic glass green */
+    --sn-wasabi-dark: 144 100% 18%;     /* #005F1E */
+    --sn-wasabi-darker: 151 100% 10%;   /* #003310 */
     
-    --sn-navy: 195 45% 8%;
-    --sn-navy-light: 195 40% 12%;
-    --sn-navy-mid: 195 35% 16%;
+    /* Blue family */
+    --sn-blue: 205 100% 67%;            /* #52B8FF */
+    --sn-blue-light: 205 100% 88%;      /* #C2E6FF - Basic glass blue */
+    --sn-blue-dark: 200 96% 31%;        /* #035D99 */
+    --sn-blue-darker: 199 93% 14%;      /* #032D42 */
     
-    --sn-blue: 200 85% 55%;
-    --sn-blue-light: 200 80% 65%;
-    --sn-teal: 180 50% 35%;
+    /* Indigo family */
+    --sn-indigo: 248 100% 69%;          /* #7661FF */
+    --sn-indigo-light: 243 95% 86%;     /* #BDBAFD - Basic glass indigo */
+    --sn-indigo-dark: 257 56% 35%;      /* #3C288D */
     
-    /* Glass container colors from template */
-    --glass-basic: 195 30% 25%;
-    --glass-emphasis: 195 35% 35%;
+    /* Purple family */
+    --sn-purple: 283 84% 70%;           /* #BF71F2 */
+    --sn-purple-light: 283 76% 87%;     /* #DEC3F7 - Basic glass purple */
+    
+    /* Deep Navy background tones */
+    --sn-navy: 200 35% 8%;
+    --sn-navy-light: 200 30% 12%;
+    --sn-navy-mid: 200 25% 16%;
+    
+    /* Glass container colors - from template */
+    --glass-basic: 0 0% 100% / 0.05;
+    --glass-emphasis: 0 0% 100% / 0.12;
     
     /* Status colors */
-    --success: 110 74% 55%;
-    --warning: 40 95% 60%;
+    --success: 111 72% 59%;
+    --info: 205 100% 67%;
     --danger: 0 72% 51%;
     
-    /* ServiceNow gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(110 74% 55%) 0%, hsl(150 60% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(200 85% 55%) 0%, hsl(180 50% 35%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(160 45% 12%) 0%, hsl(195 45% 8%) 40%, hsl(210 40% 10%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(195 35% 16% / 0.9) 0%, hsl(195 40% 12% / 0.7) 100%);
-    --gradient-shine: linear-gradient(120deg, transparent 30%, hsl(110 74% 55% / 0.08) 50%, transparent 70%);
-    --gradient-sn-bg: linear-gradient(160deg, hsl(160 40% 10%) 0%, hsl(195 45% 8%) 50%, hsl(210 40% 12%) 100%);
+    /* ServiceNow gradients - matching template gradient backgrounds */
+    --gradient-bg: linear-gradient(160deg, hsl(180 30% 8%) 0%, hsl(200 35% 8%) 50%, hsl(220 30% 10%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100% / 0.08) 0%, hsl(0 0% 100% / 0.03) 100%);
+    --gradient-card-emphasis: linear-gradient(180deg, hsl(0 0% 100% / 0.15) 0%, hsl(0 0% 100% / 0.06) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(111 72% 59%) 0%, hsl(150 60% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(205 100% 67%) 0%, hsl(190 70% 50%) 100%);
 
-    --sidebar-background: 195 45% 8%;
+    --sidebar-background: 200 35% 8%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 110 74% 55%;
-    --sidebar-primary-foreground: 195 45% 8%;
-    --sidebar-accent: 195 35% 16%;
+    --sidebar-primary: 111 72% 59%;
+    --sidebar-primary-foreground: 200 35% 8%;
+    --sidebar-accent: 200 25% 16%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 195 25% 22%;
-    --sidebar-ring: 110 74% 55%;
+    --sidebar-border: 200 20% 20%;
+    --sidebar-ring: 111 72% 59%;
   }
 
   .dark {
-    --background: 195 45% 8%;
+    --background: 200 35% 8%;
     --foreground: 0 0% 100%;
-    --card: 195 40% 12%;
+    --card: 200 30% 12%;
     --card-foreground: 0 0% 100%;
-    --popover: 195 40% 12%;
+    --popover: 200 30% 12%;
     --popover-foreground: 0 0% 100%;
-    --primary: 110 74% 55%;
-    --primary-foreground: 195 45% 8%;
-    --secondary: 195 35% 16%;
+    --primary: 111 72% 59%;
+    --primary-foreground: 200 35% 8%;
+    --secondary: 200 25% 16%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 195 30% 20%;
-    --muted-foreground: 195 20% 65%;
-    --accent: 200 85% 55%;
+    --muted: 200 20% 18%;
+    --muted-foreground: 200 15% 60%;
+    --accent: 205 100% 67%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 195 25% 22%;
-    --input: 195 25% 22%;
-    --ring: 110 74% 55%;
+    --border: 200 20% 20%;
+    --input: 200 20% 20%;
+    --ring: 111 72% 59%;
   }
 }
 
@@ -113,7 +133,7 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
     letter-spacing: -0.01em;
-    background: var(--gradient-sn-bg);
+    background: var(--gradient-bg);
     min-height: 100vh;
   }
 
@@ -125,212 +145,192 @@
 }
 
 @layer components {
-  /* ServiceNow gradient backgrounds */
-  .gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  .gradient-card {
-    background: var(--gradient-card);
-  }
-
-  .gradient-accent {
-    background: var(--gradient-accent);
-  }
-
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-
-  .sn-background {
-    background: var(--gradient-sn-bg);
-  }
-
-  /* ServiceNow Glass card - matching template style */
-  .glass-card {
-    @apply rounded-2xl border;
-    border-color: hsl(var(--foreground) / 0.08);
-    background: linear-gradient(180deg, 
-      hsl(var(--card) / 0.7) 0%, 
-      hsl(var(--card) / 0.5) 100%
-    );
-    backdrop-filter: blur(24px);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--gradient-shine);
-    animation: shine 8s infinite;
-    pointer-events: none;
-  }
-
-  /* ServiceNow Basic Glass container */
-  .sn-glass-basic {
+  /* ===== ServiceNow Glass Containers - EXACT Template Match ===== */
+  
+  /* Basic Glass - de-emphasized, lighter */
+  .sn-glass {
     @apply rounded-xl;
-    background: hsl(var(--foreground) / 0.03);
-    border: 1px solid hsl(var(--foreground) / 0.08);
+    background: hsl(0 0% 100% / 0.05);
+    border: 1px solid hsl(0 0% 100% / 0.08);
     backdrop-filter: blur(20px);
   }
 
-  /* ServiceNow Emphasis Glass container */
+  /* Emphasis Glass - stronger, more prominent */
   .sn-glass-emphasis {
     @apply rounded-xl;
-    background: linear-gradient(180deg, 
-      hsl(var(--foreground) / 0.08) 0%, 
-      hsl(var(--foreground) / 0.03) 100%
-    );
-    border: 1px solid hsl(var(--foreground) / 0.12);
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.12) 0%, hsl(0 0% 100% / 0.05) 100%);
+    border: 1px solid hsl(0 0% 100% / 0.15);
+    backdrop-filter: blur(24px);
+  }
+
+  /* Glass with shadow - template style with solid shadow behind */
+  .sn-glass-shadow {
+    @apply rounded-xl relative;
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.10) 0%, hsl(0 0% 100% / 0.04) 100%);
+    border: 1px solid hsl(0 0% 100% / 0.12);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
+  }
+
+  /* Main glass-card - primary container style */
+  .glass-card {
+    @apply rounded-xl;
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.08) 0%, hsl(0 0% 100% / 0.03) 100%);
+    border: 1px solid hsl(0 0% 100% / 0.10);
     backdrop-filter: blur(20px);
   }
 
-  /* ServiceNow Two-tone typography */
-  .sn-heading {
-    @apply font-bold;
+  /* ===== ServiceNow Two-Tone Typography ===== */
+  /* Rule: Start with Wasabi Green, then white for key message */
+  
+  .sn-title {
+    @apply font-bold tracking-tight;
+    font-family: 'Sora', system-ui, sans-serif;
   }
 
-  .sn-heading .highlight {
+  .sn-title .green {
     color: hsl(var(--primary));
   }
 
-  /* Premium stat card */
+  .sn-title .white {
+    color: hsl(var(--foreground));
+  }
+
+  /* Subtitle style - lighter weight */
+  .sn-subtitle {
+    @apply text-lg font-light;
+    color: hsl(var(--muted-foreground));
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* ===== Slide Header Pattern - matching template ===== */
+  .slide-header {
+    @apply mb-8;
+  }
+
+  .slide-header-title {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+    font-family: 'Sora', system-ui, sans-serif;
+  }
+
+  .slide-header-subtitle {
+    @apply text-lg mt-2;
+    color: hsl(var(--muted-foreground));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 300;
+  }
+
+  /* ===== Stat Cards - Template Metric Style ===== */
   .stat-card {
-    @apply glass-card p-6 transition-all duration-500;
-    border: 1px solid hsl(var(--primary) / 0.15);
+    @apply glass-card p-6;
   }
 
-  .stat-card:hover {
-    border-color: hsl(var(--primary) / 0.35);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 20px 40px -20px hsl(var(--primary) / 0.25),
-      0 0 60px -30px hsl(var(--primary) / 0.35);
-  }
-
-  /* Metric highlight with Wasabi Green */
-  .metric-highlight {
-    @apply text-5xl font-bold tracking-tight;
+  .stat-value {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
     color: hsl(var(--primary));
+    font-family: 'Sora', system-ui, sans-serif;
   }
 
-  .metric-highlight-accent {
-    @apply text-5xl font-bold tracking-tight;
+  .stat-value-accent {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
     color: hsl(var(--accent));
+    font-family: 'Sora', system-ui, sans-serif;
   }
 
-  /* Role badges */
-  .role-badge {
-    @apply px-4 py-2 rounded-lg text-sm font-medium border;
-    border-color: hsl(var(--primary) / 0.35);
-    color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.1);
+  .stat-label {
+    @apply text-sm text-muted-foreground mb-2;
   }
 
-  .role-badge-filled {
-    @apply px-4 py-2 rounded-lg text-sm font-semibold;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
-
-  /* Connector line */
-  .connector-line {
-    @apply border-t-2 border-dashed;
-    border-color: hsl(var(--muted-foreground) / 0.3);
-  }
-
-  /* Team card with elegant hover */
-  .team-card {
-    @apply rounded-xl p-4 transition-all duration-300;
-    background: hsl(var(--card) / 0.5);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .team-card:hover {
-    background: hsl(var(--card) / 0.8);
-    border-color: hsl(var(--primary) / 0.4);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 12px 24px -8px hsl(var(--primary) / 0.2),
-      inset 0 1px 0 hsl(var(--foreground) / 0.05);
-  }
-
-  /* Premium pill badge with Wasabi Green */
-  .pill-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-    background: hsl(var(--primary) / 0.12);
+  /* ===== Badges - Template Pill Style ===== */
+  .sn-badge {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
+    background: hsl(var(--primary) / 0.15);
     color: hsl(var(--primary));
     border: 1px solid hsl(var(--primary) / 0.25);
   }
 
-  .pill-badge-accent {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-    background: hsl(var(--accent) / 0.12);
+  .sn-badge-accent {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
+    background: hsl(var(--accent) / 0.15);
     color: hsl(var(--accent));
     border: 1px solid hsl(var(--accent) / 0.25);
   }
 
-  /* Section divider with gradient */
-  .section-divider {
-    @apply h-px w-full;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      hsl(var(--primary) / 0.4) 50%, 
-      transparent 100%
-    );
+  .sn-badge-warning {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
+    background: hsl(var(--warning) / 0.15);
+    color: hsl(var(--warning));
+    border: 1px solid hsl(var(--warning) / 0.25);
   }
 
-  /* Icon container with Wasabi glow */
-  .icon-container {
+  /* ===== Icon Containers - Template Style ===== */
+  .sn-icon-box {
     @apply w-12 h-12 rounded-xl flex items-center justify-center;
-    background: hsl(var(--primary) / 0.12);
+    background: hsl(var(--primary) / 0.15);
     border: 1px solid hsl(var(--primary) / 0.25);
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.25);
   }
 
-  .icon-container-accent {
+  .sn-icon-box-accent {
     @apply w-12 h-12 rounded-xl flex items-center justify-center;
-    background: hsl(var(--accent) / 0.12);
+    background: hsl(var(--accent) / 0.15);
     border: 1px solid hsl(var(--accent) / 0.25);
-    box-shadow: 0 0 20px -5px hsl(var(--accent) / 0.25);
   }
 
-  /* Progress bar */
+  .sn-icon-box-warning {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center;
+    background: hsl(var(--warning) / 0.15);
+    border: 1px solid hsl(var(--warning) / 0.25);
+  }
+
+  /* ===== Callout Lines - Template Style ===== */
+  .sn-callout {
+    @apply pl-4 border-l-2;
+    border-color: hsl(var(--primary));
+  }
+
+  .sn-callout-accent {
+    @apply pl-4 border-l-2;
+    border-color: hsl(var(--accent));
+  }
+
+  /* ===== Quote Block ===== */
+  .quote-block {
+    @apply relative pl-6 py-2;
+    border-left: 3px solid hsl(var(--primary));
+  }
+
+  .quote-block::before {
+    content: '"';
+    @apply absolute -left-1 -top-3 text-5xl font-serif;
+    color: hsl(var(--primary) / 0.3);
+    line-height: 1;
+  }
+
+  /* ===== Progress Bar ===== */
   .progress-track {
     @apply h-2 rounded-full overflow-hidden;
     background: hsl(var(--muted));
   }
 
   .progress-fill {
-    @apply h-full rounded-full transition-all duration-700;
+    @apply h-full rounded-full;
     background: hsl(var(--primary));
   }
 
-  /* Data grid item */
-  .data-grid-item {
-    @apply p-4 rounded-xl;
-    background: hsl(var(--secondary) / 0.5);
-    border: 1px solid hsl(var(--border) / 0.4);
+  /* ===== Data Grid Items ===== */
+  .data-item {
+    @apply p-4 rounded-lg;
+    background: hsl(0 0% 100% / 0.03);
+    border: 1px solid hsl(0 0% 100% / 0.06);
   }
 
-  /* Quote block with Wasabi Green accent */
-  .quote-block {
-    @apply relative pl-6 py-3;
-    border-left: 3px solid hsl(var(--primary));
+  /* ===== Section Divider ===== */
+  .section-divider {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.4) 50%, transparent 100%);
   }
 
-  .quote-block::before {
-    content: '"';
-    @apply absolute -left-1 -top-2 text-4xl font-serif;
-    color: hsl(var(--primary) / 0.4);
-  }
-
-  /* ServiceNow Logo Style - Green O */
+  /* ===== ServiceNow Logo Style ===== */
   .sn-logo {
     font-family: 'Sora', system-ui, sans-serif;
     font-weight: 700;
@@ -340,20 +340,51 @@
   .sn-logo .o {
     color: hsl(var(--primary));
   }
+
+  /* ===== Column Headers - Template Style ===== */
+  .column-header {
+    @apply flex items-center gap-2 pb-3 mb-4;
+    border-bottom: 2px solid hsl(var(--primary));
+  }
+
+  .column-header-accent {
+    @apply flex items-center gap-2 pb-3 mb-4;
+    border-bottom: 2px solid hsl(var(--accent));
+  }
+
+  /* ===== Team/Speaker Cards ===== */
+  .team-card {
+    @apply rounded-xl p-4 transition-all duration-300;
+    background: hsl(0 0% 100% / 0.04);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+  }
+
+  .team-card:hover {
+    background: hsl(0 0% 100% / 0.08);
+    border-color: hsl(var(--primary) / 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ===== Footer Style - Template Match ===== */
+  .slide-footer {
+    @apply fixed bottom-0 left-0 right-0 px-8 py-3;
+    @apply flex items-center justify-between;
+    @apply border-t;
+    border-color: hsl(0 0% 100% / 0.08);
+    background: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+
+  /* ===== Connector/Flow Lines ===== */
+  .connector-line {
+    @apply border-t-2 border-dashed;
+    border-color: hsl(var(--muted-foreground) / 0.3);
+  }
 }
 
 @layer utilities {
-  .text-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-primary);
-  }
-
-  .text-gradient-accent {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-accent);
-  }
-
-  /* ServiceNow Wasabi text */
+  /* Text color utilities */
   .text-sn-wasabi {
     color: hsl(var(--primary));
   }
@@ -362,7 +393,13 @@
     color: hsl(var(--accent));
   }
 
-  /* Subtle glow effects */
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(150 60% 50%) 100%);
+  }
+
+  /* Glow effects */
   .glow-primary {
     box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.5);
   }
@@ -371,7 +408,7 @@
     box-shadow: 0 0 40px -10px hsl(var(--accent) / 0.5);
   }
 
-  /* Animation delay utilities */
+  /* Animation delays */
   .animation-delay-100 { animation-delay: 100ms; }
   .animation-delay-200 { animation-delay: 200ms; }
   .animation-delay-300 { animation-delay: 300ms; }
@@ -382,29 +419,23 @@
   .animation-delay-800 { animation-delay: 800ms; }
 }
 
-/* Shine animation for glass cards */
-@keyframes shine {
-  0% { left: -100%; }
-  20%, 100% { left: 200%; }
-}
-
 /* Subtle float animation */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
 
-/* Pulse glow animation with Wasabi Green */
+/* Pulse glow animation */
 @keyframes pulse-glow {
   0%, 100% { 
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.35);
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
   }
   50% { 
-    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.55);
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5);
   }
 }
 
