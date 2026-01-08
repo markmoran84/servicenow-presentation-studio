@@ -1,143 +1,197 @@
-import { SectionHeader } from "@/components/SectionHeader";
-import { Users, Cpu, Shield, Layers, AlertCircle, Trophy, Zap, ArrowRight } from "lucide-react";
+import { Zap, TrendingUp, Calendar, Users, Lightbulb } from "lucide-react";
 
-const bigBets = [
+const executives = [
+  { name: "Vincent Clerc", role: "CEO MAERSK" },
+  { name: "Navneet Kapoor", role: "EVP & CTIO" },
+  { name: "Narin Pohl", role: "EVP & CPO L&S" },
+  { name: "John Ball", role: "EVP CRM" },
+  { name: "Karsten Kildahl", role: "CCO" },
+  { name: "Bill McDermott", role: "CEO ServiceNow" },
+];
+
+const workstreams = [
   {
-    icon: Users,
-    title: "CRM Modernisation & Service Cloud Expansion",
-    status: "Active Pursuit — Moved to Q1",
-    statusColor: "bg-warning/20 text-warning",
-    whyNow: "Salesforce Service Cloud takeout opportunity identified. Maersk seeking to consolidate customer service platforms aligned to 'All the Way' customer experience strategy.",
-    ifWeLose: "Salesforce cements position. ServiceNow marginalised to IT workflows only. Customer-facing expansion blocked.",
-    winningInFY26: "Service Cloud deal closed Q1. Customer success deployed. CSAT baseline established for expansion justification.",
-    alignment: ["Customer Centricity", "Digital Transformation"],
-    color: "from-primary to-accent",
+    title: "Maersk Line Ocean – SFDC Takeout",
+    subtitle: "CRM Modernisation & Service Cloud",
+    dealClose: "Q1 2026",
+    dealStatus: "Active Pursuit",
+    statusColor: "bg-primary",
+    insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
+    netNewACV: "$5M",
+    steadyStateBenefit: "$565M",
+    people: [
+      { name: "Tan Gill", role: "SVP, IT Logistics" },
+      { name: "Mark Graham", role: "SVP, IT Logistics" },
+      { name: "Arjun Ghattaura", role: "Procurement Lead" },
+      { name: "Sarah Sharples", role: "Head of strategic vendors" },
+    ],
   },
   {
-    icon: Cpu,
     title: "AI Use Cases & Workflow Automation",
-    status: "Strategic Initiative",
-    statusColor: "bg-primary/20 text-primary",
-    whyNow: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows.",
-    ifWeLose: "AI initiatives fragment across point solutions. No enterprise workflow backbone. Value unrealised.",
-    winningInFY26: "2+ AI use cases in production (e.g., predictive case routing, intelligent document processing). Measurable efficiency gains.",
-    alignment: ["AI-First Ambition", "Operational Excellence"],
-    color: "from-purple-500 to-pink-500",
+    subtitle: "Operationalising AI-First Strategy",
+    dealClose: "Q2 2026",
+    dealStatus: "Strategic Initiative",
+    statusColor: "bg-accent",
+    insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
+    netNewACV: "$2M",
+    steadyStateBenefit: "TBD",
+    people: [
+      { name: "Jakob Skovsgaard", role: "Head of CX" },
+      { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
+      { name: "Oscar Ohde", role: "AI Platform Owner" },
+      { name: "Sunil Kumar", role: "Engineering Director" },
+    ],
   },
   {
-    icon: Shield,
-    title: "IT & Security Operations Enhancement",
-    status: "Foundation Expansion",
-    statusColor: "bg-accent/20 text-accent",
-    whyNow: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility.",
-    ifWeLose: "Competitors capture security orchestration. Platform relevance constrained to core ITSM.",
-    winningInFY26: "SecOps pilot deployed. ITOM discovery completed. Unified IT visibility dashboard for leadership.",
-    alignment: ["Cost Discipline", "Risk Management"],
-    color: "from-accent to-teal-500",
-  },
-  {
-    icon: Layers,
-    title: "Platform Consolidation & Workflow Expansion",
-    status: "Growth Engine",
-    statusColor: "bg-blue-500/20 text-blue-400",
-    whyNow: "Success in CRM creates expansion opportunity. HR, Legal, and Risk workflows are natural adjacencies with proven ROI models.",
-    ifWeLose: "ACV stagnates. ServiceNow remains point solution. Strategic relevance diminishes.",
-    winningInFY26: "Expansion pipeline formalised. Executive roadmap endorsed. Multi-workflow commitment secured.",
-    alignment: ["Cost Discipline", "All the Way"],
-    color: "from-blue-500 to-cyan-500",
+    title: "IT & Security Operations",
+    subtitle: "SecOps & ITOM Expansion",
+    dealClose: "Q3 2026",
+    dealStatus: "Foundation Growth",
+    statusColor: "bg-blue-500",
+    insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
+    netNewACV: "$3M",
+    steadyStateBenefit: "$320M",
+    people: [
+      { name: "Scott Horn", role: "SVP, IT Logistics" },
+      { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
+      { name: "Geoffrey Breed", role: "Director FbM Platform" },
+    ],
   },
 ];
 
 export const BigBetsSlide = () => {
   return (
     <div className="px-8 pt-6 pb-32">
-      <div className="flex items-center justify-between mb-6 opacity-0 animate-fade-in">
-        <div className="flex items-center gap-3">
-          <Zap className="w-8 h-8 text-primary" />
-          <h1 className="text-4xl font-bold text-foreground">Big Bets & Strategic Initiatives</h1>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 opacity-0 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Key Transformation Workstreams</h1>
+          <p className="text-muted-foreground mt-1">Aligning stakeholders to accelerate impact and outcomes</p>
         </div>
         <div className="pill-badge">
-          "AI-first, with a platform to operationalise it"
+          FY26 Big Bets
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {bigBets.map((bet, index) => (
-          <div
-            key={bet.title}
-            className="glass-card p-5 opacity-0 animate-fade-in"
-            style={{ animationDelay: `${100 + index * 100}ms` }}
-          >
-            <div className="flex items-start gap-4">
-              {/* Icon & Status */}
-              <div className="flex flex-col items-center gap-2">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${bet.color} flex items-center justify-center flex-shrink-0`}>
-                  <bet.icon className="w-6 h-6 text-white" />
-                </div>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${bet.statusColor}`}>
-                  {bet.status}
+      {/* Executive Row */}
+      <div className="glass-card p-4 mb-4 opacity-0 animate-fade-in animation-delay-100">
+        <div className="flex items-center gap-2 mb-3">
+          <Users className="w-4 h-4 text-primary" />
+          <span className="text-xs font-bold text-primary uppercase tracking-wider">Execs</span>
+        </div>
+        <div className="flex items-center justify-between">
+          {executives.map((exec, index) => (
+            <div
+              key={exec.name}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 border-2 border-primary/50 flex items-center justify-center mb-1">
+                <span className="text-xs font-bold text-foreground">
+                  {exec.name.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
+              <span className="text-[10px] font-semibold text-foreground">{exec.name}</span>
+              <span className="text-[9px] text-muted-foreground">{exec.role}</span>
+            </div>
+          ))}
+          {/* Connection line */}
+          <div className="absolute left-[10%] right-[10%] top-[60px] h-0.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30 -z-10" />
+        </div>
+      </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-foreground mb-2">{bet.title}</h3>
-                
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {bet.alignment.map((tag) => (
-                    <span key={tag} className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-muted-foreground">
-                      {tag}
-                    </span>
-                  ))}
+      {/* Workstreams Grid */}
+      <div className="grid grid-cols-3 gap-4">
+        {workstreams.map((stream, index) => (
+          <div
+            key={stream.title}
+            className="glass-card p-0 overflow-hidden opacity-0 animate-fade-in"
+            style={{ animationDelay: `${200 + index * 100}ms` }}
+          >
+            {/* Stream Header */}
+            <div className={`p-4 ${stream.statusColor}/10 border-b border-border/30`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stream.statusColor} text-white`}>
+                  {stream.dealStatus}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">Close: {stream.dealClose}</span>
                 </div>
+              </div>
+              <h3 className="font-bold text-foreground text-sm leading-tight">{stream.title}</h3>
+              <p className="text-xs text-primary mt-0.5">{stream.subtitle}</p>
+            </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Why Now */}
-                  <div className="p-2.5 rounded-lg bg-secondary/50 border border-border/30">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <Zap className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Why Now</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">{bet.whyNow}</p>
-                  </div>
+            {/* Insight Section */}
+            <div className="p-4 border-b border-border/30">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Lightbulb className="w-3.5 h-3.5 text-accent" />
+                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Insights</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {stream.insight}
+              </p>
+            </div>
 
-                  {/* If We Lose */}
-                  <div className="p-2.5 rounded-lg bg-destructive/5 border border-destructive/20">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <AlertCircle className="w-3.5 h-3.5 text-destructive" />
-                      <span className="text-[10px] font-semibold text-destructive uppercase tracking-wide">If We Lose</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">{bet.ifWeLose}</p>
-                  </div>
-
-                  {/* Winning */}
-                  <div className="p-2.5 rounded-lg bg-accent/5 border border-accent/20">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <Trophy className="w-3.5 h-3.5 text-accent" />
-                      <span className="text-[10px] font-semibold text-accent uppercase tracking-wide">Winning in FY26</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">{bet.winningInFY26}</p>
-                  </div>
+            {/* Financials */}
+            <div className="p-4 bg-secondary/30 border-b border-border/30">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Net new annual contract value</span>
+                  <span className="text-xl font-bold text-gradient">{stream.netNewACV}</span>
                 </div>
+                <div>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Steady-state benefit (Annual)</span>
+                  <span className="text-xl font-bold text-gradient-accent">{stream.steadyStateBenefit}</span>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div className="mt-3 h-1 rounded-full bg-border/50 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${stream.statusColor}`}
+                  style={{ width: index === 0 ? '75%' : index === 1 ? '40%' : '25%' }}
+                />
+              </div>
+            </div>
+
+            {/* People Section */}
+            <div className="p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Users className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">People</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {stream.people.map((person) => (
+                  <div key={person.name} className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[8px] font-bold text-foreground">
+                        {person.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-medium text-foreground block truncate">{person.name}</span>
+                      <span className="text-[9px] text-muted-foreground block truncate">{person.role}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* CRM Priority Call-out */}
-      <div className="mt-4 glass-card p-4 opacity-0 animate-fade-in animation-delay-500">
-        <div className="flex items-center gap-4">
-          <div className="icon-container animate-pulse-glow">
-            <ArrowRight className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h4 className="font-semibold text-foreground">CRM Modernisation is the Primary Commercial Wedge</h4>
-            <p className="text-sm text-muted-foreground">
-              Q1 FY26 focus: Close Service Cloud opportunity. Success here unlocks multi-workflow expansion across 
-              the Maersk enterprise and validates ServiceNow as the digital execution backbone.
-            </p>
-          </div>
+      {/* CRM Priority Callout */}
+      <div className="mt-4 glass-card p-3 flex items-center gap-4 opacity-0 animate-fade-in animation-delay-600">
+        <div className="icon-container animate-pulse-glow">
+          <Zap className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <span className="text-sm font-semibold text-foreground">CRM Modernisation is the Primary Commercial Wedge</span>
+          <span className="text-sm text-muted-foreground ml-2">— Q1 FY26 priority. Success unlocks multi-workflow expansion.</span>
+        </div>
+        <div className="text-right">
+          <span className="text-2xl font-bold text-gradient">$10M+</span>
+          <span className="text-xs text-muted-foreground block">Total ACV Opportunity</span>
         </div>
       </div>
     </div>
