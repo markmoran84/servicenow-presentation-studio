@@ -266,6 +266,79 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     className="bg-background"
                   />
                 </div>
+
+                {/* Core Team Members for Cover Slide */}
+                <div className="col-span-2 p-4 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      Core Account Team (Cover Slide)
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newMembers = [...(data.basics.coreTeamMembers || []), { firstName: "", lastName: "", title: "" }];
+                        updateData("basics", { coreTeamMembers: newMembers });
+                      }}
+                      className="gap-2"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add Member
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {(data.basics.coreTeamMembers || []).map((member, index) => (
+                      <div key={index} className="flex gap-3 items-start">
+                        <div className="flex-1 grid grid-cols-3 gap-2">
+                          <Input
+                            placeholder="First Name"
+                            value={member.firstName}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.coreTeamMembers];
+                              newMembers[index] = { ...newMembers[index], firstName: e.target.value };
+                              updateData("basics", { coreTeamMembers: newMembers });
+                            }}
+                          />
+                          <Input
+                            placeholder="Last Name"
+                            value={member.lastName}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.coreTeamMembers];
+                              newMembers[index] = { ...newMembers[index], lastName: e.target.value };
+                              updateData("basics", { coreTeamMembers: newMembers });
+                            }}
+                          />
+                          <Input
+                            placeholder="Title"
+                            value={member.title}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.coreTeamMembers];
+                              newMembers[index] = { ...newMembers[index], title: e.target.value };
+                              updateData("basics", { coreTeamMembers: newMembers });
+                            }}
+                          />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newMembers = data.basics.coreTeamMembers.filter((_, i) => i !== index);
+                            updateData("basics", { coreTeamMembers: newMembers });
+                          }}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {(!data.basics.coreTeamMembers || data.basics.coreTeamMembers.length === 0) && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No team members added. Click "Add Member" to add core account team members for the cover slide.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
