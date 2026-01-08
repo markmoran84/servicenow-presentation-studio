@@ -492,7 +492,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                 <div className="col-span-2">
                   <label className="text-sm text-muted-foreground mb-2 block font-medium">Published Transformation Themes</label>
                   <div className="space-y-3">
-                    {data.strategy.transformationThemes.map((theme, index) => (
+                    {(data.strategy.transformationThemes || []).map((theme, index) => (
                       <div key={index} className="p-3 rounded-lg bg-secondary/30 border border-border/30">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
@@ -527,7 +527,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                       size="sm"
                       onClick={() => {
                         updateData("strategy", {
-                          transformationThemes: [...data.strategy.transformationThemes, { title: "", description: "" }]
+                          transformationThemes: [...(data.strategy.transformationThemes || []), { title: "", description: "" }]
                         });
                       }}
                     >
@@ -540,7 +540,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                 <div className="col-span-2">
                   <label className="text-sm text-muted-foreground mb-2 block font-medium">Published Digital Strategies</label>
                   <div className="space-y-3">
-                    {data.strategy.digitalStrategies.map((strategy, index) => (
+                    {(data.strategy.digitalStrategies || []).map((strategy, index) => (
                       <div key={index} className="p-3 rounded-lg bg-secondary/30 border border-border/30">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
@@ -548,7 +548,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             <Input
                               value={strategy.title}
                               onChange={(e) => {
-                                const updated = [...data.strategy.digitalStrategies];
+                                const updated = [...(data.strategy.digitalStrategies || [])];
                                 updated[index] = { ...updated[index], title: e.target.value };
                                 updateData("strategy", { digitalStrategies: updated });
                               }}
@@ -560,7 +560,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             <Input
                               value={strategy.description}
                               onChange={(e) => {
-                                const updated = [...data.strategy.digitalStrategies];
+                                const updated = [...(data.strategy.digitalStrategies || [])];
                                 updated[index] = { ...updated[index], description: e.target.value };
                                 updateData("strategy", { digitalStrategies: updated });
                               }}
@@ -575,7 +575,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                       size="sm"
                       onClick={() => {
                         updateData("strategy", {
-                          digitalStrategies: [...data.strategy.digitalStrategies, { title: "", description: "" }]
+                          digitalStrategies: [...(data.strategy.digitalStrategies || []), { title: "", description: "" }]
                         });
                       }}
                     >
