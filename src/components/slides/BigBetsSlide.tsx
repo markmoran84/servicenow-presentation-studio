@@ -14,9 +14,9 @@ const workstreams = [
     title: "Maersk Line Ocean – SFDC Takeout",
     subtitle: "CRM Modernisation & Service Cloud",
     dealClose: "Q1 2026",
-    dealStatus: "Q1 Priority",
+    dealStatus: "Active Pursuit",
     statusColor: "bg-primary",
-    insight: "Anticipated Q4 FY25 close slipped to Q1 FY26. CRM modernisation remains the primary commercial wedge. Maersk is replacing Service Cloud with ServiceNow to unlock AI-first customer experience transformation and reduce cost-to-serve.",
+    insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
     netNewACV: "$5M",
     steadyStateBenefit: "$565M",
     people: [
