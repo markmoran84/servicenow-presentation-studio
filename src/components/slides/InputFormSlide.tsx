@@ -722,52 +722,68 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Strategic Pain Points
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {data.painPoints.painPoints.map((painPoint, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-sm font-semibold text-destructive">Pain Point {index + 1}</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Title</label>
-                        <Input
-                          value={painPoint.title}
-                          onChange={(e) => {
-                            const updated = [...data.painPoints.painPoints];
-                            updated[index] = { ...updated[index], title: e.target.value };
-                            updateData("painPoints", { painPoints: updated });
-                          }}
-                          placeholder="e.g., Fragmented CRM Landscape"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Description</label>
-                        <Textarea
-                          value={painPoint.description}
-                          onChange={(e) => {
-                            const updated = [...data.painPoints.painPoints];
-                            updated[index] = { ...updated[index], description: e.target.value };
-                            updateData("painPoints", { painPoints: updated });
-                          }}
-                          placeholder="Describe the business impact and quantify where possible..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
+              <CardContent className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30 col-span-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-destructive">Pain Points</span>
                   </div>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    updateData("painPoints", {
-                      painPoints: [...data.painPoints.painPoints, { title: "", description: "" }]
-                    });
-                  }}
-                >
-                  + Add Pain Point
-                </Button>
+                  <div className="space-y-2">
+                    {data.painPoints.painPoints.map((painPoint, index) => (
+                      <Collapsible key={index}>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={painPoint.title}
+                            onChange={(e) => {
+                              const updated = [...data.painPoints.painPoints];
+                              updated[index] = { ...updated[index], title: e.target.value };
+                              updateData("painPoints", { painPoints: updated });
+                            }}
+                            placeholder={`Pain Point ${index + 1}`}
+                            className="flex-1"
+                          />
+                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </CollapsibleTrigger>
+                          {data.painPoints.painPoints.length > 1 && (
+                            <button
+                              className="text-muted-foreground hover:text-destructive transition-colors"
+                              onClick={() => {
+                                const updated = data.painPoints.painPoints.filter((_, i) => i !== index);
+                                updateData("painPoints", { painPoints: updated });
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <CollapsibleContent className="mt-2 pr-12">
+                          <Textarea
+                            value={painPoint.description}
+                            onChange={(e) => {
+                              const updated = [...data.painPoints.painPoints];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              updateData("painPoints", { painPoints: updated });
+                            }}
+                            placeholder="Describe the business impact and quantify where possible..."
+                            rows={2}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      updateData("painPoints", {
+                        painPoints: [...data.painPoints.painPoints, { title: "", description: "" }]
+                      });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Pain Point
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
