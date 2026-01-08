@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles 
 } from "lucide-react";
 
 interface InputFormSlideProps {
@@ -19,7 +19,7 @@ interface InputFormSlideProps {
 
 export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults } = useAccountData();
-  const [activeTab, setActiveTab] = useState("basics");
+  const [activeTab, setActiveTab] = useState("aiAnalyzer");
 
   const handleGenerate = () => {
     toast.success("Account plan generated! Navigating to slides...");
@@ -57,7 +57,11 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-5 lg:grid-cols-9 gap-1 h-auto p-1 bg-secondary/50">
+          <TabsList className="grid grid-cols-5 lg:grid-cols-10 gap-1 h-auto p-1 bg-secondary/50">
+            <TabsTrigger value="aiAnalyzer" className="gap-2 text-xs">
+              <Sparkles className="w-3 h-3" />
+              <span className="hidden sm:inline">AI Import</span>
+            </TabsTrigger>
             <TabsTrigger value="basics" className="gap-2 text-xs">
               <Building2 className="w-3 h-3" />
               <span className="hidden sm:inline">Basics</span>
@@ -96,10 +100,13 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </TabsTrigger>
           </TabsList>
 
+          {/* AI Annual Report Analyzer */}
+          <TabsContent value="aiAnalyzer" className="space-y-4">
+            <AnnualReportAnalyzer />
+          </TabsContent>
+
           {/* Section A - Account Basics */}
           <TabsContent value="basics" className="space-y-4">
-            <AnnualReportAnalyzer />
-            
             <Card className="glass-card border-border/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
