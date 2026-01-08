@@ -6,6 +6,7 @@ export interface AccountBasics {
   industry: string;
   region: string;
   tier: "Strategic" | "Enterprise" | "Growth";
+  numberOfEmployees: string;
   currentContractValue: string;
   nextFYAmbition: string;
   threeYearAmbition: string;
@@ -110,6 +111,7 @@ const defaultMaerskData: AccountData = {
     industry: "Integrated Logistics & Shipping",
     region: "Global (HQ: Copenhagen)",
     tier: "Strategic",
+    numberOfEmployees: "100,000+",
     currentContractValue: "$8.5M ARR",
     nextFYAmbition: "$12M ARR",
     threeYearAmbition: "$25M ARR",
