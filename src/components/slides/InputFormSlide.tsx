@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText 
 } from "lucide-react";
 
 interface InputFormSlideProps {
@@ -56,7 +56,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-1 h-auto p-1 bg-secondary/50">
+          <TabsList className="grid grid-cols-5 lg:grid-cols-9 gap-1 h-auto p-1 bg-secondary/50">
             <TabsTrigger value="basics" className="gap-2 text-xs">
               <Building2 className="w-3 h-3" />
               <span className="hidden sm:inline">Basics</span>
@@ -68,6 +68,10 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             <TabsTrigger value="financial" className="gap-2 text-xs">
               <DollarSign className="w-3 h-3" />
               <span className="hidden sm:inline">Financial</span>
+            </TabsTrigger>
+            <TabsTrigger value="annualReport" className="gap-2 text-xs">
+              <FileText className="w-3 h-3" />
+              <span className="hidden sm:inline">Annual</span>
             </TabsTrigger>
             <TabsTrigger value="strategy" className="gap-2 text-xs">
               <Target className="w-3 h-3" />
@@ -268,6 +272,75 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     value={data.financial.costPressureAreas}
                     onChange={(e) => updateData("financial", { costPressureAreas: e.target.value })}
                     rows={2}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Annual Report Highlights */}
+          <TabsContent value="annualReport" className="space-y-4">
+            <Card className="glass-card border-border/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  Annual Report Highlights
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Revenue (e.g. $55.5B)</label>
+                  <Input
+                    value={data.annualReport.revenue}
+                    onChange={(e) => updateData("annualReport", { revenue: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Revenue Comparison (e.g. 2023: $51.1B)</label>
+                  <Input
+                    value={data.annualReport.revenueComparison}
+                    onChange={(e) => updateData("annualReport", { revenueComparison: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">EBIT Improvement (e.g. +65%)</label>
+                  <Input
+                    value={data.annualReport.ebitImprovement}
+                    onChange={(e) => updateData("annualReport", { ebitImprovement: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Net Zero Target Year</label>
+                  <Input
+                    value={data.annualReport.netZeroTarget}
+                    onChange={(e) => updateData("annualReport", { netZeroTarget: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Key Milestones (one per line)</label>
+                  <Textarea
+                    value={data.annualReport.keyMilestones.join("\n")}
+                    onChange={(e) => handleArrayInput("annualReport", "keyMilestones", e.target.value)}
+                    rows={4}
+                    placeholder="Gemini network launch with MSC&#10;Green methanol vessel fleet expansion"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Strategic Achievements (one per line)</label>
+                  <Textarea
+                    value={data.annualReport.strategicAchievements.join("\n")}
+                    onChange={(e) => handleArrayInput("annualReport", "strategicAchievements", e.target.value)}
+                    rows={4}
+                    placeholder="Successfully navigated Red Sea disruption&#10;Completed Landside logistics integration"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm text-muted-foreground mb-1 block">Executive Summary Narrative</label>
+                  <Textarea
+                    value={data.annualReport.executiveSummaryNarrative}
+                    onChange={(e) => updateData("annualReport", { executiveSummaryNarrative: e.target.value })}
+                    rows={4}
+                    placeholder="We are the world's leading integrated logistics company..."
                   />
                 </div>
               </CardContent>
