@@ -5,51 +5,43 @@ import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { InputFormSlide } from "@/components/slides/InputFormSlide";
 import { CoverSlide } from "@/components/slides/CoverSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
-import { CustomerOverviewSlide } from "@/components/slides/CustomerOverviewSlide";
-import { BusinessModelCanvasSlide } from "@/components/slides/BusinessModelCanvasSlide";
-import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
+import { CustomerSnapshotSlide } from "@/components/slides/CustomerSnapshotSlide";
+import { CustomerStrategySlide } from "@/components/slides/CustomerStrategySlide";
 import { FY1RetrospectiveSlide } from "@/components/slides/FY1RetrospectiveSlide";
-import { CurrentStateSlide } from "@/components/slides/CurrentStateSlide";
-import { StrategicObservationSlide } from "@/components/slides/StrategicObservationSlide";
-import { StrategicImplicationSlide } from "@/components/slides/StrategicImplicationSlide";
-import { StrategicTensionSlide } from "@/components/slides/StrategicTensionSlide";
-import { InsightSlide } from "@/components/slides/InsightSlide";
-import { ValueHypothesisSlide } from "@/components/slides/ValueHypothesisSlide";
+import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
+import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
+import { SWOTSlide } from "@/components/slides/SWOTSlide";
 import { CoreValueDriversSlide } from "@/components/slides/CoreValueDriversSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
 import { AIUseCasesSlide } from "@/components/slides/AIUseCasesSlide";
-import { AutomationSlide } from "@/components/slides/AutomationSlide";
 import { PlatformSlide } from "@/components/slides/PlatformSlide";
 import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
+import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
-import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
+import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
 
 const slides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
-  { component: CustomerOverviewSlide, label: "2. Customer Overview" },
-  { component: BusinessModelCanvasSlide, label: "3. Business Model" },
-  { component: StrategicAlignmentSlide, label: "4. Strategy & Direction" },
-  { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
-  { component: CurrentStateSlide, label: "6. Current State" },
-  { component: StrategicObservationSlide, label: "7. Observation" },
-  { component: StrategicImplicationSlide, label: "8. Implication" },
-  { component: StrategicTensionSlide, label: "9. Tension" },
-  { component: InsightSlide, label: "10. Insight" },
-  { component: ValueHypothesisSlide, label: "11. Value Hypothesis" },
-  { component: CoreValueDriversSlide, label: "12. Value Drivers" },
-  { component: BigBetsSlide, label: "13. Big Bets" },
-  { component: AIUseCasesSlide, label: "14. AI Use Cases" },
-  { component: AutomationSlide, label: "15. Automation" },
-  { component: PlatformSlide, label: "16. Platform" },
-  { component: RoadmapSlide, label: "17. Roadmap" },
-  { component: GovernanceSlide, label: "18. Governance" },
-  { component: ExecutiveEngagementSlide, label: "19. Engagement" },
-  { component: ClosePlanSlide, label: "20. Close Plan" },
-  { component: SuccessSlide, label: "21. Success" },
+  { component: CustomerSnapshotSlide, label: "2. Customer Snapshot" },
+  { component: CustomerStrategySlide, label: "3. Customer Strategy" },
+  { component: FY1RetrospectiveSlide, label: "4. FY-1 Retrospective" },
+  { component: StrategicAlignmentSlide, label: "5. Strategic Alignment" },
+  { component: AccountTeamSlide, label: "6. Account Team" },
+  { component: SWOTSlide, label: "7. SWOT Analysis" },
+  { component: CoreValueDriversSlide, label: "8. Value Drivers" },
+  { component: BigBetsSlide, label: "9. Key Workstreams" },
+  { component: AIUseCasesSlide, label: "10. AI Portfolio" },
+  { component: PlatformSlide, label: "11. Platform Vision" },
+  { component: RoadmapSlide, label: "12. Roadmap" },
+  { component: RiskMitigationSlide, label: "13. Risk & Mitigation" },
+  { component: GovernanceSlide, label: "14. Governance" },
+  { component: ExecutiveEngagementSlide, label: "15. Engagement" },
+  { component: PursuitPlanSlide, label: "16. Pursuit Plan" },
+  { component: SuccessSlide, label: "17. Success Metrics" },
 ];
 
 const Index = () => {
@@ -64,7 +56,7 @@ const Index = () => {
   }, []);
 
   const goToFirstSlide = useCallback(() => {
-    setCurrentSlide(1); // Navigate to Executive Summary (slide 1)
+    setCurrentSlide(1); // Navigate to Cover slide
   }, []);
 
   useEffect(() => {
