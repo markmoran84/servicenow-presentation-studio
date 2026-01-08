@@ -8,55 +8,33 @@ export const RoadmapSlide = () => {
   ];
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-24">
+    <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
-        {/* Header - Two-tone style */}
-        <div className="slide-header flex items-center gap-4">
-          <div className="sn-icon-box-accent">
-            <Calendar className="w-6 h-6 text-accent" />
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center">
+            <Calendar className="w-7 h-7 text-accent" />
           </div>
           <div>
-            <h1 className="slide-header-title">
-              <span className="text-primary">Transformation</span>{" "}
-              <span className="text-foreground">Roadmap</span>
-            </h1>
-            <p className="slide-header-subtitle">FY26 phased execution plan</p>
+            <h1 className="text-4xl font-bold text-foreground">Transformation Roadmap</h1>
+            <p className="text-muted-foreground text-lg">FY26 phased execution plan</p>
           </div>
         </div>
 
-        {/* Timeline phases */}
-        <div className="flex items-stretch gap-6">
+        <div className="flex items-start gap-4">
           {phases.map((phase, i) => (
-            <div 
-              key={phase.quarter} 
-              className="flex-1 sn-glass-emphasis p-6 opacity-0 animate-fade-in" 
-              style={{ animationDelay: `${i * 150}ms`, animationFillMode: 'forwards' }}
-            >
-              <div className="sn-badge mb-4">{phase.quarter}</div>
-              <div className="text-xl font-semibold text-foreground mb-4">{phase.title}</div>
-              <ul className="space-y-3">
+            <div key={phase.quarter} className="flex-1 glass-card p-6 opacity-0 animate-fade-in" style={{ animationDelay: `${i * 150}ms` }}>
+              <div className="text-2xl font-bold text-primary mb-2">{phase.quarter}</div>
+              <div className="text-lg font-semibold text-foreground mb-4">{phase.title}</div>
+              <ul className="space-y-2">
                 {phase.items.map((item, j) => (
-                  <li key={j} className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span>{item}</span>
+                  <li key={j} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <ArrowRight className="w-4 h-4 text-accent" />
+                    {item}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-        </div>
-
-        {/* Timeline connector */}
-        <div className="mt-8 flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-primary"></div>
-            <div className="w-32 h-1 bg-gradient-to-r from-primary to-primary/50"></div>
-            <div className="w-3 h-3 rounded-full bg-primary/60"></div>
-            <div className="w-32 h-1 bg-gradient-to-r from-primary/50 to-accent/50"></div>
-            <div className="w-3 h-3 rounded-full bg-accent/60"></div>
-            <div className="w-32 h-1 bg-gradient-to-r from-accent/50 to-accent"></div>
-            <div className="w-4 h-4 rounded-full bg-accent"></div>
-          </div>
         </div>
       </div>
     </div>
