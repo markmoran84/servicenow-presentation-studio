@@ -88,6 +88,16 @@ export const AnnualReportAnalyzer = () => {
         });
       }
 
+      // Update SWOT tab
+      if (extracted.strengths?.length || extracted.weaknesses?.length || extracted.swotOpportunities?.length || extracted.threats?.length) {
+        updateData("swot", {
+          ...(extracted.strengths?.length && { strengths: extracted.strengths }),
+          ...(extracted.weaknesses?.length && { weaknesses: extracted.weaknesses }),
+          ...(extracted.swotOpportunities?.length && { opportunities: extracted.swotOpportunities }),
+          ...(extracted.threats?.length && { threats: extracted.threats }),
+        });
+      }
+
       // Update Annual Report tab
       updateData("annualReport", {
         ...(extracted.revenue && { revenue: extracted.revenue }),
