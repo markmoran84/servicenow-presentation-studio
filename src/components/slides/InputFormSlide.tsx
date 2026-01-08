@@ -6,14 +6,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight 
 } from "lucide-react";
 
-export const InputFormSlide = () => {
+interface InputFormSlideProps {
+  onGenerate?: () => void;
+}
+
+export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults } = useAccountData();
   const [activeTab, setActiveTab] = useState("basics");
+
+  const handleGenerate = () => {
+    toast.success("Account plan generated! Navigating to slides...");
+    onGenerate?.();
+  };
 
   const handleArrayInput = (
     section: keyof typeof data,
@@ -38,8 +48,8 @@ export const InputFormSlide = () => {
               <RotateCcw className="w-4 h-4" />
               Reset to Defaults
             </Button>
-            <Button className="gap-2">
-              <Save className="w-4 h-4" />
+            <Button onClick={handleGenerate} className="gap-2">
+              <ArrowRight className="w-4 h-4" />
               Save & Generate
             </Button>
           </div>
