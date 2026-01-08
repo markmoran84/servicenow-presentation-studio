@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
 
 interface SlideNavigationProps {
   currentSlide: number;
@@ -54,6 +55,18 @@ export const SlideNavigation = ({
         className="text-white hover:bg-white/10 disabled:opacity-30"
       >
         <ChevronRight className="w-5 h-5" />
+      </Button>
+
+      <div className="w-px h-6 bg-white/20 mx-2" />
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={exportToPowerPoint}
+        className="text-white hover:bg-white/10 gap-2"
+      >
+        <Download className="w-4 h-4" />
+        Export
       </Button>
     </div>
   );
