@@ -328,22 +328,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     placeholder="Brief summary of the previous account plan focus and outcomes..."
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">What Did Not Work</label>
-                  <Textarea
-                    value={data.history.whatDidNotWork}
-                    onChange={(e) => updateData("history", { whatDidNotWork: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">Prior Transformation Attempts</label>
-                  <Textarea
-                    value={data.history.priorTransformationAttempts}
-                    onChange={(e) => updateData("history", { priorTransformationAttempts: e.target.value })}
-                    rows={2}
-                  />
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
