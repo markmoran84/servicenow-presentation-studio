@@ -64,13 +64,12 @@ export interface ExecutiveEngagement {
   renewalRFPTiming: string;
 }
 
-// Section H — Risk & Constraints
-export interface RiskConstraints {
-  politicalRisk: "Low" | "Medium" | "High";
-  incumbentRisk: "Low" | "Medium" | "High";
-  deliveryRisk: "Low" | "Medium" | "High";
-  adoptionRisk: "Low" | "Medium" | "High";
-  governanceMaturity: "Low" | "Medium" | "High";
+// Section H — SWOT Analysis
+export interface SWOTAnalysis {
+  strengths: string[];
+  weaknesses: string[];
+  opportunities: string[];
+  threats: string[];
 }
 
 // Annual Report Highlights (for Executive Summary slide)
@@ -92,7 +91,7 @@ export interface AccountData {
   painPoints: StrategicPainPoints;
   opportunities: OpportunityHypotheses;
   engagement: ExecutiveEngagement;
-  risks: RiskConstraints;
+  swot: SWOTAnalysis;
   annualReport: AnnualReportHighlights;
 }
 
@@ -216,12 +215,31 @@ const defaultMaerskData: AccountData = {
     decisionDeadlines: "Q1 2026 for CRM decision, Q2 2026 for AI use cases",
     renewalRFPTiming: "Renewal discussions begin August 2026",
   },
-  risks: {
-    politicalRisk: "Medium",
-    incumbentRisk: "High",
-    deliveryRisk: "Medium",
-    adoptionRisk: "Medium",
-    governanceMaturity: "Medium",
+  swot: {
+    strengths: [
+      "Global leader in integrated logistics with 130+ country presence",
+      "Strong financial position with $6.5B EBIT",
+      "Industry-leading sustainability commitment (Net Zero 2040)",
+      "Established technology infrastructure and digital platforms",
+    ],
+    weaknesses: [
+      "700+ fragmented applications across the technology landscape",
+      "Over-customisation of existing platforms limiting agility",
+      "Slow adoption of new capabilities and extended change cycles",
+      "Multiple ITSM and CRM tools by region creating inconsistency",
+    ],
+    opportunities: [
+      "AI-first strategy with explicit executive mandate",
+      "Platform consolidation to reduce complexity",
+      "Customer experience differentiation through digital",
+      "Operational efficiency through automation",
+    ],
+    threats: [
+      "High incumbent vendor risk (Salesforce, SAP, Microsoft)",
+      "Geopolitical disruptions (Red Sea, supply chain volatility)",
+      "Competitive pressure from digital-native logistics players",
+      "Rising fuel and operational costs",
+    ],
   },
   annualReport: {
     revenue: "$55.5B",

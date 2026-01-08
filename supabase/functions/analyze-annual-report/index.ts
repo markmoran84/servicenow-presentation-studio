@@ -61,6 +61,12 @@ OPPORTUNITIES (infer from initiatives, investments, or stated goals):
 - automationOpportunities: Automation initiatives
 - standardisationOpportunities: Consolidation or standardization efforts
 
+SWOT ANALYSIS (critical - extract from the report content):
+- strengths: Internal positive attributes and competitive advantages (3-5 items)
+- weaknesses: Internal limitations, challenges, or areas needing improvement (3-5 items)
+- swotOpportunities: External favorable factors or market opportunities (3-5 items)
+- threats: External risks, competitive pressures, or market challenges (3-5 items)
+
 ANNUAL REPORT:
 - netZeroTarget: Sustainability/net zero target year if mentioned (e.g., "2040" or "N/A")
 - keyMilestones: 3-5 key operational or business milestones achieved (short bullet points)
@@ -150,6 +156,27 @@ If specific data isn't available, provide empty arrays or "Not specified" as app
                     type: "array",
                     items: { type: "string" },
                     description: "Standardisation opportunities"
+                  },
+                  // SWOT Analysis
+                  strengths: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Internal strengths and competitive advantages"
+                  },
+                  weaknesses: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Internal weaknesses and limitations"
+                  },
+                  swotOpportunities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "External opportunities"
+                  },
+                  threats: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "External threats and risks"
                   },
                   // Annual Report
                   netZeroTarget: { type: "string", description: "Net zero target year" },

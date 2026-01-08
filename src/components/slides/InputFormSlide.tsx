@@ -94,9 +94,9 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <Users className="w-3 h-3" />
               <span className="hidden sm:inline">Execs</span>
             </TabsTrigger>
-            <TabsTrigger value="risks" className="gap-2 text-xs">
+            <TabsTrigger value="swot" className="gap-2 text-xs">
               <Shield className="w-3 h-3" />
-              <span className="hidden sm:inline">Risks</span>
+              <span className="hidden sm:inline">SWOT</span>
             </TabsTrigger>
           </TabsList>
 
@@ -563,36 +563,52 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </Card>
           </TabsContent>
 
-          {/* Section H - Risks */}
-          <TabsContent value="risks" className="space-y-4">
+          {/* Section H - SWOT Analysis */}
+          <TabsContent value="swot" className="space-y-4">
             <Card className="glass-card border-border/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-destructive" />
-                  Risk & Constraints
+                  <Shield className="w-5 h-5 text-primary" />
+                  SWOT Analysis
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {(["politicalRisk", "incumbentRisk", "deliveryRisk", "adoptionRisk", "governanceMaturity"] as const).map((field) => (
-                  <div key={field}>
-                    <label className="text-sm text-muted-foreground mb-1 block capitalize">
-                      {field.replace(/([A-Z])/g, " $1").trim()}
-                    </label>
-                    <Select
-                      value={data.risks[field]}
-                      onValueChange={(value) => updateData("risks", { [field]: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Low">Low</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
+              <CardContent className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block font-medium text-green-400">Strengths (one per line)</label>
+                  <Textarea
+                    value={data.swot.strengths.join("\n")}
+                    onChange={(e) => handleArrayInput("swot", "strengths", e.target.value)}
+                    rows={5}
+                    placeholder="Internal positive attributes..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block font-medium text-red-400">Weaknesses (one per line)</label>
+                  <Textarea
+                    value={data.swot.weaknesses.join("\n")}
+                    onChange={(e) => handleArrayInput("swot", "weaknesses", e.target.value)}
+                    rows={5}
+                    placeholder="Internal areas for improvement..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block font-medium text-blue-400">Opportunities (one per line)</label>
+                  <Textarea
+                    value={data.swot.opportunities.join("\n")}
+                    onChange={(e) => handleArrayInput("swot", "opportunities", e.target.value)}
+                    rows={5}
+                    placeholder="External factors to capitalize on..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block font-medium text-orange-400">Threats (one per line)</label>
+                  <Textarea
+                    value={data.swot.threats.join("\n")}
+                    onChange={(e) => handleArrayInput("swot", "threats", e.target.value)}
+                    rows={5}
+                    placeholder="External risks and challenges..."
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
