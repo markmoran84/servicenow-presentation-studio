@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -21,6 +21,7 @@ interface InputFormSlideProps {
 export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults } = useAccountData();
   const [activeTab, setActiveTab] = useState("aiAnalyzer");
+  const [isGeneratingVision, setIsGeneratingVision] = useState(false);
 
   const handleGenerate = () => {
     toast.success("Account plan generated! Navigating to slides...");
@@ -34,6 +35,35 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   ) => {
     const arrayValue = value.split("\n").filter((item) => item.trim() !== "");
     updateData(section, { [field]: arrayValue });
+  };
+
+  const handleGenerateVision = async () => {
+    setIsGeneratingVision(true);
+    try {
+      const accountContext = {
+        basics: data.basics,
+        strategy: data.strategy,
+        financial: data.financial,
+        painPoints: data.painPoints,
+        opportunities: data.opportunities,
+        annualReport: data.annualReport,
+      };
+
+      const { data: responseData, error } = await supabase.functions.invoke("generate-vision", {
+        body: { accountContext }
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Failed to generate vision");
+
+      updateData("strategy", { visionStatement: responseData.visionStatement });
+      toast.success("Vision statement generated!");
+    } catch (error) {
+      console.error("Vision generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate vision");
+    } finally {
+      setIsGeneratingVision(false);
+    }
   };
 
   return (
@@ -453,6 +483,45 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     value={data.strategy.costDisciplineTargets}
                     onChange={(e) => updateData("strategy", { costDisciplineTargets: e.target.value })}
                     rows={2}
+                  />
+                </div>
+
+                {/* Vision Statement - Full Width with AI Generation */}
+                <div className="col-span-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-primary" />
+                      Account Team Vision for ServiceNow at {data.basics.accountName || "Customer"}
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateVision}
+                      disabled={isGeneratingVision}
+                      className="gap-2"
+                    >
+                      {isGeneratingVision ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-3 h-3" />
+                          {data.strategy.visionStatement ? "Regenerate Vision" : "Generate Vision"}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    AI-generated strategic vision statement based on all account context. Click to regenerate for alternatives.
+                  </p>
+                  <Textarea
+                    value={data.strategy.visionStatement}
+                    onChange={(e) => updateData("strategy", { visionStatement: e.target.value })}
+                    placeholder="Click 'Generate Vision' to create an AI-powered strategic vision statement, or type your own..."
+                    rows={4}
+                    className="bg-background"
                   />
                 </div>
               </CardContent>

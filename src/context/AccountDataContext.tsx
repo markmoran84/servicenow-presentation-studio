@@ -41,6 +41,7 @@ export interface CustomerStrategy {
   transformationThemes: string[];
   aiDigitalAmbition: string;
   costDisciplineTargets: string;
+  visionStatement: string; // Account team vision for ServiceNow at [Customer]
 }
 
 // Pain Point item with title and description
@@ -170,6 +171,7 @@ const defaultMaerskData: AccountData = {
     ],
     aiDigitalAmbition: "AI-first: Deploy AI across operations, customer service, and decision-making. Explicit executive mandate.",
     costDisciplineTargets: "5-7% annual productivity improvement, $2B share buyback signals capital discipline",
+    visionStatement: "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision.",
   },
   painPoints: {
     painPoints: [
