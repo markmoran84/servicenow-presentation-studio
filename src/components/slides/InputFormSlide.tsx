@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
   Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText 
@@ -280,6 +281,8 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
           {/* Annual Report Highlights */}
           <TabsContent value="annualReport" className="space-y-4">
+            <AnnualReportAnalyzer />
+            
             <Card className="glass-card border-border/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
