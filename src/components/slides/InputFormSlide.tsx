@@ -464,13 +464,13 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <CardContent className="space-y-4">
                 {/* Corporate Strategy */}
                 <Collapsible>
-                  <div className="flex items-center gap-2">
-                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <Plus className="w-4 h-4" />
-                      Corporate Strategy
-                    </CollapsibleTrigger>
-                  </div>
-                  <div className="mt-2">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-sm text-muted-foreground">Corporate Strategy</label>
+                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                        <Plus className="w-4 h-4" />
+                      </CollapsibleTrigger>
+                    </div>
                     <Input
                       value={data.strategy.corporateStrategy.title}
                       onChange={(e) => updateData("strategy", { 
@@ -487,20 +487,19 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                       })}
                       placeholder="Describe the corporate strategy in detail..."
                       rows={3}
-                      className="text-sm"
                     />
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Digital Strategies / Ambition */}
                 <Collapsible>
-                  <div className="flex items-center gap-2">
-                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <Plus className="w-4 h-4" />
-                      Digital Strategies / Ambition
-                    </CollapsibleTrigger>
-                  </div>
-                  <div className="mt-2">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-sm text-muted-foreground">Digital Strategies / Ambition</label>
+                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                        <Plus className="w-4 h-4" />
+                      </CollapsibleTrigger>
+                    </div>
                     <Input
                       value={data.strategy.digitalStrategies.title}
                       onChange={(e) => updateData("strategy", { 
@@ -517,20 +516,16 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                       })}
                       placeholder="Describe the digital strategy and AI ambition in detail..."
                       rows={3}
-                      className="text-sm"
                     />
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* CEO / Board Priorities */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-foreground block">CEO / Board Priorities</label>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">CEO / Board Priorities (one per line)</label>
                   {data.strategy.ceoBoardPriorities.map((priority, index) => (
-                    <Collapsible key={index}>
+                    <Collapsible key={index} className="mb-2">
                       <div className="flex items-center gap-2">
-                        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                          <Plus className="w-4 h-4" />
-                        </CollapsibleTrigger>
                         <Input
                           value={priority.title}
                           onChange={(e) => {
@@ -541,10 +536,14 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                           placeholder={`Priority ${index + 1}`}
                           className="flex-1"
                         />
+                        <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors p-2">
+                          <Plus className="w-4 h-4" />
+                        </CollapsibleTrigger>
                         {data.strategy.ceoBoardPriorities.length > 1 && (
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
+                            className="h-8 w-8"
                             onClick={() => {
                               const updated = data.strategy.ceoBoardPriorities.filter((_, i) => i !== index);
                               updateData("strategy", { ceoBoardPriorities: updated });
@@ -554,7 +553,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                           </Button>
                         )}
                       </div>
-                      <CollapsibleContent className="mt-2 ml-6">
+                      <CollapsibleContent className="mt-2">
                         <Textarea
                           value={priority.description}
                           onChange={(e) => {
@@ -564,7 +563,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                           }}
                           placeholder="Describe this priority in detail..."
                           rows={2}
-                          className="text-sm"
                         />
                       </CollapsibleContent>
                     </Collapsible>
@@ -583,13 +581,13 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
                 {/* Published Transformation Themes */}
                 <Collapsible>
-                  <div className="flex items-center gap-2">
-                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <Plus className="w-4 h-4" />
-                      Published Transformation Themes
-                    </CollapsibleTrigger>
-                  </div>
-                  <div className="mt-2">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-sm text-muted-foreground">Published Transformation Themes</label>
+                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                        <Plus className="w-4 h-4" />
+                      </CollapsibleTrigger>
+                    </div>
                     <Input
                       value={data.strategy.transformationThemes.title}
                       onChange={(e) => updateData("strategy", { 
@@ -606,7 +604,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                       })}
                       placeholder="Describe the transformation themes in detail..."
                       rows={3}
-                      className="text-sm"
                     />
                   </CollapsibleContent>
                 </Collapsible>
