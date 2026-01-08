@@ -496,7 +496,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             </button>
                           )}
                         </div>
-                        <CollapsibleContent className="mt-2">
+                        <CollapsibleContent className="mt-2 pr-12">
                           <Textarea
                             value={item.description}
                             onChange={(e) => {
@@ -558,7 +558,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             </button>
                           )}
                         </div>
-                        <CollapsibleContent className="mt-2">
+                        <CollapsibleContent className="mt-2 pr-12">
                           <Textarea
                             value={item.description}
                             onChange={(e) => {
@@ -620,7 +620,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             </button>
                           )}
                         </div>
-                        <CollapsibleContent className="mt-2">
+                        <CollapsibleContent className="mt-2 pr-12">
                           <Textarea
                             value={priority.description}
                             onChange={(e) => {
@@ -682,7 +682,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             </button>
                           )}
                         </div>
-                        <CollapsibleContent className="mt-2">
+                        <CollapsibleContent className="mt-2 pr-12">
                           <Textarea
                             value={item.description}
                             onChange={(e) => {
