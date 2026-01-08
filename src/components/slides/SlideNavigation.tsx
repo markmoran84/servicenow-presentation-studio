@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2 } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
 import { useAccountData } from "@/context/AccountDataContext";
+import { toast } from "sonner";
 
 interface SlideNavigationProps {
   currentSlide: number;
@@ -19,9 +21,23 @@ export const SlideNavigation = ({
   slideLabels,
 }: SlideNavigationProps) => {
   const { data } = useAccountData();
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = () => {
-    exportToPowerPoint(data);
+  const handleExport = async () => {
+    if (isExporting) return;
+
+    setIsExporting(true);
+    const toastId = toast.loading("Generating PowerPoint…");
+
+    try {
+      await exportToPowerPoint(data);
+      toast.success("PowerPoint downloaded.", { id: toastId });
+    } catch (err) {
+      console.error("PowerPoint export failed:", err);
+      toast.error("Export failed — check console for details.", { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -70,10 +86,20 @@ export const SlideNavigation = ({
         variant="ghost"
         size="sm"
         onClick={handleExport}
-        className="text-white hover:bg-white/10 gap-2"
+        disabled={isExporting}
+        className="text-white hover:bg-white/10 gap-2 disabled:opacity-60"
       >
-        <Download className="w-4 h-4" />
-        Export
+        {isExporting ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Exporting…
+          </>
+        ) : (
+          <>
+            <Download className="w-4 h-4" />
+            Export
+          </>
+        )}
       </Button>
     </div>
   );

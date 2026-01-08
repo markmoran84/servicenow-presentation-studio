@@ -1483,14 +1483,23 @@ export const exportToPowerPoint = async (data: AccountData) => {
   // 21. Closing
   slides.push(createClosingSlide(pptx, data));
 
-  // Add footers to all slides except cover (0) and closing (last)
+  const exportId = new Date()
+    .toISOString()
+    .replace(/\..+/, "")
+    .replace(/[-:]/g, "")
+    .replace("T", "_");
+
+  // Add footers + speaker notes (notes let us verify you're getting the latest export)
   slides.forEach((slide, i) => {
+    slide.addNotes(`export_id: ${exportId}\nslide: ${i + 1}/${slides.length}`);
+
+    // Add footers to all slides except cover (0) and closing (last)
     if (i > 0 && i < slides.length - 1) {
       addFooter(slide, i + 1, slides.length, data.basics.accountName);
     }
   });
 
   await pptx.writeFile({
-    fileName: `${data.basics.accountName.replace(/[^a-zA-Z0-9]/g, "_")}_Account_Plan_FY26.pptx`,
+    fileName: `${data.basics.accountName.replace(/[^a-zA-Z0-9]/g, "_")}_Account_Plan_FY26_${exportId}.pptx`,
   });
 };
