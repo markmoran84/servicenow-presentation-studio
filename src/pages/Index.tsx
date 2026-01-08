@@ -1,18 +1,24 @@
 import { useState, useCallback, useEffect } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
+import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
+import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
-import { CustomerOverviewSlide } from "@/components/slides/CustomerOverviewSlide";
+import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
 import { BusinessPerformanceSlide } from "@/components/slides/BusinessPerformanceSlide";
-import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
+import { RiskOpportunitySlide } from "@/components/slides/RiskOpportunitySlide";
+import { FinancialOpportunitySlide } from "@/components/slides/FinancialOpportunitySlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { MarketingPlanSlide } from "@/components/slides/MarketingPlanSlide";
 
 const slides = [
+  { component: ExecutiveSummarySlide, label: "Executive Summary" },
+  { component: StrategicAlignmentSlide, label: "Strategic Alignment" },
   { component: AccountTeamSlide, label: "Account Team" },
-  { component: CustomerOverviewSlide, label: "Customer Overview" },
+  { component: BigBetsSlide, label: "Big Bets" },
   { component: BusinessPerformanceSlide, label: "Business Performance" },
-  { component: StrategicPrioritiesSlide, label: "Strategic Priorities" },
+  { component: RiskOpportunitySlide, label: "Risks & Opportunities" },
+  { component: FinancialOpportunitySlide, label: "Financial Opportunity" },
   { component: GovernanceSlide, label: "Governance" },
   { component: MarketingPlanSlide, label: "Marketing Plan" },
 ];
@@ -28,7 +34,6 @@ const Index = () => {
     setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
   }, []);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") {
@@ -49,17 +54,17 @@ const Index = () => {
   return (
     <div className="min-h-screen gradient-hero relative overflow-y-auto">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-sn-navy/50 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2" />
       </div>
 
-      {/* Slide content with transition */}
+      {/* Slide content */}
       <div className="relative z-10 animate-fade-in" key={currentSlide}>
         <CurrentSlideComponent />
       </div>
 
-      {/* Navigation */}
       <SlideNavigation
         currentSlide={currentSlide}
         totalSlides={slides.length}
