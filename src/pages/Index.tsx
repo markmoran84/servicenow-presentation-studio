@@ -3,6 +3,7 @@ import { AccountDataProvider } from "@/context/AccountDataContext";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { InputFormSlide } from "@/components/slides/InputFormSlide";
+import { CoverSlide } from "@/components/slides/CoverSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
 import { CustomerOverviewSlide } from "@/components/slides/CustomerOverviewSlide";
 import { BusinessModelCanvasSlide } from "@/components/slides/BusinessModelCanvasSlide";
@@ -27,6 +28,7 @@ import { SuccessSlide } from "@/components/slides/SuccessSlide";
 
 const slides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
+  { component: CoverSlide, label: "Cover" },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
   { component: CustomerOverviewSlide, label: "2. Customer Overview" },
   { component: BusinessModelCanvasSlide, label: "3. Business Model" },
