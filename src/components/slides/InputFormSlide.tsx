@@ -226,13 +226,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     onChange={(e) => updateData("basics", { renewalDates: e.target.value })}
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">Key Incumbents / Competitors</label>
-                  <Input
-                    value={data.basics.keyIncumbents}
-                    onChange={(e) => updateData("basics", { keyIncumbents: e.target.value })}
-                  />
-                </div>
 
                 {/* Vision Statement - Full Width with AI Generation */}
                 <div className="col-span-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
