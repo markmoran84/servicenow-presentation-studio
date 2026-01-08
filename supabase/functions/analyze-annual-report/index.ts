@@ -72,85 +72,129 @@ serve(async (req) => {
     if (accountContext) {
       const { basics, history, financial, engagement } = accountContext;
       accountContextStr = `
-CURRENT ACCOUNT CONTEXT (from populated fields):
-- Account: ${basics?.accountName || "Unknown"} | Industry: ${basics?.industry || "Unknown"} | Region: ${basics?.region || "Unknown"}
-- Tier: ${basics?.tier || "Unknown"} | Employees: ${basics?.numberOfEmployees || "Unknown"}
-- Current ACV: ${basics?.currentContractValue || "Unknown"} | Next FY Target: ${basics?.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics?.threeYearAmbition || "Unknown"}
-- Renewal: ${basics?.renewalDates || "Unknown"} | Key Incumbents: ${basics?.keyIncumbents || "Unknown"}
-- Last Plan: ${history?.lastPlanDate || "Unknown"} | Planner: ${history?.plannerName || "Unknown"} (${history?.plannerRole || ""})
-- What Didn't Work: ${history?.whatDidNotWork || "Not specified"}
-- Prior Transformation Attempts: ${history?.priorTransformationAttempts || "Not specified"}
-- Current Perception: ${history?.currentPerception || "Unknown"}
-- Executive Sponsors: ${engagement?.knownExecutiveSponsors?.join(", ") || "Unknown"}
-- Decision Deadlines: ${engagement?.decisionDeadlines || "Unknown"}
-- RFP Timing: ${engagement?.renewalRFPTiming || "Unknown"}
+═══════════════════════════════════════════════════════════════
+ACCOUNT INTELLIGENCE (Pre-populated by Account Executive)
+═══════════════════════════════════════════════════════════════
+ACCOUNT PROFILE:
+• Customer: ${basics?.accountName || "Unknown"} 
+• Industry: ${basics?.industry || "Unknown"} | Region: ${basics?.region || "Unknown"}
+• Strategic Tier: ${basics?.tier || "Unknown"} | Employees: ${basics?.numberOfEmployees || "Unknown"}
 
-Use this context to inform the SWOT analysis - considering ServiceNow's position, commercial opportunity, and account dynamics.
+COMMERCIAL POSITION:
+• Current ACV: ${basics?.currentContractValue || "Unknown"}
+• Next FY Target: ${basics?.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics?.threeYearAmbition || "Unknown"}
+• Renewal Window: ${basics?.renewalDates || "Unknown"}
+• Incumbent Competitors: ${basics?.keyIncumbents || "Unknown"}
+
+RELATIONSHIP HISTORY:
+• Last Account Plan: ${history?.lastPlanDate || "Unknown"} by ${history?.plannerName || "Unknown"} (${history?.plannerRole || ""})
+• Previous Failures: ${history?.whatDidNotWork || "Not specified"}
+• Prior Transformation Attempts: ${history?.priorTransformationAttempts || "Not specified"}
+• Current ServiceNow Perception: ${history?.currentPerception || "Unknown"}
+
+EXECUTIVE ACCESS:
+• Known Sponsors: ${engagement?.knownExecutiveSponsors?.join(", ") || "Unknown"}
+• Decision Deadlines: ${engagement?.decisionDeadlines || "Unknown"}
+• RFP/Renewal Timing: ${engagement?.renewalRFPTiming || "Unknown"}
+═══════════════════════════════════════════════════════════════
 `;
     }
 
-    // First pass: Extract company name and check what data we have
-    const initialPrompt = `You are an expert strategic account executive at ServiceNow analyzing a customer's annual report to build an account plan.
+    // Premium strategic analysis prompt
+    const initialPrompt = `You are a McKinsey-caliber strategic advisor embedded in ServiceNow's most elite account team. You analyze Fortune 500 annual reports to craft board-ready account strategies that win transformational deals.
 
 ${accountContextStr}
 
-CRITICAL INSTRUCTIONS:
-1. Read the ENTIRE document carefully before responding
-2. Look for financial figures (revenue, profit, EBIT, margins) - they may be in tables, charts, or footnotes
-3. Look for strategic priorities, CEO statements, and business highlights
-4. For executiveSummaryNarrative: Write 2-3 compelling sentences that describe what the company does, their market position, and strategic direction. DO NOT just describe the document - summarize the COMPANY.
-5. For SWOT: Generate a COMPREHENSIVE analysis from FOUR PERSPECTIVES:
+═══════════════════════════════════════════════════════════════
+ANALYSIS FRAMEWORK: STRATEGIC EXCELLENCE
+═══════════════════════════════════════════════════════════════
 
-SWOT ANALYSIS FRAMEWORK (CRITICAL):
-Generate SWOT items that consider ALL of the following perspectives:
+PHASE 1: DEEP DOCUMENT ANALYSIS
+Read the ENTIRE document with the precision of a financial analyst and the strategic lens of a management consultant:
+• Extract exact financial figures - revenue, margins, EBIT, growth rates (check tables, footnotes, charts)
+• Identify the CEO's voice - their exact language, priorities, and transformation vision
+• Map the strategic narrative - what story is leadership telling investors?
+• Detect tension points - where does ambition exceed current capability?
 
-A) ORGANIZATIONAL PERSPECTIVE (Customer's internal capabilities):
-   - Strengths: What makes this organization operationally strong? (culture, talent, scale, processes)
-   - Weaknesses: Where do they struggle internally? (legacy tech, siloed operations, skill gaps)
+PHASE 2: EXECUTIVE SUMMARY NARRATIVE
+Write a 2-3 sentence executive brief that a C-suite sponsor could use verbatim in a board presentation:
+• Lead with market position and scale (revenue, geography, employee count)
+• Articulate strategic direction using THEIR language
+• Connect to transformation imperatives that ServiceNow can address
+• NEVER describe the document - describe the COMPANY and its trajectory
 
-B) ACCOUNT PERSPECTIVE (ServiceNow's relationship with this customer):
-   - Strengths: Strong exec relationships, successful deployments, expansion opportunities
-   - Weaknesses: Limited footprint, competitive pressure, perception issues, what didn't work before
+EXCELLENT EXAMPLE:
+"A.P. Møller-Maersk is the world's leading integrated logistics company, operating across 130+ countries with $55.5B in revenue and 100,000+ employees. Under CEO Vincent Clerc's 'Gemini Strategy,' Maersk is pivoting from container shipping to end-to-end supply chain orchestration, targeting 8% EBIT margins through operational AI and customer experience transformation."
 
-C) COMMERCIAL PERSPECTIVE (Business/financial dynamics):
-   - Opportunities: Renewal timing, budget cycles, transformation spend, M&A activity
-   - Threats: Cost cutting, competitor discounts, procurement pressure, economic headwinds
+POOR EXAMPLE (NEVER DO THIS):
+"This annual report discusses Maersk's financial performance and strategic initiatives."
 
-D) SERVICENOW PLATFORM & OPPORTUNITY PERSPECTIVE:
-   - Opportunities: White space for new products, AI/workflow use cases, platform consolidation plays
-   - Threats: Competitive threats (Salesforce, SAP, Microsoft), build-vs-buy decisions, alternative vendors
+PHASE 3: STRATEGIC PAIN POINTS (The "Why Act Now" Story)
+Extract 3-5 pain points that create URGENCY for executive action:
+• Derive DIRECTLY from stated challenges, risks, or gaps in the annual report
+• Use the customer's OWN LANGUAGE (if they say "fragmented systems," use that exact phrase)
+• Connect each pain to a strategic priority they've publicly committed to
+• Quantify impact where possible (e.g., "$2.3B cost overrun," "18-month delay in AI deployment")
+• Frame as obstacles to achieving stated board-level goals
 
-Each SWOT item should be a crisp, specific statement that combines insights from the annual report WITH the account context provided.
+PAIN POINT FORMAT:
+{
+  "title": "Punchy 5-7 word headline using their terminology",
+  "description": "1-2 sentences: [Specific pain] is blocking [their stated priority], resulting in [quantified impact or strategic risk]"
+}
 
-Example GOOD SWOT items:
-- Strength: "Strong CEO mandate for 'AI-first operations' aligns with ServiceNow's platform vision and existing ITSM footprint"
-- Weakness: "Current perception rated 'Medium' - prior transformation attempts stalled, need to rebuild trust"
-- Opportunity: "Renewal in Oct 2026 with $12M target creates natural upsell window for 3 new product lines"
-- Threat: "SAP and Salesforce deeply embedded as key incumbents - may position for platform consolidation"
+EXCELLENT PAIN POINT:
+{
+  "title": "Fragmented Tech Stack Blocking AI-First Vision",
+  "description": "130+ disconnected systems across regions prevent the unified data layer CEO cited as prerequisite for AI operationalisation—directly threatening the 2026 'AI-first operations' commitment made to investors."
+}
 
-PAIN POINTS - MUST BE STRATEGICALLY ALIGNED:
-Extract 3-5 pain points that are DIRECTLY DERIVED from challenges, risks, or gaps mentioned in the annual report.
-- These must connect to the customer's STATED priorities (not generic industry pain points)
-- Look for: CEO concerns, risk factors, operational challenges, transformation blockers, cost pressures
-- Frame each pain point as an obstacle to achieving their stated strategic goals
+PHASE 4: STRATEGIC OPPORTUNITIES (The "How ServiceNow Wins" Story)
+Extract 3-5 opportunities that position ServiceNow as the strategic enabler:
+• Each opportunity MUST address a specific pain point
+• Each opportunity MUST accelerate a stated customer priority
+• Frame as business outcomes, not product features
+• Use action verbs: Accelerate, Consolidate, Transform, Enable, Reduce, Eliminate
+• Include proof points or benchmarks where credible
 
-Each pain point needs:
-- title: Short, punchy headline derived from their language (e.g., if they mention "digital fragmentation", use that)
-- description: 1-2 sentences linking the pain to their strategic priority with quantification where available
+OPPORTUNITY FORMAT:
+{
+  "title": "Action-Oriented 5-8 word headline",
+  "description": "1-2 sentences: ServiceNow enables [their goal] by [specific capability], delivering [quantified outcome based on comparable deployments]"
+}
 
-STRATEGIC OPPORTUNITIES - ServiceNow Perspective:
-Extract 3-5 opportunities that DIRECTLY ADDRESS the pain points and ENABLE their stated strategic priorities.
-- Each opportunity should map to a stated customer goal from the annual report
-- Frame as how ServiceNow can accelerate what they're already trying to achieve
-- Use language like "Accelerate...", "Reduce...", "Transform...", "Enable..."
+EXCELLENT OPPORTUNITY:
+{
+  "title": "Unified AI Platform for Global Operations",
+  "description": "Consolidate 130+ regional systems onto ServiceNow's AI-native platform, enabling the CEO's 'single source of truth' vision and reducing AI deployment cycles from 18 months to 6 months—as achieved at comparable logistics enterprises."
+}
 
-Each opportunity needs:
-- title: Action-oriented headline (e.g., "Unified Service Excellence Platform", "AI-First Operations Enablement")
-- description: Exec-ready value proposition showing how ServiceNow helps achieve THEIR goals (reference their language)
+PHASE 5: SWOT ANALYSIS (Four-Dimensional Strategic Assessment)
+Generate SWOT items that synthesize annual report insights WITH account context across FOUR PERSPECTIVES:
 
-Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
+A) ORGANIZATIONAL (Customer's Internal Capabilities)
+   STRENGTHS: Operational excellence, market position, talent, culture, scale advantages
+   WEAKNESSES: Legacy systems, skill gaps, silos, execution challenges, tech debt
 
-Example bad narrative: "This document contains links to Maersk's annual report sections." - DO NOT DO THIS.`;
+B) ACCOUNT RELATIONSHIP (ServiceNow's Position)
+   STRENGTHS: Existing deployments, exec relationships, proven value, expansion momentum
+   WEAKNESSES: Limited footprint, past failures, competitive threats, perception gaps
+
+C) COMMERCIAL (Financial & Business Dynamics)
+   OPPORTUNITIES: Renewal timing, budget cycles, M&A activity, transformation funding
+   THREATS: Cost-cutting mandates, procurement pressure, economic headwinds, competitive pricing
+
+D) SERVICENOW PLATFORM (Technology & Market Position)
+   OPPORTUNITIES: White space products, AI/workflow differentiation, consolidation plays, partner ecosystem
+   THREATS: Incumbent entrenchment, build-vs-buy decisions, point solution alternatives, platform fatigue
+
+SWOT QUALITY STANDARDS:
+• Each item should be specific, actionable, and defensible with evidence
+• Reference annual report data AND account context where relevant
+• Prioritize insights that inform deal strategy and executive engagement
+• Avoid generic statements that could apply to any company
+
+═══════════════════════════════════════════════════════════════`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -159,70 +203,68 @@ Example bad narrative: "This document contains links to Maersk's annual report s
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: initialPrompt },
-          { role: "user", content: `Analyze this annual report content thoroughly and extract all available data:\n\n${content}` }
+          { role: "user", content: `Conduct a comprehensive strategic analysis of this annual report. Extract all financial data, strategic priorities, pain points, opportunities, and SWOT insights. Produce board-ready outputs:\n\n${content}` }
         ],
         tools: [
           {
             type: "function",
             function: {
               name: "extract_annual_report_data",
-              description: "Extract comprehensive structured data from an annual report",
+              description: "Extract comprehensive structured data from an annual report for strategic account planning",
               parameters: {
                 type: "object",
                 properties: {
-                  accountName: { type: "string", description: "Company name" },
-                  industry: { type: "string", description: "Industry/sector" },
-                  revenue: { type: "string", description: "Total revenue figure with currency (e.g. $55.5B)" },
-                  revenueComparison: { type: "string", description: "Prior year revenue" },
-                  growthRate: { type: "string", description: "YoY growth rate" },
-                  ebitImprovement: { type: "string", description: "EBIT improvement %" },
-                  marginEBIT: { type: "string", description: "EBIT margin or absolute" },
-                  costPressureAreas: { type: "string", description: "Cost pressures" },
-                  strategicInvestmentAreas: { type: "string", description: "Investment areas" },
-                  corporateStrategyPillars: { type: "array", items: { type: "string" }, description: "3-5 strategic pillars" },
-                  ceoBoardPriorities: { type: "array", items: { type: "string" }, description: "CEO priorities" },
-                  transformationThemes: { type: "array", items: { type: "string" }, description: "Transformation themes" },
-                  aiDigitalAmbition: { type: "string", description: "AI/digital ambition" },
-                  costDisciplineTargets: { type: "string", description: "Cost targets" },
-                  // Pain points with title/description
+                  accountName: { type: "string", description: "Full company name as it appears officially" },
+                  industry: { type: "string", description: "Primary industry/sector with specificity (e.g., 'Integrated Logistics & Container Shipping' not just 'Transportation')" },
+                  revenue: { type: "string", description: "Total revenue with currency and period (e.g., '$55.5B FY2024')" },
+                  revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
+                  growthRate: { type: "string", description: "YoY growth rate with context (e.g., '+12% YoY' or '-8% due to market normalization')" },
+                  ebitImprovement: { type: "string", description: "EBIT improvement or margin change" },
+                  marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
+                  costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
+                  strategicInvestmentAreas: { type: "string", description: "Where the company is investing for growth" },
+                  corporateStrategyPillars: { type: "array", items: { type: "string" }, description: "3-5 core strategic pillars using their exact terminology" },
+                  ceoBoardPriorities: { type: "array", items: { type: "string" }, description: "CEO's stated priorities from letters/presentations" },
+                  transformationThemes: { type: "array", items: { type: "string" }, description: "Digital/operational transformation themes" },
+                  aiDigitalAmbition: { type: "string", description: "Stated AI and digital transformation ambition with timeline" },
+                  costDisciplineTargets: { type: "string", description: "Specific cost reduction or efficiency targets" },
                   painPoints: { 
                     type: "array", 
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Short punchy headline" },
-                        description: { type: "string", description: "1-2 sentences with business impact" }
+                        title: { type: "string", description: "5-7 word punchy headline using customer's language" },
+                        description: { type: "string", description: "1-2 sentences linking pain to strategic priority with quantification" }
                       },
                       required: ["title", "description"]
                     }, 
-                    description: "3-5 pain points with title and description" 
+                    description: "3-5 strategically-aligned pain points derived from the document" 
                   },
-                  // Opportunities with title/description
                   opportunities: { 
                     type: "array", 
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Action-oriented headline" },
-                        description: { type: "string", description: "Exec-ready value proposition from ServiceNow perspective" }
+                        title: { type: "string", description: "Action-oriented 5-8 word headline" },
+                        description: { type: "string", description: "Exec-ready value proposition with quantified outcomes" }
                       },
                       required: ["title", "description"]
                     }, 
-                    description: "3-5 opportunities with title and description" 
+                    description: "3-5 ServiceNow opportunities that address pain points" 
                   },
-                  strengths: { type: "array", items: { type: "string" }, description: "3-5 internal strengths" },
-                  weaknesses: { type: "array", items: { type: "string" }, description: "3-5 internal weaknesses" },
-                  swotOpportunities: { type: "array", items: { type: "string" }, description: "3-5 external opportunities" },
-                  threats: { type: "array", items: { type: "string" }, description: "3-5 external threats" },
-                  netZeroTarget: { type: "string", description: "Net zero year" },
-                  keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 milestones" },
-                  strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 achievements" },
-                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence company summary - describe what they DO and their strategy, not the document" }
+                  strengths: { type: "array", items: { type: "string" }, description: "4-6 strengths combining organizational and account relationship factors" },
+                  weaknesses: { type: "array", items: { type: "string" }, description: "4-6 weaknesses combining organizational gaps and ServiceNow position challenges" },
+                  swotOpportunities: { type: "array", items: { type: "string" }, description: "4-6 opportunities combining commercial timing and platform white space" },
+                  threats: { type: "array", items: { type: "string" }, description: "4-6 threats combining market risks and competitive dynamics" },
+                  netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment with year" },
+                  keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones or achievements from the year" },
+                  strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements that demonstrate execution capability" },
+                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" }
                 },
-                required: ["accountName", "executiveSummaryNarrative"],
+                required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats"],
                 additionalProperties: false
               }
             }
@@ -286,20 +328,21 @@ Example bad narrative: "This document contains links to Maersk's annual report s
 
       if (supplementaryContent) {
         usedWebSearch = true;
-        // Second pass with supplementary data
-        const enrichPrompt = `You previously extracted data but some financial fields were missing. Here is additional data from web search. 
-Merge this with what you know and provide updated values. Keep existing values if the new data doesn't have better information.
+        // Second pass with supplementary data - use pro model for best quality
+        const enrichPrompt = `You are a senior strategic analyst enriching an account analysis with additional financial intelligence.
 
-Original extraction: ${JSON.stringify(extractedData)}
+ORIGINAL EXTRACTION:
+${JSON.stringify(extractedData, null, 2)}
 
-Additional web search results:
+SUPPLEMENTARY WEB INTELLIGENCE:
 ${supplementaryContent}
 
-IMPORTANT: 
-- Update revenue, EBIT, growth figures if you find them
-- Improve the executiveSummaryNarrative to be more compelling
-- Add any strategic pillars, achievements, or SWOT items you find
-- For opportunities, maintain the ServiceNow exec-ready framing`;
+ENRICHMENT INSTRUCTIONS:
+1. Update financial figures (revenue, EBIT, margins, growth) with the most recent and accurate data
+2. Enhance the executiveSummaryNarrative to be more compelling and board-ready
+3. Add any additional strategic pillars, achievements, or SWOT items discovered
+4. Maintain the executive-grade quality and ServiceNow strategic framing for all opportunities
+5. Preserve existing high-quality content - only enhance, don't diminish`;
 
         const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -308,9 +351,9 @@ IMPORTANT:
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: "google/gemini-2.5-pro",
             messages: [
-              { role: "system", content: "You are enriching company data with additional financial information. Merge and improve the data. For opportunities, keep the ServiceNow exec-ready framing." },
+              { role: "system", content: "You are a McKinsey-caliber analyst enriching strategic account data. Merge new intelligence while maintaining board-ready quality. Prioritize accuracy and strategic insight." },
               { role: "user", content: enrichPrompt }
             ],
             tools: [
