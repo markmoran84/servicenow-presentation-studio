@@ -1,13 +1,20 @@
-export const SlideFooter = () => {
+interface SlideFooterProps {
+  slideNumber?: number;
+  source?: string;
+}
+
+export const SlideFooter = ({ slideNumber, source }: SlideFooterProps) => {
+  const currentYear = new Date().getFullYear();
+  
   return (
-    <footer className="fixed bottom-0 left-0 right-0 px-8 py-3 flex items-center justify-between border-t border-border/20 bg-background/90 backdrop-blur-md z-50">
+    <footer className="slide-footer">
       <div className="flex items-center gap-6">
-        {/* ServiceNow Logo - matching corporate template style */}
+        {/* ServiceNow Logo - exact corporate template style */}
         <span className="sn-logo text-lg text-foreground">
           servicen<span className="o">o</span>w
         </span>
         
-        <div className="w-px h-5 bg-border/30" />
+        <div className="w-px h-5 bg-white/10" />
         
         {/* Customer Logo */}
         <div className="flex items-center gap-2">
@@ -19,12 +26,19 @@ export const SlideFooter = () => {
       </div>
       
       <div className="flex items-center gap-6">
-        <span className="text-muted-foreground text-xs">
-          FY26 Account Plan • Confidential
+        {source && (
+          <span className="text-muted-foreground text-xs">
+            Source: {source}
+          </span>
+        )}
+        <span className="text-muted-foreground/60 text-xs">
+          © {currentYear} ServiceNow, Inc. All Rights Reserved.
         </span>
-        <span className="text-muted-foreground/50 text-xs">
-          © 2026 ServiceNow, Inc. All Rights Reserved.
-        </span>
+        {slideNumber && (
+          <span className="text-muted-foreground text-sm font-medium min-w-[24px] text-right">
+            {slideNumber}
+          </span>
+        )}
       </div>
     </footer>
   );
