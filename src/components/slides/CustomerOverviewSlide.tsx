@@ -1,45 +1,57 @@
 import { SectionHeader } from "@/components/SectionHeader";
-import { Ship, Globe, TrendingUp, Target, Cpu, DollarSign } from "lucide-react";
+import { Ship, Globe, TrendingUp, Target, Cpu, DollarSign, Zap, AlertTriangle, CheckCircle } from "lucide-react";
 
 const strategicPillars = [
   {
     icon: Ship,
-    title: "Gemini Network",
-    description: "Network reliability and schedule integrity as competitive differentiator",
+    title: "Global Integrator",
+    description: "Operating Ocean, Logistics & Services, and Terminals as one connected enterprise",
     color: "from-blue-500 to-cyan-500",
   },
   {
     icon: Cpu,
-    title: "AI-First Ambition",
-    description: "AI is central to operations, customer experience, and decision-making",
+    title: "AI & Data-Led Transformation",
+    description: "Scale AI and data to power intelligent operations and execution quality at scale",
     color: "from-primary to-sn-green",
   },
   {
     icon: DollarSign,
     title: "Cost Discipline & ROIC",
-    description: "Rigorous cost management with focus on return on invested capital",
+    description: "Reduce structural cost-to-serve while maintaining strong margins during transformation",
     color: "from-amber-500 to-orange-500",
   },
   {
     icon: Globe,
-    title: "Digital Transformation",
-    description: "Standardisation and modernisation across technology landscape",
+    title: "Commercial Agility",
+    description: "Digitise and standardise end-to-end processes to improve responsiveness across regions",
     color: "from-purple-500 to-pink-500",
   },
 ];
 
-const keyPriorities = [
+const coreValueDrivers = [
   {
-    label: "All the Way",
-    description: "End-to-end integrated logistics from factory to final destination",
+    icon: DollarSign,
+    title: "Reduce Cost to Serve",
+    description: "Eliminate operational friction, manual effort, and fragmented workflows",
+    color: "text-amber-400",
   },
   {
-    label: "Customer Centricity",
-    description: "Commercial agility and superior customer experience",
+    icon: Zap,
+    title: "Unlock Commercial Agility",
+    description: "Faster lead-to-agreement cycles, improved cross-sell and upsell execution",
+    color: "text-primary",
   },
   {
-    label: "Operational Excellence",
-    description: "Standardised processes and technology backbone",
+    icon: TrendingUp,
+    title: "Elevate Customer Experience",
+    description: "Connected, predictable, high-quality customer journeys across channels",
+    color: "text-sn-green",
+  },
+  {
+    icon: Cpu,
+    title: "Embed AI as Core Capability",
+    description: "Operationalise AI across workflows to augment decision-making at scale",
+    color: "text-purple-400",
   },
 ];
 
@@ -47,78 +59,90 @@ export const CustomerOverviewSlide = () => {
   return (
     <div className="px-8 pt-6 pb-32">
       <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
-        Customer Overview & Strategy
+        Customer Overview & Strategic Context
       </h1>
 
-      <div className="grid grid-cols-3 gap-6">
-        {/* Left - Maersk Overview */}
-        <div className="col-span-2">
-          <div className="glass-card rounded-2xl p-6 h-full">
+      <div className="grid grid-cols-12 gap-5">
+        {/* Left - Maersk Strategic Direction */}
+        <div className="col-span-7">
+          <div className="glass-card rounded-2xl p-5 h-full">
             <SectionHeader
               title="Maersk Strategic Direction"
-              description="A.P. Møller - Maersk: Global integrator of container logistics"
+              description="Global integrator of container logistics — Ocean, Logistics & Services, Terminals as one enterprise"
               delay={100}
             />
 
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               {strategicPillars.map((pillar, index) => (
                 <div
                   key={pillar.title}
-                  className="bg-card/50 rounded-xl p-4 border border-border/50 opacity-0 animate-fade-in hover:border-primary/30 transition-all duration-300"
+                  className="bg-card/50 rounded-xl p-3 border border-border/50 opacity-0 animate-fade-in hover:border-primary/30 transition-all duration-300"
                   style={{ animationDelay: `${200 + index * 100}ms` }}
                 >
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${pillar.color} flex items-center justify-center mb-3`}>
-                    <pillar.icon className="w-5 h-5 text-white" />
+                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${pillar.color} flex items-center justify-center mb-2`}>
+                    <pillar.icon className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-1">{pillar.title}</h3>
-                  <p className="text-sm text-muted-foreground">{pillar.description}</p>
+                  <h3 className="font-semibold text-foreground text-sm mb-1">{pillar.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{pillar.description}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
+            {/* FY25 Reset Context */}
+            <div className="mt-4 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
               <div className="flex items-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-primary" />
-                <span className="font-semibold text-foreground">FY25 Context</span>
+                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <span className="font-semibold text-foreground text-sm">FY25 Reset Context</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                FY25 focused on stabilisation, trust rebuilding, and platform health. Over-customisation 
-                constrained perceived value. CRM modernisation is the primary commercial wedge for FY26.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                FY25 was deliberately focused on stabilising the partnership and restoring execution confidence. 
+                Platform health challenges driven by over-customisation had constrained perceived value. 
+                This reset enabled return to strategic conversations aligned with Maersk's enterprise agenda.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Right - Key Priorities */}
-        <div>
-          <div className="glass-card rounded-2xl p-6 h-full">
+        {/* Right - Core Value Drivers & Strategic Intent */}
+        <div className="col-span-5 space-y-4">
+          {/* Core Value Drivers */}
+          <div className="glass-card rounded-2xl p-5">
             <SectionHeader
-              title="Enterprise Priorities"
-              description="Operating context aligned to 'All the Way' framework"
+              title="FY26 Core Value Drivers"
+              description="Directly mapped to Maersk strategic objectives"
               delay={150}
             />
 
-            <div className="mt-6 space-y-4">
-              {keyPriorities.map((priority, index) => (
+            <div className="mt-4 space-y-2">
+              {coreValueDrivers.map((driver, index) => (
                 <div
-                  key={priority.label}
-                  className="p-4 bg-gradient-to-r from-sn-navy/50 to-transparent rounded-xl border-l-4 border-primary opacity-0 animate-fade-in"
-                  style={{ animationDelay: `${300 + index * 100}ms` }}
+                  key={driver.title}
+                  className="flex items-start gap-3 p-3 bg-card/50 rounded-lg border border-border/50 opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${300 + index * 80}ms` }}
                 >
-                  <h4 className="font-semibold text-foreground mb-1">{priority.label}</h4>
-                  <p className="text-sm text-muted-foreground">{priority.description}</p>
+                  <driver.icon className={`w-4 h-4 ${driver.color} mt-0.5 flex-shrink-0`} />
+                  <div>
+                    <h4 className="font-semibold text-foreground text-sm">{driver.title}</h4>
+                    <p className="text-xs text-muted-foreground">{driver.description}</p>
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            <div className="mt-6 p-4 bg-sn-green/10 rounded-xl border border-sn-green/30 opacity-0 animate-fade-in" style={{ animationDelay: "700ms" }}>
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-sn-green" />
-                <span className="font-semibold text-foreground">ServiceNow Position</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Digital execution backbone — not a point solution. Platform to operationalise AI-first strategy.
-              </p>
+          {/* Strategic Intent */}
+          <div className="p-4 bg-gradient-to-br from-primary/20 to-sn-green/10 rounded-xl border border-primary/30 opacity-0 animate-fade-in" style={{ animationDelay: "700ms" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-foreground text-sm">FY26 Strategic Intent</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              Shift from stabilisation to <span className="text-primary font-medium">scaled value creation</span>. 
+              ServiceNow positioned as the digital backbone that operationalises AI across customer, commercial, and operational workflows.
+            </p>
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle className="w-3 h-3 text-sn-green" />
+              <span className="text-sn-green font-medium">AI-led use cases and automation at the core</span>
             </div>
           </div>
         </div>
