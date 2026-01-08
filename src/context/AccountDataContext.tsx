@@ -73,6 +73,17 @@ export interface RiskConstraints {
   governanceMaturity: "Low" | "Medium" | "High";
 }
 
+// Annual Report Highlights (for Executive Summary slide)
+export interface AnnualReportHighlights {
+  revenue: string;
+  revenueComparison: string;
+  ebitImprovement: string;
+  netZeroTarget: string;
+  keyMilestones: string[];
+  strategicAchievements: string[];
+  executiveSummaryNarrative: string;
+}
+
 export interface AccountData {
   basics: AccountBasics;
   history: AccountHistory;
@@ -82,6 +93,7 @@ export interface AccountData {
   opportunities: OpportunityHypotheses;
   engagement: ExecutiveEngagement;
   risks: RiskConstraints;
+  annualReport: AnnualReportHighlights;
 }
 
 // Default Maersk data
@@ -210,6 +222,25 @@ const defaultMaerskData: AccountData = {
     deliveryRisk: "Medium",
     adoptionRisk: "Medium",
     governanceMaturity: "Medium",
+  },
+  annualReport: {
+    revenue: "$55.5B",
+    revenueComparison: "2023: $51.1B",
+    ebitImprovement: "+65%",
+    netZeroTarget: "2040",
+    keyMilestones: [
+      "Gemini network launch with MSC strengthened reliability",
+      "Green methanol vessel fleet expansion to 25 ships",
+      "AI-first strategy formally adopted by executive team",
+      "Customer NPS improved by 12 points YoY",
+    ],
+    strategicAchievements: [
+      "Successfully navigated Red Sea disruption via Cape routing",
+      "Completed Landside logistics integration in 45 countries",
+      "Launched unified digital booking platform",
+      "$2B share buyback program initiated",
+    ],
+    executiveSummaryNarrative: "We are the world's leading integrated logistics company. Maersk operates across 130+ countries, connecting and simplifying global trade for customers. We provide end-to-end supply chain solutions underpinned by market-leading technology, creating seamless experiences.",
   },
 };
 
