@@ -172,7 +172,7 @@ export const exportToPowerPoint = async () => {
   keyPriorities.forEach((priority, i) => {
     const y = 1.8 + (i * 0.75);
     slide2.addShape(pptx.ShapeType.rect, { x: 7.05, y, w: 0.08, h: 0.6, fill: { color: colors.snGreen } });
-    slide2.addShape(pptx.ShapeType.roundRect, { x: 7.18, y, w: 2.35, h: 0.6, fill: { color: colors.navy, transparency: 50 }, line: { color: "transparent" }, rectRadius: 0.08 });
+    slide2.addShape(pptx.ShapeType.roundRect, { x: 7.18, y, w: 2.35, h: 0.6, fill: { color: colors.navy, transparency: 50 }, rectRadius: 0.08 });
     slide2.addText(priority.label, { x: 7.25, y: y + 0.05, w: 2.2, h: 0.22, fontSize: 8, bold: true, color: colors.white, fontFace: "Arial" });
     slide2.addText(priority.description, { x: 7.25, y: y + 0.28, w: 2.2, h: 0.3, fontSize: 6, color: colors.muted, fontFace: "Arial" });
   });
@@ -432,7 +432,7 @@ export const exportToPowerPoint = async () => {
   strategicNarratives.forEach((narrative, i) => {
     const y = 1.65 + (i * 0.8);
     slide6.addShape(pptx.ShapeType.rect, { x: 6.95, y, w: 0.08, h: 0.7, fill: { color: colors.snGreen } });
-    slide6.addShape(pptx.ShapeType.roundRect, { x: 7.08, y, w: 2.45, h: 0.7, fill: { color: colors.snGreen, transparency: 90 }, line: { color: "transparent" }, rectRadius: 0.08 });
+    slide6.addShape(pptx.ShapeType.roundRect, { x: 7.08, y, w: 2.45, h: 0.7, fill: { color: colors.snGreen, transparency: 90 }, rectRadius: 0.08 });
     slide6.addText(narrative, { x: 7.15, y: y + 0.08, w: 2.3, h: 0.55, fontSize: 7, color: colors.white, fontFace: "Arial" });
   });
   
