@@ -7,15 +7,6 @@ export const SlideFooter = () => {
           servicen<span className="o">o</span>w
         </span>
         
-        <div className="w-px h-5 bg-border/30" />
-        
-        {/* Customer Logo */}
-        <div className="flex items-center gap-2">
-          <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="currentColor">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-          <span className="text-foreground font-semibold text-sm tracking-wide">MAERSK</span>
-        </div>
       </div>
       
       <div className="flex items-center gap-6">
