@@ -1,21 +1,17 @@
 import { useState, useCallback, useEffect } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
-import { CoverSlide } from "@/components/slides/CoverSlide";
-import { ContentsSlide } from "@/components/slides/ContentsSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
-import { LastAccountPlanSlide } from "@/components/slides/LastAccountPlanSlide";
-import { CustomerSnapshotSlide } from "@/components/slides/CustomerSnapshotSlide";
+import { CustomerOverviewSlide } from "@/components/slides/CustomerOverviewSlide";
+import { BusinessPerformanceSlide } from "@/components/slides/BusinessPerformanceSlide";
 import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { MarketingPlanSlide } from "@/components/slides/MarketingPlanSlide";
 
 const slides = [
-  { component: CoverSlide, label: "Cover" },
-  { component: ContentsSlide, label: "Contents" },
   { component: AccountTeamSlide, label: "Account Team" },
-  { component: LastAccountPlanSlide, label: "Last Account Plan" },
-  { component: CustomerSnapshotSlide, label: "Customer Snapshot" },
+  { component: CustomerOverviewSlide, label: "Customer Overview" },
+  { component: BusinessPerformanceSlide, label: "Business Performance" },
   { component: StrategicPrioritiesSlide, label: "Strategic Priorities" },
   { component: GovernanceSlide, label: "Governance" },
   { component: MarketingPlanSlide, label: "Marketing Plan" },

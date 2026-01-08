@@ -53,11 +53,12 @@ const accountTeamMembers = {
         "Drives global strategy in local territory",
       ],
       avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
+      subTeams: ["Solution sales teams", "Commercial and legal support"],
     },
     {
       name: "Markus Maurer",
       email: "markus.maurer@servicenow.com",
-      role: "Customer Success Executive",
+      role: "Customer Success Executive EMEA",
       responsibilities: [
         "Interlock to Post-Sales",
         "Drives Business Value for customer",
@@ -68,11 +69,12 @@ const accountTeamMembers = {
     {
       name: "Fikret Uenlue",
       email: "fikret.uenlue@servicenow.com",
-      role: "Services Account Executive",
+      role: "Services Account Executive EMEA",
       responsibilities: [
         "Point of contact for Expert Services and Success offerings",
       ],
       avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face",
+      subTeams: ["Expert services, training", "Impact"],
     },
     {
       name: "Laura Chen",
@@ -83,47 +85,6 @@ const accountTeamMembers = {
         "Cross-regional alignment",
       ],
       avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face",
-    },
-  ],
-  extendedRow2: [
-    {
-      name: "Greg Pope",
-      email: "greg.pope@servicenow.com",
-      role: "Solution Consultant NA",
-      responsibilities: [
-        "Presales and value engineering",
-        "Leverages global synergies",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Brian Murchison",
-      email: "brian.murchison@servicenow.com",
-      role: "Customer Success Executive NA",
-      responsibilities: [
-        "Interlock to Post-Sales",
-        "Drives Business Value for customer",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "John Duker",
-      email: "john.duker@servicenow.com",
-      role: "Services Account Executive NA",
-      responsibilities: [
-        "Point of contact for Expert Services",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Emma Rodriguez",
-      email: "emma.rodriguez@servicenow.com",
-      role: "Technical Account Manager",
-      responsibilities: [
-        "Technical escalation management",
-        "Platform health oversight",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
     },
   ],
 };
@@ -181,21 +142,23 @@ export const AccountTeamSlide = () => {
 
             <div className="grid grid-cols-4 gap-3">
               {accountTeamMembers.extended.map((member, index) => (
-                <TeamMemberCard
-                  key={member.email}
-                  {...member}
-                  delay={500 + index * 100}
-                />
-              ))}
-            </div>
-
-            <div className="grid grid-cols-4 gap-3 mt-3">
-              {accountTeamMembers.extendedRow2.map((member, index) => (
-                <TeamMemberCard
-                  key={member.email}
-                  {...member}
-                  delay={700 + index * 100}
-                />
+                <div key={member.email} className="flex flex-col">
+                  <TeamMemberCard
+                    {...member}
+                    delay={500 + index * 100}
+                  />
+                  {member.subTeams && (
+                    <div className="mt-2 space-y-1.5">
+                      {member.subTeams.map((team, teamIndex) => (
+                        <SubTeamBadge
+                          key={team}
+                          label={team}
+                          delay={700 + index * 100 + teamIndex * 50}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
