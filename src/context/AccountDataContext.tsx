@@ -92,6 +92,20 @@ export interface AnnualReportHighlights {
   executiveSummaryNarrative: string;
 }
 
+// Business Model Canvas (9 building blocks)
+export interface BusinessModelCanvas {
+  keyPartners: string[];
+  keyActivities: string[];
+  keyResources: string[];
+  valueProposition: string[];
+  customerRelationships: string[];
+  channels: string[];
+  customerSegments: string[];
+  costStructure: string[];
+  revenueStreams: string[];
+  competitors: string[];
+}
+
 export interface AccountData {
   basics: AccountBasics;
   history: AccountHistory;
@@ -102,6 +116,7 @@ export interface AccountData {
   engagement: ExecutiveEngagement;
   swot: SWOTAnalysis;
   annualReport: AnnualReportHighlights;
+  businessModel: BusinessModelCanvas;
 }
 
 // Default Maersk data
@@ -255,6 +270,80 @@ const defaultMaerskData: AccountData = {
       "$2B share buyback program initiated",
     ],
     executiveSummaryNarrative: "We are the world's leading integrated logistics company. Maersk operates across 130+ countries, connecting and simplifying global trade for customers. We provide end-to-end supply chain solutions underpinned by market-leading technology, creating seamless experiences.",
+  },
+  businessModel: {
+    keyPartners: [
+      "Port authorities and terminal operators globally",
+      "MSC (Gemini network alliance)",
+      "Technology vendors (SAP, Salesforce, Microsoft)",
+      "Green fuel suppliers (methanol producers)",
+      "Freight forwarders and customs brokers",
+    ],
+    keyActivities: [
+      "Container shipping and ocean freight",
+      "End-to-end logistics orchestration",
+      "Port and terminal operations",
+      "Digital platform development",
+      "Fleet management and vessel operations",
+    ],
+    keyResources: [
+      "Global fleet of 700+ vessels",
+      "130+ country operational network",
+      "Digital booking and visibility platforms",
+      "Port terminals and logistics hubs",
+      "100,000+ employees worldwide",
+    ],
+    valueProposition: [
+      "End-to-end integrated logistics ('All the Way')",
+      "Global network with local expertise",
+      "Digital visibility and real-time tracking",
+      "Sustainable shipping (Net Zero 2040)",
+      "Reliability through operational excellence",
+    ],
+    customerRelationships: [
+      "Dedicated key account management",
+      "Digital self-service platforms",
+      "24/7 customer service centers",
+      "Industry-specific solutions teams",
+      "Strategic partnership programs",
+    ],
+    channels: [
+      "Direct sales force",
+      "Digital booking platform (maersk.com)",
+      "Freight forwarder partnerships",
+      "Industry trade shows and events",
+      "API integrations with shipper systems",
+    ],
+    customerSegments: [
+      "Global enterprises (Fortune 500)",
+      "SME exporters and importers",
+      "Retail and e-commerce companies",
+      "Automotive and manufacturing",
+      "Chemical and pharmaceutical",
+    ],
+    costStructure: [
+      "Fuel and bunker costs (30% of operating)",
+      "Port and terminal fees",
+      "Crew and vessel operating costs",
+      "Technology and digital investments",
+      "Green fleet transition investments",
+    ],
+    revenueStreams: [
+      "Ocean freight (container shipping)",
+      "Logistics services (warehousing, trucking)",
+      "Terminal handling and port services",
+      "Value-added services (customs, insurance)",
+      "Digital platform subscriptions",
+    ],
+    competitors: [
+      "MSC - Mediterranean Shipping Company",
+      "CMA CGM Group",
+      "COSCO Shipping",
+      "Hapag-Lloyd",
+      "Evergreen Marine",
+      "Kuehne + Nagel (logistics)",
+      "DHL Supply Chain (logistics)",
+    ],
   },
 };
 
