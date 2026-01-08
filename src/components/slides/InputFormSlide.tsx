@@ -463,62 +463,128 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 {/* Corporate Strategy */}
-                <Collapsible>
-                  <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-primary">Corporate Strategy</span>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.corporateStrategy.title}
-                      onChange={(e) => updateData("strategy", { 
-                        corporateStrategy: { ...data.strategy.corporateStrategy, title: e.target.value } 
-                      })}
-                      placeholder="e.g., Integrated Logistics ('All the Way')"
-                    />
-                    <CollapsibleContent className="mt-3">
-                      <Textarea
-                        value={data.strategy.corporateStrategy.description}
-                        onChange={(e) => updateData("strategy", { 
-                          corporateStrategy: { ...data.strategy.corporateStrategy, description: e.target.value } 
-                        })}
-                        placeholder="Describe the corporate strategy in detail..."
-                        rows={3}
-                      />
-                    </CollapsibleContent>
+                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-primary">Corporate Strategy</span>
                   </div>
-                </Collapsible>
+                  <div className="space-y-2">
+                    {data.strategy.corporateStrategy.map((item, index) => (
+                      <Collapsible key={index}>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.corporateStrategy];
+                              updated[index] = { ...updated[index], title: e.target.value };
+                              updateData("strategy", { corporateStrategy: updated });
+                            }}
+                            placeholder={`Strategy ${index + 1}`}
+                            className="flex-1"
+                          />
+                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </CollapsibleTrigger>
+                          {data.strategy.corporateStrategy.length > 1 && (
+                            <button
+                              className="text-muted-foreground hover:text-destructive transition-colors"
+                              onClick={() => {
+                                const updated = data.strategy.corporateStrategy.filter((_, i) => i !== index);
+                                updateData("strategy", { corporateStrategy: updated });
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <CollapsibleContent className="mt-2">
+                          <Textarea
+                            value={item.description}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.corporateStrategy];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              updateData("strategy", { corporateStrategy: updated });
+                            }}
+                            placeholder="Describe this strategy in detail..."
+                            rows={2}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      const updated = [...data.strategy.corporateStrategy, { title: "", description: "" }];
+                      updateData("strategy", { corporateStrategy: updated });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Strategy
+                  </Button>
+                </div>
 
                 {/* Digital Strategies / Ambition */}
-                <Collapsible>
-                  <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-primary">Digital Strategies / Ambition</span>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.digitalStrategies.title}
-                      onChange={(e) => updateData("strategy", { 
-                        digitalStrategies: { ...data.strategy.digitalStrategies, title: e.target.value } 
-                      })}
-                      placeholder="e.g., AI-First Operations"
-                    />
-                    <CollapsibleContent className="mt-3">
-                      <Textarea
-                        value={data.strategy.digitalStrategies.description}
-                        onChange={(e) => updateData("strategy", { 
-                          digitalStrategies: { ...data.strategy.digitalStrategies, description: e.target.value } 
-                        })}
-                        placeholder="Describe the digital strategy and AI ambition in detail..."
-                        rows={3}
-                      />
-                    </CollapsibleContent>
+                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-primary">Digital Strategies / Ambition</span>
                   </div>
-                </Collapsible>
+                  <div className="space-y-2">
+                    {data.strategy.digitalStrategies.map((item, index) => (
+                      <Collapsible key={index}>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.digitalStrategies];
+                              updated[index] = { ...updated[index], title: e.target.value };
+                              updateData("strategy", { digitalStrategies: updated });
+                            }}
+                            placeholder={`Strategy ${index + 1}`}
+                            className="flex-1"
+                          />
+                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </CollapsibleTrigger>
+                          {data.strategy.digitalStrategies.length > 1 && (
+                            <button
+                              className="text-muted-foreground hover:text-destructive transition-colors"
+                              onClick={() => {
+                                const updated = data.strategy.digitalStrategies.filter((_, i) => i !== index);
+                                updateData("strategy", { digitalStrategies: updated });
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <CollapsibleContent className="mt-2">
+                          <Textarea
+                            value={item.description}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.digitalStrategies];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              updateData("strategy", { digitalStrategies: updated });
+                            }}
+                            placeholder="Describe this strategy in detail..."
+                            rows={2}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      const updated = [...data.strategy.digitalStrategies, { title: "", description: "" }];
+                      updateData("strategy", { digitalStrategies: updated });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Strategy
+                  </Button>
+                </div>
 
                 {/* CEO / Board Priorities */}
                 <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
@@ -583,33 +649,66 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                 </div>
 
                 {/* Published Transformation Themes */}
-                <Collapsible>
-                  <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-primary">Published Transformation Themes</span>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.transformationThemes.title}
-                      onChange={(e) => updateData("strategy", { 
-                        transformationThemes: { ...data.strategy.transformationThemes, title: e.target.value } 
-                      })}
-                      placeholder="e.g., End-to-end supply chain visibility"
-                    />
-                    <CollapsibleContent className="mt-3">
-                      <Textarea
-                        value={data.strategy.transformationThemes.description}
-                        onChange={(e) => updateData("strategy", { 
-                          transformationThemes: { ...data.strategy.transformationThemes, description: e.target.value } 
-                        })}
-                        placeholder="Describe the transformation themes in detail..."
-                        rows={3}
-                      />
-                    </CollapsibleContent>
+                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-primary">Published Transformation Themes</span>
                   </div>
-                </Collapsible>
+                  <div className="space-y-2">
+                    {data.strategy.transformationThemes.map((item, index) => (
+                      <Collapsible key={index}>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.transformationThemes];
+                              updated[index] = { ...updated[index], title: e.target.value };
+                              updateData("strategy", { transformationThemes: updated });
+                            }}
+                            placeholder={`Theme ${index + 1}`}
+                            className="flex-1"
+                          />
+                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </CollapsibleTrigger>
+                          {data.strategy.transformationThemes.length > 1 && (
+                            <button
+                              className="text-muted-foreground hover:text-destructive transition-colors"
+                              onClick={() => {
+                                const updated = data.strategy.transformationThemes.filter((_, i) => i !== index);
+                                updateData("strategy", { transformationThemes: updated });
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <CollapsibleContent className="mt-2">
+                          <Textarea
+                            value={item.description}
+                            onChange={(e) => {
+                              const updated = [...data.strategy.transformationThemes];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              updateData("strategy", { transformationThemes: updated });
+                            }}
+                            placeholder="Describe this theme in detail..."
+                            rows={2}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      const updated = [...data.strategy.transformationThemes, { title: "", description: "" }];
+                      updateData("strategy", { transformationThemes: updated });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Theme
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -6,26 +6,15 @@ export const ExecutiveSummarySlide = () => {
   const { basics, strategy, annualReport } = data;
 
   const strategicPillars = [
-    {
-      keyword: "CORPORATE",
-      title: "Strategy",
-      description: strategy.corporateStrategy.title,
-    },
-    {
-      keyword: "DIGITAL",
-      title: "Ambition",
-      description: strategy.digitalStrategies.title,
-    },
-    {
-      keyword: "TRANSFORMATION",
-      title: "Themes",
-      description: strategy.transformationThemes.title,
-    },
-    ...(strategy.ceoBoardPriorities.length > 0 ? [{
-      keyword: "CEO",
-      title: "Priority",
-      description: strategy.ceoBoardPriorities[0].title,
-    }] : []),
+    ...strategy.corporateStrategy.slice(0, 4).map((item, index) => {
+      const keywords = ["INTEGRATED", "CUSTOMER", "AI-FIRST", "NET ZERO"];
+      const titles = ["Logistics", "Centricity", "Operations", "Ambition"];
+      return {
+        keyword: keywords[index] || item.title.split(" ")[0].toUpperCase(),
+        title: titles[index] || item.title.split(" ").slice(1).join(" "),
+        description: item.title,
+      };
+    }),
   ].slice(0, 4);
 
   return (
