@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
+import { useAccountData } from "@/context/AccountDataContext";
 
 interface SlideNavigationProps {
   currentSlide: number;
@@ -17,6 +18,12 @@ export const SlideNavigation = ({
   onNext,
   slideLabels,
 }: SlideNavigationProps) => {
+  const { data } = useAccountData();
+
+  const handleExport = () => {
+    exportToPowerPoint(data);
+  };
+
   return (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-sn-navy/90 backdrop-blur-md rounded-full px-6 py-3 shadow-2xl border border-white/10">
       <Button
@@ -62,7 +69,7 @@ export const SlideNavigation = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={exportToPowerPoint}
+        onClick={handleExport}
         className="text-white hover:bg-white/10 gap-2"
       >
         <Download className="w-4 h-4" />
