@@ -5,9 +5,22 @@ export const CustomerStrategySlide = () => {
   const { data } = useAccountData();
   const { basics, strategy } = data;
 
+  const corporate = (strategy.corporateStrategy ?? []).filter(
+    (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
+  );
+  const digital = (strategy.digitalStrategies ?? []).filter(
+    (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
+  );
+  const ceo = (strategy.ceoBoardPriorities ?? []).filter(
+    (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
+  );
+  const themes = (strategy.transformationThemes ?? []).filter(
+    (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
+  );
+
   // Get the first corporate strategy as the main thesis
-  const mainStrategy = strategy.corporateStrategy[0];
-  const supportingStrategies = strategy.corporateStrategy.slice(1);
+  const mainStrategy = corporate[0];
+  const supportingStrategies = corporate.slice(1);
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
@@ -33,13 +46,23 @@ export const CustomerStrategySlide = () => {
                 </div>
                 <div>
                   <p className="text-xs text-primary font-semibold uppercase tracking-wider">Strategic Transformation</p>
-                  <h2 className="text-2xl font-bold text-foreground">{mainStrategy?.title}</h2>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {mainStrategy?.title || "Corporate Strategy (add in Input Form)"}
+                  </h2>
                 </div>
               </div>
 
-              <p className="text-lg text-foreground/90 leading-relaxed mb-8">
-                {mainStrategy?.description}
-              </p>
+              {mainStrategy?.description ? (
+                <p className="text-lg text-foreground/90 leading-relaxed mb-8">{mainStrategy.description}</p>
+              ) : (
+                <div className="rounded-xl bg-secondary/50 border border-border/50 p-4 mb-8">
+                  <p className="text-sm font-semibold text-foreground">No corporate strategy found</p>
+                  <p className="text-sm text-muted-foreground">
+                    Go to <span className="font-medium text-foreground">Input Form → Strategy</span> and add at least one Corporate Strategy item (title + description), then click{" "}
+                    <span className="font-medium text-foreground">Save & Generate</span>.
+                  </p>
+                </div>
+              )}
 
               {/* Digital Strategy Priorities */}
               <div className="border-t border-border pt-6">
@@ -47,9 +70,9 @@ export const CustomerStrategySlide = () => {
                   Digital Strategy Priorities
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {strategy.digitalStrategies.map((item, index) => (
-                    <div 
-                      key={item.title}
+                  {digital.map((item, index) => (
+                    <div
+                      key={`${item.title}-${index}`}
                       className="p-4 rounded-xl bg-secondary/50 border border-border/50 opacity-0 animate-fade-in"
                       style={{ animationDelay: `${200 + index * 100}ms` }}
                     >
@@ -74,8 +97,8 @@ export const CustomerStrategySlide = () => {
               </div>
               <div className="space-y-3">
                 {supportingStrategies.map((item, index) => (
-                  <div 
-                    key={item.title}
+                  <div
+                    key={`${item.title}-${index}`}
                     className="p-3 rounded-lg bg-secondary/50 border-l-2 border-l-primary opacity-0 animate-fade-in"
                     style={{ animationDelay: `${250 + index * 75}ms` }}
                   >
@@ -93,9 +116,9 @@ export const CustomerStrategySlide = () => {
                 <h3 className="font-bold text-foreground">CEO & Board Priorities</h3>
               </div>
               <div className="space-y-2">
-                {strategy.ceoBoardPriorities.slice(0, 4).map((item, index) => (
-                  <div 
-                    key={item.title}
+                {ceo.slice(0, 4).map((item, index) => (
+                  <div
+                    key={`${item.title}-${index}`}
                     className="flex items-start gap-2 p-2 rounded-lg hover:bg-secondary/30 transition-colors"
                   >
                     <ArrowRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
@@ -111,13 +134,11 @@ export const CustomerStrategySlide = () => {
 
         {/* Transformation Themes Footer */}
         <div className="mt-6 glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "500ms" }}>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-            Key Transformation Themes
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Key Transformation Themes</h3>
           <div className="flex gap-4">
-            {strategy.transformationThemes.map((theme, index) => (
-              <div 
-                key={theme.title}
+            {themes.map((theme, index) => (
+              <div
+                key={`${theme.title}-${index}`}
                 className="flex-1 p-3 rounded-lg bg-gradient-to-br from-primary/10 to-accent/5 border border-primary/20"
               >
                 <p className="font-semibold text-foreground text-sm">{theme.title}</p>
