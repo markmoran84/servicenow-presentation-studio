@@ -98,6 +98,8 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
           {/* Section A - Account Basics */}
           <TabsContent value="basics" className="space-y-4">
+            <AnnualReportAnalyzer />
+            
             <Card className="glass-card border-border/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -281,8 +283,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
           {/* Annual Report Highlights */}
           <TabsContent value="annualReport" className="space-y-4">
-            <AnnualReportAnalyzer />
-            
             <Card className="glass-card border-border/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
