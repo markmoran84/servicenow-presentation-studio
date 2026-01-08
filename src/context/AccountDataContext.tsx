@@ -11,10 +11,12 @@ export interface AccountBasics {
   keyIncumbents: string;
 }
 
-// Section B — Account History
+// Section B — Account History / Prior Plan
 export interface AccountHistory {
-  relationshipStartYear: string;
-  whatWorked: string;
+  lastPlanDate: string;
+  plannerName: string;
+  plannerRole: string;
+  lastPlanSummary: string;
   whatDidNotWork: string;
   priorTransformationAttempts: string;
   currentPerception: "Low" | "Medium" | "High";
@@ -111,9 +113,11 @@ const defaultMaerskData: AccountData = {
     keyIncumbents: "Salesforce, SAP, Microsoft",
   },
   history: {
-    relationshipStartYear: "2018",
-    whatWorked: "ITSM implementation, incident management standardisation, platform stability",
-    whatDidNotWork: "Over-customisation constrained value perception, slow adoption of new capabilities",
+    lastPlanDate: "March 2025",
+    plannerName: "Sarah Mitchell",
+    plannerRole: "Strategic Account Executive",
+    lastPlanSummary: "FY25 plan focused on ITSM expansion and initial CRM pilot. Achieved 95% renewal but CRM pilot stalled due to change management challenges.",
+    whatDidNotWork: "Over-customisation constrained value perception, slow adoption of new capabilities, CRM pilot stalled",
     priorTransformationAttempts: "CRM pilot (2022) stalled due to change management, HR service delivery postponed",
     currentPerception: "Medium",
   },

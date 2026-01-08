@@ -183,15 +183,16 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <History className="w-5 h-5 text-primary" />
-                  Account History
+                  Prior Account Plan
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Relationship Start Year</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Date of Last Account Plan</label>
                   <Input
-                    value={data.history.relationshipStartYear}
-                    onChange={(e) => updateData("history", { relationshipStartYear: e.target.value })}
+                    value={data.history.lastPlanDate}
+                    onChange={(e) => updateData("history", { lastPlanDate: e.target.value })}
+                    placeholder="e.g., March 2025"
                   />
                 </div>
                 <div>
@@ -210,16 +211,33 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">What Has Worked Historically</label>
-                  <Textarea
-                    value={data.history.whatWorked}
-                    onChange={(e) => updateData("history", { whatWorked: e.target.value })}
-                    rows={2}
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Planner Name</label>
+                  <Input
+                    value={data.history.plannerName}
+                    onChange={(e) => updateData("history", { plannerName: e.target.value })}
+                    placeholder="e.g., Sarah Mitchell"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Planner Role</label>
+                  <Input
+                    value={data.history.plannerRole}
+                    onChange={(e) => updateData("history", { plannerRole: e.target.value })}
+                    placeholder="e.g., Strategic Account Executive"
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">What Has Not Worked</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Summary of Last Account Plan</label>
+                  <Textarea
+                    value={data.history.lastPlanSummary}
+                    onChange={(e) => updateData("history", { lastPlanSummary: e.target.value })}
+                    rows={3}
+                    placeholder="Brief summary of the previous account plan focus and outcomes..."
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm text-muted-foreground mb-1 block">What Did Not Work</label>
                   <Textarea
                     value={data.history.whatDidNotWork}
                     onChange={(e) => updateData("history", { whatDidNotWork: e.target.value })}

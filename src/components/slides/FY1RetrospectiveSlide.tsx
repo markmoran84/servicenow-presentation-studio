@@ -63,16 +63,21 @@ export const FY1RetrospectiveSlide = () => {
               </ul>
             </div>
 
-            {/* What Worked */}
+            {/* Prior Plan Summary */}
             <div className="glass-card p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground">What Worked</h2>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Prior Plan Summary</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {data.history.lastPlanDate} • {data.history.plannerName}, {data.history.plannerRole}
+                  </p>
+                </div>
               </div>
               <p className="text-foreground/90 leading-relaxed">
-                {data.history.whatWorked}
+                {data.history.lastPlanSummary}
               </p>
             </div>
           </div>
