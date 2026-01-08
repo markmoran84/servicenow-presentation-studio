@@ -94,6 +94,16 @@ export interface SWOTAnalysis {
   threats: string[];
 }
 
+// Strategic Pillar (for Executive Summary slide)
+export interface StrategicPillar {
+  icon: "network" | "customer" | "technology" | "efficiency";
+  keyword: string;
+  title: string;
+  tagline: string;
+  description: string;
+  outcome: string;
+}
+
 // Annual Report Highlights (for Executive Summary slide)
 export interface AnnualReportHighlights {
   revenue: string;
@@ -103,6 +113,7 @@ export interface AnnualReportHighlights {
   keyMilestones: string[];
   strategicAchievements: string[];
   executiveSummaryNarrative: string;
+  strategicPillars: StrategicPillar[];
 }
 
 // Business Model Canvas (9 building blocks)
@@ -290,6 +301,40 @@ const defaultMaerskData: AccountData = {
       "$2B share buyback program initiated",
     ],
     executiveSummaryNarrative: "We are the world's leading integrated logistics company. Maersk operates across 130+ countries, connecting and simplifying global trade for customers. We provide end-to-end supply chain solutions underpinned by market-leading technology, creating seamless experiences.",
+    strategicPillars: [
+      {
+        icon: "network",
+        keyword: "BETTER",
+        title: "NETWORK",
+        tagline: "More reliable. More predictable. More integrated.",
+        description: "Strengthened network reliability and operational discipline across Ocean, Logistics & Services, and Terminals — operating as one connected system through network redesign, capacity discipline, and digitised execution.",
+        outcome: "schedule reliability, resilience, and end-to-end flow"
+      },
+      {
+        icon: "customer",
+        keyword: "BETTER",
+        title: "CUSTOMER EXPERIENCE",
+        tagline: "Connected journeys, not fragmented interactions.",
+        description: "Improving customer experience by simplifying engagement, reducing handoffs, and connecting customer-facing processes to operational execution with aligned digital channels and service operations.",
+        outcome: "trust, transparency, and reduced friction"
+      },
+      {
+        icon: "technology",
+        keyword: "BETTER",
+        title: "TECHNOLOGY & AI",
+        tagline: "From digital ambition to operational execution.",
+        description: "Accelerated AI-first agenda by embedding intelligence into core workflows — moving beyond pilots to operational use cases with data, automation, and AI improving decision-making and execution speed.",
+        outcome: "AI in execution, not experimentation"
+      },
+      {
+        icon: "efficiency",
+        keyword: "BETTER",
+        title: "EFFICIENCY",
+        tagline: "Lower cost-to-serve through standardisation and automation.",
+        description: "Continued to reduce structural cost-to-serve by simplifying systems, standardising processes, and automating manual work — improving productivity and reducing complexity.",
+        outcome: "efficiency as a structural advantage"
+      }
+    ],
   },
   businessModel: {
     keyPartners: [
