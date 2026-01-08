@@ -461,24 +461,22 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Customer Strategy Inputs
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="grid grid-cols-2 gap-4">
                 {/* Corporate Strategy */}
                 <Collapsible>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-sm text-muted-foreground">Corporate Strategy</label>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.corporateStrategy.title}
-                      onChange={(e) => updateData("strategy", { 
-                        corporateStrategy: { ...data.strategy.corporateStrategy, title: e.target.value } 
-                      })}
-                      placeholder="e.g., Integrated Logistics ('All the Way')"
-                    />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm text-muted-foreground">Corporate Strategy</label>
+                    <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                    </CollapsibleTrigger>
                   </div>
+                  <Input
+                    value={data.strategy.corporateStrategy.title}
+                    onChange={(e) => updateData("strategy", { 
+                      corporateStrategy: { ...data.strategy.corporateStrategy, title: e.target.value } 
+                    })}
+                    placeholder="e.g., Integrated Logistics ('All the Way')"
+                  />
                   <CollapsibleContent className="mt-2">
                     <Textarea
                       value={data.strategy.corporateStrategy.description}
@@ -493,21 +491,19 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
                 {/* Digital Strategies / Ambition */}
                 <Collapsible>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-sm text-muted-foreground">Digital Strategies / Ambition</label>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.digitalStrategies.title}
-                      onChange={(e) => updateData("strategy", { 
-                        digitalStrategies: { ...data.strategy.digitalStrategies, title: e.target.value } 
-                      })}
-                      placeholder="e.g., AI-First Operations"
-                    />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm text-muted-foreground">Digital Strategies / Ambition</label>
+                    <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                    </CollapsibleTrigger>
                   </div>
+                  <Input
+                    value={data.strategy.digitalStrategies.title}
+                    onChange={(e) => updateData("strategy", { 
+                      digitalStrategies: { ...data.strategy.digitalStrategies, title: e.target.value } 
+                    })}
+                    placeholder="e.g., AI-First Operations"
+                  />
                   <CollapsibleContent className="mt-2">
                     <Textarea
                       value={data.strategy.digitalStrategies.description}
@@ -522,7 +518,9 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
                 {/* CEO / Board Priorities */}
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">CEO / Board Priorities (one per line)</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm text-muted-foreground">CEO / Board Priorities (one per line)</label>
+                  </div>
                   {data.strategy.ceoBoardPriorities.map((priority, index) => (
                     <Collapsible key={index} className="mb-2">
                       <div className="flex items-center gap-2">
@@ -536,21 +534,19 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                           placeholder={`Priority ${index + 1}`}
                           className="flex-1"
                         />
-                        <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors p-2">
+                        <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
                           <Plus className="w-4 h-4" />
                         </CollapsibleTrigger>
                         {data.strategy.ceoBoardPriorities.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
+                          <button
+                            className="text-muted-foreground hover:text-destructive transition-colors"
                             onClick={() => {
                               const updated = data.strategy.ceoBoardPriorities.filter((_, i) => i !== index);
                               updateData("strategy", { ceoBoardPriorities: updated });
                             }}
                           >
                             <X className="w-4 h-4" />
-                          </Button>
+                          </button>
                         )}
                       </div>
                       <CollapsibleContent className="mt-2">
@@ -581,21 +577,19 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
                 {/* Published Transformation Themes */}
                 <Collapsible>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-sm text-muted-foreground">Published Transformation Themes</label>
-                      <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                        <Plus className="w-4 h-4" />
-                      </CollapsibleTrigger>
-                    </div>
-                    <Input
-                      value={data.strategy.transformationThemes.title}
-                      onChange={(e) => updateData("strategy", { 
-                        transformationThemes: { ...data.strategy.transformationThemes, title: e.target.value } 
-                      })}
-                      placeholder="e.g., End-to-end supply chain visibility"
-                    />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-sm text-muted-foreground">Published Transformation Themes</label>
+                    <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                    </CollapsibleTrigger>
                   </div>
+                  <Input
+                    value={data.strategy.transformationThemes.title}
+                    onChange={(e) => updateData("strategy", { 
+                      transformationThemes: { ...data.strategy.transformationThemes, title: e.target.value } 
+                    })}
+                    placeholder="e.g., End-to-end supply chain visibility"
+                  />
                   <CollapsibleContent className="mt-2">
                     <Textarea
                       value={data.strategy.transformationThemes.description}
