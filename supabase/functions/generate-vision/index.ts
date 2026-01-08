@@ -58,27 +58,25 @@ EXECUTIVE NARRATIVE:
 ${accountContext?.annualReport?.executiveSummaryNarrative || "Not available"}
 `;
 
-    const systemPrompt = `You are a McKinsey-caliber strategic advisor crafting a compelling vision statement for a ServiceNow account team.
+    const systemPrompt = `You are a strategic advisor crafting a vision statement for a ServiceNow account plan.
 
-Your task: Create a 2-3 sentence VISION STATEMENT that articulates the strategic partnership vision between ServiceNow and ${companyName}.
+TASK: Write ONE single sentence that defines ServiceNow's strategic role for ${companyName}.
 
-VISION STATEMENT REQUIREMENTS:
-1. ASPIRATIONAL: Paint a picture of the transformed future state
-2. CUSTOMER-CENTRIC: Use the customer's own strategic language and priorities
-3. VALUE-FOCUSED: Articulate the business outcomes ServiceNow enables
-4. SPECIFIC: Reference concrete capabilities and transformation goals
-5. EXECUTIVE-READY: Could be spoken by the CIO or CEO in a board meeting
+TONE: Strategic, precise, confident. No hype. No generic transformation language. Use the customer's own strategic terminology.
+
+FORMAT: Start with "To..." and complete in one clear, purposeful sentence.
 
 EXCELLENT EXAMPLES:
-• "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision."
-
-• "By 2027, ServiceNow will transform how HSBC delivers employee and customer experiences, reducing operational friction by 50% and becoming the enterprise AI orchestration layer that makes every process intelligent, automated, and compliant."
+• "To build the digital backbone that powers Maersk's Integrator Strategy to deliver seamless, integrated logistics across a connected global network."
+• "To become the enterprise automation layer that enables HSBC's cost transformation while accelerating customer-facing innovation."
+• "To serve as the AI orchestration platform that unifies Shell's operational technology and IT landscapes into a single intelligent enterprise."
 
 POOR EXAMPLES (NEVER DO THIS):
-• "ServiceNow will help the customer with digital transformation." (too generic)
-• "We will expand our footprint and increase ARR." (internal-focused, not visionary)
+• "To help the customer with digital transformation." (too generic)
+• "To partner with the customer to drive value." (meaningless)
+• "ServiceNow will be instrumental in..." (weak, passive)
 
-Generate ONE compelling vision statement that would inspire both the ServiceNow account team AND resonate with the customer's executive team.`;
+Generate ONE sentence. Be specific to their strategy. No fluff.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
