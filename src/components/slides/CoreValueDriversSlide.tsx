@@ -14,7 +14,7 @@ export const CoreValueDriversSlide = () => {
         "Tool consolidation savings",
         "Operational efficiency gains",
       ],
-      alignment: data.strategy.corporateStrategy.title || "Cost Discipline",
+      alignment: data.strategy.corporateStrategy[0]?.title || "Cost Discipline",
       color: "primary",
     },
     {
