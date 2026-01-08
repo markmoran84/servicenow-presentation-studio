@@ -8,6 +8,7 @@ import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
 import { BusinessPerformanceSlide } from "@/components/slides/BusinessPerformanceSlide";
 import { RiskOpportunitySlide } from "@/components/slides/RiskOpportunitySlide";
 import { FinancialOpportunitySlide } from "@/components/slides/FinancialOpportunitySlide";
+import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { MarketingPlanSlide } from "@/components/slides/MarketingPlanSlide";
 
@@ -19,6 +20,7 @@ const slides = [
   { component: BusinessPerformanceSlide, label: "Business Performance" },
   { component: RiskOpportunitySlide, label: "Risks & Opportunities" },
   { component: FinancialOpportunitySlide, label: "Financial Opportunity" },
+  { component: ClosePlanSlide, label: "Close Plan" },
   { component: GovernanceSlide, label: "Governance" },
   { component: MarketingPlanSlide, label: "Marketing Plan" },
 ];
