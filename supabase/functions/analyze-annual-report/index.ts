@@ -53,7 +53,7 @@ serve(async (req) => {
   }
 
   try {
-    const { content } = await req.json();
+    const { content, accountContext } = await req.json();
 
     if (!content || content.trim().length < 100) {
       return new Response(
@@ -67,17 +67,66 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Build context from account data if provided
+    let accountContextStr = "";
+    if (accountContext) {
+      const { basics, history, financial, engagement } = accountContext;
+      accountContextStr = `
+CURRENT ACCOUNT CONTEXT (from populated fields):
+- Account: ${basics?.accountName || "Unknown"} | Industry: ${basics?.industry || "Unknown"} | Region: ${basics?.region || "Unknown"}
+- Tier: ${basics?.tier || "Unknown"} | Employees: ${basics?.numberOfEmployees || "Unknown"}
+- Current ACV: ${basics?.currentContractValue || "Unknown"} | Next FY Target: ${basics?.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics?.threeYearAmbition || "Unknown"}
+- Renewal: ${basics?.renewalDates || "Unknown"} | Key Incumbents: ${basics?.keyIncumbents || "Unknown"}
+- Last Plan: ${history?.lastPlanDate || "Unknown"} | Planner: ${history?.plannerName || "Unknown"} (${history?.plannerRole || ""})
+- What Didn't Work: ${history?.whatDidNotWork || "Not specified"}
+- Prior Transformation Attempts: ${history?.priorTransformationAttempts || "Not specified"}
+- Current Perception: ${history?.currentPerception || "Unknown"}
+- Executive Sponsors: ${engagement?.knownExecutiveSponsors?.join(", ") || "Unknown"}
+- Decision Deadlines: ${engagement?.decisionDeadlines || "Unknown"}
+- RFP Timing: ${engagement?.renewalRFPTiming || "Unknown"}
+
+Use this context to inform the SWOT analysis - considering ServiceNow's position, commercial opportunity, and account dynamics.
+`;
+    }
+
     // First pass: Extract company name and check what data we have
     const initialPrompt = `You are an expert strategic account executive at ServiceNow analyzing a customer's annual report to build an account plan.
+
+${accountContextStr}
 
 CRITICAL INSTRUCTIONS:
 1. Read the ENTIRE document carefully before responding
 2. Look for financial figures (revenue, profit, EBIT, margins) - they may be in tables, charts, or footnotes
 3. Look for strategic priorities, CEO statements, and business highlights
 4. For executiveSummaryNarrative: Write 2-3 compelling sentences that describe what the company does, their market position, and strategic direction. DO NOT just describe the document - summarize the COMPANY.
-5. For SWOT: Infer from challenges mentioned (weaknesses/threats) and achievements mentioned (strengths/opportunities)
-6. If you find mentions of "geopolitical", "supply chain", "competition", "costs" - these are threats
-7. If you find mentions of "growth", "expansion", "innovation", "market leader" - these are strengths
+5. For SWOT: Generate a COMPREHENSIVE analysis from FOUR PERSPECTIVES:
+
+SWOT ANALYSIS FRAMEWORK (CRITICAL):
+Generate SWOT items that consider ALL of the following perspectives:
+
+A) ORGANIZATIONAL PERSPECTIVE (Customer's internal capabilities):
+   - Strengths: What makes this organization operationally strong? (culture, talent, scale, processes)
+   - Weaknesses: Where do they struggle internally? (legacy tech, siloed operations, skill gaps)
+
+B) ACCOUNT PERSPECTIVE (ServiceNow's relationship with this customer):
+   - Strengths: Strong exec relationships, successful deployments, expansion opportunities
+   - Weaknesses: Limited footprint, competitive pressure, perception issues, what didn't work before
+
+C) COMMERCIAL PERSPECTIVE (Business/financial dynamics):
+   - Opportunities: Renewal timing, budget cycles, transformation spend, M&A activity
+   - Threats: Cost cutting, competitor discounts, procurement pressure, economic headwinds
+
+D) SERVICENOW PLATFORM & OPPORTUNITY PERSPECTIVE:
+   - Opportunities: White space for new products, AI/workflow use cases, platform consolidation plays
+   - Threats: Competitive threats (Salesforce, SAP, Microsoft), build-vs-buy decisions, alternative vendors
+
+Each SWOT item should be a crisp, specific statement that combines insights from the annual report WITH the account context provided.
+
+Example GOOD SWOT items:
+- Strength: "Strong CEO mandate for 'AI-first operations' aligns with ServiceNow's platform vision and existing ITSM footprint"
+- Weakness: "Current perception rated 'Medium' - prior transformation attempts stalled, need to rebuild trust"
+- Opportunity: "Renewal in Oct 2026 with $12M target creates natural upsell window for 3 new product lines"
+- Threat: "SAP and Salesforce deeply embedded as key incumbents - may position for platform consolidation"
 
 PAIN POINTS - MUST BE STRATEGICALLY ALIGNED:
 Extract 3-5 pain points that are DIRECTLY DERIVED from challenges, risks, or gaps mentioned in the annual report.
@@ -89,18 +138,6 @@ Each pain point needs:
 - title: Short, punchy headline derived from their language (e.g., if they mention "digital fragmentation", use that)
 - description: 1-2 sentences linking the pain to their strategic priority with quantification where available
 
-Example GOOD pain point (strategically aligned):
-{
-  "title": "Digital Fragmentation Blocking AI-First Ambition",
-  "description": "Multiple disconnected systems across regions prevent the unified data layer required for AI operationalisation - directly blocking CEO's stated AI-first strategy"
-}
-
-Example BAD pain point (generic, not from report):
-{
-  "title": "Need for Digital Transformation",
-  "description": "Companies need to transform digitally to stay competitive"
-}
-
 STRATEGIC OPPORTUNITIES - ServiceNow Perspective:
 Extract 3-5 opportunities that DIRECTLY ADDRESS the pain points and ENABLE their stated strategic priorities.
 - Each opportunity should map to a stated customer goal from the annual report
@@ -110,12 +147,6 @@ Extract 3-5 opportunities that DIRECTLY ADDRESS the pain points and ENABLE their
 Each opportunity needs:
 - title: Action-oriented headline (e.g., "Unified Service Excellence Platform", "AI-First Operations Enablement")
 - description: Exec-ready value proposition showing how ServiceNow helps achieve THEIR goals (reference their language)
-
-Example GOOD opportunity (tied to their strategy):
-{
-  "title": "Accelerate AI-First Operations",
-  "description": "Enable the CEO's AI-first mandate through unified workflow orchestration, reducing AI time-to-production from 18 months to 6 months"
-}
 
 Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
 
