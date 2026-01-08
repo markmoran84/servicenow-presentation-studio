@@ -40,18 +40,67 @@ export const AnnualReportAnalyzer = () => {
 
       const extracted = data.data;
 
+      // Update Basics tab
+      if (extracted.accountName || extracted.industry) {
+        updateData("basics", {
+          ...(extracted.accountName && { accountName: extracted.accountName }),
+          ...(extracted.industry && { industry: extracted.industry }),
+        });
+      }
+
+      // Update Financial tab
+      if (extracted.revenue || extracted.growthRate || extracted.marginEBIT) {
+        updateData("financial", {
+          ...(extracted.revenue && { customerRevenue: extracted.revenue }),
+          ...(extracted.growthRate && { growthRate: extracted.growthRate }),
+          ...(extracted.marginEBIT && { marginEBIT: extracted.marginEBIT }),
+          ...(extracted.costPressureAreas && { costPressureAreas: extracted.costPressureAreas }),
+          ...(extracted.strategicInvestmentAreas && { strategicInvestmentAreas: extracted.strategicInvestmentAreas }),
+        });
+      }
+
+      // Update Strategy tab
+      if (extracted.corporateStrategyPillars?.length || extracted.ceoBoardPriorities?.length) {
+        updateData("strategy", {
+          ...(extracted.corporateStrategyPillars?.length && { corporateStrategyPillars: extracted.corporateStrategyPillars }),
+          ...(extracted.ceoBoardPriorities?.length && { ceoBoardPriorities: extracted.ceoBoardPriorities }),
+          ...(extracted.transformationThemes?.length && { transformationThemes: extracted.transformationThemes }),
+          ...(extracted.aiDigitalAmbition && { aiDigitalAmbition: extracted.aiDigitalAmbition }),
+          ...(extracted.costDisciplineTargets && { costDisciplineTargets: extracted.costDisciplineTargets }),
+        });
+      }
+
+      // Update Pain Points tab
+      if (extracted.customerExperienceChallenges?.length || extracted.technologyFragmentation?.length) {
+        updateData("painPoints", {
+          ...(extracted.customerExperienceChallenges?.length && { customerExperienceChallenges: extracted.customerExperienceChallenges }),
+          ...(extracted.technologyFragmentation?.length && { technologyFragmentation: extracted.technologyFragmentation }),
+          ...(extracted.timeToValueIssues?.length && { timeToValueIssues: extracted.timeToValueIssues }),
+        });
+      }
+
+      // Update Opportunities tab
+      if (extracted.aiOpportunities?.length || extracted.automationOpportunities?.length) {
+        updateData("opportunities", {
+          ...(extracted.aiOpportunities?.length && { aiOpportunities: extracted.aiOpportunities }),
+          ...(extracted.automationOpportunities?.length && { automationOpportunities: extracted.automationOpportunities }),
+          ...(extracted.standardisationOpportunities?.length && { standardisationOpportunities: extracted.standardisationOpportunities }),
+        });
+      }
+
+      // Update Annual Report tab
       updateData("annualReport", {
-        revenue: extracted.revenue,
-        revenueComparison: extracted.revenueComparison,
-        ebitImprovement: extracted.ebitImprovement,
-        netZeroTarget: extracted.netZeroTarget,
-        keyMilestones: extracted.keyMilestones,
-        strategicAchievements: extracted.strategicAchievements,
-        executiveSummaryNarrative: extracted.executiveSummaryNarrative,
+        ...(extracted.revenue && { revenue: extracted.revenue }),
+        ...(extracted.revenueComparison && { revenueComparison: extracted.revenueComparison }),
+        ...(extracted.ebitImprovement && { ebitImprovement: extracted.ebitImprovement }),
+        ...(extracted.netZeroTarget && { netZeroTarget: extracted.netZeroTarget }),
+        ...(extracted.keyMilestones?.length && { keyMilestones: extracted.keyMilestones }),
+        ...(extracted.strategicAchievements?.length && { strategicAchievements: extracted.strategicAchievements }),
+        ...(extracted.executiveSummaryNarrative && { executiveSummaryNarrative: extracted.executiveSummaryNarrative }),
       });
 
       setAnalysisComplete(true);
-      toast.success("Annual report analyzed! Data has been populated.");
+      toast.success("Analysis complete! Data populated across all relevant tabs.");
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to analyze report");
@@ -146,7 +195,7 @@ export const AnnualReportAnalyzer = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Extract key highlights from annual reports to auto-populate your Executive Summary slide.
+          Upload or paste an annual report to auto-populate <strong>Basics, Financial, Strategy, Pain Points, Opportunities,</strong> and <strong>Annual Report</strong> tabs.
         </p>
 
         <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as InputMode)}>
@@ -283,7 +332,7 @@ Example: Copy text from sections like:
         {analysisComplete && (
           <div className="flex items-center gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
             <CheckCircle2 className="w-5 h-5" />
-            Data extracted and populated in the form!
+            Data extracted and populated across multiple tabs! Review each tab to verify and refine.
           </div>
         )}
 
