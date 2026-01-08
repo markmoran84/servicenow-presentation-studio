@@ -5,6 +5,7 @@ import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide
 import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
+import { InitiativeTimelineSlide } from "@/components/slides/InitiativeTimelineSlide";
 import { BusinessPerformanceSlide } from "@/components/slides/BusinessPerformanceSlide";
 import { RiskOpportunitySlide } from "@/components/slides/RiskOpportunitySlide";
 import { FinancialOpportunitySlide } from "@/components/slides/FinancialOpportunitySlide";
@@ -17,6 +18,7 @@ const slides = [
   { component: StrategicAlignmentSlide, label: "Strategic Alignment" },
   { component: AccountTeamSlide, label: "Account Team" },
   { component: BigBetsSlide, label: "Big Bets" },
+  { component: InitiativeTimelineSlide, label: "Initiative Roadmap" },
   { component: BusinessPerformanceSlide, label: "Business Performance" },
   { component: RiskOpportunitySlide, label: "Risks & Opportunities" },
   { component: FinancialOpportunitySlide, label: "Financial Opportunity" },
