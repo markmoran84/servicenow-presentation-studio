@@ -19,7 +19,7 @@ interface DataSourceInfo {
 }
 
 export const AnnualReportAnalyzer = () => {
-  const { updateData } = useAccountData();
+  const { data, updateData } = useAccountData();
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -40,16 +40,24 @@ export const AnnualReportAnalyzer = () => {
     setDataSourceInfo(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("analyze-annual-report", {
-        body: { content: textContent }
+      // Pass current account context to inform SWOT analysis
+      const accountContext = {
+        basics: data.basics,
+        history: data.history,
+        financial: data.financial,
+        engagement: data.engagement
+      };
+
+      const { data: responseData, error } = await supabase.functions.invoke("analyze-annual-report", {
+        body: { content: textContent, accountContext }
       });
 
       if (error) throw error;
-      if (!data.success) throw new Error(data.error || "Analysis failed");
+      if (!responseData.success) throw new Error(responseData.error || "Analysis failed");
 
-      const extracted = data.data;
-      const dataSources = data.dataSources || {};
-      const usedWebSearch = data.usedWebSearch || false;
+      const extracted = responseData.data;
+      const dataSources = responseData.dataSources || {};
+      const usedWebSearch = responseData.usedWebSearch || false;
 
       // Calculate source info
       const documentFields: string[] = [];
