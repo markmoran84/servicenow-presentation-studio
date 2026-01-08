@@ -273,137 +273,220 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 3: CUSTOMER OVERVIEW
+// SLIDE 3: CUSTOMER OVERVIEW (matching web: 2:1 grid layout)
 // =============================================================================
 const createCustomerOverviewSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Customer Overview & Strategy", "Strategic direction and enterprise priorities");
+  addTitle(slide, "Customer Overview & Strategy");
 
-  const topY = 1.0;
-  const colW = (CONTENT_W - 0.15) / 2;
+  const topY = 0.85;
+  const cardGap = 0.15;
+  const leftW = CONTENT_W * 0.62; // ~2/3
+  const rightW = CONTENT_W * 0.38 - cardGap; // ~1/3
+  const mainH = 3.85;
 
-  // Left: Strategic Direction
-  addCard(pptx, slide, MX, topY, colW, 3.9);
-  slide.addText("Strategic Direction", {
-    x: MX + 0.12, y: topY + 0.1, w: colW - 0.24, h: 0.28,
+  // ─────────────────────────────────────────────────────────────────────────
+  // LEFT CARD: Strategic Direction (wider, with 2x2 pillars grid)
+  // ─────────────────────────────────────────────────────────────────────────
+  addCard(pptx, slide, MX, topY, leftW, mainH);
+
+  slide.addText("Maersk Strategic Direction", {
+    x: MX + 0.15, y: topY + 0.1, w: leftW - 0.3, h: 0.28,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  slide.addText(data.basics.accountName, {
-    x: MX + 0.12, y: topY + 0.38, w: colW - 0.24, h: 0.22,
-    fontSize: BODY_SIZE, color: C.primary, fontFace: FONT_BODY,
+  slide.addText("A.P. Møller - Maersk: Global integrator of container logistics", {
+    x: MX + 0.15, y: topY + 0.38, w: leftW - 0.3, h: 0.2,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
 
-  data.strategy.corporateStrategy.slice(0, 4).forEach((s, i) => {
-    const sy = topY + 0.7 + i * 0.75;
-    addLeftBorder(pptx, slide, MX + 0.12, sy, 0.6, C.primary);
-    slide.addText(s.title, {
-      x: MX + 0.25, y: sy + 0.02, w: colW - 0.4, h: 0.2,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+  // Strategic Pillars as 2x2 grid
+  const pillars = [
+    { title: "Gemini Network", desc: "Network reliability and schedule integrity", color: C.accent },
+    { title: "AI-First Ambition", desc: "AI central to operations and decisions", color: C.primary },
+    { title: "Cost Discipline", desc: "Rigorous cost management with ROIC focus", color: C.warning },
+    { title: "Digital Transformation", desc: "Standardisation across technology", color: C.purple },
+  ];
+
+  const pillarW = (leftW - 0.45) / 2;
+  const pillarH = 0.85;
+  const pillarGap = 0.1;
+  const pillarStartY = topY + 0.65;
+
+  pillars.forEach((p, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const px = MX + 0.15 + col * (pillarW + pillarGap);
+    const py = pillarStartY + row * (pillarH + pillarGap);
+
+    // Mini card with colored icon placeholder
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: px, y: py, w: pillarW, h: pillarH,
+      fill: { color: C.bgLight, transparency: 50 },
+      line: { color: C.border, width: 0.5, transparency: 60 },
+      rectRadius: 0.08,
     });
-    slide.addText((s.description || "").substring(0, 100), {
-      x: MX + 0.25, y: sy + 0.24, w: colW - 0.4, h: 0.32,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+    // Color dot
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: px + 0.1, y: py + 0.12, w: 0.22, h: 0.22,
+      fill: { color: p.color, transparency: 70 },
+      line: { color: p.color, width: 0.5 },
     });
-  });
-
-  // Right: CEO/Board Priorities
-  const rx = MX + colW + 0.15;
-  addCard(pptx, slide, rx, topY, colW, 3.9);
-  slide.addText("CEO/Board Priorities", {
-    x: rx + 0.12, y: topY + 0.1, w: colW - 0.24, h: 0.28,
-    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
-  });
-
-  data.strategy.ceoBoardPriorities.slice(0, 4).forEach((p, i) => {
-    const py = topY + 0.5 + i * 0.8;
-    addLeftBorder(pptx, slide, rx + 0.12, py, 0.65, C.accent);
     slide.addText(p.title, {
-      x: rx + 0.25, y: py + 0.02, w: colW - 0.4, h: 0.2,
+      x: px + 0.4, y: py + 0.12, w: pillarW - 0.55, h: 0.22,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText((p.description || "").substring(0, 110), {
-      x: rx + 0.25, y: py + 0.24, w: colW - 0.4, h: 0.38,
+    slide.addText(p.desc, {
+      x: px + 0.1, y: py + 0.42, w: pillarW - 0.2, h: 0.38,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
+  });
+
+  // FY25 Context box at bottom of left card
+  const contextY = pillarStartY + 2 * (pillarH + pillarGap) + 0.08;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: MX + 0.15, y: contextY, w: leftW - 0.3, h: 0.7,
+    fill: { color: C.primary, transparency: 92 },
+    line: { color: C.primary, width: 0.5, transparency: 70 },
+    rectRadius: 0.06,
+  });
+  slide.addText("FY25 Context", {
+    x: MX + 0.25, y: contextY + 0.08, w: 1.5, h: 0.18,
+    fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  });
+  slide.addText("FY25 focused on stabilisation, trust rebuilding, and platform health. CRM modernisation is the primary commercial wedge for FY26.", {
+    x: MX + 0.25, y: contextY + 0.28, w: leftW - 0.5, h: 0.38,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RIGHT CARD: Enterprise Priorities
+  // ─────────────────────────────────────────────────────────────────────────
+  const rx = MX + leftW + cardGap;
+  addCard(pptx, slide, rx, topY, rightW, mainH);
+
+  slide.addText("Enterprise Priorities", {
+    x: rx + 0.12, y: topY + 0.1, w: rightW - 0.24, h: 0.25,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("Operating context aligned to 'All the Way' framework", {
+    x: rx + 0.12, y: topY + 0.35, w: rightW - 0.24, h: 0.18,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  const priorities = [
+    { label: "All the Way", desc: "End-to-end integrated logistics" },
+    { label: "Customer Centricity", desc: "Commercial agility and superior CX" },
+    { label: "Operational Excellence", desc: "Standardised processes and tech" },
+  ];
+
+  priorities.forEach((pr, i) => {
+    const prY = topY + 0.65 + i * 0.72;
+    addLeftBorder(pptx, slide, rx + 0.12, prY, 0.6, C.primary);
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: rx + 0.2, y: prY, w: rightW - 0.4, h: 0.6,
+      fill: { color: C.bgLight, transparency: 70 },
+      line: { color: C.border, transparency: 80 },
+      rectRadius: 0.05,
+    });
+    slide.addText(pr.label, {
+      x: rx + 0.25, y: prY + 0.08, w: rightW - 0.5, h: 0.2,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(pr.desc, {
+      x: rx + 0.25, y: prY + 0.3, w: rightW - 0.5, h: 0.26,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  });
+
+  // ServiceNow Position box
+  const snY = topY + 0.65 + 3 * 0.72 + 0.1;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: rx + 0.12, y: snY, w: rightW - 0.24, h: 0.65,
+    fill: { color: C.primary, transparency: 92 },
+    line: { color: C.primary, width: 0.5, transparency: 70 },
+    rectRadius: 0.06,
+  });
+  slide.addText("ServiceNow Position", {
+    x: rx + 0.2, y: snY + 0.06, w: rightW - 0.4, h: 0.18,
+    fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  });
+  slide.addText("Digital execution backbone — platform to operationalise AI-first strategy.", {
+    x: rx + 0.2, y: snY + 0.26, w: rightW - 0.4, h: 0.35,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
   });
 
   return slide;
 };
 
 // =============================================================================
-// SLIDE 4: BUSINESS MODEL CANVAS
+// SLIDE 4: BUSINESS MODEL CANVAS (Classic 9-block layout matching web)
 // =============================================================================
 const createBusinessModelSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Business Model Canvas", data.basics.accountName);
+  addTitle(slide, "Business Model Canvas", `${data.basics.accountName} | How They Create, Deliver & Capture Value`);
 
   const bmc = data.businessModel;
-  const topY = 0.95;
 
-  const colWidth = 1.75;
-  const rowHeight1 = 1.5;
-  const rowHeight2 = 1.0;
+  // Canvas area starts below title
+  const canvasY = 0.9;
+  const canvasH = 3.6; // Total canvas height
+  const canvasW = CONTENT_W;
+
+  // Grid proportions (matching web's 10-column grid)
+  const col2 = canvasW * 0.2; // 2/10 columns
+  const col4 = canvasW * 0.4; // 4/10 columns
+  const topRowH = canvasH * 0.55;
+  const bottomRowH = canvasH * 0.35;
   const gap = 0.08;
 
-  const blocks = [
-    { title: "Key Partners", items: bmc.keyPartners, col: 0, row: 0, rowSpan: 2, color: C.accent },
-    { title: "Key Activities", items: bmc.keyActivities, col: 1, row: 0, rowSpan: 1, color: C.accent },
-    { title: "Key Resources", items: bmc.keyResources, col: 1, row: 1, rowSpan: 1, color: C.accent },
-    { title: "Value Proposition", items: bmc.valueProposition, col: 2, row: 0, rowSpan: 2, color: C.primary },
-    { title: "Customer Relationships", items: bmc.customerRelationships, col: 3, row: 0, rowSpan: 1, color: C.accent },
-    { title: "Channels", items: bmc.channels, col: 3, row: 1, rowSpan: 1, color: C.accent },
-    { title: "Customer Segments", items: bmc.customerSegments, col: 4, row: 0, rowSpan: 2, color: C.accent },
+  // Top row blocks - classic BMC layout
+  const topBlocks = [
+    { title: "Key Partners", items: bmc.keyPartners, x: MX, y: canvasY, w: col2 - gap, h: topRowH, color: C.accent },
+    { title: "Key Activities", items: bmc.keyActivities, x: MX + col2, y: canvasY, w: col2 - gap, h: topRowH / 2 - gap / 2, color: C.accent },
+    { title: "Key Resources", items: bmc.keyResources, x: MX + col2, y: canvasY + topRowH / 2 + gap / 2, w: col2 - gap, h: topRowH / 2 - gap / 2, color: C.accent },
+    { title: "Value Proposition", items: bmc.valueProposition, x: MX + col2 * 2, y: canvasY, w: col2 - gap, h: topRowH, color: C.primary },
+    { title: "Customer Rel.", items: bmc.customerRelationships, x: MX + col2 * 3, y: canvasY, w: col2 - gap, h: topRowH / 2 - gap / 2, color: C.accent },
+    { title: "Channels", items: bmc.channels, x: MX + col2 * 3, y: canvasY + topRowH / 2 + gap / 2, w: col2 - gap, h: topRowH / 2 - gap / 2, color: C.accent },
+    { title: "Customer Segments", items: bmc.customerSegments, x: MX + col2 * 4, y: canvasY, w: col2, h: topRowH, color: C.accent },
   ];
 
-  blocks.forEach((b) => {
-    const x = MX + b.col * (colWidth + gap);
-    const y = topY + (b.row === 0 ? 0 : rowHeight1 / 2 + gap);
-    const h = b.rowSpan === 2 ? rowHeight1 : rowHeight1 / 2 - gap;
-    addCard(pptx, slide, x, y, colWidth, h, { accentBorder: b.color });
+  topBlocks.forEach((b) => {
+    addCard(pptx, slide, b.x, b.y, b.w, b.h, { accentBorder: b.color });
     slide.addText(b.title, {
-      x: x + 0.08, y: y + 0.06, w: colWidth - 0.16, h: 0.18,
-      fontSize: TINY_SIZE, bold: true, color: b.color, fontFace: FONT_BODY,
+      x: b.x + 0.1, y: b.y + 0.08, w: b.w - 0.2, h: 0.2,
+      fontSize: SMALL_SIZE, bold: true, color: b.color, fontFace: FONT_BODY,
     });
-    b.items.slice(0, 3).forEach((item, i) => {
-      slide.addText(`• ${item.substring(0, 30)}`, {
-        x: x + 0.08, y: y + 0.26 + i * 0.16, w: colWidth - 0.16, h: 0.16,
-        fontSize: 6, color: C.muted, fontFace: FONT_BODY,
-      });
-    });
-  });
-
-  // Cost Structure & Revenue Streams
-  const bottomY = topY + rowHeight1 + 0.12;
-  const halfW = (CONTENT_W - 0.1) / 2;
-  [
-    { title: "Cost Structure", items: bmc.costStructure, x: MX },
-    { title: "Revenue Streams", items: bmc.revenueStreams, x: MX + halfW + 0.1 },
-  ].forEach((section) => {
-    addCard(pptx, slide, section.x, bottomY, halfW, rowHeight2);
-    slide.addText(section.title, {
-      x: section.x + 0.1, y: bottomY + 0.06, w: halfW - 0.2, h: 0.18,
-      fontSize: SMALL_SIZE, bold: true, color: C.accent, fontFace: FONT_BODY,
-    });
-    section.items.slice(0, 3).forEach((item, i) => {
-      slide.addText(`• ${item.substring(0, 50)}`, {
-        x: section.x + 0.1, y: bottomY + 0.28 + i * 0.18, w: halfW - 0.2, h: 0.18,
+    const maxItems = b.h > 1.5 ? 5 : 3;
+    b.items.slice(0, maxItems).forEach((item, i) => {
+      slide.addText(`• ${item.substring(0, 40)}`, {
+        x: b.x + 0.1, y: b.y + 0.32 + i * 0.18, w: b.w - 0.2, h: 0.18,
         fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
     });
   });
 
-  // Competitors row
-  const compY = bottomY + rowHeight2 + 0.1;
-  addCard(pptx, slide, MX, compY, CONTENT_W, 0.45);
-  slide.addText("Key Competitors", {
-    x: MX + 0.1, y: compY + 0.04, w: 1.5, h: 0.18,
-    fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-  });
-  slide.addText(bmc.competitors.slice(0, 6).join("  •  "), {
-    x: MX + 1.7, y: compY + 0.04, w: CONTENT_W - 1.9, h: 0.36,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "middle",
+  // Bottom row: Cost Structure (4 cols), Revenue Streams (4 cols), Competitors (2 cols)
+  const bottomY = canvasY + topRowH + gap;
+  const bottomBlocks = [
+    { title: "Cost Structure", items: bmc.costStructure, x: MX, w: col4 - gap },
+    { title: "Revenue Streams", items: bmc.revenueStreams, x: MX + col4, w: col4 - gap },
+    { title: "Key Competitors", items: bmc.competitors, x: MX + col4 * 2, w: col2 },
+  ];
+
+  bottomBlocks.forEach((b) => {
+    addCard(pptx, slide, b.x, bottomY, b.w, bottomRowH);
+    slide.addText(b.title, {
+      x: b.x + 0.1, y: bottomY + 0.08, w: b.w - 0.2, h: 0.2,
+      fontSize: SMALL_SIZE, bold: true, color: C.accent, fontFace: FONT_BODY,
+    });
+    b.items.slice(0, 4).forEach((item, i) => {
+      slide.addText(`• ${item.substring(0, 45)}`, {
+        x: b.x + 0.1, y: bottomY + 0.32 + i * 0.18, w: b.w - 0.2, h: 0.18,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
   });
 
   return slide;
@@ -503,79 +586,119 @@ const createStrategicAlignmentSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 6: FY-1 RETROSPECTIVE
+// SLIDE 6: FY-1 RETROSPECTIVE (matching screenshot exactly)
 // =============================================================================
 const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
   addTitle(slide, "FY-1 Retrospective", "What happened, what didn't work, and lessons learned");
 
-  const topY = 1.0;
-  const colW = (CONTENT_W - 0.12) / 2;
+  const topY = 0.9;
+  const cardGap = 0.15;
+  const colW = (CONTENT_W - cardGap) / 2;
+  const mainCardH = 2.45;
 
-  // Prior Plan
-  addCard(pptx, slide, MX, topY, colW, 2.0);
+  // ─────────────────────────────────────────────────────────────────────────
+  // LEFT CARD: Prior Plan Summary + What Didn't Work
+  // ─────────────────────────────────────────────────────────────────────────
+  addCard(pptx, slide, MX, topY, colW, mainCardH);
+
+  // "Prior Plan Summary" heading
   slide.addText("Prior Plan Summary", {
-    x: MX + 0.1, y: topY + 0.08, w: colW - 0.2, h: 0.22,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
+    x: MX + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.28,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
+
+  // Date/author line
   slide.addText(`Last plan: ${data.history.lastPlanDate} by ${data.history.plannerName}`, {
-    x: MX + 0.1, y: topY + 0.32, w: colW - 0.2, h: 0.16,
+    x: MX + 0.15, y: topY + 0.42, w: colW - 0.3, h: 0.18,
     fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
+
+  // Summary paragraph
   slide.addText(data.history.lastPlanSummary || "", {
-    x: MX + 0.1, y: topY + 0.52, w: colW - 0.2, h: 0.55,
+    x: MX + 0.15, y: topY + 0.65, w: colW - 0.3, h: 0.65,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
+
+  // "What Didn't Work" heading (red)
   slide.addText("What Didn't Work", {
-    x: MX + 0.1, y: topY + 1.15, w: colW - 0.2, h: 0.18,
+    x: MX + 0.15, y: topY + 1.4, w: colW - 0.3, h: 0.22,
     fontSize: BODY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
   });
+
+  // What didn't work text
   slide.addText(data.history.whatDidNotWork || "", {
-    x: MX + 0.1, y: topY + 1.35, w: colW - 0.2, h: 0.55,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+    x: MX + 0.15, y: topY + 1.65, w: colW - 0.3, h: 0.7,
+    fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
   });
 
-  // SWOT
-  const rx = MX + colW + 0.12;
-  addCard(pptx, slide, rx, topY, colW, 2.0);
+  // ─────────────────────────────────────────────────────────────────────────
+  // RIGHT CARD: SWOT Analysis (2x2 grid)
+  // ─────────────────────────────────────────────────────────────────────────
+  const rx = MX + colW + cardGap;
+  addCard(pptx, slide, rx, topY, colW, mainCardH);
+
+  // "SWOT Analysis" heading
   slide.addText("SWOT Analysis", {
-    x: rx + 0.1, y: topY + 0.08, w: colW - 0.2, h: 0.22,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
+    x: rx + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.28,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
+
+  // SWOT 2x2 grid
   const swotData = [
     { label: "S", items: data.swot.strengths, color: C.primary },
     { label: "W", items: data.swot.weaknesses, color: C.danger },
     { label: "O", items: data.swot.opportunities, color: C.accent },
     { label: "T", items: data.swot.threats, color: C.warning },
   ];
-  const quadW = (colW - 0.3) / 2;
-  const quadH = 0.75;
+
+  const gridStartY = topY + 0.5;
+  const quadW = (colW - 0.45) / 2;
+  const quadH = 0.9;
+  const quadGap = 0.12;
+
   swotData.forEach((q, i) => {
-    const qx = rx + 0.1 + (i % 2) * (quadW + 0.08);
-    const qy = topY + 0.35 + Math.floor(i / 2) * (quadH + 0.08);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const qx = rx + 0.15 + col * (quadW + quadGap);
+    const qy = gridStartY + row * (quadH + quadGap);
+
+    // Letter label (S, W, O, T)
     slide.addText(q.label, {
-      x: qx, y: qy, w: 0.2, h: 0.18,
-      fontSize: SMALL_SIZE, bold: true, color: q.color, fontFace: FONT_BODY,
+      x: qx, y: qy, w: 0.22, h: 0.22,
+      fontSize: BODY_SIZE, bold: true, color: q.color, fontFace: FONT_HEADING,
     });
+
+    // Bullet points (2 items max)
     q.items.slice(0, 2).forEach((item, j) => {
-      slide.addText(`• ${item.substring(0, 35)}`, {
-        x: qx + 0.22, y: qy + j * 0.16, w: quadW - 0.3, h: 0.16,
-        fontSize: 6, color: C.muted, fontFace: FONT_BODY,
+      slide.addText(`• ${item.substring(0, 38)}`, {
+        x: qx + 0.25, y: qy + j * 0.2, w: quadW - 0.3, h: 0.2,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
     });
   });
 
-  // Lessons Learned
-  const lessonY = topY + 2.15;
-  addCard(pptx, slide, MX, lessonY, CONTENT_W, 0.65, { accentBorder: C.primary });
+  // ─────────────────────────────────────────────────────────────────────────
+  // BOTTOM CARD: Key Lessons Learned (full width)
+  // ─────────────────────────────────────────────────────────────────────────
+  const lessonY = topY + mainCardH + 0.15;
+  const lessonH = 0.6;
+
+  // Card with green left accent border
+  addCard(pptx, slide, MX, lessonY, CONTENT_W, lessonH, { accentBorder: C.primary });
+  addLeftBorder(pptx, slide, MX, lessonY, lessonH, C.primary);
+
+  // "Key Lessons Learned" label (green)
   slide.addText("Key Lessons Learned", {
-    x: MX + 0.1, y: lessonY + 0.06, w: 2.2, h: 0.18,
+    x: MX + 0.2, y: lessonY + 0.15, w: 2.0, h: 0.25,
     fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
   });
+
+  // Lesson text
   slide.addText("Focus on value demonstration, not just capability expansion.", {
-    x: MX + 2.4, y: lessonY + 0.06, w: CONTENT_W - 2.6, h: 0.5,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
+    x: MX + 2.3, y: lessonY + 0.15, w: CONTENT_W - 2.6, h: 0.3,
+    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "middle",
   });
 
   return slide;
@@ -681,41 +804,106 @@ const createStrategicAnalysisSlide = (
 };
 
 // =============================================================================
-// SLIDE 12: VALUE HYPOTHESIS
+// SLIDE 12: VALUE HYPOTHESIS (2x2 grid matching web layout)
 // =============================================================================
 const createValueHypothesisSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Value Hypothesis", "How ServiceNow delivers measurable impact");
+  addTitle(slide, "Value Hypothesis", "Point of View — Step 5: Testable Business Outcomes");
+  addBadge(slide, W - MX - 1.2, MY + 0.05, "PoV Framework", C.primary);
 
-  const topY = 1.0;
-  const cardW = (CONTENT_W - 0.24) / 3;
-  const cardH = 2.5;
+  const topY = 0.9;
+  const cardGap = 0.12;
+  const cardW = (CONTENT_W - cardGap) / 2;
+  const cardH = 1.35;
 
   const hypotheses = [
-    { title: "Cost Optimisation", metric: "5-7%", sub: "annual productivity improvement", description: "Platform consolidation reduces total cost of ownership while improving service delivery efficiency." },
-    { title: "Experience Excellence", metric: "25%", sub: "improvement in CSAT", description: "Unified customer engagement platform delivers consistent, proactive service across all channels." },
-    { title: "AI Operationalisation", metric: "40%", sub: "faster case resolution", description: "Workflow-embedded AI transforms fragmented experiments into measurable business outcomes." },
+    { outcome: "Reduce cost-to-serve by 30%", mechanism: "CRM consolidation eliminates duplicate systems and automates case handling", timeframe: "12-18 months", impact: "$15-20M annual savings", color: C.primary },
+    { outcome: "Accelerate AI operationalisation 5x", mechanism: "Unified workflow platform provides production-ready AI orchestration layer", timeframe: "6-12 months", impact: "Avoided cost of failed AI", color: C.accent },
+    { outcome: "Improve CSAT by 15 points", mechanism: "Predictive case routing and AI-augmented service delivery", timeframe: "9-12 months", impact: "Customer retention value", color: C.primary },
+    { outcome: "Reduce time-to-resolution by 50%", mechanism: "Intelligent automation and proactive notifications", timeframe: "6-9 months", impact: "Operational efficiency", color: C.accent },
   ];
 
   hypotheses.forEach((h, i) => {
-    const cx = MX + i * (cardW + 0.12);
-    addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: i === 1 ? C.primary : C.accent });
-    slide.addText(h.title, {
-      x: cx + 0.1, y: topY + 0.1, w: cardW - 0.2, h: 0.22,
-      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const cx = MX + col * (cardW + cardGap);
+    const cy = topY + row * (cardH + cardGap);
+
+    addCard(pptx, slide, cx, cy, cardW, cardH, { accentBorder: h.color });
+
+    // Icon placeholder
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: cx + 0.12, y: cy + 0.12, w: 0.35, h: 0.35,
+      fill: { color: h.color, transparency: 85 },
+      line: { color: h.color, width: 0.5, transparency: 60 },
+      rectRadius: 0.08,
     });
-    slide.addText(h.metric, {
-      x: cx + 0.1, y: topY + 0.4, w: cardW - 0.2, h: 0.5,
-      fontSize: 32, bold: true, color: i === 1 ? C.primary : C.accent, fontFace: FONT_HEADING,
+
+    // Outcome title
+    slide.addText(h.outcome, {
+      x: cx + 0.55, y: cy + 0.1, w: cardW - 0.7, h: 0.3,
+      fontSize: BODY_SIZE, bold: true, color: h.color, fontFace: FONT_HEADING,
     });
-    slide.addText(h.sub, {
-      x: cx + 0.1, y: topY + 0.95, w: cardW - 0.2, h: 0.18,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+
+    // Mechanism
+    slide.addText(h.mechanism, {
+      x: cx + 0.55, y: cy + 0.42, w: cardW - 0.7, h: 0.35,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
-    slide.addText(h.description, {
-      x: cx + 0.1, y: topY + 1.2, w: cardW - 0.2, h: 1.0,
-      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+
+    // Timeframe & Impact mini-boxes
+    const miniY = cy + 0.85;
+    const miniW = (cardW - 0.36) / 2;
+    [
+      { label: "Timeframe", value: h.timeframe },
+      { label: "Economic Impact", value: h.impact },
+    ].forEach((m, j) => {
+      const mx = cx + 0.12 + j * (miniW + 0.1);
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: mx, y: miniY, w: miniW, h: 0.4,
+        fill: { color: C.bgLight, transparency: 50 },
+        line: { color: C.border, transparency: 80 },
+        rectRadius: 0.05,
+      });
+      slide.addText(m.label, {
+        x: mx + 0.06, y: miniY + 0.04, w: miniW - 0.12, h: 0.14,
+        fontSize: 6, color: C.muted, fontFace: FONT_BODY,
+      });
+      slide.addText(m.value, {
+        x: mx + 0.06, y: miniY + 0.18, w: miniW - 0.12, h: 0.18,
+        fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+      });
+    });
+  });
+
+  // Validation Approach - bottom section
+  const valY = topY + 2 * (cardH + cardGap) + 0.08;
+  addCard(pptx, slide, MX, valY, CONTENT_W, 0.7, { accentBorder: C.primary });
+  addLeftBorder(pptx, slide, MX, valY, 0.7, C.primary);
+
+  slide.addText("Hypothesis Validation Approach", {
+    x: MX + 0.15, y: valY + 0.08, w: CONTENT_W - 0.3, h: 0.2,
+    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+
+  const steps = ["Define baseline metrics", "Execute pilot scope", "Measure outcomes", "Scale or pivot"];
+  const stepW = (CONTENT_W - 0.5) / 4;
+  steps.forEach((step, i) => {
+    const sx = MX + 0.15 + i * stepW;
+    // Step number
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: sx, y: valY + 0.32, w: 0.25, h: 0.25,
+      fill: { color: C.primary, transparency: 70 },
+      line: { color: C.primary },
+    });
+    slide.addText(`${i + 1}`, {
+      x: sx, y: valY + 0.32, w: 0.25, h: 0.25,
+      fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY, align: "center", valign: "middle",
+    });
+    slide.addText(step, {
+      x: sx + 0.3, y: valY + 0.34, w: stepW - 0.4, h: 0.22,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "middle",
     });
   });
 
@@ -903,36 +1091,133 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 17: GOVERNANCE
+// SLIDE 17: GOVERNANCE (2-column layout matching web)
 // =============================================================================
 const createGovernanceSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Governance & Cadence", "Ensuring sustained momentum and accountability");
+  addTitle(slide, "Governance Model");
 
-  const topY = 1.0;
-  const rows = [
-    { label: "Executive Steering", freq: "Quarterly", purpose: "Strategic alignment, investment decisions, executive sponsorship", color: C.primary },
-    { label: "Delivery Review", freq: "Monthly", purpose: "Progress tracking, risk mitigation, resource allocation", color: C.accent },
-    { label: "Working Sessions", freq: "Weekly", purpose: "Technical coordination, issue resolution, sprint planning", color: C.blue },
+  const topY = 0.85;
+  const cardGap = 0.15;
+  const colW = (CONTENT_W - cardGap) / 2;
+  const mainH = 3.85;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LEFT: Execution Governance
+  // ─────────────────────────────────────────────────────────────────────────
+  addCard(pptx, slide, MX, topY, colW, mainH);
+
+  slide.addText("Execution Governance", {
+    x: MX + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.25,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("How we ensure alignment, accountability, and value realisation", {
+    x: MX + 0.15, y: topY + 0.35, w: colW - 0.3, h: 0.18,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  const govItems = [
+    { title: "Executive Steering Committee", freq: "Quarterly", desc: "SVP-level alignment on strategy and investment", color: C.primary },
+    { title: "Operational Cadence", freq: "Bi-weekly", desc: "Execution tracking and blocker resolution", color: C.accent },
+    { title: "Value Tracking", freq: "Monthly", desc: "KPI review and business outcome reporting", color: C.blue },
   ];
 
-  const rowH = 0.9;
-  rows.forEach((r, i) => {
-    const ry = topY + i * (rowH + 0.1);
-    addCard(pptx, slide, MX, ry, CONTENT_W, rowH, { accentBorder: r.color });
-    slide.addText(r.label, {
-      x: MX + 0.12, y: ry + 0.1, w: 2.2, h: 0.25,
-      fontSize: BODY_SIZE, bold: true, color: r.color, fontFace: FONT_HEADING,
+  govItems.forEach((g, i) => {
+    const gy = topY + 0.6 + i * 1.0;
+    // Mini card
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: MX + 0.15, y: gy, w: colW - 0.3, h: 0.88,
+      fill: { color: C.bgLight, transparency: 50 },
+      line: { color: C.border, transparency: 70 },
+      rectRadius: 0.08,
     });
-    slide.addText(r.freq, {
-      x: MX + 2.5, y: ry + 0.1, w: 1.2, h: 0.25,
-      fontSize: BODY_SIZE, color: C.white, fontFace: FONT_BODY,
+    // Icon dot
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: MX + 0.25, y: gy + 0.1, w: 0.28, h: 0.28,
+      fill: { color: g.color, transparency: 80 },
+      line: { color: g.color, width: 0.5 },
+      rectRadius: 0.06,
     });
-    slide.addText(r.purpose, {
-      x: MX + 3.8, y: ry + 0.1, w: CONTENT_W - 4.0, h: rowH - 0.2,
-      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "middle",
+    // Title + Freq badge
+    slide.addText(g.title, {
+      x: MX + 0.6, y: gy + 0.1, w: colW - 1.4, h: 0.22,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
+    addBadge(slide, MX + colW - 0.95, gy + 0.1, g.freq, C.primary);
+    // Description
+    slide.addText(g.desc, {
+      x: MX + 0.6, y: gy + 0.38, w: colW - 0.8, h: 0.4,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RIGHT: Prioritisation Framework
+  // ─────────────────────────────────────────────────────────────────────────
+  const rx = MX + colW + cardGap;
+  addCard(pptx, slide, rx, topY, colW, mainH);
+
+  slide.addText("Prioritisation Framework", {
+    x: rx + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.25,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("Decision criteria for initiative selection", {
+    x: rx + 0.15, y: topY + 0.35, w: colW - 0.3, h: 0.18,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  const steps = [
+    { step: "1", label: "Strategic Alignment", desc: "Does it map to Maersk priorities?" },
+    { step: "2", label: "Economic Impact", desc: "Is the ROI measurable?" },
+    { step: "3", label: "Execution Readiness", desc: "Can we deliver in timeframe?" },
+    { step: "4", label: "Stakeholder Commitment", desc: "Is exec sponsorship secured?" },
+  ];
+
+  steps.forEach((s, i) => {
+    const sy = topY + 0.6 + i * 0.6;
+    // Step circle
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: rx + 0.2, y: sy + 0.05, w: 0.32, h: 0.32,
+      fill: { color: C.primary, transparency: 60 },
+      line: { color: C.primary },
+    });
+    slide.addText(s.step, {
+      x: rx + 0.2, y: sy + 0.05, w: 0.32, h: 0.32,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING, align: "center", valign: "middle",
+    });
+    // Label box
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: rx + 0.6, y: sy, w: colW - 0.8, h: 0.5,
+      fill: { color: C.bgLight, transparency: 60 },
+      line: { color: C.border, transparency: 80 },
+      rectRadius: 0.05,
+    });
+    slide.addText(s.label, {
+      x: rx + 0.68, y: sy + 0.06, w: colW - 0.95, h: 0.18,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(s.desc, {
+      x: rx + 0.68, y: sy + 0.26, w: colW - 0.95, h: 0.2,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  });
+
+  // Governance Principle box at bottom
+  const gpY = topY + 3.05;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: rx + 0.15, y: gpY, w: colW - 0.3, h: 0.7,
+    fill: { color: C.primary, transparency: 92 },
+    line: { color: C.primary, width: 0.5, transparency: 70 },
+    rectRadius: 0.06,
+  });
+  slide.addText("Governance Principle", {
+    x: rx + 0.25, y: gpY + 0.06, w: colW - 0.5, h: 0.18,
+    fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  });
+  slide.addText("All initiatives must pass this framework. No investment without clear strategic alignment and measurable outcome.", {
+    x: rx + 0.25, y: gpY + 0.26, w: colW - 0.5, h: 0.4,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
   });
 
   return slide;
