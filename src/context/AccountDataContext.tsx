@@ -7,6 +7,8 @@ export interface AccountBasics {
   region: string;
   tier: "Strategic" | "Enterprise" | "Growth";
   currentContractValue: string;
+  nextFYAmbition: string;
+  threeYearAmbition: string;
   renewalDates: string;
   keyIncumbents: string;
 }
@@ -109,6 +111,8 @@ const defaultMaerskData: AccountData = {
     region: "Global (HQ: Copenhagen)",
     tier: "Strategic",
     currentContractValue: "$8.5M ARR",
+    nextFYAmbition: "$12M ARR",
+    threeYearAmbition: "$25M ARR",
     renewalDates: "October 2026",
     keyIncumbents: "Salesforce, SAP, Microsoft",
   },
