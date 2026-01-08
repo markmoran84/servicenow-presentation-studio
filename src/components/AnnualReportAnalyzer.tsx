@@ -91,28 +91,23 @@ export const AnnualReportAnalyzer = () => {
         });
       }
 
-      // Update Pain Points tab
-      if (extracted.customerExperienceChallenges?.length || extracted.technologyFragmentation?.length) {
+      // Update Pain Points tab - convert to title/description format
+      if (extracted.painPoints?.length) {
         updateData("painPoints", {
-          ...(extracted.customerExperienceChallenges?.length && { customerExperienceChallenges: extracted.customerExperienceChallenges }),
-          ...(extracted.technologyFragmentation?.length && { technologyFragmentation: extracted.technologyFragmentation }),
-          ...(extracted.timeToValueIssues?.length && { timeToValueIssues: extracted.timeToValueIssues }),
+          painPoints: extracted.painPoints.map((pp: { title: string; description: string }) => ({
+            title: pp.title || "",
+            description: pp.description || ""
+          }))
         });
       }
 
-      // Update Opportunities tab (new ServiceNow-focused structure)
-      const hasOpportunities = 
-        extracted.serviceExcellenceOpportunities?.length ||
-        extracted.operationalEfficiencyOpportunities?.length ||
-        extracted.digitalTransformationOpportunities?.length ||
-        extracted.platformConsolidationOpportunities?.length;
-
-      if (hasOpportunities) {
+      // Update Opportunities tab - convert to title/description format
+      if (extracted.opportunities?.length) {
         updateData("opportunities", {
-          ...(extracted.serviceExcellenceOpportunities?.length && { serviceExcellence: extracted.serviceExcellenceOpportunities }),
-          ...(extracted.operationalEfficiencyOpportunities?.length && { operationalEfficiency: extracted.operationalEfficiencyOpportunities }),
-          ...(extracted.digitalTransformationOpportunities?.length && { digitalTransformation: extracted.digitalTransformationOpportunities }),
-          ...(extracted.platformConsolidationOpportunities?.length && { platformConsolidation: extracted.platformConsolidationOpportunities }),
+          opportunities: extracted.opportunities.map((op: { title: string; description: string }) => ({
+            title: op.title || "",
+            description: op.description || ""
+          }))
         });
       }
 

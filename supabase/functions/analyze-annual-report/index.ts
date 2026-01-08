@@ -79,23 +79,27 @@ CRITICAL INSTRUCTIONS:
 6. If you find mentions of "geopolitical", "supply chain", "competition", "costs" - these are threats
 7. If you find mentions of "growth", "expansion", "innovation", "market leader" - these are strengths
 
+PAIN POINTS:
+Extract 3-5 distinct pain points. Each pain point needs:
+- title: Short, punchy headline (e.g., "Fragmented CRM Landscape", "AI Operationalisation Gap")
+- description: 1-2 sentences describing the business impact with quantification where possible
+
+Example pain point:
+{
+  "title": "Technology Sprawl",
+  "description": "700+ applications in the technology landscape with multiple ITSM tools by region, no unified service catalog, and $15M+ in redundant licensing costs"
+}
+
 STRATEGIC OPPORTUNITIES - ServiceNow Perspective:
-When identifying opportunities, frame them as executive-ready value propositions from a ServiceNow perspective:
-- Focus on business outcomes, not product features
-- Frame as how ServiceNow can help the customer achieve their stated goals
-- Use language like "Accelerate...", "Reduce...", "Transform...", "Enable...", "Unify..."
-- Connect to their stated pain points and strategic priorities
+Extract 3-5 opportunities. Each needs:
+- title: Action-oriented headline (e.g., "Unified Service Excellence Platform", "AI-First Operations Enablement")
+- description: Exec-ready value proposition showing how ServiceNow can help achieve their goals. Use language like "Accelerate...", "Reduce...", "Transform...", "Enable..."
 
-Example good opportunities:
-- "Accelerate AI operationalisation through unified workflow orchestration, reducing time-to-value from 18 months to 6 months"
-- "Reduce cost-to-serve by 30% through intelligent case automation and predictive routing"
-- "Transform customer experience with AI-powered self-service, driving NPS improvement of 15+ points"
-- "Enable platform consolidation from 700+ applications to a single workflow backbone, saving $20M+ annually"
-
-Example bad opportunities:
-- "AI opportunities" (too vague)
-- "Use ServiceNow" (not outcome-focused)
-- "Implement automation" (not exec-ready)
+Example opportunity:
+{
+  "title": "Cost-to-Serve Optimisation",
+  "description": "Reduce cost-to-serve by 30% through intelligent automation of case handling, document processing, and proactive customer notifications"
+}
 
 Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
 
@@ -136,14 +140,32 @@ Example bad narrative: "This document contains links to Maersk's annual report s
                   transformationThemes: { type: "array", items: { type: "string" }, description: "Transformation themes" },
                   aiDigitalAmbition: { type: "string", description: "AI/digital ambition" },
                   costDisciplineTargets: { type: "string", description: "Cost targets" },
-                  customerExperienceChallenges: { type: "array", items: { type: "string" }, description: "CX challenges" },
-                  technologyFragmentation: { type: "array", items: { type: "string" }, description: "Tech challenges" },
-                  timeToValueIssues: { type: "array", items: { type: "string" }, description: "Speed issues" },
-                  // New ServiceNow-focused opportunities
-                  serviceExcellenceOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can drive service excellence outcomes" },
-                  operationalEfficiencyOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can improve operational efficiency" },
-                  digitalTransformationOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can accelerate digital transformation" },
-                  platformConsolidationOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can enable platform consolidation" },
+                  // Pain points with title/description
+                  painPoints: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Short punchy headline" },
+                        description: { type: "string", description: "1-2 sentences with business impact" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "3-5 pain points with title and description" 
+                  },
+                  // Opportunities with title/description
+                  opportunities: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Action-oriented headline" },
+                        description: { type: "string", description: "Exec-ready value proposition from ServiceNow perspective" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "3-5 opportunities with title and description" 
+                  },
                   strengths: { type: "array", items: { type: "string" }, description: "3-5 internal strengths" },
                   weaknesses: { type: "array", items: { type: "string" }, description: "3-5 internal weaknesses" },
                   swotOpportunities: { type: "array", items: { type: "string" }, description: "3-5 external opportunities" },
@@ -267,13 +289,26 @@ IMPORTANT:
                       transformationThemes: { type: "array", items: { type: "string" } },
                       aiDigitalAmbition: { type: "string" },
                       costDisciplineTargets: { type: "string" },
-                      customerExperienceChallenges: { type: "array", items: { type: "string" } },
-                      technologyFragmentation: { type: "array", items: { type: "string" } },
-                      timeToValueIssues: { type: "array", items: { type: "string" } },
-                      serviceExcellenceOpportunities: { type: "array", items: { type: "string" } },
-                      operationalEfficiencyOpportunities: { type: "array", items: { type: "string" } },
-                      digitalTransformationOpportunities: { type: "array", items: { type: "string" } },
-                      platformConsolidationOpportunities: { type: "array", items: { type: "string" } },
+                      painPoints: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            description: { type: "string" }
+                          }
+                        }
+                      },
+                      opportunities: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            description: { type: "string" }
+                          }
+                        }
+                      },
                       strengths: { type: "array", items: { type: "string" } },
                       weaknesses: { type: "array", items: { type: "string" } },
                       swotOpportunities: { type: "array", items: { type: "string" } },

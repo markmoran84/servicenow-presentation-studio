@@ -38,22 +38,26 @@ export interface CustomerStrategy {
   costDisciplineTargets: string;
 }
 
-// Section E — Strategic Pain Points
-export interface StrategicPainPoints {
-  costToServeDrivers: string[];
-  customerExperienceChallenges: string[];
-  commercialInefficiencies: string[];
-  technologyFragmentation: string[];
-  aiGovernanceGaps: string[];
-  timeToValueIssues: string[];
+// Pain Point item with title and description
+export interface PainPointItem {
+  title: string;
+  description: string;
 }
 
-// Section F — Strategic Opportunities (ServiceNow perspective)
+// Section E — Strategic Pain Points (simple list)
+export interface StrategicPainPoints {
+  painPoints: PainPointItem[];
+}
+
+// Opportunity item with title and description
+export interface OpportunityItem {
+  title: string;
+  description: string;
+}
+
+// Section F — Strategic Opportunities (simple list)
 export interface StrategicOpportunities {
-  serviceExcellence: string[];
-  operationalEfficiency: string[];
-  digitalTransformation: string[];
-  platformConsolidation: string[];
+  opportunities: OpportunityItem[];
 }
 
 // Section G — Executive Engagement
@@ -143,57 +147,43 @@ const defaultMaerskData: AccountData = {
     costDisciplineTargets: "5-7% annual productivity improvement, $2B share buyback signals capital discipline",
   },
   painPoints: {
-    costToServeDrivers: [
-      "Fragmented CRM across regions",
-      "Manual case handling",
-      "Duplicate data entry across systems",
-    ],
-    customerExperienceChallenges: [
-      "Inconsistent service levels across touchpoints",
-      "Limited self-service capabilities",
-      "Slow resolution times for complex queries",
-    ],
-    commercialInefficiencies: [
-      "Sales tool sprawl (SFDC, custom apps)",
-      "Poor pipeline visibility",
-      "Manual quoting processes",
-    ],
-    technologyFragmentation: [
-      "700+ applications in landscape",
-      "Multiple ITSM tools by region",
-      "No unified service catalog",
-    ],
-    aiGovernanceGaps: [
-      "AI experiments not production-ready",
-      "No central orchestration layer",
-      "Model deployment complexity",
-    ],
-    timeToValueIssues: [
-      "18-24 month implementation cycles",
-      "Extended change management periods",
-      "Slow user adoption curves",
+    painPoints: [
+      {
+        title: "Fragmented CRM Landscape",
+        description: "Multiple CRM systems across regions creating inconsistent customer data, duplicate processes, and $15M+ in redundant licensing costs",
+      },
+      {
+        title: "AI Operationalisation Gap",
+        description: "18-24 month implementation cycles for AI initiatives with no central orchestration layer, causing 60% of AI pilots to fail production deployment",
+      },
+      {
+        title: "Technology Sprawl",
+        description: "700+ applications in the technology landscape with multiple ITSM tools by region, no unified service catalog, and limited integration",
+      },
+      {
+        title: "Customer Experience Inconsistency",
+        description: "Inconsistent service levels across touchpoints, limited self-service capabilities, and slow resolution times impacting NPS by 15+ points",
+      },
     ],
   },
   opportunities: {
-    serviceExcellence: [
-      "Transform customer experience with AI-powered self-service and intelligent case routing, driving NPS improvement of 15+ points",
-      "Reduce time-to-resolution by 50% through predictive case management and proactive customer notifications",
-      "Enable seamless omnichannel service delivery across 130+ countries with unified service catalog",
-    ],
-    operationalEfficiency: [
-      "Reduce cost-to-serve by 30% through intelligent automation of case handling and document processing",
-      "Accelerate quote-to-cash cycle by 40% with automated quote generation and approval workflows",
-      "Eliminate $15M+ in redundant licensing through platform consolidation from 700+ applications",
-    ],
-    digitalTransformation: [
-      "Accelerate AI operationalisation from 18 months to 6 months through unified workflow orchestration layer",
-      "Enable AI-first strategy with production-ready model governance, deployment, and monitoring",
-      "Drive 5-7% annual productivity improvement through intelligent automation at scale",
-    ],
-    platformConsolidation: [
-      "Unify fragmented CRM landscape onto single platform, reducing complexity and improving data quality",
-      "Consolidate multiple regional ITSM tools into enterprise-wide service management backbone",
-      "Create single source of truth for customer interactions, enabling 360° visibility across all touchpoints",
+    opportunities: [
+      {
+        title: "Unified Service Excellence Platform",
+        description: "Transform customer experience with AI-powered self-service and intelligent case routing, driving NPS improvement of 15+ points and reducing time-to-resolution by 50%",
+      },
+      {
+        title: "AI-First Operations Enablement",
+        description: "Accelerate AI operationalisation from 18 months to 6 months through unified workflow orchestration, enabling production-ready model governance and 5-7% annual productivity improvement",
+      },
+      {
+        title: "Cost-to-Serve Optimisation",
+        description: "Reduce cost-to-serve by 30% through intelligent automation of case handling, document processing, and proactive customer notifications",
+      },
+      {
+        title: "Platform Consolidation",
+        description: "Unify fragmented CRM and ITSM landscape onto single platform, eliminating $15M+ in redundant licensing and creating single source of truth for customer interactions",
+      },
     ],
   },
   engagement: {
