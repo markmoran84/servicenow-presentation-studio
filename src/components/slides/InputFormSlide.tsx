@@ -153,6 +153,14 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   </Select>
                 </div>
                 <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Number of Employees</label>
+                  <Input
+                    value={data.basics.numberOfEmployees}
+                    onChange={(e) => updateData("basics", { numberOfEmployees: e.target.value })}
+                    placeholder="e.g., 100,000+"
+                  />
+                </div>
+                <div>
                   <label className="text-sm text-muted-foreground mb-1 block">Current ACV</label>
                   <Input
                     value={data.basics.currentContractValue}
