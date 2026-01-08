@@ -56,7 +56,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
       if (error) throw error;
       if (!responseData.success) throw new Error(responseData.error || "Failed to generate vision");
 
-      updateData("strategy", { visionStatement: responseData.visionStatement });
+      updateData("basics", { visionStatement: responseData.visionStatement });
       toast.success("Vision statement generated!");
     } catch (error) {
       console.error("Vision generation error:", error);
