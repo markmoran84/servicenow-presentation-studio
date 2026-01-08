@@ -259,11 +259,54 @@ SWOT QUALITY STANDARDS:
                   marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
                   costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
                   strategicInvestmentAreas: { type: "string", description: "Where the company is investing for growth" },
-                  corporateStrategyPillars: { type: "array", items: { type: "string" }, description: "3-5 core strategic pillars using their exact terminology" },
-                  ceoBoardPriorities: { type: "array", items: { type: "string" }, description: "CEO's stated priorities from letters/presentations" },
-                  transformationThemes: { type: "array", items: { type: "string" }, description: "Digital/operational transformation themes" },
-                  aiDigitalAmbition: { type: "string", description: "Stated AI and digital transformation ambition with timeline" },
-                  costDisciplineTargets: { type: "string", description: "Specific cost reduction or efficiency targets" },
+                  corporateStrategy: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Strategic pillar name using their exact terminology" },
+                        description: { type: "string", description: "1-2 sentences explaining the strategic initiative" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "3-5 core corporate strategy pillars with descriptions" 
+                  },
+                  digitalStrategies: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Digital/AI strategy initiative name" },
+                        description: { type: "string", description: "1-2 sentences explaining the digital ambition" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "2-4 digital/AI strategy initiatives with descriptions" 
+                  },
+                  ceoBoardPriorities: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "CEO/Board priority name" },
+                        description: { type: "string", description: "1-2 sentences explaining the priority" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "3-5 CEO's stated priorities from letters/presentations" 
+                  },
+                  transformationThemes: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Transformation theme name" },
+                        description: { type: "string", description: "1-2 sentences explaining the transformation" }
+                      },
+                      required: ["title", "description"]
+                    }, 
+                    description: "3-5 digital/operational transformation themes" 
+                  },
                   painPoints: { 
                     type: "array", 
                     items: { 

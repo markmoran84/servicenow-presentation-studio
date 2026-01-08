@@ -89,14 +89,33 @@ export const AnnualReportAnalyzer = () => {
         });
       }
 
-      // Update Strategy tab
-      if (extracted.corporateStrategyPillars?.length || extracted.ceoBoardPriorities?.length) {
+      // Update Strategy tab - convert to StrategyItem format
+      if (extracted.corporateStrategy?.length || extracted.digitalStrategies?.length || extracted.ceoBoardPriorities?.length || extracted.transformationThemes?.length) {
         updateData("strategy", {
-          ...(extracted.corporateStrategyPillars?.length && { corporateStrategyPillars: extracted.corporateStrategyPillars }),
-          ...(extracted.ceoBoardPriorities?.length && { ceoBoardPriorities: extracted.ceoBoardPriorities }),
-          ...(extracted.transformationThemes?.length && { transformationThemes: extracted.transformationThemes }),
-          ...(extracted.aiDigitalAmbition && { aiDigitalAmbition: extracted.aiDigitalAmbition }),
-          ...(extracted.costDisciplineTargets && { costDisciplineTargets: extracted.costDisciplineTargets }),
+          ...(extracted.corporateStrategy?.length && { 
+            corporateStrategy: extracted.corporateStrategy.map((item: { title: string; description: string }) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extracted.digitalStrategies?.length && { 
+            digitalStrategies: extracted.digitalStrategies.map((item: { title: string; description: string }) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extracted.ceoBoardPriorities?.length && { 
+            ceoBoardPriorities: extracted.ceoBoardPriorities.map((item: { title: string; description: string }) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extracted.transformationThemes?.length && { 
+            transformationThemes: extracted.transformationThemes.map((item: { title: string; description: string }) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
         });
       }
 
