@@ -420,55 +420,52 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Strategic Pain Points
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Cost-to-Serve Drivers (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.costToServeDrivers.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "costToServeDrivers", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Customer Experience Challenges (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.customerExperienceChallenges.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "customerExperienceChallenges", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Commercial Inefficiencies (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.commercialInefficiencies.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "commercialInefficiencies", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Technology Fragmentation (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.technologyFragmentation.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "technologyFragmentation", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">AI Governance Gaps (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.aiGovernanceGaps.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "aiGovernanceGaps", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Time-to-Value Issues (one per line)</label>
-                  <Textarea
-                    value={data.painPoints.timeToValueIssues.join("\n")}
-                    onChange={(e) => handleArrayInput("painPoints", "timeToValueIssues", e.target.value)}
-                    rows={3}
-                  />
-                </div>
+              <CardContent className="space-y-4">
+                {data.painPoints.painPoints.map((painPoint, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-semibold text-destructive">Pain Point {index + 1}</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Title</label>
+                        <Input
+                          value={painPoint.title}
+                          onChange={(e) => {
+                            const updated = [...data.painPoints.painPoints];
+                            updated[index] = { ...updated[index], title: e.target.value };
+                            updateData("painPoints", { painPoints: updated });
+                          }}
+                          placeholder="e.g., Fragmented CRM Landscape"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Description</label>
+                        <Textarea
+                          value={painPoint.description}
+                          onChange={(e) => {
+                            const updated = [...data.painPoints.painPoints];
+                            updated[index] = { ...updated[index], description: e.target.value };
+                            updateData("painPoints", { painPoints: updated });
+                          }}
+                          placeholder="Describe the business impact and quantify where possible..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    updateData("painPoints", {
+                      painPoints: [...data.painPoints.painPoints, { title: "", description: "" }]
+                    });
+                  }}
+                >
+                  + Add Pain Point
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -482,43 +479,52 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Strategic Opportunities
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Service Excellence (one per line)</label>
-                  <Textarea
-                    value={data.opportunities.serviceExcellence.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "serviceExcellence", e.target.value)}
-                    rows={4}
-                    placeholder="Transform customer experience with AI-powered self-service..."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Operational Efficiency (one per line)</label>
-                  <Textarea
-                    value={data.opportunities.operationalEfficiency.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "operationalEfficiency", e.target.value)}
-                    rows={4}
-                    placeholder="Reduce cost-to-serve by 30% through intelligent automation..."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Digital Transformation (one per line)</label>
-                  <Textarea
-                    value={data.opportunities.digitalTransformation.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "digitalTransformation", e.target.value)}
-                    rows={4}
-                    placeholder="Accelerate AI operationalisation from 18 months to 6 months..."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Platform Consolidation (one per line)</label>
-                  <Textarea
-                    value={data.opportunities.platformConsolidation.join("\n")}
-                    onChange={(e) => handleArrayInput("opportunities", "platformConsolidation", e.target.value)}
-                    rows={4}
-                    placeholder="Unify fragmented CRM landscape onto single platform..."
-                  />
-                </div>
+              <CardContent className="space-y-4">
+                {data.opportunities.opportunities.map((opportunity, index) => (
+                  <div key={index} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-semibold text-primary">Opportunity {index + 1}</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Title</label>
+                        <Input
+                          value={opportunity.title}
+                          onChange={(e) => {
+                            const updated = [...data.opportunities.opportunities];
+                            updated[index] = { ...updated[index], title: e.target.value };
+                            updateData("opportunities", { opportunities: updated });
+                          }}
+                          placeholder="e.g., Unified Service Excellence Platform"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-muted-foreground mb-1 block">Description (exec-ready, outcome-focused)</label>
+                        <Textarea
+                          value={opportunity.description}
+                          onChange={(e) => {
+                            const updated = [...data.opportunities.opportunities];
+                            updated[index] = { ...updated[index], description: e.target.value };
+                            updateData("opportunities", { opportunities: updated });
+                          }}
+                          placeholder="e.g., Transform customer experience with AI-powered self-service, driving NPS improvement of 15+ points..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    updateData("opportunities", {
+                      opportunities: [...data.opportunities.opportunities, { title: "", description: "" }]
+                    });
+                  }}
+                >
+                  + Add Opportunity
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
