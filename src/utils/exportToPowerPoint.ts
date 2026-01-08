@@ -27,9 +27,29 @@ export const exportToPowerPoint = async () => {
   };
   
   const addSlideBackground = (slide: pptxgen.Slide) => {
+    // NOTE: Keep all shapes within slide bounds to avoid PowerPoint "Repaired and removed" warnings.
+    // Slide size for LAYOUT_16x9 is 10in x 5.625in.
     slide.background = { color: colors.background };
-    slide.addShape(pptx.ShapeType.ellipse, { x: -2, y: -2, w: 5, h: 5, fill: { color: colors.snGreen, transparency: 92 }, line: { color: colors.snGreen, transparency: 100 } });
-    slide.addShape(pptx.ShapeType.ellipse, { x: 8, y: 3, w: 4, h: 4, fill: { color: colors.navy, transparency: 70 }, line: { color: colors.navy, transparency: 100 } });
+
+    // Top-left soft glow
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: 0,
+      y: 0,
+      w: 2.8,
+      h: 2.8,
+      fill: { color: colors.snGreen, transparency: 92 },
+      line: { color: colors.snGreen, transparency: 100 },
+    });
+
+    // Bottom-right soft glow
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: 7.2,
+      y: 2.6,
+      w: 2.8,
+      h: 2.8,
+      fill: { color: colors.navy, transparency: 70 },
+      line: { color: colors.navy, transparency: 100 },
+    });
   };
   
   const addFooter = (slide: pptxgen.Slide, slideNum: number, totalSlides: number) => {
@@ -82,7 +102,7 @@ export const exportToPowerPoint = async () => {
   });
   
   // Connector line for extended team
-  slide1.addShape(pptx.ShapeType.line, { x: 0.7, y: 3.55, w: 6.8, h: 0, line: { color: colors.muted, dashType: "dash", width: 0.75, transparency: 60 } });
+  slide1.addShape(pptx.ShapeType.line, { x: 0.7, y: 3.55, w: 6.8, h: 0.001, line: { color: colors.muted, dashType: "dash", width: 0.75, transparency: 60 } });
   slide1.addText("Extended Account Team", { x: 2.5, y: 3.4, w: 2.5, h: 0.3, fontSize: 8, color: colors.muted, align: "center", fontFace: "Arial", fill: { color: colors.background } });
   
   // Extended team - exact data
