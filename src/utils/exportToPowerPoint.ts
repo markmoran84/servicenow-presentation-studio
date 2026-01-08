@@ -586,119 +586,145 @@ const createStrategicAlignmentSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 6: FY-1 RETROSPECTIVE (matching screenshot exactly)
+// SLIDE 6: FY-1 RETROSPECTIVE (matching web: 2-column layout)
 // =============================================================================
 const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "FY-1 Retrospective", "What happened, what didn't work, and lessons learned");
+  addTitle(slide, "FY-1 Retrospective", "What Actually Happened — Honest Assessment");
 
   const topY = 0.9;
   const cardGap = 0.15;
   const colW = (CONTENT_W - cardGap) / 2;
-  const mainCardH = 2.45;
 
   // ─────────────────────────────────────────────────────────────────────────
-  // LEFT CARD: Prior Plan Summary + What Didn't Work
+  // LEFT COLUMN
   // ─────────────────────────────────────────────────────────────────────────
-  addCard(pptx, slide, MX, topY, colW, mainCardH);
 
-  // "Prior Plan Summary" heading
-  slide.addText("Prior Plan Summary", {
-    x: MX + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.28,
+  // Card 1: What FY25 Focused On
+  const focus1H = 1.55;
+  addCard(pptx, slide, MX, topY, colW, focus1H);
+  slide.addText("What FY25 Focused On", {
+    x: MX + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.25,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
 
-  // Date/author line
-  slide.addText(`Last plan: ${data.history.lastPlanDate} by ${data.history.plannerName}`, {
-    x: MX + 0.15, y: topY + 0.42, w: colW - 0.3, h: 0.18,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  const focusItems = [
+    { title: "Platform Stabilisation", desc: "Addressing technical debt and performance issues" },
+    { title: "Trust Rebuilding", desc: "Re-establishing credibility with key stakeholders" },
+    { title: "Foundation Setting", desc: "Creating conditions for FY26 expansion" },
+  ];
+  focusItems.forEach((f, i) => {
+    const fy = topY + 0.4 + i * 0.38;
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: MX + 0.2, y: fy + 0.06, w: 0.08, h: 0.08,
+      fill: { color: C.primary },
+    });
+    slide.addText(f.title, {
+      x: MX + 0.35, y: fy, w: colW - 0.5, h: 0.18,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(f.desc, {
+      x: MX + 0.35, y: fy + 0.17, w: colW - 0.5, h: 0.18,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
   });
 
-  // Summary paragraph
-  slide.addText(data.history.lastPlanSummary || "", {
-    x: MX + 0.15, y: topY + 0.65, w: colW - 0.3, h: 0.65,
+  // Card 2: Prior Plan Summary
+  const priorY = topY + focus1H + 0.12;
+  const priorH = 1.1;
+  addCard(pptx, slide, MX, priorY, colW, priorH);
+  slide.addText("Prior Plan Summary", {
+    x: MX + 0.15, y: priorY + 0.1, w: colW - 0.3, h: 0.22,
+    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText(`${data.history.lastPlanDate} • ${data.history.plannerName}, ${data.history.plannerRole}`, {
+    x: MX + 0.15, y: priorY + 0.32, w: colW - 0.3, h: 0.16,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+  slide.addText((data.history.lastPlanSummary || "").substring(0, 180), {
+    x: MX + 0.15, y: priorY + 0.5, w: colW - 0.3, h: 0.55,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
 
-  // "What Didn't Work" heading (red)
-  slide.addText("What Didn't Work", {
-    x: MX + 0.15, y: topY + 1.4, w: colW - 0.3, h: 0.22,
-    fontSize: BODY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
-  });
-
-  // What didn't work text
-  slide.addText(data.history.whatDidNotWork || "", {
-    x: MX + 0.15, y: topY + 1.65, w: colW - 0.3, h: 0.7,
-    fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
-  });
-
   // ─────────────────────────────────────────────────────────────────────────
-  // RIGHT CARD: SWOT Analysis (2x2 grid)
+  // RIGHT COLUMN
   // ─────────────────────────────────────────────────────────────────────────
   const rx = MX + colW + cardGap;
-  addCard(pptx, slide, rx, topY, colW, mainCardH);
 
-  // "SWOT Analysis" heading
-  slide.addText("SWOT Analysis", {
-    x: rx + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.28,
+  // Card 3: What Did Not Work (red accent)
+  const notWorkH = 1.35;
+  addCard(pptx, slide, rx, topY, colW, notWorkH);
+  addLeftBorder(pptx, slide, rx, topY, notWorkH, C.danger);
+  slide.addText("What Did Not Work", {
+    x: rx + 0.2, y: topY + 0.1, w: colW - 0.35, h: 0.22,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
+  slide.addText((data.history.whatDidNotWork || "").substring(0, 160), {
+    x: rx + 0.2, y: topY + 0.35, w: colW - 0.35, h: 0.5,
+    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
+  });
+  // Prior Transformation Attempts sub-box
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: rx + 0.15, y: topY + 0.88, w: colW - 0.3, h: 0.4,
+    fill: { color: C.danger, transparency: 92 },
+    line: { color: C.danger, width: 0.5, transparency: 70 },
+    rectRadius: 0.06,
+  });
+  slide.addText("Prior Transformation Attempts", {
+    x: rx + 0.2, y: topY + 0.9, w: colW - 0.4, h: 0.15,
+    fontSize: TINY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
+  });
+  slide.addText((data.history.priorTransformationAttempts || "").substring(0, 80), {
+    x: rx + 0.2, y: topY + 1.05, w: colW - 0.4, h: 0.2,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
 
-  // SWOT 2x2 grid
-  const swotData = [
-    { label: "S", items: data.swot.strengths, color: C.primary },
-    { label: "W", items: data.swot.weaknesses, color: C.danger },
-    { label: "O", items: data.swot.opportunities, color: C.accent },
-    { label: "T", items: data.swot.threats, color: C.warning },
+  // Card 4: Why Stabilisation Was Necessary
+  const whyY = topY + notWorkH + 0.12;
+  const whyH = 0.95;
+  addCard(pptx, slide, rx, whyY, colW, whyH);
+  slide.addText("Why Stabilisation Was Necessary", {
+    x: rx + 0.15, y: whyY + 0.08, w: colW - 0.3, h: 0.2,
+    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+
+  const reasons = [
+    { label: "Over-Customisation", desc: "Upgrade complexity & maintenance burden" },
+    { label: "Value Perception Gap", desc: "Platform capability masked by issues" },
+    { label: "Trust Deficit", desc: "Executive confidence eroded" },
   ];
-
-  const gridStartY = topY + 0.5;
-  const quadW = (colW - 0.45) / 2;
-  const quadH = 0.9;
-  const quadGap = 0.12;
-
-  swotData.forEach((q, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const qx = rx + 0.15 + col * (quadW + quadGap);
-    const qy = gridStartY + row * (quadH + quadGap);
-
-    // Letter label (S, W, O, T)
-    slide.addText(q.label, {
-      x: qx, y: qy, w: 0.22, h: 0.22,
-      fontSize: BODY_SIZE, bold: true, color: q.color, fontFace: FONT_HEADING,
+  reasons.forEach((r, i) => {
+    slide.addText(`${r.label}:`, {
+      x: rx + 0.15, y: whyY + 0.32 + i * 0.2, w: 1.4, h: 0.18,
+      fontSize: TINY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-
-    // Bullet points (2 items max)
-    q.items.slice(0, 2).forEach((item, j) => {
-      slide.addText(`• ${item.substring(0, 38)}`, {
-        x: qx + 0.25, y: qy + j * 0.2, w: quadW - 0.3, h: 0.2,
-        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
+    slide.addText(r.desc, {
+      x: rx + 1.55, y: whyY + 0.32 + i * 0.2, w: colW - 1.8, h: 0.18,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // BOTTOM CARD: Key Lessons Learned (full width)
-  // ─────────────────────────────────────────────────────────────────────────
-  const lessonY = topY + mainCardH + 0.15;
-  const lessonH = 0.6;
-
-  // Card with green left accent border
-  addCard(pptx, slide, MX, lessonY, CONTENT_W, lessonH, { accentBorder: C.primary });
-  addLeftBorder(pptx, slide, MX, lessonY, lessonH, C.primary);
-
-  // "Key Lessons Learned" label (green)
-  slide.addText("Key Lessons Learned", {
-    x: MX + 0.2, y: lessonY + 0.15, w: 2.0, h: 0.25,
-    fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  // Card 5: What Was Deliberately Deprioritised
+  const depriY = whyY + whyH + 0.12;
+  const depriH = 0.55;
+  addCard(pptx, slide, rx, depriY, colW, depriH);
+  slide.addText("What Was Deliberately Deprioritised", {
+    x: rx + 0.15, y: depriY + 0.08, w: colW - 0.3, h: 0.18,
+    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
   });
-
-  // Lesson text
-  slide.addText("Focus on value demonstration, not just capability expansion.", {
-    x: MX + 2.3, y: lessonY + 0.15, w: CONTENT_W - 2.6, h: 0.3,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "middle",
+  const tags = ["CRM Expansion", "AI Use Cases", "HR Service Delivery", "SecOps Rollout"];
+  tags.forEach((t, i) => {
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: rx + 0.15 + i * 1.05, y: depriY + 0.3, w: 1.0, h: 0.2,
+      fill: { color: C.bgLight },
+      line: { color: C.border, width: 0.5 },
+      rectRadius: 0.1,
+    });
+    slide.addText(t, {
+      x: rx + 0.15 + i * 1.05, y: depriY + 0.3, w: 1.0, h: 0.2,
+      fontSize: 7, color: C.muted, fontFace: FONT_BODY, align: "center", valign: "middle",
+    });
   });
 
   return slide;
