@@ -1,6 +1,6 @@
 import pptxgen from "pptxgenjs";
 
-export const exportToPowerPoint = () => {
+export const exportToPowerPoint = async () => {
   const pptx = new pptxgen();
   
   pptx.author = "ServiceNow";
@@ -446,5 +446,5 @@ export const exportToPowerPoint = () => {
   allSlides.forEach((slide, i) => addFooter(slide, i + 1, allSlides.length));
 
   // Save the file
-  pptx.writeFile({ fileName: "Maersk_Account_Plan_FY26.pptx" });
+  await pptx.writeFile({ fileName: "Maersk_Account_Plan_FY26.pptx" });
 };
