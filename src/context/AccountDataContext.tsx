@@ -12,6 +12,7 @@ export interface AccountBasics {
   threeYearAmbition: string;
   renewalDates: string;
   keyIncumbents: string;
+  visionStatement: string; // Account team vision for ServiceNow at [Customer]
 }
 
 // Section B — Account History / Prior Plan
@@ -41,7 +42,6 @@ export interface CustomerStrategy {
   transformationThemes: string[];
   aiDigitalAmbition: string;
   costDisciplineTargets: string;
-  visionStatement: string; // Account team vision for ServiceNow at [Customer]
 }
 
 // Pain Point item with title and description
@@ -133,6 +133,7 @@ const defaultMaerskData: AccountData = {
     threeYearAmbition: "$25M ARR",
     renewalDates: "October 2026",
     keyIncumbents: "Salesforce, SAP, Microsoft",
+    visionStatement: "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision.",
   },
   history: {
     lastPlanDate: "March 2025",
@@ -171,7 +172,6 @@ const defaultMaerskData: AccountData = {
     ],
     aiDigitalAmbition: "AI-first: Deploy AI across operations, customer service, and decision-making. Explicit executive mandate.",
     costDisciplineTargets: "5-7% annual productivity improvement, $2B share buyback signals capital discipline",
-    visionStatement: "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision.",
   },
   painPoints: {
     painPoints: [
