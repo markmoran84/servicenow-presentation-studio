@@ -5,6 +5,48 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Fetch supplementary financial data from the web
+async function fetchFinancialData(companyName: string): Promise<string> {
+  const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!apiKey) {
+    console.log("Firecrawl not configured, skipping web search");
+    return "";
+  }
+
+  try {
+    console.log(`Searching for financial data: ${companyName}`);
+    const response = await fetch("https://api.firecrawl.dev/v1/search", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `${companyName} annual report 2024 revenue EBIT financial results`,
+        limit: 3,
+        scrapeOptions: { formats: ["markdown"] },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Firecrawl search failed:", response.status);
+      return "";
+    }
+
+    const data = await response.json();
+    const results = data.data || [];
+    const combinedContent = results
+      .map((r: any) => r.markdown || r.description || "")
+      .join("\n\n");
+
+    console.log(`Found ${results.length} search results, content length: ${combinedContent.length}`);
+    return combinedContent;
+  } catch (error) {
+    console.error("Error fetching financial data:", error);
+    return "";
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,55 +67,21 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-const systemPrompt = `You are an expert financial analyst specializing in extracting comprehensive information from annual reports and investor relations documents.
+    // First pass: Extract company name and check what data we have
+    const initialPrompt = `You are an expert financial analyst. Analyze this content and extract the company name and any available financial/strategic data.
 
-Your task is to analyze the provided annual report content and extract structured data to populate an account planning tool. Extract as much relevant information as possible.
+CRITICAL INSTRUCTIONS:
+1. Read the ENTIRE document carefully before responding
+2. Look for financial figures (revenue, profit, EBIT, margins) - they may be in tables, charts, or footnotes
+3. Look for strategic priorities, CEO statements, and business highlights
+4. For executiveSummaryNarrative: Write 2-3 compelling sentences that describe what the company does, their market position, and strategic direction. DO NOT just describe the document - summarize the COMPANY.
+5. For SWOT: Infer from challenges mentioned (weaknesses/threats) and achievements mentioned (strengths/opportunities)
+6. If you find mentions of "geopolitical", "supply chain", "competition", "costs" - these are threats
+7. If you find mentions of "growth", "expansion", "innovation", "market leader" - these are strengths
 
-Extract the following information and return it using the exact tool schema provided:
+Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
 
-BASICS:
-- accountName: The company name
-- industry: The industry/sector they operate in
-
-FINANCIAL:
-- revenue: The total revenue figure (e.g., "$55.5B" or "£3.2B")
-- revenueComparison: Prior year comparison (e.g., "2023: $51.1B")
-- growthRate: Year-over-year growth rate (e.g., "+9% YoY")
-- ebitImprovement: EBIT or profit improvement percentage (e.g., "+65%" or "-12%")
-- marginEBIT: EBIT margin or absolute figure if available
-- costPressureAreas: Key cost pressure areas mentioned
-- strategicInvestmentAreas: Where the company is investing
-
-STRATEGY:
-- corporateStrategyPillars: 3-5 key strategic pillars or focus areas
-- ceoBoardPriorities: CEO/Board stated priorities
-- transformationThemes: Digital or business transformation themes
-- aiDigitalAmbition: AI or digital ambition statements
-- costDisciplineTargets: Cost reduction or efficiency targets mentioned
-
-PAIN POINTS (infer from challenges, risks, or areas of focus mentioned):
-- customerExperienceChallenges: Customer-related challenges
-- technologyFragmentation: Technology or system challenges
-- timeToValueIssues: Speed or efficiency issues mentioned
-
-OPPORTUNITIES (infer from initiatives, investments, or stated goals):
-- aiOpportunities: AI-related opportunities or initiatives
-- automationOpportunities: Automation initiatives
-- standardisationOpportunities: Consolidation or standardization efforts
-
-SWOT ANALYSIS (critical - extract from the report content):
-- strengths: Internal positive attributes and competitive advantages (3-5 items)
-- weaknesses: Internal limitations, challenges, or areas needing improvement (3-5 items)
-- swotOpportunities: External favorable factors or market opportunities (3-5 items)
-- threats: External risks, competitive pressures, or market challenges (3-5 items)
-
-ANNUAL REPORT:
-- netZeroTarget: Sustainability/net zero target year if mentioned (e.g., "2040" or "N/A")
-- keyMilestones: 3-5 key operational or business milestones achieved (short bullet points)
-- strategicAchievements: 3-5 major strategic accomplishments (short bullet points)
-- executiveSummaryNarrative: A 2-3 sentence executive summary describing the company's position and strategic direction
-
-If specific data isn't available, provide empty arrays or "Not specified" as appropriate.`;
+Example bad narrative: "This document contains links to Maersk's annual report sections." - DO NOT DO THIS.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -84,8 +92,8 @@ If specific data isn't available, provide empty arrays or "Not specified" as app
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `Please analyze this annual report content and extract the key highlights:\n\n${content}` }
+          { role: "system", content: initialPrompt },
+          { role: "user", content: `Analyze this annual report content thoroughly and extract all available data:\n\n${content}` }
         ],
         tools: [
           {
@@ -96,106 +104,36 @@ If specific data isn't available, provide empty arrays or "Not specified" as app
               parameters: {
                 type: "object",
                 properties: {
-                  // Basics
                   accountName: { type: "string", description: "Company name" },
                   industry: { type: "string", description: "Industry/sector" },
-                  // Financial
-                  revenue: { type: "string", description: "Total revenue figure" },
-                  revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
+                  revenue: { type: "string", description: "Total revenue figure with currency (e.g. $55.5B)" },
+                  revenueComparison: { type: "string", description: "Prior year revenue" },
                   growthRate: { type: "string", description: "YoY growth rate" },
-                  ebitImprovement: { type: "string", description: "EBIT or profit improvement percentage" },
-                  marginEBIT: { type: "string", description: "EBIT margin or absolute figure" },
-                  costPressureAreas: { type: "string", description: "Cost pressure areas" },
-                  strategicInvestmentAreas: { type: "string", description: "Strategic investment areas" },
-                  // Strategy
-                  corporateStrategyPillars: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3-5 strategic pillars"
-                  },
-                  ceoBoardPriorities: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "CEO/Board priorities"
-                  },
-                  transformationThemes: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Transformation themes"
-                  },
-                  aiDigitalAmbition: { type: "string", description: "AI/digital ambition statement" },
-                  costDisciplineTargets: { type: "string", description: "Cost discipline targets" },
-                  // Pain Points
-                  customerExperienceChallenges: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Customer experience challenges"
-                  },
-                  technologyFragmentation: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Technology challenges"
-                  },
-                  timeToValueIssues: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Speed/efficiency issues"
-                  },
-                  // Opportunities
-                  aiOpportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "AI opportunities"
-                  },
-                  automationOpportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Automation opportunities"
-                  },
-                  standardisationOpportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Standardisation opportunities"
-                  },
-                  // SWOT Analysis
-                  strengths: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Internal strengths and competitive advantages"
-                  },
-                  weaknesses: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Internal weaknesses and limitations"
-                  },
-                  swotOpportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "External opportunities"
-                  },
-                  threats: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "External threats and risks"
-                  },
-                  // Annual Report
-                  netZeroTarget: { type: "string", description: "Net zero target year" },
-                  keyMilestones: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Key milestones"
-                  },
-                  strategicAchievements: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Strategic achievements"
-                  },
-                  executiveSummaryNarrative: {
-                    type: "string",
-                    description: "Executive summary narrative"
-                  }
+                  ebitImprovement: { type: "string", description: "EBIT improvement %" },
+                  marginEBIT: { type: "string", description: "EBIT margin or absolute" },
+                  costPressureAreas: { type: "string", description: "Cost pressures" },
+                  strategicInvestmentAreas: { type: "string", description: "Investment areas" },
+                  corporateStrategyPillars: { type: "array", items: { type: "string" }, description: "3-5 strategic pillars" },
+                  ceoBoardPriorities: { type: "array", items: { type: "string" }, description: "CEO priorities" },
+                  transformationThemes: { type: "array", items: { type: "string" }, description: "Transformation themes" },
+                  aiDigitalAmbition: { type: "string", description: "AI/digital ambition" },
+                  costDisciplineTargets: { type: "string", description: "Cost targets" },
+                  customerExperienceChallenges: { type: "array", items: { type: "string" }, description: "CX challenges" },
+                  technologyFragmentation: { type: "array", items: { type: "string" }, description: "Tech challenges" },
+                  timeToValueIssues: { type: "array", items: { type: "string" }, description: "Speed issues" },
+                  aiOpportunities: { type: "array", items: { type: "string" }, description: "AI opportunities" },
+                  automationOpportunities: { type: "array", items: { type: "string" }, description: "Automation opps" },
+                  standardisationOpportunities: { type: "array", items: { type: "string" }, description: "Standardisation opps" },
+                  strengths: { type: "array", items: { type: "string" }, description: "3-5 internal strengths" },
+                  weaknesses: { type: "array", items: { type: "string" }, description: "3-5 internal weaknesses" },
+                  swotOpportunities: { type: "array", items: { type: "string" }, description: "3-5 external opportunities" },
+                  threats: { type: "array", items: { type: "string" }, description: "3-5 external threats" },
+                  netZeroTarget: { type: "string", description: "Net zero year" },
+                  keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 milestones" },
+                  strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 achievements" },
+                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence company summary - describe what they DO and their strategy, not the document" }
                 },
-                required: ["accountName", "revenue", "executiveSummaryNarrative"],
+                required: ["accountName", "executiveSummaryNarrative"],
                 additionalProperties: false
               }
             }
@@ -224,15 +162,124 @@ If specific data isn't available, provide empty arrays or "Not specified" as app
     }
 
     const data = await response.json();
-    console.log("AI response:", JSON.stringify(data, null, 2));
+    console.log("Initial AI response received");
 
-    // Extract the tool call result
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall || toolCall.function.name !== "extract_annual_report_data") {
       throw new Error("Unexpected AI response format");
     }
 
-    const extractedData = JSON.parse(toolCall.function.arguments);
+    let extractedData = JSON.parse(toolCall.function.arguments);
+    const companyName = extractedData.accountName || "";
+
+    // Check if we need to fetch supplementary data
+    const needsFinancialData = 
+      !extractedData.revenue || 
+      extractedData.revenue === "N/A" || 
+      extractedData.revenue === "Not specified" ||
+      !extractedData.ebitImprovement ||
+      extractedData.ebitImprovement === "N/A";
+
+    if (needsFinancialData && companyName) {
+      console.log("Financial data missing, fetching from web...");
+      const supplementaryContent = await fetchFinancialData(companyName);
+
+      if (supplementaryContent) {
+        // Second pass with supplementary data
+        const enrichPrompt = `You previously extracted data but some financial fields were missing. Here is additional data from web search. 
+Merge this with what you know and provide updated values. Keep existing values if the new data doesn't have better information.
+
+Original extraction: ${JSON.stringify(extractedData)}
+
+Additional web search results:
+${supplementaryContent}
+
+IMPORTANT: 
+- Update revenue, EBIT, growth figures if you find them
+- Improve the executiveSummaryNarrative to be more compelling
+- Add any strategic pillars, achievements, or SWOT items you find`;
+
+        const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: "You are enriching company data with additional financial information. Merge and improve the data." },
+              { role: "user", content: enrichPrompt }
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "extract_annual_report_data",
+                  description: "Extract enriched data",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      accountName: { type: "string" },
+                      industry: { type: "string" },
+                      revenue: { type: "string" },
+                      revenueComparison: { type: "string" },
+                      growthRate: { type: "string" },
+                      ebitImprovement: { type: "string" },
+                      marginEBIT: { type: "string" },
+                      costPressureAreas: { type: "string" },
+                      strategicInvestmentAreas: { type: "string" },
+                      corporateStrategyPillars: { type: "array", items: { type: "string" } },
+                      ceoBoardPriorities: { type: "array", items: { type: "string" } },
+                      transformationThemes: { type: "array", items: { type: "string" } },
+                      aiDigitalAmbition: { type: "string" },
+                      costDisciplineTargets: { type: "string" },
+                      customerExperienceChallenges: { type: "array", items: { type: "string" } },
+                      technologyFragmentation: { type: "array", items: { type: "string" } },
+                      timeToValueIssues: { type: "array", items: { type: "string" } },
+                      aiOpportunities: { type: "array", items: { type: "string" } },
+                      automationOpportunities: { type: "array", items: { type: "string" } },
+                      standardisationOpportunities: { type: "array", items: { type: "string" } },
+                      strengths: { type: "array", items: { type: "string" } },
+                      weaknesses: { type: "array", items: { type: "string" } },
+                      swotOpportunities: { type: "array", items: { type: "string" } },
+                      threats: { type: "array", items: { type: "string" } },
+                      netZeroTarget: { type: "string" },
+                      keyMilestones: { type: "array", items: { type: "string" } },
+                      strategicAchievements: { type: "array", items: { type: "string" } },
+                      executiveSummaryNarrative: { type: "string" }
+                    },
+                    additionalProperties: false
+                  }
+                }
+              }
+            ],
+            tool_choice: { type: "function", function: { name: "extract_annual_report_data" } }
+          }),
+        });
+
+        if (enrichResponse.ok) {
+          const enrichData = await enrichResponse.json();
+          const enrichToolCall = enrichData.choices?.[0]?.message?.tool_calls?.[0];
+          if (enrichToolCall) {
+            const enrichedExtraction = JSON.parse(enrichToolCall.function.arguments);
+            // Merge enriched data (prefer non-empty values)
+            for (const key of Object.keys(enrichedExtraction)) {
+              const newValue = enrichedExtraction[key];
+              const oldValue = extractedData[key];
+              if (newValue && newValue !== "N/A" && newValue !== "Not specified") {
+                if (Array.isArray(newValue) && newValue.length > 0) {
+                  extractedData[key] = newValue;
+                } else if (!Array.isArray(newValue) && newValue) {
+                  extractedData[key] = newValue;
+                }
+              }
+            }
+            console.log("Data enriched with web search results");
+          }
+        }
+      }
+    }
 
     return new Response(
       JSON.stringify({ success: true, data: extractedData }),
