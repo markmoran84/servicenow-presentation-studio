@@ -11,7 +11,6 @@ export interface AccountBasics {
   nextFYAmbition: string;
   threeYearAmbition: string;
   renewalDates: string;
-  keyIncumbents: string;
   visionStatement: string; // Account team vision for ServiceNow at [Customer]
 }
 
@@ -132,7 +131,6 @@ const defaultMaerskData: AccountData = {
     nextFYAmbition: "$12M ARR",
     threeYearAmbition: "$25M ARR",
     renewalDates: "October 2026",
-    keyIncumbents: "Salesforce, SAP, Microsoft",
     visionStatement: "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision.",
   },
   history: {
