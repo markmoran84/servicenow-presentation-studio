@@ -34,13 +34,18 @@ export interface FinancialSnapshot {
   strategicInvestmentAreas: string;
 }
 
+// Strategy item with title and optional description
+export interface StrategyItem {
+  title: string;
+  description: string;
+}
+
 // Section D — Customer Strategy Inputs
 export interface CustomerStrategy {
-  corporateStrategyPillars: string[];
-  ceoBoardPriorities: string[];
-  transformationThemes: string[];
-  aiDigitalAmbition: string;
-  costDisciplineTargets: string;
+  corporateStrategy: StrategyItem;
+  digitalStrategies: StrategyItem;
+  ceoBoardPriorities: StrategyItem[];
+  transformationThemes: StrategyItem;
 }
 
 // Pain Point item with title and description
@@ -150,26 +155,24 @@ const defaultMaerskData: AccountData = {
     strategicInvestmentAreas: "AI & automation, digital customer experience, green methanol fleet, integrated logistics platform",
   },
   strategy: {
-    corporateStrategyPillars: [
-      "Integrated Logistics ('All the Way')",
-      "Customer Experience Excellence",
-      "AI-First Operations",
-      "Net Zero 2040",
-    ],
+    corporateStrategy: {
+      title: "Integrated Logistics ('All the Way')",
+      description: "Transform from a container shipping company to an integrated logistics provider offering end-to-end supply chain solutions. Focus on owning the customer relationship across the entire journey from origin to destination.",
+    },
+    digitalStrategies: {
+      title: "AI-First Operations",
+      description: "Deploy AI across operations, customer service, and decision-making with explicit executive mandate. Target 5-7% annual productivity improvement through intelligent automation and predictive analytics.",
+    },
     ceoBoardPriorities: [
-      "Operational resilience (Red Sea/Cape routing)",
-      "Cost discipline with ROIC focus",
-      "Digital transformation acceleration",
-      "Platform consolidation",
+      { title: "Operational resilience (Red Sea/Cape routing)", description: "Navigate geopolitical disruptions through flexible routing and network optimization while maintaining service levels and cost efficiency." },
+      { title: "Cost discipline with ROIC focus", description: "$2B share buyback program signals capital discipline. Target consistent returns on invested capital through operational excellence." },
+      { title: "Digital transformation acceleration", description: "Accelerate technology modernization and platform consolidation to enable AI-first operations and improve customer experience." },
+      { title: "Platform consolidation", description: "Reduce 700+ application footprint through strategic platform decisions, eliminating redundancy and creating unified data foundation." },
     ],
-    transformationThemes: [
-      "End-to-end supply chain visibility",
-      "Predictive analytics and AI operationalisation",
-      "Customer-centric service delivery",
-      "Technology standardisation",
-    ],
-    aiDigitalAmbition: "AI-first: Deploy AI across operations, customer service, and decision-making. Explicit executive mandate.",
-    costDisciplineTargets: "5-7% annual productivity improvement, $2B share buyback signals capital discipline",
+    transformationThemes: {
+      title: "End-to-end supply chain visibility",
+      description: "Enable real-time tracking and predictive insights across the entire supply chain journey, from manufacturer to end customer, through unified digital platforms and data integration.",
+    },
   },
   painPoints: {
     painPoints: [

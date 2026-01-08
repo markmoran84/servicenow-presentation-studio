@@ -6,11 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X 
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -460,47 +461,155 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Customer Strategy Inputs
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Corporate Strategy Pillars (one per line)</label>
-                  <Textarea
-                    value={data.strategy.corporateStrategyPillars.join("\n")}
-                    onChange={(e) => handleArrayInput("strategy", "corporateStrategyPillars", e.target.value)}
-                    rows={4}
-                  />
+              <CardContent className="space-y-4">
+                {/* Corporate Strategy */}
+                <Collapsible>
+                  <div className="flex items-center gap-2">
+                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                      Corporate Strategy
+                    </CollapsibleTrigger>
+                  </div>
+                  <div className="mt-2">
+                    <Input
+                      value={data.strategy.corporateStrategy.title}
+                      onChange={(e) => updateData("strategy", { 
+                        corporateStrategy: { ...data.strategy.corporateStrategy, title: e.target.value } 
+                      })}
+                      placeholder="e.g., Integrated Logistics ('All the Way')"
+                    />
+                  </div>
+                  <CollapsibleContent className="mt-2">
+                    <Textarea
+                      value={data.strategy.corporateStrategy.description}
+                      onChange={(e) => updateData("strategy", { 
+                        corporateStrategy: { ...data.strategy.corporateStrategy, description: e.target.value } 
+                      })}
+                      placeholder="Describe the corporate strategy in detail..."
+                      rows={3}
+                      className="text-sm"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Digital Strategies / Ambition */}
+                <Collapsible>
+                  <div className="flex items-center gap-2">
+                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                      Digital Strategies / Ambition
+                    </CollapsibleTrigger>
+                  </div>
+                  <div className="mt-2">
+                    <Input
+                      value={data.strategy.digitalStrategies.title}
+                      onChange={(e) => updateData("strategy", { 
+                        digitalStrategies: { ...data.strategy.digitalStrategies, title: e.target.value } 
+                      })}
+                      placeholder="e.g., AI-First Operations"
+                    />
+                  </div>
+                  <CollapsibleContent className="mt-2">
+                    <Textarea
+                      value={data.strategy.digitalStrategies.description}
+                      onChange={(e) => updateData("strategy", { 
+                        digitalStrategies: { ...data.strategy.digitalStrategies, description: e.target.value } 
+                      })}
+                      placeholder="Describe the digital strategy and AI ambition in detail..."
+                      rows={3}
+                      className="text-sm"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* CEO / Board Priorities */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-foreground block">CEO / Board Priorities</label>
+                  {data.strategy.ceoBoardPriorities.map((priority, index) => (
+                    <Collapsible key={index}>
+                      <div className="flex items-center gap-2">
+                        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                          <Plus className="w-4 h-4" />
+                        </CollapsibleTrigger>
+                        <Input
+                          value={priority.title}
+                          onChange={(e) => {
+                            const updated = [...data.strategy.ceoBoardPriorities];
+                            updated[index] = { ...updated[index], title: e.target.value };
+                            updateData("strategy", { ceoBoardPriorities: updated });
+                          }}
+                          placeholder={`Priority ${index + 1}`}
+                          className="flex-1"
+                        />
+                        {data.strategy.ceoBoardPriorities.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const updated = data.strategy.ceoBoardPriorities.filter((_, i) => i !== index);
+                              updateData("strategy", { ceoBoardPriorities: updated });
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <CollapsibleContent className="mt-2 ml-6">
+                        <Textarea
+                          value={priority.description}
+                          onChange={(e) => {
+                            const updated = [...data.strategy.ceoBoardPriorities];
+                            updated[index] = { ...updated[index], description: e.target.value };
+                            updateData("strategy", { ceoBoardPriorities: updated });
+                          }}
+                          placeholder="Describe this priority in detail..."
+                          rows={2}
+                          className="text-sm"
+                        />
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const updated = [...data.strategy.ceoBoardPriorities, { title: "", description: "" }];
+                      updateData("strategy", { ceoBoardPriorities: updated });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Priority
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">CEO / Board Priorities (one per line)</label>
-                  <Textarea
-                    value={data.strategy.ceoBoardPriorities.join("\n")}
-                    onChange={(e) => handleArrayInput("strategy", "ceoBoardPriorities", e.target.value)}
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Published Transformation Themes (one per line)</label>
-                  <Textarea
-                    value={data.strategy.transformationThemes.join("\n")}
-                    onChange={(e) => handleArrayInput("strategy", "transformationThemes", e.target.value)}
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">AI / Digital Ambition</label>
-                  <Textarea
-                    value={data.strategy.aiDigitalAmbition}
-                    onChange={(e) => updateData("strategy", { aiDigitalAmbition: e.target.value })}
-                    rows={4}
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">Cost Discipline Targets</label>
-                  <Textarea
-                    value={data.strategy.costDisciplineTargets}
-                    onChange={(e) => updateData("strategy", { costDisciplineTargets: e.target.value })}
-                    rows={2}
-                  />
-                </div>
+
+                {/* Published Transformation Themes */}
+                <Collapsible>
+                  <div className="flex items-center gap-2">
+                    <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                      <Plus className="w-4 h-4" />
+                      Published Transformation Themes
+                    </CollapsibleTrigger>
+                  </div>
+                  <div className="mt-2">
+                    <Input
+                      value={data.strategy.transformationThemes.title}
+                      onChange={(e) => updateData("strategy", { 
+                        transformationThemes: { ...data.strategy.transformationThemes, title: e.target.value } 
+                      })}
+                      placeholder="e.g., End-to-end supply chain visibility"
+                    />
+                  </div>
+                  <CollapsibleContent className="mt-2">
+                    <Textarea
+                      value={data.strategy.transformationThemes.description}
+                      onChange={(e) => updateData("strategy", { 
+                        transformationThemes: { ...data.strategy.transformationThemes, description: e.target.value } 
+                      })}
+                      placeholder="Describe the transformation themes in detail..."
+                      rows={3}
+                      className="text-sm"
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
               </CardContent>
             </Card>
           </TabsContent>
