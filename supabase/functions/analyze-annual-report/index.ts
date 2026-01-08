@@ -25,20 +25,49 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert financial analyst specializing in extracting key information from annual reports and investor relations documents.
+const systemPrompt = `You are an expert financial analyst specializing in extracting comprehensive information from annual reports and investor relations documents.
 
-Your task is to analyze the provided annual report content and extract structured data for an executive summary slide.
+Your task is to analyze the provided annual report content and extract structured data to populate an account planning tool. Extract as much relevant information as possible.
 
-Extract the following information and return it as a JSON object using the exact tool schema provided:
+Extract the following information and return it using the exact tool schema provided:
+
+BASICS:
+- accountName: The company name
+- industry: The industry/sector they operate in
+
+FINANCIAL:
 - revenue: The total revenue figure (e.g., "$55.5B" or "£3.2B")
 - revenueComparison: Prior year comparison (e.g., "2023: $51.1B")
+- growthRate: Year-over-year growth rate (e.g., "+9% YoY")
 - ebitImprovement: EBIT or profit improvement percentage (e.g., "+65%" or "-12%")
+- marginEBIT: EBIT margin or absolute figure if available
+- costPressureAreas: Key cost pressure areas mentioned
+- strategicInvestmentAreas: Where the company is investing
+
+STRATEGY:
+- corporateStrategyPillars: 3-5 key strategic pillars or focus areas
+- ceoBoardPriorities: CEO/Board stated priorities
+- transformationThemes: Digital or business transformation themes
+- aiDigitalAmbition: AI or digital ambition statements
+- costDisciplineTargets: Cost reduction or efficiency targets mentioned
+
+PAIN POINTS (infer from challenges, risks, or areas of focus mentioned):
+- customerExperienceChallenges: Customer-related challenges
+- technologyFragmentation: Technology or system challenges
+- timeToValueIssues: Speed or efficiency issues mentioned
+
+OPPORTUNITIES (infer from initiatives, investments, or stated goals):
+- aiOpportunities: AI-related opportunities or initiatives
+- automationOpportunities: Automation initiatives
+- standardisationOpportunities: Consolidation or standardization efforts
+
+ANNUAL REPORT:
 - netZeroTarget: Sustainability/net zero target year if mentioned (e.g., "2040" or "N/A")
 - keyMilestones: 3-5 key operational or business milestones achieved (short bullet points)
 - strategicAchievements: 3-5 major strategic accomplishments (short bullet points)
 - executiveSummaryNarrative: A 2-3 sentence executive summary describing the company's position and strategic direction
 
-If specific data isn't available, make reasonable inferences or indicate "Not specified".`;
+If specific data isn't available, provide empty arrays or "Not specified" as appropriate.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -57,30 +86,89 @@ If specific data isn't available, make reasonable inferences or indicate "Not sp
             type: "function",
             function: {
               name: "extract_annual_report_data",
-              description: "Extract structured data from an annual report",
+              description: "Extract comprehensive structured data from an annual report",
               parameters: {
                 type: "object",
                 properties: {
+                  // Basics
+                  accountName: { type: "string", description: "Company name" },
+                  industry: { type: "string", description: "Industry/sector" },
+                  // Financial
                   revenue: { type: "string", description: "Total revenue figure" },
                   revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
+                  growthRate: { type: "string", description: "YoY growth rate" },
                   ebitImprovement: { type: "string", description: "EBIT or profit improvement percentage" },
-                  netZeroTarget: { type: "string", description: "Net zero or sustainability target year" },
+                  marginEBIT: { type: "string", description: "EBIT margin or absolute figure" },
+                  costPressureAreas: { type: "string", description: "Cost pressure areas" },
+                  strategicInvestmentAreas: { type: "string", description: "Strategic investment areas" },
+                  // Strategy
+                  corporateStrategyPillars: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "3-5 strategic pillars"
+                  },
+                  ceoBoardPriorities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "CEO/Board priorities"
+                  },
+                  transformationThemes: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Transformation themes"
+                  },
+                  aiDigitalAmbition: { type: "string", description: "AI/digital ambition statement" },
+                  costDisciplineTargets: { type: "string", description: "Cost discipline targets" },
+                  // Pain Points
+                  customerExperienceChallenges: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Customer experience challenges"
+                  },
+                  technologyFragmentation: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Technology challenges"
+                  },
+                  timeToValueIssues: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Speed/efficiency issues"
+                  },
+                  // Opportunities
+                  aiOpportunities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "AI opportunities"
+                  },
+                  automationOpportunities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Automation opportunities"
+                  },
+                  standardisationOpportunities: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Standardisation opportunities"
+                  },
+                  // Annual Report
+                  netZeroTarget: { type: "string", description: "Net zero target year" },
                   keyMilestones: {
                     type: "array",
                     items: { type: "string" },
-                    description: "3-5 key operational milestones"
+                    description: "Key milestones"
                   },
                   strategicAchievements: {
                     type: "array",
                     items: { type: "string" },
-                    description: "3-5 strategic achievements"
+                    description: "Strategic achievements"
                   },
                   executiveSummaryNarrative: {
                     type: "string",
-                    description: "2-3 sentence executive summary"
+                    description: "Executive summary narrative"
                   }
                 },
-                required: ["revenue", "revenueComparison", "ebitImprovement", "netZeroTarget", "keyMilestones", "strategicAchievements", "executiveSummaryNarrative"],
+                required: ["accountName", "revenue", "executiveSummaryNarrative"],
                 additionalProperties: false
               }
             }
