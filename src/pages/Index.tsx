@@ -25,7 +25,7 @@ import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
 
 const slides = [
-  { component: InputFormSlide, label: "Input Form" },
+  { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
   { component: CustomerOverviewSlide, label: "2. Customer Overview" },
   { component: StrategicAlignmentSlide, label: "3. Strategy & Direction" },
@@ -59,6 +59,10 @@ const Index = () => {
     setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
   }, []);
 
+  const goToFirstSlide = useCallback(() => {
+    setCurrentSlide(1); // Navigate to Executive Summary (slide 1)
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === " ") {
@@ -74,7 +78,8 @@ const Index = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNext, goToPrevious]);
 
-  const CurrentSlideComponent = slides[currentSlide].component;
+  const currentSlideConfig = slides[currentSlide];
+  const CurrentSlideComponent = currentSlideConfig.component;
 
   return (
     <AccountDataProvider>
@@ -85,7 +90,11 @@ const Index = () => {
         </div>
 
         <div className="relative z-10 animate-fade-in" key={currentSlide}>
-          <CurrentSlideComponent />
+          {currentSlideConfig.isForm ? (
+            <CurrentSlideComponent onGenerate={goToFirstSlide} />
+          ) : (
+            <CurrentSlideComponent />
+          )}
         </div>
 
         <SlideNavigation
