@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type InputMode = "paste" | "pdf" | "url";
@@ -27,6 +27,7 @@ export const AnnualReportAnalyzer = () => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>("paste");
   const [dataSourceInfo, setDataSourceInfo] = useState<DataSourceInfo | null>(null);
+  const [isResyncing, setIsResyncing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const analyzeContent = async (textContent: string) => {
@@ -147,6 +148,74 @@ export const AnnualReportAnalyzer = () => {
       toast.error(error instanceof Error ? error.message : "Failed to analyze report");
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleResyncStrategy = async () => {
+    setIsResyncing(true);
+    try {
+      const accountContext = {
+        basics: data.basics,
+        history: data.history,
+        financial: data.financial,
+        strategy: data.strategy,
+        engagement: data.engagement,
+        annualReport: data.annualReport
+      };
+
+      const existingAnalysis = {
+        painPoints: data.painPoints.painPoints,
+        opportunities: data.opportunities.opportunities
+      };
+
+      const { data: responseData, error } = await supabase.functions.invoke("resync-strategy", {
+        body: { accountContext, existingAnalysis }
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Resync failed");
+
+      const resynced = responseData.data;
+
+      // Update Pain Points
+      if (resynced.painPoints?.length) {
+        updateData("painPoints", {
+          painPoints: resynced.painPoints.map((pp: { title: string; description: string }) => ({
+            title: pp.title || "",
+            description: pp.description || ""
+          }))
+        });
+      }
+
+      // Update Opportunities
+      if (resynced.opportunities?.length) {
+        updateData("opportunities", {
+          opportunities: resynced.opportunities.map((op: { title: string; description: string }) => ({
+            title: op.title || "",
+            description: op.description || ""
+          }))
+        });
+      }
+
+      // Update SWOT
+      if (resynced.strengths?.length || resynced.weaknesses?.length) {
+        updateData("swot", {
+          strengths: resynced.strengths || [],
+          weaknesses: resynced.weaknesses || [],
+          opportunities: resynced.swotOpportunities || [],
+          threats: resynced.threats || []
+        });
+      }
+
+      toast.success("Strategy realigned with updated context!");
+      if (resynced.alignmentNotes) {
+        toast.info(resynced.alignmentNotes, { duration: 5000 });
+      }
+    } catch (error) {
+      console.error("Resync error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to resync strategy");
+    } finally {
+      setIsResyncing(false);
     }
   };
 
@@ -372,9 +441,42 @@ Example: Copy text from sections like:
 
         {analysisComplete && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
-              <CheckCircle2 className="w-5 h-5" />
-              Data extracted and populated across multiple tabs! Review each tab to verify and refine.
+            <div className="flex items-center justify-between gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Data extracted and populated across multiple tabs! Review each tab to verify and refine.
+              </div>
+            </div>
+
+            {/* Re-sync Strategy Button */}
+            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Updated Account Info?</p>
+                  <p className="text-xs text-muted-foreground">
+                    Re-align SWOT, pain points & opportunities with your latest inputs
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResyncStrategy}
+                  disabled={isResyncing}
+                  className="gap-2"
+                >
+                  {isResyncing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Re-sync Strategy
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Data Quality Indicator */}
