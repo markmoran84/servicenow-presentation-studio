@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
+import { JourneyContextSlide } from "@/components/slides/JourneyContextSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
 import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
@@ -13,6 +14,7 @@ import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { MarketingPlanSlide } from "@/components/slides/MarketingPlanSlide";
 
 const slides = [
+  { component: JourneyContextSlide, label: "The Journey" },
   { component: ExecutiveSummarySlide, label: "Executive Summary" },
   { component: StrategicAlignmentSlide, label: "Strategic Alignment" },
   { component: AccountTeamSlide, label: "Account Team" },
