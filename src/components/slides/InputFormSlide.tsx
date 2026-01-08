@@ -233,6 +233,45 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     onChange={(e) => updateData("basics", { keyIncumbents: e.target.value })}
                   />
                 </div>
+
+                {/* Vision Statement - Full Width with AI Generation */}
+                <div className="col-span-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-primary" />
+                      Account Team Vision for ServiceNow at {data.basics.accountName || "Customer"}
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateVision}
+                      disabled={isGeneratingVision}
+                      className="gap-2"
+                    >
+                      {isGeneratingVision ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-3 h-3" />
+                          {data.basics.visionStatement ? "Regenerate Vision" : "Generate Vision"}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    AI-generated strategic vision statement based on all account context. Click to regenerate for alternatives.
+                  </p>
+                  <Textarea
+                    value={data.basics.visionStatement}
+                    onChange={(e) => updateData("basics", { visionStatement: e.target.value })}
+                    placeholder="Click 'Generate Vision' to create an AI-powered strategic vision statement, or type your own..."
+                    rows={4}
+                    className="bg-background"
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -483,45 +522,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     value={data.strategy.costDisciplineTargets}
                     onChange={(e) => updateData("strategy", { costDisciplineTargets: e.target.value })}
                     rows={2}
-                  />
-                </div>
-
-                {/* Vision Statement - Full Width with AI Generation */}
-                <div className="col-span-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-primary" />
-                      Account Team Vision for ServiceNow at {data.basics.accountName || "Customer"}
-                    </label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleGenerateVision}
-                      disabled={isGeneratingVision}
-                      className="gap-2"
-                    >
-                      {isGeneratingVision ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-3 h-3" />
-                          {data.strategy.visionStatement ? "Regenerate Vision" : "Generate Vision"}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    AI-generated strategic vision statement based on all account context. Click to regenerate for alternatives.
-                  </p>
-                  <Textarea
-                    value={data.strategy.visionStatement}
-                    onChange={(e) => updateData("strategy", { visionStatement: e.target.value })}
-                    placeholder="Click 'Generate Vision' to create an AI-powered strategic vision statement, or type your own..."
-                    rows={4}
-                    className="bg-background"
                   />
                 </div>
               </CardContent>
