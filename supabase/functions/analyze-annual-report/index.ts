@@ -68,7 +68,7 @@ serve(async (req) => {
     }
 
     // First pass: Extract company name and check what data we have
-    const initialPrompt = `You are an expert strategic account executive at ServiceNow analyzing a customer's annual report.
+    const initialPrompt = `You are an expert strategic account executive at ServiceNow analyzing a customer's annual report to build an account plan.
 
 CRITICAL INSTRUCTIONS:
 1. Read the ENTIRE document carefully before responding
@@ -79,26 +79,42 @@ CRITICAL INSTRUCTIONS:
 6. If you find mentions of "geopolitical", "supply chain", "competition", "costs" - these are threats
 7. If you find mentions of "growth", "expansion", "innovation", "market leader" - these are strengths
 
-PAIN POINTS:
-Extract 3-5 distinct pain points. Each pain point needs:
-- title: Short, punchy headline (e.g., "Fragmented CRM Landscape", "AI Operationalisation Gap")
-- description: 1-2 sentences describing the business impact with quantification where possible
+PAIN POINTS - MUST BE STRATEGICALLY ALIGNED:
+Extract 3-5 pain points that are DIRECTLY DERIVED from challenges, risks, or gaps mentioned in the annual report.
+- These must connect to the customer's STATED priorities (not generic industry pain points)
+- Look for: CEO concerns, risk factors, operational challenges, transformation blockers, cost pressures
+- Frame each pain point as an obstacle to achieving their stated strategic goals
 
-Example pain point:
+Each pain point needs:
+- title: Short, punchy headline derived from their language (e.g., if they mention "digital fragmentation", use that)
+- description: 1-2 sentences linking the pain to their strategic priority with quantification where available
+
+Example GOOD pain point (strategically aligned):
 {
-  "title": "Technology Sprawl",
-  "description": "700+ applications in the technology landscape with multiple ITSM tools by region, no unified service catalog, and $15M+ in redundant licensing costs"
+  "title": "Digital Fragmentation Blocking AI-First Ambition",
+  "description": "Multiple disconnected systems across regions prevent the unified data layer required for AI operationalisation - directly blocking CEO's stated AI-first strategy"
+}
+
+Example BAD pain point (generic, not from report):
+{
+  "title": "Need for Digital Transformation",
+  "description": "Companies need to transform digitally to stay competitive"
 }
 
 STRATEGIC OPPORTUNITIES - ServiceNow Perspective:
-Extract 3-5 opportunities. Each needs:
-- title: Action-oriented headline (e.g., "Unified Service Excellence Platform", "AI-First Operations Enablement")
-- description: Exec-ready value proposition showing how ServiceNow can help achieve their goals. Use language like "Accelerate...", "Reduce...", "Transform...", "Enable..."
+Extract 3-5 opportunities that DIRECTLY ADDRESS the pain points and ENABLE their stated strategic priorities.
+- Each opportunity should map to a stated customer goal from the annual report
+- Frame as how ServiceNow can accelerate what they're already trying to achieve
+- Use language like "Accelerate...", "Reduce...", "Transform...", "Enable..."
 
-Example opportunity:
+Each opportunity needs:
+- title: Action-oriented headline (e.g., "Unified Service Excellence Platform", "AI-First Operations Enablement")
+- description: Exec-ready value proposition showing how ServiceNow helps achieve THEIR goals (reference their language)
+
+Example GOOD opportunity (tied to their strategy):
 {
-  "title": "Cost-to-Serve Optimisation",
-  "description": "Reduce cost-to-serve by 30% through intelligent automation of case handling, document processing, and proactive customer notifications"
+  "title": "Accelerate AI-First Operations",
+  "description": "Enable the CEO's AI-first mandate through unified workflow orchestration, reducing AI time-to-production from 18 months to 6 months"
 }
 
 Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
