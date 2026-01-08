@@ -34,13 +34,19 @@ export interface FinancialSnapshot {
   strategicInvestmentAreas: string;
 }
 
+// Theme/Strategy item with title and description
+export interface ThemeItem {
+  title: string;
+  description: string;
+}
+
 // Section D — Customer Strategy Inputs
 export interface CustomerStrategy {
   corporateStrategyPillars: string[];
   ceoBoardPriorities: string[];
-  transformationThemes: string[];
+  transformationThemes: ThemeItem[];
+  digitalStrategies: ThemeItem[];
   aiDigitalAmbition: string;
-  costDisciplineTargets: string;
 }
 
 // Pain Point item with title and description
@@ -163,13 +169,17 @@ const defaultMaerskData: AccountData = {
       "Platform consolidation",
     ],
     transformationThemes: [
-      "End-to-end supply chain visibility",
-      "Predictive analytics and AI operationalisation",
-      "Customer-centric service delivery",
-      "Technology standardisation",
+      { title: "End-to-end supply chain visibility", description: "Full transparency across logistics chain from origin to destination" },
+      { title: "Predictive analytics and AI operationalisation", description: "Deploying AI for proactive decision-making and automation" },
+      { title: "Customer-centric service delivery", description: "Unified customer experience across all touchpoints" },
+      { title: "Technology standardisation", description: "Reducing 700+ applications to consolidated platform architecture" },
+    ],
+    digitalStrategies: [
+      { title: "AI-First Operations", description: "Embedding AI across operations, customer service, and decision-making" },
+      { title: "Platform Consolidation", description: "Unifying fragmented systems into single integrated platform" },
+      { title: "Digital Customer Experience", description: "Self-service portals and real-time visibility for customers" },
     ],
     aiDigitalAmbition: "AI-first: Deploy AI across operations, customer service, and decision-making. Explicit executive mandate.",
-    costDisciplineTargets: "5-7% annual productivity improvement, $2B share buyback signals capital discipline",
   },
   painPoints: {
     painPoints: [

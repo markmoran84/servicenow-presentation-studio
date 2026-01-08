@@ -477,29 +477,111 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     rows={4}
                   />
                 </div>
-                <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Published Transformation Themes (one per line)</label>
-                  <Textarea
-                    value={data.strategy.transformationThemes.join("\n")}
-                    onChange={(e) => handleArrayInput("strategy", "transformationThemes", e.target.value)}
-                    rows={4}
-                  />
-                </div>
-                <div>
+                {/* AI / Digital Ambition - Full Width */}
+                <div className="col-span-2">
                   <label className="text-sm text-muted-foreground mb-1 block">AI / Digital Ambition</label>
                   <Textarea
                     value={data.strategy.aiDigitalAmbition}
                     onChange={(e) => updateData("strategy", { aiDigitalAmbition: e.target.value })}
-                    rows={4}
+                    rows={3}
+                    placeholder="e.g., AI-first: Deploy AI across operations, customer service, and decision-making..."
                   />
                 </div>
+
+                {/* Published Transformation Themes */}
                 <div className="col-span-2">
-                  <label className="text-sm text-muted-foreground mb-1 block">Cost Discipline Targets</label>
-                  <Textarea
-                    value={data.strategy.costDisciplineTargets}
-                    onChange={(e) => updateData("strategy", { costDisciplineTargets: e.target.value })}
-                    rows={2}
-                  />
+                  <label className="text-sm text-muted-foreground mb-2 block font-medium">Published Transformation Themes</label>
+                  <div className="space-y-3">
+                    {data.strategy.transformationThemes.map((theme, index) => (
+                      <div key={index} className="p-3 rounded-lg bg-secondary/30 border border-border/30">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Theme {index + 1}</label>
+                            <Input
+                              value={theme.title}
+                              onChange={(e) => {
+                                const updated = [...data.strategy.transformationThemes];
+                                updated[index] = { ...updated[index], title: e.target.value };
+                                updateData("strategy", { transformationThemes: updated });
+                              }}
+                              placeholder="Theme name"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+                            <Input
+                              value={theme.description}
+                              onChange={(e) => {
+                                const updated = [...data.strategy.transformationThemes];
+                                updated[index] = { ...updated[index], description: e.target.value };
+                                updateData("strategy", { transformationThemes: updated });
+                              }}
+                              placeholder="Brief description of this theme"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        updateData("strategy", {
+                          transformationThemes: [...data.strategy.transformationThemes, { title: "", description: "" }]
+                        });
+                      }}
+                    >
+                      + Add Transformation Theme
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Published Digital Strategies */}
+                <div className="col-span-2">
+                  <label className="text-sm text-muted-foreground mb-2 block font-medium">Published Digital Strategies</label>
+                  <div className="space-y-3">
+                    {data.strategy.digitalStrategies.map((strategy, index) => (
+                      <div key={index} className="p-3 rounded-lg bg-secondary/30 border border-border/30">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Strategy {index + 1}</label>
+                            <Input
+                              value={strategy.title}
+                              onChange={(e) => {
+                                const updated = [...data.strategy.digitalStrategies];
+                                updated[index] = { ...updated[index], title: e.target.value };
+                                updateData("strategy", { digitalStrategies: updated });
+                              }}
+                              placeholder="Strategy name"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="text-xs text-muted-foreground mb-1 block">Description</label>
+                            <Input
+                              value={strategy.description}
+                              onChange={(e) => {
+                                const updated = [...data.strategy.digitalStrategies];
+                                updated[index] = { ...updated[index], description: e.target.value };
+                                updateData("strategy", { digitalStrategies: updated });
+                              }}
+                              placeholder="Brief description of this strategy"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        updateData("strategy", {
+                          digitalStrategies: [...data.strategy.digitalStrategies, { title: "", description: "" }]
+                        });
+                      }}
+                    >
+                      + Add Digital Strategy
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
