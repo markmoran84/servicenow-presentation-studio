@@ -5,6 +5,7 @@ import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { InputFormSlide } from "@/components/slides/InputFormSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
 import { CustomerOverviewSlide } from "@/components/slides/CustomerOverviewSlide";
+import { BusinessModelCanvasSlide } from "@/components/slides/BusinessModelCanvasSlide";
 import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { FY1RetrospectiveSlide } from "@/components/slides/FY1RetrospectiveSlide";
 import { CurrentStateSlide } from "@/components/slides/CurrentStateSlide";
@@ -28,24 +29,25 @@ const slides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
   { component: CustomerOverviewSlide, label: "2. Customer Overview" },
-  { component: StrategicAlignmentSlide, label: "3. Strategy & Direction" },
-  { component: FY1RetrospectiveSlide, label: "4. FY-1 Retrospective" },
-  { component: CurrentStateSlide, label: "5. Current State" },
-  { component: StrategicObservationSlide, label: "6. Observation" },
-  { component: StrategicImplicationSlide, label: "7. Implication" },
-  { component: StrategicTensionSlide, label: "8. Tension" },
-  { component: InsightSlide, label: "9. Insight" },
-  { component: ValueHypothesisSlide, label: "10. Value Hypothesis" },
-  { component: CoreValueDriversSlide, label: "11. Value Drivers" },
-  { component: BigBetsSlide, label: "12. Big Bets" },
-  { component: AIUseCasesSlide, label: "13. AI Use Cases" },
-  { component: AutomationSlide, label: "14. Automation" },
-  { component: PlatformSlide, label: "15. Platform" },
-  { component: RoadmapSlide, label: "16. Roadmap" },
-  { component: GovernanceSlide, label: "17. Governance" },
-  { component: ExecutiveEngagementSlide, label: "18. Engagement" },
-  { component: ClosePlanSlide, label: "19. Close Plan" },
-  { component: SuccessSlide, label: "20. Success" },
+  { component: BusinessModelCanvasSlide, label: "3. Business Model" },
+  { component: StrategicAlignmentSlide, label: "4. Strategy & Direction" },
+  { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
+  { component: CurrentStateSlide, label: "6. Current State" },
+  { component: StrategicObservationSlide, label: "7. Observation" },
+  { component: StrategicImplicationSlide, label: "8. Implication" },
+  { component: StrategicTensionSlide, label: "9. Tension" },
+  { component: InsightSlide, label: "10. Insight" },
+  { component: ValueHypothesisSlide, label: "11. Value Hypothesis" },
+  { component: CoreValueDriversSlide, label: "12. Value Drivers" },
+  { component: BigBetsSlide, label: "13. Big Bets" },
+  { component: AIUseCasesSlide, label: "14. AI Use Cases" },
+  { component: AutomationSlide, label: "15. Automation" },
+  { component: PlatformSlide, label: "16. Platform" },
+  { component: RoadmapSlide, label: "17. Roadmap" },
+  { component: GovernanceSlide, label: "18. Governance" },
+  { component: ExecutiveEngagementSlide, label: "19. Engagement" },
+  { component: ClosePlanSlide, label: "20. Close Plan" },
+  { component: SuccessSlide, label: "21. Success" },
 ];
 
 const Index = () => {

@@ -10,8 +10,9 @@ import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe 
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InputFormSlideProps {
   onGenerate?: () => void;
@@ -57,7 +58,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-5 lg:grid-cols-10 gap-1 h-auto p-1 bg-secondary/50">
+          <TabsList className="grid grid-cols-6 lg:grid-cols-11 gap-1 h-auto p-1 bg-secondary/50">
             <TabsTrigger value="aiAnalyzer" className="gap-2 text-xs">
               <Sparkles className="w-3 h-3" />
               <span className="hidden sm:inline">AI Import</span>
@@ -97,6 +98,10 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             <TabsTrigger value="swot" className="gap-2 text-xs">
               <Shield className="w-3 h-3" />
               <span className="hidden sm:inline">SWOT</span>
+            </TabsTrigger>
+            <TabsTrigger value="businessModel" className="gap-2 text-xs">
+              <LayoutGrid className="w-3 h-3" />
+              <span className="hidden sm:inline">Business</span>
             </TabsTrigger>
           </TabsList>
 
@@ -665,8 +670,209 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Business Model Canvas */}
+          <TabsContent value="businessModel" className="space-y-4">
+            <BusinessModelTab 
+              data={data} 
+              updateData={updateData}
+              handleArrayInput={handleArrayInput}
+            />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
+  );
+};
+
+// Business Model Tab Component
+interface BusinessModelTabProps {
+  data: typeof import("@/context/AccountDataContext").AccountDataProvider extends React.FC<{children: React.ReactNode}> ? any : any;
+  updateData: (section: any, value: any) => void;
+  handleArrayInput: (section: any, field: string, value: string) => void;
+}
+
+const BusinessModelTab = ({ data, updateData, handleArrayInput }: BusinessModelTabProps) => {
+  const [isResearching, setIsResearching] = useState(false);
+
+  const handleResearchBusinessModel = async () => {
+    if (!data.basics.accountName) {
+      toast.error("Please enter an account name first");
+      return;
+    }
+
+    setIsResearching(true);
+    try {
+      const { data: responseData, error } = await supabase.functions.invoke("research-business-model", {
+        body: { 
+          companyName: data.basics.accountName,
+          annualReportContent: data.annualReport.executiveSummaryNarrative,
+          existingData: data.businessModel
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Research failed");
+
+      const bm = responseData.data;
+      updateData("businessModel", {
+        keyPartners: bm.keyPartners || [],
+        keyActivities: bm.keyActivities || [],
+        keyResources: bm.keyResources || [],
+        valueProposition: bm.valueProposition || [],
+        customerRelationships: bm.customerRelationships || [],
+        channels: bm.channels || [],
+        customerSegments: bm.customerSegments || [],
+        costStructure: bm.costStructure || [],
+        revenueStreams: bm.revenueStreams || [],
+        competitors: bm.competitors || [],
+      });
+
+      toast.success("Business model canvas populated from research!");
+    } catch (error) {
+      console.error("Research error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to research business model");
+    } finally {
+      setIsResearching(false);
+    }
+  };
+
+  return (
+    <>
+      {/* AI Research Button */}
+      <Card className="glass-card border-primary/30">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                AI Business Model Research
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Research {data.basics.accountName || "the company"}'s business model from annual reports, web sources, and investor data
+              </p>
+            </div>
+            <Button
+              onClick={handleResearchBusinessModel}
+              disabled={isResearching || !data.basics.accountName}
+              className="gap-2"
+            >
+              {isResearching ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Researching...
+                </>
+              ) : (
+                <>
+                  <Globe className="w-4 h-4" />
+                  Research & Populate
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LayoutGrid className="w-5 h-5 text-primary" />
+            Business Model Canvas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Key Partners (one per line)</label>
+            <Textarea
+              value={data.businessModel.keyPartners.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "keyPartners", e.target.value)}
+              rows={4}
+              placeholder="Strategic alliances, suppliers..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Key Activities (one per line)</label>
+            <Textarea
+              value={data.businessModel.keyActivities.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "keyActivities", e.target.value)}
+              rows={4}
+              placeholder="Core operations..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Key Resources (one per line)</label>
+            <Textarea
+              value={data.businessModel.keyResources.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "keyResources", e.target.value)}
+              rows={4}
+              placeholder="Physical, intellectual, human..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Value Proposition (one per line)</label>
+            <Textarea
+              value={data.businessModel.valueProposition.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "valueProposition", e.target.value)}
+              rows={4}
+              placeholder="What value do they deliver..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Customer Relationships (one per line)</label>
+            <Textarea
+              value={data.businessModel.customerRelationships.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "customerRelationships", e.target.value)}
+              rows={4}
+              placeholder="How they interact with customers..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Channels (one per line)</label>
+            <Textarea
+              value={data.businessModel.channels.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "channels", e.target.value)}
+              rows={4}
+              placeholder="How they reach customers..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Customer Segments (one per line)</label>
+            <Textarea
+              value={data.businessModel.customerSegments.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "customerSegments", e.target.value)}
+              rows={4}
+              placeholder="Target customers..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Cost Structure (one per line)</label>
+            <Textarea
+              value={data.businessModel.costStructure.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "costStructure", e.target.value)}
+              rows={4}
+              placeholder="Major cost drivers..."
+            />
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">Revenue Streams (one per line)</label>
+            <Textarea
+              value={data.businessModel.revenueStreams.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "revenueStreams", e.target.value)}
+              rows={4}
+              placeholder="How they make money..."
+            />
+          </div>
+          <div className="lg:col-span-3">
+            <label className="text-sm text-muted-foreground mb-1 block font-medium text-orange-400">Key Competitors (one per line)</label>
+            <Textarea
+              value={data.businessModel.competitors.join("\n")}
+              onChange={(e) => handleArrayInput("businessModel", "competitors", e.target.value)}
+              rows={3}
+              placeholder="Direct and indirect competitors..."
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 };
