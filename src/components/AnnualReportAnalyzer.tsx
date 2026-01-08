@@ -7,9 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type InputMode = "paste" | "pdf" | "url";
+
+interface DataSourceInfo {
+  documentFields: string[];
+  webFields: string[];
+  usedWebSearch: boolean;
+}
 
 export const AnnualReportAnalyzer = () => {
   const { updateData } = useAccountData();
@@ -19,6 +26,7 @@ export const AnnualReportAnalyzer = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>("paste");
+  const [dataSourceInfo, setDataSourceInfo] = useState<DataSourceInfo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const analyzeContent = async (textContent: string) => {
@@ -29,6 +37,7 @@ export const AnnualReportAnalyzer = () => {
 
     setIsAnalyzing(true);
     setAnalysisComplete(false);
+    setDataSourceInfo(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-annual-report", {
@@ -39,6 +48,18 @@ export const AnnualReportAnalyzer = () => {
       if (!data.success) throw new Error(data.error || "Analysis failed");
 
       const extracted = data.data;
+      const dataSources = data.dataSources || {};
+      const usedWebSearch = data.usedWebSearch || false;
+
+      // Calculate source info
+      const documentFields: string[] = [];
+      const webFields: string[] = [];
+      Object.entries(dataSources).forEach(([field, source]) => {
+        if (source === "document") documentFields.push(field);
+        else if (source === "web") webFields.push(field);
+      });
+
+      setDataSourceInfo({ documentFields, webFields, usedWebSearch });
 
       // Update Basics tab
       if (extracted.accountName || extracted.industry) {
@@ -79,12 +100,19 @@ export const AnnualReportAnalyzer = () => {
         });
       }
 
-      // Update Opportunities tab
-      if (extracted.aiOpportunities?.length || extracted.automationOpportunities?.length) {
+      // Update Opportunities tab (new ServiceNow-focused structure)
+      const hasOpportunities = 
+        extracted.serviceExcellenceOpportunities?.length ||
+        extracted.operationalEfficiencyOpportunities?.length ||
+        extracted.digitalTransformationOpportunities?.length ||
+        extracted.platformConsolidationOpportunities?.length;
+
+      if (hasOpportunities) {
         updateData("opportunities", {
-          ...(extracted.aiOpportunities?.length && { aiOpportunities: extracted.aiOpportunities }),
-          ...(extracted.automationOpportunities?.length && { automationOpportunities: extracted.automationOpportunities }),
-          ...(extracted.standardisationOpportunities?.length && { standardisationOpportunities: extracted.standardisationOpportunities }),
+          ...(extracted.serviceExcellenceOpportunities?.length && { serviceExcellence: extracted.serviceExcellenceOpportunities }),
+          ...(extracted.operationalEfficiencyOpportunities?.length && { operationalEfficiency: extracted.operationalEfficiencyOpportunities }),
+          ...(extracted.digitalTransformationOpportunities?.length && { digitalTransformation: extracted.digitalTransformationOpportunities }),
+          ...(extracted.platformConsolidationOpportunities?.length && { platformConsolidation: extracted.platformConsolidationOpportunities }),
         });
       }
 
@@ -340,9 +368,36 @@ Example: Copy text from sections like:
         </Tabs>
 
         {analysisComplete && (
-          <div className="flex items-center gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
-            <CheckCircle2 className="w-5 h-5" />
-            Data extracted and populated across multiple tabs! Review each tab to verify and refine.
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
+              <CheckCircle2 className="w-5 h-5" />
+              Data extracted and populated across multiple tabs! Review each tab to verify and refine.
+            </div>
+
+            {/* Data Quality Indicator */}
+            {dataSourceInfo && (
+              <div className="p-3 rounded-lg bg-secondary/30 space-y-2">
+                <p className="text-sm font-medium text-foreground">Data Sources</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="gap-1 text-xs">
+                    <FileCheck className="w-3 h-3" />
+                    {dataSourceInfo.documentFields.length} fields from document
+                  </Badge>
+                  {dataSourceInfo.usedWebSearch && (
+                    <Badge variant="secondary" className="gap-1 text-xs">
+                      <Globe className="w-3 h-3" />
+                      {dataSourceInfo.webFields.length} fields from web search
+                    </Badge>
+                  )}
+                </div>
+                {dataSourceInfo.usedWebSearch && dataSourceInfo.webFields.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Web-enriched: {dataSourceInfo.webFields.slice(0, 5).join(", ")}
+                    {dataSourceInfo.webFields.length > 5 && ` +${dataSourceInfo.webFields.length - 5} more`}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
 

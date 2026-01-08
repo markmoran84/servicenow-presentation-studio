@@ -68,7 +68,7 @@ serve(async (req) => {
     }
 
     // First pass: Extract company name and check what data we have
-    const initialPrompt = `You are an expert financial analyst. Analyze this content and extract the company name and any available financial/strategic data.
+    const initialPrompt = `You are an expert strategic account executive at ServiceNow analyzing a customer's annual report.
 
 CRITICAL INSTRUCTIONS:
 1. Read the ENTIRE document carefully before responding
@@ -78,6 +78,24 @@ CRITICAL INSTRUCTIONS:
 5. For SWOT: Infer from challenges mentioned (weaknesses/threats) and achievements mentioned (strengths/opportunities)
 6. If you find mentions of "geopolitical", "supply chain", "competition", "costs" - these are threats
 7. If you find mentions of "growth", "expansion", "innovation", "market leader" - these are strengths
+
+STRATEGIC OPPORTUNITIES - ServiceNow Perspective:
+When identifying opportunities, frame them as executive-ready value propositions from a ServiceNow perspective:
+- Focus on business outcomes, not product features
+- Frame as how ServiceNow can help the customer achieve their stated goals
+- Use language like "Accelerate...", "Reduce...", "Transform...", "Enable...", "Unify..."
+- Connect to their stated pain points and strategic priorities
+
+Example good opportunities:
+- "Accelerate AI operationalisation through unified workflow orchestration, reducing time-to-value from 18 months to 6 months"
+- "Reduce cost-to-serve by 30% through intelligent case automation and predictive routing"
+- "Transform customer experience with AI-powered self-service, driving NPS improvement of 15+ points"
+- "Enable platform consolidation from 700+ applications to a single workflow backbone, saving $20M+ annually"
+
+Example bad opportunities:
+- "AI opportunities" (too vague)
+- "Use ServiceNow" (not outcome-focused)
+- "Implement automation" (not exec-ready)
 
 Example good narrative: "Maersk is the world's leading integrated logistics company, operating in 130+ countries and providing end-to-end supply chain solutions. With $55.5B in revenue and a commitment to Net Zero by 2040, the company is transforming through AI-first operations and customer experience excellence."
 
@@ -121,9 +139,11 @@ Example bad narrative: "This document contains links to Maersk's annual report s
                   customerExperienceChallenges: { type: "array", items: { type: "string" }, description: "CX challenges" },
                   technologyFragmentation: { type: "array", items: { type: "string" }, description: "Tech challenges" },
                   timeToValueIssues: { type: "array", items: { type: "string" }, description: "Speed issues" },
-                  aiOpportunities: { type: "array", items: { type: "string" }, description: "AI opportunities" },
-                  automationOpportunities: { type: "array", items: { type: "string" }, description: "Automation opps" },
-                  standardisationOpportunities: { type: "array", items: { type: "string" }, description: "Standardisation opps" },
+                  // New ServiceNow-focused opportunities
+                  serviceExcellenceOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can drive service excellence outcomes" },
+                  operationalEfficiencyOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can improve operational efficiency" },
+                  digitalTransformationOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can accelerate digital transformation" },
+                  platformConsolidationOpportunities: { type: "array", items: { type: "string" }, description: "2-3 exec-ready statements on how ServiceNow can enable platform consolidation" },
                   strengths: { type: "array", items: { type: "string" }, description: "3-5 internal strengths" },
                   weaknesses: { type: "array", items: { type: "string" }, description: "3-5 internal weaknesses" },
                   swotOpportunities: { type: "array", items: { type: "string" }, description: "3-5 external opportunities" },
@@ -172,6 +192,15 @@ Example bad narrative: "This document contains links to Maersk's annual report s
     let extractedData = JSON.parse(toolCall.function.arguments);
     const companyName = extractedData.accountName || "";
 
+    // Track data sources
+    const dataSources: Record<string, "document" | "web"> = {};
+    const documentFields = Object.keys(extractedData).filter(k => {
+      const val = extractedData[k];
+      return val && val !== "N/A" && val !== "Not specified" && 
+        (typeof val === "string" ? val.length > 0 : Array.isArray(val) && val.length > 0);
+    });
+    documentFields.forEach(f => dataSources[f] = "document");
+
     // Check if we need to fetch supplementary data
     const needsFinancialData = 
       !extractedData.revenue || 
@@ -180,11 +209,14 @@ Example bad narrative: "This document contains links to Maersk's annual report s
       !extractedData.ebitImprovement ||
       extractedData.ebitImprovement === "N/A";
 
+    let usedWebSearch = false;
+
     if (needsFinancialData && companyName) {
       console.log("Financial data missing, fetching from web...");
       const supplementaryContent = await fetchFinancialData(companyName);
 
       if (supplementaryContent) {
+        usedWebSearch = true;
         // Second pass with supplementary data
         const enrichPrompt = `You previously extracted data but some financial fields were missing. Here is additional data from web search. 
 Merge this with what you know and provide updated values. Keep existing values if the new data doesn't have better information.
@@ -197,7 +229,8 @@ ${supplementaryContent}
 IMPORTANT: 
 - Update revenue, EBIT, growth figures if you find them
 - Improve the executiveSummaryNarrative to be more compelling
-- Add any strategic pillars, achievements, or SWOT items you find`;
+- Add any strategic pillars, achievements, or SWOT items you find
+- For opportunities, maintain the ServiceNow exec-ready framing`;
 
         const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -208,7 +241,7 @@ IMPORTANT:
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
             messages: [
-              { role: "system", content: "You are enriching company data with additional financial information. Merge and improve the data." },
+              { role: "system", content: "You are enriching company data with additional financial information. Merge and improve the data. For opportunities, keep the ServiceNow exec-ready framing." },
               { role: "user", content: enrichPrompt }
             ],
             tools: [
@@ -237,9 +270,10 @@ IMPORTANT:
                       customerExperienceChallenges: { type: "array", items: { type: "string" } },
                       technologyFragmentation: { type: "array", items: { type: "string" } },
                       timeToValueIssues: { type: "array", items: { type: "string" } },
-                      aiOpportunities: { type: "array", items: { type: "string" } },
-                      automationOpportunities: { type: "array", items: { type: "string" } },
-                      standardisationOpportunities: { type: "array", items: { type: "string" } },
+                      serviceExcellenceOpportunities: { type: "array", items: { type: "string" } },
+                      operationalEfficiencyOpportunities: { type: "array", items: { type: "string" } },
+                      digitalTransformationOpportunities: { type: "array", items: { type: "string" } },
+                      platformConsolidationOpportunities: { type: "array", items: { type: "string" } },
                       strengths: { type: "array", items: { type: "string" } },
                       weaknesses: { type: "array", items: { type: "string" } },
                       swotOpportunities: { type: "array", items: { type: "string" } },
@@ -269,9 +303,15 @@ IMPORTANT:
               const oldValue = extractedData[key];
               if (newValue && newValue !== "N/A" && newValue !== "Not specified") {
                 if (Array.isArray(newValue) && newValue.length > 0) {
-                  extractedData[key] = newValue;
+                  if (!oldValue || oldValue.length === 0) {
+                    extractedData[key] = newValue;
+                    dataSources[key] = "web";
+                  }
                 } else if (!Array.isArray(newValue) && newValue) {
-                  extractedData[key] = newValue;
+                  if (!oldValue || oldValue === "N/A" || oldValue === "Not specified") {
+                    extractedData[key] = newValue;
+                    dataSources[key] = "web";
+                  }
                 }
               }
             }
@@ -282,7 +322,12 @@ IMPORTANT:
     }
 
     return new Response(
-      JSON.stringify({ success: true, data: extractedData }),
+      JSON.stringify({ 
+        success: true, 
+        data: extractedData,
+        dataSources,
+        usedWebSearch 
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
