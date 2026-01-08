@@ -153,10 +153,27 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Current Contract Value</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">Current ACV</label>
                   <Input
                     value={data.basics.currentContractValue}
                     onChange={(e) => updateData("basics", { currentContractValue: e.target.value })}
+                    placeholder="e.g., $8.5M ARR"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Next FY Ambition</label>
+                  <Input
+                    value={data.basics.nextFYAmbition}
+                    onChange={(e) => updateData("basics", { nextFYAmbition: e.target.value })}
+                    placeholder="e.g., $12M ARR"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">3 Year Ambition</label>
+                  <Input
+                    value={data.basics.threeYearAmbition}
+                    onChange={(e) => updateData("basics", { threeYearAmbition: e.target.value })}
+                    placeholder="e.g., $25M ARR"
                   />
                 </div>
                 <div>
