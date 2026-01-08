@@ -797,52 +797,68 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   Strategic Opportunities
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {data.opportunities.opportunities.map((opportunity, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-secondary/30 border border-border/30">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-sm font-semibold text-primary">Opportunity {index + 1}</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Title</label>
-                        <Input
-                          value={opportunity.title}
-                          onChange={(e) => {
-                            const updated = [...data.opportunities.opportunities];
-                            updated[index] = { ...updated[index], title: e.target.value };
-                            updateData("opportunities", { opportunities: updated });
-                          }}
-                          placeholder="e.g., Unified Service Excellence Platform"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground mb-1 block">Description (exec-ready, outcome-focused)</label>
-                        <Textarea
-                          value={opportunity.description}
-                          onChange={(e) => {
-                            const updated = [...data.opportunities.opportunities];
-                            updated[index] = { ...updated[index], description: e.target.value };
-                            updateData("opportunities", { opportunities: updated });
-                          }}
-                          placeholder="e.g., Transform customer experience with AI-powered self-service, driving NPS improvement of 15+ points..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
+              <CardContent className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30 col-span-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-primary">Opportunities</span>
                   </div>
-                ))}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    updateData("opportunities", {
-                      opportunities: [...data.opportunities.opportunities, { title: "", description: "" }]
-                    });
-                  }}
-                >
-                  + Add Opportunity
-                </Button>
+                  <div className="space-y-2">
+                    {data.opportunities.opportunities.map((opportunity, index) => (
+                      <Collapsible key={index}>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={opportunity.title}
+                            onChange={(e) => {
+                              const updated = [...data.opportunities.opportunities];
+                              updated[index] = { ...updated[index], title: e.target.value };
+                              updateData("opportunities", { opportunities: updated });
+                            }}
+                            placeholder={`Opportunity ${index + 1}`}
+                            className="flex-1"
+                          />
+                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                            <Plus className="w-4 h-4" />
+                          </CollapsibleTrigger>
+                          {data.opportunities.opportunities.length > 1 && (
+                            <button
+                              className="text-muted-foreground hover:text-destructive transition-colors"
+                              onClick={() => {
+                                const updated = data.opportunities.opportunities.filter((_, i) => i !== index);
+                                updateData("opportunities", { opportunities: updated });
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <CollapsibleContent className="mt-2 pr-12">
+                          <Textarea
+                            value={opportunity.description}
+                            onChange={(e) => {
+                              const updated = [...data.opportunities.opportunities];
+                              updated[index] = { ...updated[index], description: e.target.value };
+                              updateData("opportunities", { opportunities: updated });
+                            }}
+                            placeholder="Exec-ready, outcome-focused description..."
+                            rows={2}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      updateData("opportunities", {
+                        opportunities: [...data.opportunities.opportunities, { title: "", description: "" }]
+                      });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-1" /> Add Opportunity
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
