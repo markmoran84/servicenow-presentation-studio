@@ -34,10 +34,10 @@ const defaultWorkstreams = [
       { name: "Mark Graham", role: "SVP, IT Logistics" },
     ],
     opportunities: [
-      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track", oppNumber: "OPP-2024-001" },
-      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track", oppNumber: "OPP-2024-002" },
-      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating", oppNumber: "OPP-2024-003" },
-      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk", oppNumber: "OPP-2024-004" },
+      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track", oppNumber: "OPP-2024-001", closeDate: "Mar 2025" },
+      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track", oppNumber: "OPP-2024-002", closeDate: "Jun 2025" },
+      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating", oppNumber: "OPP-2024-003", closeDate: "Feb 2025" },
+      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk", oppNumber: "OPP-2024-004", closeDate: "Sep 2025" },
     ],
   },
   {
@@ -54,10 +54,10 @@ const defaultWorkstreams = [
       { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
     ],
     opportunities: [
-      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track", oppNumber: "OPP-2024-005" },
-      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track", oppNumber: "OPP-2024-006" },
-      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention", oppNumber: "OPP-2024-007" },
-      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track", oppNumber: "OPP-2024-008" },
+      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track", oppNumber: "OPP-2024-005", closeDate: "Apr 2025" },
+      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track", oppNumber: "OPP-2024-006", closeDate: "Jul 2025" },
+      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention", oppNumber: "OPP-2024-007", closeDate: "Oct 2025" },
+      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track", oppNumber: "OPP-2024-008", closeDate: "May 2025" },
     ],
   },
   {
@@ -74,10 +74,10 @@ const defaultWorkstreams = [
       { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
     ],
     opportunities: [
-      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating", oppNumber: "OPP-2024-009" },
-      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track", oppNumber: "OPP-2024-010" },
-      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track", oppNumber: "OPP-2024-011" },
-      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage", oppNumber: "OPP-2024-012" },
+      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating", oppNumber: "OPP-2024-009", closeDate: "Feb 2025" },
+      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track", oppNumber: "OPP-2024-010", closeDate: "May 2025" },
+      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track", oppNumber: "OPP-2024-011", closeDate: "Aug 2025" },
+      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage", oppNumber: "OPP-2024-012", closeDate: "Nov 2025" },
     ],
   },
 ];
@@ -131,14 +131,20 @@ export const WorkstreamDetailSlide = () => {
         insight: bet.insight,
         people: bet.people || [],
         // Generate sample opportunities based on products if not defined
-        opportunities: bet.products?.map((product, idx) => ({
-          name: `${product} Implementation`,
-          value: `$${(Math.random() * 1.5 + 0.2).toFixed(1)}M`,
-          stage: ["Qualification", "Discovery", "Proposal", "Negotiation"][idx % 4],
-          probability: Math.floor(Math.random() * 40 + 40),
-          status: ["On Track", "Accelerating", "Needs Attention", "On Track"][idx % 4],
-          oppNumber: `OPP-${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
-        })) || [],
+        opportunities: bet.products?.map((product, idx) => {
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const closeMonth = months[(new Date().getMonth() + idx + 2) % 12];
+          const closeYear = new Date().getFullYear() + (new Date().getMonth() + idx + 2 >= 12 ? 1 : 0);
+          return {
+            name: `${product} Implementation`,
+            value: `$${(Math.random() * 1.5 + 0.2).toFixed(1)}M`,
+            stage: ["Qualification", "Discovery", "Proposal", "Negotiation"][idx % 4],
+            probability: Math.floor(Math.random() * 40 + 40),
+            status: ["On Track", "Accelerating", "Needs Attention", "On Track"][idx % 4],
+            oppNumber: `OPP-${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
+            closeDate: `${closeMonth} ${closeYear}`,
+          };
+        }) || [],
       }))
     : defaultWorkstreams;
 
@@ -246,14 +252,20 @@ export const WorkstreamDetailSlide = () => {
                       <span className="text-lg font-bold text-primary">{opp.value}</span>
                     </div>
 
-                    {/* Opportunity Number */}
-                    {opp.oppNumber && (
-                      <div className="mb-2">
+                    {/* Opportunity Number & Close Date */}
+                    <div className="flex items-center justify-between mb-2">
+                      {opp.oppNumber && (
                         <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
                           {opp.oppNumber}
                         </span>
-                      </div>
-                    )}
+                      )}
+                      {opp.closeDate && (
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {opp.closeDate}
+                        </span>
+                      )}
+                    </div>
 
                     {/* Opportunity Name */}
                     <h4 className="font-semibold text-sm text-foreground mb-2 leading-tight">{opp.name}</h4>
