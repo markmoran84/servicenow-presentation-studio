@@ -1,4 +1,5 @@
 import { useAccountData, StrategicPillar } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { Anchor, Cpu, Users, Zap, LucideIcon, ArrowRight, Sparkles } from "lucide-react";
 
 const iconMap: Record<StrategicPillar["icon"], LucideIcon> = {
@@ -43,6 +44,7 @@ export const ExecutiveSummarySlide = () => {
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-semibold">
                 Executive Summary
               </span>
+              <RegenerateSectionButton section="executiveSummary" />
               {isAIGenerated && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
                   <Sparkles className="w-3 h-3" />

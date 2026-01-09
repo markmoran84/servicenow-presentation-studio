@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { Zap, TrendingUp, Calendar, Users, Lightbulb, Sparkles } from "lucide-react";
 
 const defaultExecutives = [
@@ -93,6 +94,7 @@ export const BigBetsSlide = () => {
           <p className="text-muted-foreground mt-1">Aligning stakeholders to accelerate impact and outcomes</p>
         </div>
         <div className="flex items-center gap-2">
+          <RegenerateSectionButton section="keyWorkstreams" />
           {isAIGenerated && (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
               <Sparkles className="w-3 h-3" />
