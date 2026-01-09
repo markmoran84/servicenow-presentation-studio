@@ -4,6 +4,7 @@ import { Building2, Users, DollarSign, TrendingUp, Globe, Calendar, Target, Brie
 export const CustomerSnapshotSlide = () => {
   const { data } = useAccountData();
   const { basics, financial } = data;
+  const competitors = data.businessModel.competitors || [];
 
   const metrics = [
     {
@@ -100,6 +101,23 @@ export const CustomerSnapshotSlide = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Competitive Landscape */}
+              {competitors.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <p className="text-xs text-muted-foreground mb-2">Competitive Landscape</p>
+                  <div className="flex flex-wrap gap-2">
+                    {competitors.map((competitor, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-sm font-medium border border-red-500/20"
+                      >
+                        {competitor}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
