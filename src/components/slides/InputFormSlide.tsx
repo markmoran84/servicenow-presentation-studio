@@ -1289,6 +1289,7 @@ interface AccountStrategyTabProps {
 
 const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
   const [isGeneratingStrategy, setIsGeneratingStrategy] = useState(false);
+  const [generatingBetIndex, setGeneratingBetIndex] = useState<number | null>(null);
 
   const handleGenerateStrategy = async () => {
     setIsGeneratingStrategy(true);
@@ -1312,6 +1313,46 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
       toast.error(error instanceof Error ? error.message : "Failed to generate strategy", { id: "gen-strategy" });
     } finally {
       setIsGeneratingStrategy(false);
+    }
+  };
+
+  const handleGenerateBigBet = async (betIndex: number) => {
+    setGeneratingBetIndex(betIndex);
+    try {
+      toast.loading("Generating Big Bet with AI...", { id: `gen-bet-${betIndex}` });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-big-bet", {
+        body: { 
+          accountData: data,
+          existingBets: data.accountStrategy?.bigBets || [],
+          betIndex
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate Big Bet");
+
+      const generatedBet = responseData.bigBet;
+      const newBets = [...(data.accountStrategy?.bigBets || [])];
+      newBets[betIndex] = {
+        ...newBets[betIndex],
+        title: generatedBet.title || newBets[betIndex].title,
+        subtitle: generatedBet.subtitle || newBets[betIndex].subtitle,
+        dealStatus: generatedBet.dealStatus || newBets[betIndex].dealStatus,
+        targetClose: generatedBet.targetClose || newBets[betIndex].targetClose,
+        netNewACV: generatedBet.netNewACV || newBets[betIndex].netNewACV,
+        steadyStateBenefit: generatedBet.steadyStateBenefit || newBets[betIndex].steadyStateBenefit,
+        insight: generatedBet.insight || newBets[betIndex].insight,
+        people: newBets[betIndex].people || [],
+      };
+      
+      updateData("accountStrategy", { bigBets: newBets });
+      toast.success("Big Bet generated!", { id: `gen-bet-${betIndex}` });
+    } catch (error) {
+      console.error("Big Bet generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate Big Bet", { id: `gen-bet-${betIndex}` });
+    } finally {
+      setGeneratingBetIndex(null);
     }
   };
 
@@ -1497,15 +1538,36 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
             <div key={betIndex} className="p-4 rounded-lg bg-secondary/30 border border-border/30 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-primary">Big Bet #{betIndex + 1}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeBigBet(betIndex)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Remove
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleGenerateBigBet(betIndex)}
+                    disabled={generatingBetIndex === betIndex}
+                    className="gap-1"
+                  >
+                    {generatingBetIndex === betIndex ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3" />
+                        AI Generate
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeBigBet(betIndex)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Remove
+                  </Button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
