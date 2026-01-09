@@ -1,6 +1,7 @@
-import { Zap, TrendingUp, Calendar, Users, Lightbulb } from "lucide-react";
+import { useAccountData } from "@/context/AccountDataContext";
+import { Zap, TrendingUp, Calendar, Users, Lightbulb, Sparkles } from "lucide-react";
 
-const executives = [
+const defaultExecutives = [
   { name: "Vincent Clerc", role: "CEO MAERSK" },
   { name: "Navneet Kapoor", role: "EVP & CTIO" },
   { name: "Narin Pohl", role: "EVP & CPO L&S" },
@@ -9,37 +10,33 @@ const executives = [
   { name: "Bill McDermott", role: "CEO ServiceNow" },
 ];
 
-const workstreams = [
+const defaultWorkstreams = [
   {
-    title: "Maersk Line Ocean – SFDC Takeout",
-    subtitle: "CRM Modernisation & Service Cloud",
+    title: "CRM Modernisation",
+    subtitle: "Customer Service Platform",
     dealClose: "Q1 2026",
     dealStatus: "Active Pursuit",
     statusColor: "bg-primary",
-    insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
+    insight: "Primary commercial wedge. Direct alignment to customer experience priorities.",
     netNewACV: "$5M",
     steadyStateBenefit: "$565M",
     people: [
-      { name: "Tan Gill", role: "SVP, IT Logistics" },
-      { name: "Mark Graham", role: "SVP, IT Logistics" },
-      { name: "Arjun Ghattaura", role: "Procurement Lead" },
-      { name: "Sarah Sharples", role: "Head of strategic vendors" },
+      { name: "IT Lead", role: "SVP, IT" },
+      { name: "Procurement Lead", role: "Strategic Sourcing" },
     ],
   },
   {
-    title: "AI Use Cases & Workflow Automation",
+    title: "AI Use Cases & Automation",
     subtitle: "Operationalising AI-First Strategy",
     dealClose: "Q2 2026",
     dealStatus: "Strategic Initiative",
     statusColor: "bg-accent",
-    insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
+    insight: "Position as the operationalisation layer for AI — connecting intelligence to automated workflows.",
     netNewACV: "$2M",
     steadyStateBenefit: "TBD",
     people: [
-      { name: "Jakob Skovsgaard", role: "Head of CX" },
-      { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
-      { name: "Oscar Ohde", role: "AI Platform Owner" },
-      { name: "Sunil Kumar", role: "Engineering Director" },
+      { name: "CX Lead", role: "Head of CX" },
+      { name: "AI Lead", role: "AI Platform Owner" },
     ],
   },
   {
@@ -48,18 +45,45 @@ const workstreams = [
     dealClose: "Q3 2026",
     dealStatus: "Foundation Growth",
     statusColor: "bg-blue-500",
-    insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
+    insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Unified visibility required.",
     netNewACV: "$3M",
     steadyStateBenefit: "$320M",
     people: [
-      { name: "Scott Horn", role: "SVP, IT Logistics" },
-      { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
-      { name: "Geoffrey Breed", role: "Director FbM Platform" },
+      { name: "Security Lead", role: "CISO" },
+      { name: "Ops Lead", role: "Director Platform" },
     ],
   },
 ];
 
 export const BigBetsSlide = () => {
+  const { data } = useAccountData();
+  const { generatedPlan, engagement } = data;
+
+  // Use AI-generated workstreams if available
+  const isAIGenerated = !!generatedPlan?.keyWorkstreams;
+  const workstreams = generatedPlan?.keyWorkstreams?.map((ws, idx) => ({
+    title: ws.title,
+    subtitle: ws.subtitle || "Strategic Initiative",
+    dealClose: ws.targetClose,
+    dealStatus: ws.dealStatus || (idx === 0 ? "Active Pursuit" : idx === 1 ? "Strategic Initiative" : "Foundation Growth"),
+    statusColor: idx === 0 ? "bg-primary" : idx === 1 ? "bg-accent" : "bg-blue-500",
+    insight: ws.insight,
+    netNewACV: ws.acv,
+    steadyStateBenefit: ws.steadyStateBenefit || "TBD",
+    people: ws.people || [],
+  })) || defaultWorkstreams;
+
+  // Get executives from engagement data or use defaults
+  const executives = engagement.knownExecutiveSponsors.length > 0
+    ? engagement.knownExecutiveSponsors.slice(0, 6).map(sponsor => {
+        const parts = sponsor.split("(");
+        return {
+          name: parts[0].trim(),
+          role: parts[1]?.replace(")", "") || "Executive Sponsor",
+        };
+      })
+    : defaultExecutives;
+
   return (
     <div className="px-8 pt-6 pb-32">
       {/* Header */}
@@ -68,8 +92,16 @@ export const BigBetsSlide = () => {
           <h1 className="text-4xl font-bold text-foreground">Key Transformation Workstreams</h1>
           <p className="text-muted-foreground mt-1">Aligning stakeholders to accelerate impact and outcomes</p>
         </div>
-        <div className="pill-badge">
-          FY26 Big Bets
+        <div className="flex items-center gap-2">
+          {isAIGenerated && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+              <Sparkles className="w-3 h-3" />
+              AI Generated
+            </span>
+          )}
+          <div className="pill-badge">
+            FY26 Big Bets
+          </div>
         </div>
       </div>
 
@@ -94,8 +126,6 @@ export const BigBetsSlide = () => {
               <span className="text-[9px] text-muted-foreground">{exec.role}</span>
             </div>
           ))}
-          {/* Connection line */}
-          <div className="absolute left-[10%] right-[10%] top-[60px] h-0.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30 -z-10" />
         </div>
       </div>
 
@@ -137,11 +167,11 @@ export const BigBetsSlide = () => {
             <div className="p-4 bg-secondary/30 border-b border-border/30">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[9px] text-muted-foreground block mb-0.5">Net new annual contract value</span>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Net new ACV</span>
                   <span className="text-xl font-bold text-gradient">{stream.netNewACV}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] text-muted-foreground block mb-0.5">Steady-state benefit (Annual)</span>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Steady-state benefit</span>
                   <span className="text-xl font-bold text-gradient-accent">{stream.steadyStateBenefit}</span>
                 </div>
               </div>
@@ -155,27 +185,29 @@ export const BigBetsSlide = () => {
             </div>
 
             {/* People Section */}
-            <div className="p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Users className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">People</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {stream.people.map((person) => (
-                  <div key={person.name} className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[8px] font-bold text-foreground">
-                        {person.name.split(' ').map(n => n[0]).join('')}
-                      </span>
+            {stream.people.length > 0 && (
+              <div className="p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Users className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">People</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {stream.people.slice(0, 4).map((person) => (
+                    <div key={person.name} className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[8px] font-bold text-foreground">
+                          {person.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-medium text-foreground block truncate">{person.name}</span>
+                        <span className="text-[9px] text-muted-foreground block truncate">{person.role}</span>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-medium text-foreground block truncate">{person.name}</span>
-                      <span className="text-[9px] text-muted-foreground block truncate">{person.role}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
@@ -186,7 +218,7 @@ export const BigBetsSlide = () => {
           <Zap className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1">
-          <span className="text-sm font-semibold text-foreground">CRM Modernisation is the Primary Commercial Wedge</span>
+          <span className="text-sm font-semibold text-foreground">{workstreams[0]?.title} is the Primary Commercial Wedge</span>
           <span className="text-sm text-muted-foreground ml-2">— Q1 FY26 priority. Success unlocks multi-workflow expansion.</span>
         </div>
         <div className="text-right">

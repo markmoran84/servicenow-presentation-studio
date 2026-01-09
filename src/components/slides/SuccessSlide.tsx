@@ -1,12 +1,24 @@
-import { Trophy, CheckCircle, TrendingUp, Target } from "lucide-react";
+import { useAccountData } from "@/context/AccountDataContext";
+import { Trophy, Sparkles } from "lucide-react";
+
+const defaultOutcomes = [
+  { metric: "$15-20M", label: "Annual cost savings", description: "Through platform consolidation and automation" },
+  { metric: "+15pts", label: "CSAT improvement", description: "AI-augmented customer experience" },
+  { metric: "5x", label: "Faster AI deployment", description: "Unified operationalisation layer" },
+  { metric: "50%", label: "Reduced resolution time", description: "Intelligent automation and routing" },
+];
 
 export const SuccessSlide = () => {
-  const outcomes = [
-    { metric: "$15-20M", label: "Annual cost savings", description: "Through platform consolidation and automation" },
-    { metric: "+15pts", label: "CSAT improvement", description: "AI-augmented customer experience" },
-    { metric: "5x", label: "Faster AI deployment", description: "Unified operationalisation layer" },
-    { metric: "50%", label: "Reduced resolution time", description: "Intelligent automation and routing" },
-  ];
+  const { data } = useAccountData();
+  const { generatedPlan, basics } = data;
+
+  // Use AI-generated success metrics if available
+  const isAIGenerated = !!generatedPlan?.successMetrics;
+  const outcomes = generatedPlan?.successMetrics?.map(m => ({
+    metric: m.metric,
+    label: m.label,
+    description: m.description,
+  })) || defaultOutcomes;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32 flex items-center">
@@ -19,6 +31,12 @@ export const SuccessSlide = () => {
             <h1 className="text-4xl font-bold text-foreground">What Success Looks Like</h1>
             <p className="text-muted-foreground text-lg">Measurable outcomes and strategic positioning</p>
           </div>
+          {isAIGenerated && (
+            <span className="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+              <Sparkles className="w-3 h-3" />
+              AI Generated
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-6 mb-8">
@@ -34,7 +52,7 @@ export const SuccessSlide = () => {
         <div className="glass-card p-8 text-center border-t-4 border-t-accent">
           <h3 className="text-2xl font-bold text-foreground mb-4">Strategic Vision</h3>
           <p className="text-lg text-muted-foreground">
-            ServiceNow becomes Maersk's enterprise workflow backbone — enabling AI operationalisation, 
+            ServiceNow becomes {basics.accountName}'s enterprise workflow backbone — enabling AI operationalisation, 
             customer experience excellence, and cost efficiency at global scale.
           </p>
         </div>

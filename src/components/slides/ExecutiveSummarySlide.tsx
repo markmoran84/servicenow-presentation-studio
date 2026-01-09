@@ -1,5 +1,5 @@
 import { useAccountData, StrategicPillar } from "@/context/AccountDataContext";
-import { Anchor, Cpu, Users, Zap, LucideIcon, ArrowRight } from "lucide-react";
+import { Anchor, Cpu, Users, Zap, LucideIcon, ArrowRight, Sparkles } from "lucide-react";
 
 const iconMap: Record<StrategicPillar["icon"], LucideIcon> = {
   network: Anchor,
@@ -24,10 +24,14 @@ const borderColors = [
 
 export const ExecutiveSummarySlide = () => {
   const { data } = useAccountData();
-  const { basics, annualReport } = data;
+  const { basics, annualReport, generatedPlan } = data;
 
   const companyName = basics.accountName.split(" ").pop()?.toUpperCase() || "PARTNER";
-  const pillars = annualReport.strategicPillars || [];
+  
+  // Use AI-generated pillars if available, otherwise fall back to annual report data
+  const pillars = generatedPlan?.executiveSummaryPillars || annualReport.strategicPillars || [];
+  const narrative = generatedPlan?.executiveSummaryNarrative || annualReport.executiveSummaryNarrative;
+  const isAIGenerated = !!generatedPlan?.executiveSummaryPillars;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
@@ -35,10 +39,16 @@ export const ExecutiveSummarySlide = () => {
         {/* Header with badge */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <div className="mb-3 opacity-0 animate-fade-in">
+            <div className="mb-3 opacity-0 animate-fade-in flex items-center gap-2">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-semibold">
                 Executive Summary
               </span>
+              {isAIGenerated && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+                  <Sparkles className="w-3 h-3" />
+                  AI Generated
+                </span>
+              )}
             </div>
             <h1 
               className="text-5xl md:text-6xl font-bold tracking-tight mb-4 opacity-0 animate-fade-in"
@@ -69,7 +79,7 @@ export const ExecutiveSummarySlide = () => {
             <div>
               <h3 className="font-semibold text-foreground mb-2">Strategic Vision</h3>
               <p className="text-foreground/80 leading-relaxed">
-                {annualReport.executiveSummaryNarrative}
+                {narrative}
               </p>
             </div>
           </div>

@@ -1,59 +1,78 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { Zap, Users, DollarSign, Cpu, ArrowRight } from "lucide-react";
+import { Zap, Users, DollarSign, Cpu, ArrowRight, Sparkles, LucideIcon } from "lucide-react";
+
+const iconMap: Record<string, LucideIcon> = {
+  dollarsign: DollarSign,
+  zap: Zap,
+  users: Users,
+  cpu: Cpu,
+};
+
+const defaultValueDrivers = [
+  {
+    icon: DollarSign,
+    title: "Reduce Cost-to-Serve",
+    description: "Platform consolidation and workflow automation eliminate redundant systems and manual processes",
+    outcomes: [
+      "30% reduction in manual case handling",
+      "Tool consolidation savings",
+      "Operational efficiency gains",
+    ],
+    alignment: "Cost Discipline",
+    color: "primary",
+  },
+  {
+    icon: Zap,
+    title: "Unlock Commercial Agility",
+    description: "Unified CRM enables faster quote-to-cash and improved pipeline visibility",
+    outcomes: [
+      "50% faster quote generation",
+      "Real-time pipeline analytics",
+      "Cross-sell opportunity identification",
+    ],
+    alignment: "Customer Centricity",
+    color: "accent",
+  },
+  {
+    icon: Users,
+    title: "Elevate Customer Experience",
+    description: "AI-augmented service delivery with predictive routing and proactive engagement",
+    outcomes: [
+      "15pt CSAT improvement",
+      "Reduced resolution time",
+      "Proactive issue prevention",
+    ],
+    alignment: "All the Way",
+    color: "primary",
+  },
+  {
+    icon: Cpu,
+    title: "Embed AI as Core Capability",
+    description: "Workflow platform as the operationalisation layer for enterprise AI",
+    outcomes: [
+      "AI use cases in production",
+      "Governance and control",
+      "Scalable AI infrastructure",
+    ],
+    alignment: "AI-First Operations",
+    color: "accent",
+  },
+];
 
 export const CoreValueDriversSlide = () => {
   const { data } = useAccountData();
+  const { generatedPlan } = data;
 
-  const valueDrivers = [
-    {
-      icon: DollarSign,
-      title: "Reduce Cost-to-Serve",
-      description: "Platform consolidation and workflow automation eliminate redundant systems and manual processes",
-      outcomes: [
-        "30% reduction in manual case handling",
-        "Tool consolidation savings",
-        "Operational efficiency gains",
-      ],
-      alignment: data.strategy.corporateStrategy[0]?.title || "Cost Discipline",
-      color: "primary",
-    },
-    {
-      icon: Zap,
-      title: "Unlock Commercial Agility",
-      description: "Unified CRM enables faster quote-to-cash and improved pipeline visibility",
-      outcomes: [
-        "50% faster quote generation",
-        "Real-time pipeline analytics",
-        "Cross-sell opportunity identification",
-      ],
-      alignment: "Customer Centricity",
-      color: "accent",
-    },
-    {
-      icon: Users,
-      title: "Elevate Customer Experience",
-      description: "AI-augmented service delivery with predictive routing and proactive engagement",
-      outcomes: [
-        "15pt CSAT improvement",
-        "Reduced resolution time",
-        "Proactive issue prevention",
-      ],
-      alignment: "All the Way",
-      color: "primary",
-    },
-    {
-      icon: Cpu,
-      title: "Embed AI as Core Capability",
-      description: "Workflow platform as the operationalisation layer for enterprise AI",
-      outcomes: [
-        "AI use cases in production",
-        "Governance and control",
-        "Scalable AI infrastructure",
-      ],
-      alignment: "AI-First Operations",
-      color: "accent",
-    },
-  ];
+  // Use AI-generated value drivers if available
+  const isAIGenerated = !!generatedPlan?.coreValueDrivers;
+  const valueDrivers = generatedPlan?.coreValueDrivers?.map((driver, idx) => ({
+    icon: idx === 0 ? DollarSign : idx === 1 ? Zap : idx === 2 ? Users : Cpu,
+    title: driver.title,
+    description: driver.description,
+    outcomes: driver.outcomes || [],
+    alignment: driver.alignment,
+    color: idx % 2 === 0 ? "primary" : "accent",
+  })) || defaultValueDrivers;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
@@ -67,8 +86,16 @@ export const CoreValueDriversSlide = () => {
             <h1 className="text-4xl font-bold text-foreground">Core Value Drivers</h1>
             <p className="text-muted-foreground text-lg">Four pillars of strategic value creation</p>
           </div>
-          <div className="ml-auto pill-badge">
-            Slide 11
+          <div className="ml-auto flex items-center gap-2">
+            {isAIGenerated && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+                <Sparkles className="w-3 h-3" />
+                AI Generated
+              </span>
+            )}
+            <div className="pill-badge">
+              Slide 11
+            </div>
           </div>
         </div>
 
