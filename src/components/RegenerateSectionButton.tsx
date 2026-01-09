@@ -16,7 +16,10 @@ export type RegeneratablePlanSection =
   | "strategicObservations"
   | "strategicImplications"
   | "valueHypotheses"
-  | "risksMitigations";
+  | "risksMitigations"
+  | "fy1Retrospective"
+  | "customerStrategySynthesis"
+  | "weeklyUpdateContext";
 
 const sectionMeta: Record<
   RegeneratablePlanSection,
@@ -65,6 +68,18 @@ const sectionMeta: Record<
   risksMitigations: {
     label: "Risks & Mitigations",
     planKeys: ["risksMitigations"],
+  },
+  fy1Retrospective: {
+    label: "FY-1 Retrospective",
+    planKeys: ["fy1Retrospective"],
+  },
+  customerStrategySynthesis: {
+    label: "Customer Strategy Synthesis",
+    planKeys: ["customerStrategySynthesis"],
+  },
+  weeklyUpdateContext: {
+    label: "Weekly Update",
+    planKeys: ["weeklyUpdateContext"],
   },
 };
 

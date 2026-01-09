@@ -102,6 +102,9 @@ Generate a comprehensive, enterprise-grade account plan with the following secti
 13. successMetrics: Array of 4 metrics (each with "metric", "label", "description")
 14. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 strings, "alignment")
 15. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status" as "Pilot Ready"|"Discovery"|"Scoped"|"Planned")
+16. fy1Retrospective: Object with "focusAreas" (array of 4 objects with "title" and "description"), "keyLessons" (string summarizing what was learned), "lookingAhead" (string about how FY-1 sets up FY+1)
+17. customerStrategySynthesis: Object with "narrative" (2-3 sentence synthesis of customer strategy and ServiceNow alignment), "serviceNowAlignment" (array of 4 objects with "customerPriority" and "serviceNowValue" showing how ServiceNow addresses each priority)
+18. weeklyUpdateContext: Object with "overallStatus" ("On Track"|"At Risk"|"Blocked"), "keyHighlights" (array of 3 key points for stakeholder update), "criticalActions" (array of 2-3 decisions or actions needed)
 
 Return ONLY valid JSON, no markdown formatting.`;
 

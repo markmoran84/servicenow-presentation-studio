@@ -180,6 +180,12 @@ export interface AIGeneratedPlan {
   successMetrics: { metric: string; label: string; description: string }[];
   coreValueDrivers?: { title: string; description: string; outcomes: string[]; alignment: string }[];
   aiUseCases?: { title: string; description: string; priority: string; status: string }[];
+  // FY-1 Retrospective AI-generated content
+  fy1Retrospective?: { focusAreas: { title: string; description: string }[]; keyLessons: string; lookingAhead: string };
+  // Customer Strategy AI synthesis
+  customerStrategySynthesis?: { narrative: string; serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] };
+  // Weekly Update dynamic content
+  weeklyUpdateContext?: { overallStatus: string; keyHighlights: string[]; criticalActions: string[] };
 }
 
 export interface AccountData {
