@@ -163,13 +163,24 @@ export interface BusinessModelCanvas {
   competitors: string[];
 }
 
+// Strategic Tension interface for StrategicTensionSlide
+export interface StrategicTension {
+  heading: string;
+  detail: string;
+  leftLabel: string;
+  leftDescription: string;
+  rightLabel: string;
+  rightDescription: string;
+  dilemma: string;
+}
+
 // AI-Generated Strategic Plan Content
 export interface AIGeneratedPlan {
   executiveSummaryNarrative: string;
   executiveSummaryPillars?: { icon: "network" | "customer" | "technology" | "efficiency"; keyword: string; title: string; tagline: string; description: string; outcome: string }[];
   strategicObservations: { heading: string; detail: string }[];
   strategicImplications: { heading: string; detail: string }[];
-  strategicTensions: { heading: string; detail: string }[];
+  strategicTensions: StrategicTension[];
   strategicInsights: { heading: string; detail: string }[];
   valueHypotheses: { outcome: string; mechanism: string; timeframe: string; impact: string }[];
   strategicPriorities: { title: string; whyNow: string; ifWeLose: string; winningLooks?: string; alignment?: string; color?: string }[];
@@ -186,6 +197,16 @@ export interface AIGeneratedPlan {
   customerStrategySynthesis?: { narrative: string; serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] };
   // Weekly Update dynamic content
   weeklyUpdateContext?: { overallStatus: string; keyHighlights: string[]; criticalActions: string[] };
+  // Marketing Plan AI-generated content
+  marketingPlan?: { campaigns: { title: string; description: string; timeline: string; channels: string[] }[]; narrative: string };
+  // Insight AI-generated content
+  insight?: { headline: string; observations: { title: string; detail: string }[]; recommendation: string };
+  // Platform Capabilities AI-generated content
+  platformCapabilities?: { capabilities: { title: string; description: string; value: string }[]; narrative: string };
+  // Risk Opportunity Matrix AI-generated content
+  riskOpportunityMatrix?: { items: { title: string; type: "risk" | "opportunity"; impact: string; likelihood: string; mitigation?: string }[]; narrative: string };
+  // Strategic Alignment AI-generated content
+  strategicAlignment?: { alignments: { customerObjective: string; serviceNowCapability: string; outcome: string }[]; narrative: string };
 }
 
 export interface AccountData {

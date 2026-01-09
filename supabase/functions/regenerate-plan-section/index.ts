@@ -15,11 +15,17 @@ type Section =
   | "roadmapPhases"
   | "strategicObservations"
   | "strategicImplications"
+  | "strategicTensions"
   | "valueHypotheses"
   | "risksMitigations"
   | "fy1Retrospective"
   | "customerStrategySynthesis"
-  | "weeklyUpdateContext";
+  | "weeklyUpdateContext"
+  | "marketingPlan"
+  | "insight"
+  | "platformCapabilities"
+  | "riskOpportunityMatrix"
+  | "strategicAlignment";
 
 const sectionSpecs: Record<
   Section,
@@ -88,6 +94,13 @@ const sectionSpecs: Record<
     outputShapeHint:
       '{"strategicImplications":[{"heading":"Workflow Automation","detail":"Manual processes cannot scale with AI ambition. Every workflow must be automatable."}]}',
   },
+  strategicTensions: {
+    keys: ["strategicTensions"],
+    instruction:
+      "Create exactly 4 strategic tensions the customer faces. Each tension represents opposing forces that must be balanced. Include heading, detail, leftLabel (one side of tension), leftDescription, rightLabel (opposing side), rightDescription, and dilemma (the core challenge).",
+    outputShapeHint:
+      '{"strategicTensions":[{"heading":"Speed vs. Stability","detail":"The pressure to innovate rapidly conflicts with the need for operational reliability.","leftLabel":"Innovation Speed","leftDescription":"Rapid deployment of new capabilities to stay competitive","rightLabel":"Operational Stability","rightDescription":"Maintaining reliable systems and avoiding disruption","dilemma":"How to accelerate innovation without destabilizing core operations?"}]}',
+  },
   valueHypotheses: {
     keys: ["valueHypotheses"],
     instruction:
@@ -122,6 +135,41 @@ const sectionSpecs: Record<
       "Generate weekly update context based on the account's current situation. Include overallStatus (On Track/At Risk/Blocked), 3 keyHighlights for stakeholder communication, and 2-3 criticalActions that need decisions.",
     outputShapeHint:
       '{"weeklyUpdateContext":{"overallStatus":"On Track","keyHighlights":["Secured executive sponsorship for CRM initiative","Technical discovery completed"],"criticalActions":["Approval needed for expanded POC scope","Alignment on contract structure"]}}',
+  },
+  marketingPlan: {
+    keys: ["marketingPlan"],
+    instruction:
+      "Create a marketing plan with exactly 3 campaigns (each with title, description, timeline, and channels array) and a 2-3 sentence narrative describing the overall marketing approach for this account.",
+    outputShapeHint:
+      '{"marketingPlan":{"campaigns":[{"title":"Executive Engagement Series","description":"Quarterly C-suite briefings on digital transformation trends","timeline":"Q1-Q4 FY26","channels":["Executive Events","Webinars","1:1 Meetings"]}],"narrative":"Our marketing approach focuses on executive education and thought leadership..."}}',
+  },
+  insight: {
+    keys: ["insight"],
+    instruction:
+      "Create a strategic insight with a provocative headline that captures a key revelation about the account, 3 supporting observations (each with title and detail), and an actionable recommendation.",
+    outputShapeHint:
+      '{"insight":{"headline":"The Hidden Cost of Fragmentation","observations":[{"title":"Siloed Systems","detail":"Customer operates 47 disconnected workflow tools"}],"recommendation":"Propose unified platform assessment to quantify consolidation opportunity"}}',
+  },
+  platformCapabilities: {
+    keys: ["platformCapabilities"],
+    instruction:
+      "Create exactly 4 platform capabilities that address the customer's needs. Each capability should have a title, description of what it does, and value explaining the business impact. Include a 2-3 sentence narrative on overall platform strategy.",
+    outputShapeHint:
+      '{"platformCapabilities":{"capabilities":[{"title":"Workflow Automation Engine","description":"Orchestrate complex multi-step processes across departments","value":"Reduces manual handoffs by 80%, accelerating resolution times"}],"narrative":"ServiceNow\'s platform provides a unified foundation for digital transformation..."}}',
+  },
+  riskOpportunityMatrix: {
+    keys: ["riskOpportunityMatrix"],
+    instruction:
+      "Create a risk/opportunity matrix with exactly 6 items (mix of risks and opportunities). Each item needs title, type (risk or opportunity), impact (High/Medium/Low), likelihood (High/Medium/Low), and mitigation for risks. Include a summary narrative.",
+    outputShapeHint:
+      '{"riskOpportunityMatrix":{"items":[{"title":"Competitor Displacement","type":"opportunity","impact":"High","likelihood":"Medium"},{"title":"Budget Constraints","type":"risk","impact":"High","likelihood":"Medium","mitigation":"Phase implementation to spread costs across fiscal years"}],"narrative":"The account presents a balanced risk/opportunity profile with significant upside potential..."}}',
+  },
+  strategicAlignment: {
+    keys: ["strategicAlignment"],
+    instruction:
+      "Create exactly 4 strategic alignment pairs showing how ServiceNow capabilities map to customer objectives. Each pair should have customerObjective, serviceNowCapability, and expected outcome. Include a 2-3 sentence narrative on strategic fit.",
+    outputShapeHint:
+      '{"strategicAlignment":{"alignments":[{"customerObjective":"Reduce operational costs by 20%","serviceNowCapability":"IT Service Management automation","outcome":"Projected 25% reduction in IT support costs within 18 months"}],"narrative":"ServiceNow\'s capabilities directly address the customer\'s strategic imperatives..."}}',
   },
 };
 

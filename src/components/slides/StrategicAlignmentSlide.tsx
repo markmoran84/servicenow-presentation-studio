@@ -1,18 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Target, Building2, Users, Zap, CheckCircle2, Info, Sparkles, LucideIcon } from "lucide-react";
-
-const iconMap: Record<string, LucideIcon> = {
-  building2: Building2,
-  users: Users,
-  zap: Zap,
-  checkcircle2: CheckCircle2,
-};
-
-const colorMap: Record<string, string> = {
-  primary: "primary",
-  accent: "accent",
-};
+import { Target, ArrowRight, Info, Sparkles, CheckCircle2 } from "lucide-react";
 
 export const StrategicAlignmentSlide = () => {
   const { data } = useAccountData();
@@ -20,9 +8,11 @@ export const StrategicAlignmentSlide = () => {
   const companyName = basics.accountName || "the customer";
 
   // Use AI-generated strategic alignment if available
-  const isAIGenerated = !!generatedPlan?.strategicAlignment;
-  const alignmentData = generatedPlan?.strategicAlignment || [];
-  const hasAlignment = alignmentData.length > 0;
+  const strategicAlignment = generatedPlan?.strategicAlignment;
+  const isAIGenerated = !!strategicAlignment;
+  const alignments = strategicAlignment?.alignments || [];
+  const narrative = strategicAlignment?.narrative || "";
+  const hasAlignment = alignments.length > 0;
 
   return (
     <div className="px-8 pt-6 pb-32">
@@ -51,56 +41,53 @@ export const StrategicAlignmentSlide = () => {
 
       {hasAlignment ? (
         <>
-          {/* Four Column Grid */}
-          <div className="grid grid-cols-4 gap-4">
-            {alignmentData.slice(0, 4).map((column, colIndex) => {
-              const IconComponent = iconMap[column.icon?.toLowerCase()] || Building2;
-              const color = colorMap[column.color?.toLowerCase()] || (colIndex % 2 === 0 ? "primary" : "accent");
-              
-              return (
-                <div
-                  key={column.category}
-                  className="opacity-0 animate-fade-in"
-                  style={{ animationDelay: `${100 + colIndex * 100}ms` }}
-                >
-                  {/* Column Header */}
-                  <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${
-                    color === 'accent' ? 'border-accent' : 'border-primary'
-                  }`}>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      color === 'accent' 
-                        ? 'bg-accent/20' 
-                        : 'bg-primary/20'
-                    }`}>
-                      <IconComponent className={`w-4 h-4 ${
-                        color === 'accent' ? 'text-accent' : 'text-primary'
-                      }`} />
-                    </div>
-                    <h2 className="font-bold text-foreground text-sm uppercase tracking-wide">
-                      {column.category}
-                    </h2>
+          {/* Narrative */}
+          {narrative && (
+            <div className="glass-card p-6 mb-6 border-l-4 border-l-primary opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
+              <p className="text-foreground/90">{narrative}</p>
+            </div>
+          )}
+
+          {/* Alignment Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {alignments.slice(0, 4).map((alignment, index) => (
+              <div
+                key={index}
+                className="glass-card p-6 opacity-0 animate-fade-in"
+                style={{ animationDelay: `${100 + index * 100}ms` }}
+              >
+                <div className="grid grid-cols-5 gap-4 items-center">
+                  {/* Customer Objective */}
+                  <div className="col-span-2 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider block mb-2">
+                      Customer Objective
+                    </span>
+                    <p className="text-sm font-medium text-foreground">{alignment.customerObjective}</p>
                   </div>
 
-                  {/* Items */}
-                  <div className="space-y-3">
-                    {(column.items || []).map((item, itemIndex) => (
-                      <div
-                        key={item.title}
-                        className="glass-card p-4 hover:border-primary/30 transition-all group"
-                        style={{ animationDelay: `${200 + colIndex * 100 + itemIndex * 50}ms` }}
-                      >
-                        <h3 className="font-semibold text-foreground text-sm mb-1 group-hover:text-primary transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-                    ))}
+                  {/* Arrow */}
+                  <div className="flex justify-center">
+                    <ArrowRight className="w-6 h-6 text-muted-foreground" />
+                  </div>
+
+                  {/* ServiceNow Capability */}
+                  <div className="col-span-2 p-4 rounded-xl bg-accent/5 border border-accent/20">
+                    <span className="text-xs font-semibold text-accent uppercase tracking-wider block mb-2">
+                      Platform Capability
+                    </span>
+                    <p className="text-sm font-medium text-foreground">{alignment.serviceNowCapability}</p>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Outcome */}
+                <div className="mt-4 p-3 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground">{alignment.outcome}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Connection Flow Indicator */}

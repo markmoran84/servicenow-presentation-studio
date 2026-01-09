@@ -15,11 +15,17 @@ export type RegeneratablePlanSection =
   | "roadmapPhases"
   | "strategicObservations"
   | "strategicImplications"
+  | "strategicTensions"
   | "valueHypotheses"
   | "risksMitigations"
   | "fy1Retrospective"
   | "customerStrategySynthesis"
-  | "weeklyUpdateContext";
+  | "weeklyUpdateContext"
+  | "marketingPlan"
+  | "insight"
+  | "platformCapabilities"
+  | "riskOpportunityMatrix"
+  | "strategicAlignment";
 
 const sectionMeta: Record<
   RegeneratablePlanSection,
@@ -61,6 +67,10 @@ const sectionMeta: Record<
     label: "Strategic Implications",
     planKeys: ["strategicImplications"],
   },
+  strategicTensions: {
+    label: "Strategic Tensions",
+    planKeys: ["strategicTensions"],
+  },
   valueHypotheses: {
     label: "Value Hypotheses",
     planKeys: ["valueHypotheses"],
@@ -80,6 +90,26 @@ const sectionMeta: Record<
   weeklyUpdateContext: {
     label: "Weekly Update",
     planKeys: ["weeklyUpdateContext"],
+  },
+  marketingPlan: {
+    label: "Marketing Plan",
+    planKeys: ["marketingPlan"],
+  },
+  insight: {
+    label: "Strategic Insight",
+    planKeys: ["insight"],
+  },
+  platformCapabilities: {
+    label: "Platform Capabilities",
+    planKeys: ["platformCapabilities"],
+  },
+  riskOpportunityMatrix: {
+    label: "Risk/Opportunity Matrix",
+    planKeys: ["riskOpportunityMatrix"],
+  },
+  strategicAlignment: {
+    label: "Strategic Alignment",
+    planKeys: ["strategicAlignment"],
   },
 };
 
