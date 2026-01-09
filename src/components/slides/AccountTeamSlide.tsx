@@ -1,190 +1,176 @@
-import { TeamMemberCard } from "@/components/TeamMemberCard";
-import { ElevateTeamCard } from "@/components/ElevateTeamCard";
+import { useAccountData } from "@/context/AccountDataContext";
 import { SectionHeader } from "@/components/SectionHeader";
-import { SubTeamBadge } from "@/components/SubTeamBadge";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-
-const accountTeamMembers = {
-  leadership: [
-    {
-      name: "Jakob Hjortso",
-      email: "jakob.hjortso@servicenow.com",
-      phone: "+45 2889 0604",
-      role: "Global Client Director",
-      responsibilities: [
-        "Governance and relationship",
-        "Vision and Strategy",
-        "Global team orchestration",
-        "Global commercial oversight",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Manfred Birkhoff",
-      email: "manfred.birkhoff@servicenow.com",
-      phone: "+49 173 2328903",
-      role: "Global Solution Consultant",
-      responsibilities: [
-        "Technology Strategy and Solutions",
-        "Discovery and technical fit",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Sarah Mitchell",
-      email: "sarah.mitchell@servicenow.com",
-      phone: "+44 7700 900123",
-      role: "Strategic Account Manager",
-      responsibilities: [
-        "Commercial strategy execution",
-        "Stakeholder alignment",
-        "Pipeline development",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    },
-  ],
-  extended: [
-    {
-      name: "Ciara Breslin",
-      email: "ciara.breslin@servicenow.com",
-      role: "Account Executive NA",
-      responsibilities: [
-        "Regional commercial administration and execution",
-        "Drives global strategy in local territory",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-      subTeams: ["Solution sales teams", "Commercial and legal support"],
-    },
-    {
-      name: "Markus Maurer",
-      email: "markus.maurer@servicenow.com",
-      role: "Customer Success Executive EMEA",
-      responsibilities: [
-        "Interlock to Post-Sales",
-        "Drives Business Value for customer",
-        "Delivery operating model governance",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      name: "Fikret Uenlue",
-      email: "fikret.uenlue@servicenow.com",
-      role: "Services Account Executive EMEA",
-      responsibilities: [
-        "Point of contact for Expert Services and Success offerings",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face",
-      subTeams: ["Expert services, training", "Impact"],
-    },
-    {
-      name: "Laura Chen",
-      email: "laura.chen@servicenow.com",
-      role: "Solution Consultant APAC",
-      responsibilities: [
-        "Technical solutions for APAC region",
-        "Cross-regional alignment",
-      ],
-      avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face",
-    },
-  ],
-};
-
-const elevateTeam = [
-  {
-    name: "Matthias Gruen",
-    email: "matthias.gruen@servicenow.com",
-    role: "Value Advisory",
-    avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face",
-  },
-  {
-    name: "Manoj Patel",
-    email: "manoj.patel@servicenow.com",
-    role: "Enterprise Architecture",
-    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
-  },
-];
+import { Mail, Phone, Users, Globe, Building2 } from "lucide-react";
 
 export const AccountTeamSlide = () => {
+  const { data } = useAccountData();
+  const extendedTeam = data.basics.extendedTeam || [];
+
+  // Group team members by region
+  const teamByRegion = extendedTeam.reduce((acc, member) => {
+    const region = member.region || "Global";
+    if (!acc[region]) acc[region] = [];
+    acc[region].push(member);
+    return acc;
+  }, {} as Record<string, typeof extendedTeam>);
+
+  const regionOrder = ["Global", "EMEA", "NA", "APAC", "LATAM"];
+  const sortedRegions = Object.keys(teamByRegion).sort(
+    (a, b) => regionOrder.indexOf(a) - regionOrder.indexOf(b)
+  );
+
+  const getRegionColor = (region: string) => {
+    const colors: Record<string, string> = {
+      Global: "from-primary/20 to-primary/5 border-primary/30",
+      EMEA: "from-blue-500/20 to-blue-500/5 border-blue-500/30",
+      NA: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/30",
+      APAC: "from-amber-500/20 to-amber-500/5 border-amber-500/30",
+      LATAM: "from-purple-500/20 to-purple-500/5 border-purple-500/30",
+    };
+    return colors[region] || colors.Global;
+  };
+
+  const getRegionBadgeColor = (region: string) => {
+    const colors: Record<string, string> = {
+      Global: "bg-primary/20 text-primary",
+      EMEA: "bg-blue-500/20 text-blue-400",
+      NA: "bg-emerald-500/20 text-emerald-400",
+      APAC: "bg-amber-500/20 text-amber-400",
+      LATAM: "bg-purple-500/20 text-purple-400",
+    };
+    return colors[region] || colors.Global;
+  };
+
   return (
     <div className="px-8 pt-6 pb-40">
-      <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
-        Global Account Team
-      </h1>
+      <div className="flex items-center gap-4 mb-6 opacity-0 animate-fade-in">
+        <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30">
+          <Users className="w-8 h-8 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">
+            Global Extended Account Team
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Dedicated team of {extendedTeam.length} resources supporting {data.basics.accountName}
+          </p>
+        </div>
+      </div>
 
-      <div className="flex gap-8">
-        <div className="flex-1">
-          <div className="glass-card rounded-2xl p-5">
-            <SectionHeader
-              title="Account Team"
-              description="Fully dedicated team of resources assigned to support Maersk as part of ServiceNow's Marquee program"
-              delay={100}
-            />
+      {extendedTeam.length === 0 ? (
+        <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+          <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Team Members Added</h3>
+          <p className="text-sm text-muted-foreground/70">
+            Add extended team members in the Input Form to populate this slide.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* All team members in a responsive grid */}
+          <div className="glass-card rounded-2xl p-6 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {extendedTeam.map((member, index) => (
+                <div
+                  key={member.email || index}
+                  className={`relative p-4 rounded-xl bg-gradient-to-br ${getRegionColor(member.region || "Global")} border backdrop-blur-sm opacity-0 animate-fade-in transition-all hover:scale-[1.02] hover:shadow-lg`}
+                  style={{ animationDelay: `${200 + index * 50}ms` }}
+                >
+                  {/* Region Badge */}
+                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium ${getRegionBadgeColor(member.region || "Global")}`}>
+                    {member.region || "Global"}
+                  </div>
 
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              {accountTeamMembers.leadership.map((member, index) => (
-                <TeamMemberCard
-                  key={member.email}
-                  {...member}
-                  delay={200 + index * 100}
-                />
-              ))}
-            </div>
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/40 flex items-center justify-center mb-3">
+                    <span className="text-lg font-bold text-primary">
+                      {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                    </span>
+                  </div>
 
-            <div className="flex items-center gap-4 my-4 opacity-0 animate-fade-in" style={{ animationDelay: "400ms" }}>
-              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-              <div className="flex-1 connector-line" />
-              <span className="text-muted-foreground text-sm font-medium px-4">
-                Extended Account Team
-              </span>
-              <div className="flex-1 connector-line" />
-              <ArrowRight className="w-5 h-5 text-muted-foreground" />
-            </div>
+                  {/* Name & Title */}
+                  <h4 className="font-semibold text-foreground text-sm leading-tight">
+                    {member.firstName} {member.lastName}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    {member.title}
+                  </p>
 
-            <div className="grid grid-cols-4 gap-3">
-              {accountTeamMembers.extended.map((member, index) => (
-                <div key={member.email} className="flex flex-col">
-                  <TeamMemberCard
-                    {...member}
-                    delay={500 + index * 100}
-                  />
-                  {member.subTeams && (
-                    <div className="mt-2 space-y-1.5">
-                      {member.subTeams.map((team, teamIndex) => (
-                        <SubTeamBadge
-                          key={team}
-                          label={team}
-                          delay={700 + index * 100 + teamIndex * 50}
-                        />
+                  {/* Contact Info */}
+                  <div className="mt-3 space-y-1">
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="text-primary hover:text-primary/80 text-[10px] flex items-center gap-1.5 truncate transition-colors"
+                    >
+                      <Mail className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{member.email}</span>
+                    </a>
+                    {member.phone && (
+                      <p className="text-muted-foreground text-[10px] flex items-center gap-1.5">
+                        <Phone className="w-3 h-3 flex-shrink-0" />
+                        {member.phone}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Responsibilities */}
+                  {member.responsibilities && member.responsibilities.length > 0 && (
+                    <ul className="mt-3 space-y-0.5">
+                      {member.responsibilities.slice(0, 2).map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="text-[9px] text-muted-foreground flex items-start gap-1"
+                        >
+                          <span className="w-1 h-1 rounded-full bg-primary mt-1 flex-shrink-0" />
+                          <span className="line-clamp-1">{item}</span>
+                        </li>
+                      ))}
+                      {member.responsibilities.length > 2 && (
+                        <li className="text-[9px] text-muted-foreground/60">
+                          +{member.responsibilities.length - 2} more
+                        </li>
+                      )}
+                    </ul>
+                  )}
+
+                  {/* Sub Teams */}
+                  {member.subTeams && member.subTeams.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {member.subTeams.map((team, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 rounded bg-secondary/50 text-[8px] text-muted-foreground"
+                        >
+                          {team}
+                        </span>
                       ))}
                     </div>
                   )}
                 </div>
               ))}
             </div>
-
           </div>
-        </div>
 
-        <div className="w-64 flex-shrink-0">
-          <div className="glass-card rounded-2xl p-5 h-full">
-            <SectionHeader
-              title="Elevate Team"
-              description="Extended team of resources who engage with Marquee customers on building roadmaps and business cases."
-              delay={150}
-            />
-
-            <div className="mt-6 space-y-6">
-              {elevateTeam.map((member, index) => (
-                <ElevateTeamCard
-                  key={member.email}
-                  {...member}
-                  delay={300 + index * 150}
-                />
-              ))}
+          {/* Region Summary */}
+          <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in" style={{ animationDelay: `${200 + extendedTeam.length * 50}ms` }}>
+            {sortedRegions.map((region) => (
+              <div
+                key={region}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r ${getRegionColor(region)} border`}
+              >
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">{region}</span>
+                <span className="text-xs text-muted-foreground">({teamByRegion[region].length})</span>
+              </div>
+            ))}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/30 border border-border/30">
+              <Building2 className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Total</span>
+              <span className="text-xs text-muted-foreground">({extendedTeam.length} members)</span>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -379,6 +379,149 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                     )}
                   </div>
                 </div>
+
+                {/* Extended Team Members for Account Team Slide */}
+                <div className="col-span-2 p-4 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      Extended Account Team (Team Slide - supports 12+ members)
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newMembers = [...(data.basics.extendedTeam || []), { 
+                          firstName: "", 
+                          lastName: "", 
+                          title: "", 
+                          email: "", 
+                          phone: "", 
+                          responsibilities: [], 
+                          subTeams: [],
+                          region: "Global" 
+                        }];
+                        updateData("basics", { extendedTeam: newMembers });
+                      }}
+                      className="gap-2"
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add Team Member
+                    </Button>
+                  </div>
+                  <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    {(data.basics.extendedTeam || []).map((member, index) => (
+                      <div key={index} className="p-3 rounded-lg bg-background/50 border border-border/20 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-muted-foreground">Team Member {index + 1}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newMembers = data.basics.extendedTeam.filter((_, i) => i !== index);
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2"
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Remove
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          <Input
+                            placeholder="First Name"
+                            value={member.firstName}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], firstName: e.target.value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          />
+                          <Input
+                            placeholder="Last Name"
+                            value={member.lastName}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], lastName: e.target.value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          />
+                          <Input
+                            placeholder="Title/Role"
+                            value={member.title}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], title: e.target.value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          />
+                          <Select
+                            value={member.region || "Global"}
+                            onValueChange={(value) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], region: value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Global">Global</SelectItem>
+                              <SelectItem value="EMEA">EMEA</SelectItem>
+                              <SelectItem value="NA">NA</SelectItem>
+                              <SelectItem value="APAC">APAC</SelectItem>
+                              <SelectItem value="LATAM">LATAM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            placeholder="Email"
+                            type="email"
+                            value={member.email}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], email: e.target.value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          />
+                          <Input
+                            placeholder="Phone (optional)"
+                            value={member.phone || ""}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], phone: e.target.value };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">Responsibilities (one per line)</label>
+                          <Textarea
+                            placeholder="Enter responsibilities, one per line..."
+                            value={(member.responsibilities || []).join("\n")}
+                            onChange={(e) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { 
+                                ...newMembers[index], 
+                                responsibilities: e.target.value.split("\n").filter(r => r.trim()) 
+                              };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                            rows={2}
+                            className="text-xs"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {(!data.basics.extendedTeam || data.basics.extendedTeam.length === 0) && (
+                      <p className="text-sm text-muted-foreground text-center py-6">
+                        No extended team members added. Click "Add Team Member" to build your global account team.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
