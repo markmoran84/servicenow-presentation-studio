@@ -37,19 +37,17 @@ export const CustomerSnapshotSlide = () => {
     <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <Building2 className="w-7 h-7 text-primary" />
+        <div className="flex items-center gap-5 mb-10">
+          <div className="icon-box">
+            <Building2 className="w-6 h-6 text-primary" />
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">Customer Snapshot</h1>
-            <p className="text-muted-foreground text-lg">{basics.accountName} — At a Glance</p>
+          <div className="flex-1">
+            <h1 className="slide-title">Customer Snapshot</h1>
+            <p className="slide-subtitle">{basics.accountName} — At a Glance</p>
           </div>
-          <div className="ml-auto">
-            <span className="px-4 py-2 rounded-full bg-primary/20 text-primary font-semibold text-sm border border-primary/30">
-              {basics.tier} Account
-            </span>
-          </div>
+          <span className="tier-badge">
+            {basics.tier} Account
+          </span>
         </div>
 
         <div className="grid grid-cols-3 gap-6">
@@ -60,52 +58,52 @@ export const CustomerSnapshotSlide = () => {
               {metrics.map((metric, index) => (
                 <div
                   key={metric.label}
-                  className="glass-card p-5 text-center opacity-0 animate-fade-in"
+                  className="stat-card text-center opacity-0 animate-fade-in"
                   style={{ animationDelay: `${100 + index * 50}ms` }}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                  <div className="icon-box-sm mx-auto mb-4">
                     <metric.icon className="w-5 h-5 text-primary" />
                   </div>
                   <p className="text-2xl font-bold text-foreground mb-1">{metric.value}</p>
-                  <p className="text-xs text-muted-foreground">{metric.label}</p>
-                  <p className="text-[10px] text-muted-foreground/70 mt-1">{metric.detail}</p>
+                  <p className="text-xs font-medium text-muted-foreground">{metric.label}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">{metric.detail}</p>
                 </div>
               ))}
             </div>
 
             {/* Company Overview */}
             <div className="glass-card p-6 opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-5">
                 <Globe className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold text-foreground">Company Overview</h2>
+                <h2 className="section-title">Company Overview</h2>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground mb-1">Industry</p>
-                    <p className="font-medium text-foreground">{basics.industry}</p>
+              <div className="grid grid-cols-2 gap-5">
+                <div className="space-y-4">
+                  <div className="data-cell">
+                    <p className="metric-label mb-1.5">Industry</p>
+                    <p className="font-semibold text-foreground">{basics.industry}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground mb-1">Region / HQ</p>
-                    <p className="font-medium text-foreground">{basics.region}</p>
+                  <div className="data-cell">
+                    <p className="metric-label mb-1.5">Region / HQ</p>
+                    <p className="font-semibold text-foreground">{basics.region}</p>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground mb-1">Cost Pressure Areas</p>
-                    <p className="font-medium text-foreground text-sm">{financial.costPressureAreas}</p>
+                <div className="space-y-4">
+                  <div className="data-cell">
+                    <p className="metric-label mb-1.5">Cost Pressure Areas</p>
+                    <p className="font-medium text-foreground text-sm leading-relaxed">{financial.costPressureAreas}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground mb-1">Strategic Investment Areas</p>
-                    <p className="font-medium text-foreground text-sm">{financial.strategicInvestmentAreas}</p>
+                  <div className="data-cell">
+                    <p className="metric-label mb-1.5">Strategic Investment Areas</p>
+                    <p className="font-medium text-foreground text-sm leading-relaxed">{financial.strategicInvestmentAreas}</p>
                   </div>
                 </div>
               </div>
 
               {/* Competitive Landscape */}
               {competitors.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-border/50">
-                  <p className="text-xs text-muted-foreground mb-2">Competitive Landscape</p>
+                <div className="mt-5 pt-5 border-t border-border/50">
+                  <p className="metric-label mb-3">Competitive Landscape</p>
                   <div className="flex flex-wrap gap-2">
                     {competitors.map((competitor, index) => (
                       <span
@@ -125,40 +123,40 @@ export const CustomerSnapshotSlide = () => {
           <div className="space-y-6">
             {/* Current Relationship */}
             <div className="glass-card p-6 border-l-4 border-l-primary opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
-              <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+              <h3 className="card-title mb-5 flex items-center gap-2">
                 <Target className="w-5 h-5 text-primary" />
                 ServiceNow Position
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Current Contract Value</p>
-                  <p className="text-2xl font-bold text-primary">{basics.currentContractValue}</p>
+                  <p className="metric-label mb-1">Current Contract Value</p>
+                  <p className="metric-value">{basics.currentContractValue}</p>
                 </div>
-                <div className="h-px bg-border" />
+                <div className="divider-gradient" />
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">FY26 Ambition</p>
-                  <p className="text-xl font-bold text-foreground">{basics.nextFYAmbition}</p>
+                  <p className="metric-label mb-1">FY26 Ambition</p>
+                  <p className="text-2xl font-bold text-foreground">{basics.nextFYAmbition}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">3-Year Target</p>
-                  <p className="text-xl font-bold text-accent">{basics.threeYearAmbition}</p>
+                  <p className="metric-label mb-1">3-Year Target</p>
+                  <p className="text-2xl font-bold text-accent">{basics.threeYearAmbition}</p>
                 </div>
               </div>
             </div>
 
             {/* Renewal Info */}
             <div className="glass-card p-6 opacity-0 animate-fade-in" style={{ animationDelay: "400ms" }}>
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-4">
                 <Calendar className="w-5 h-5 text-accent" />
-                <h3 className="font-bold text-foreground">Key Dates</h3>
+                <h3 className="card-title">Key Dates</h3>
               </div>
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
-                  <p className="text-xs text-muted-foreground mb-1">Renewal Date</p>
-                  <p className="font-semibold text-foreground">{basics.renewalDates}</p>
+              <div className="space-y-4">
+                <div className="data-cell-highlight">
+                  <p className="metric-label mb-1">Renewal Date</p>
+                  <p className="font-bold text-foreground">{basics.renewalDates}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-secondary/50">
-                  <p className="text-xs text-muted-foreground mb-1">Decision Timeline</p>
+                <div className="data-cell">
+                  <p className="metric-label mb-1">Decision Timeline</p>
                   <p className="font-medium text-foreground text-sm">{data.engagement.decisionDeadlines}</p>
                 </div>
               </div>

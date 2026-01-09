@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,99 +7,100 @@
 
 @layer base {
   :root {
-    /* ServiceNow Corporate Palette - Deep Ocean Gradient */
-    --background: 195 45% 8%;
-    --foreground: 0 0% 100%;
+    /* ServiceNow Corporate Palette - Professional Dark */
+    --background: 210 35% 6%;
+    --foreground: 0 0% 98%;
 
-    --card: 195 40% 12%;
-    --card-foreground: 0 0% 100%;
+    --card: 210 30% 10%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 195 40% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 210 30% 10%;
+    --popover-foreground: 0 0% 98%;
 
     /* ServiceNow Wasabi Green as primary */
-    --primary: 110 74% 55%;
-    --primary-foreground: 195 45% 8%;
+    --primary: 82 85% 55%;
+    --primary-foreground: 210 35% 6%;
 
-    --secondary: 195 35% 16%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 25% 14%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 195 30% 20%;
-    --muted-foreground: 195 20% 65%;
+    --muted: 210 20% 18%;
+    --muted-foreground: 210 15% 55%;
 
     /* ServiceNow Blue as accent */
-    --accent: 200 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 200 90% 50%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 195 25% 22%;
-    --input: 195 25% 22%;
-    --ring: 110 74% 55%;
+    --border: 210 20% 18%;
+    --input: 210 20% 18%;
+    --ring: 82 85% 55%;
 
     --radius: 0.75rem;
 
-    /* ServiceNow Brand Colors */
-    --sn-wasabi: 110 74% 55%;
-    --sn-wasabi-light: 110 70% 65%;
-    --sn-wasabi-dark: 110 65% 35%;
+    /* ServiceNow Brand Colors - Enhanced */
+    --sn-wasabi: 82 85% 55%;
+    --sn-wasabi-light: 82 80% 65%;
+    --sn-wasabi-dark: 82 70% 40%;
     
-    --sn-navy: 195 45% 8%;
-    --sn-navy-light: 195 40% 12%;
-    --sn-navy-mid: 195 35% 16%;
+    --sn-navy: 210 35% 6%;
+    --sn-navy-light: 210 30% 10%;
+    --sn-navy-mid: 210 25% 14%;
     
-    --sn-blue: 200 85% 55%;
-    --sn-blue-light: 200 80% 65%;
-    --sn-teal: 180 50% 35%;
+    --sn-blue: 200 90% 50%;
+    --sn-blue-light: 200 85% 60%;
+    --sn-teal: 175 60% 40%;
     
-    /* Glass container colors from template */
-    --glass-basic: 195 30% 25%;
-    --glass-emphasis: 195 35% 35%;
+    /* Enterprise Glass colors */
+    --glass-bg: 210 30% 12%;
+    --glass-border: 210 20% 22%;
     
     /* Status colors */
-    --success: 110 74% 55%;
-    --warning: 40 95% 60%;
+    --success: 82 85% 55%;
+    --warning: 45 95% 55%;
     --danger: 0 72% 51%;
     
-    /* ServiceNow gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(110 74% 55%) 0%, hsl(150 60% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(200 85% 55%) 0%, hsl(180 50% 35%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(160 45% 12%) 0%, hsl(195 45% 8%) 40%, hsl(210 40% 10%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(195 35% 16% / 0.9) 0%, hsl(195 40% 12% / 0.7) 100%);
-    --gradient-shine: linear-gradient(120deg, transparent 30%, hsl(110 74% 55% / 0.08) 50%, transparent 70%);
-    --gradient-sn-bg: linear-gradient(160deg, hsl(160 40% 10%) 0%, hsl(195 45% 8%) 50%, hsl(210 40% 12%) 100%);
+    /* Enterprise gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(82 85% 55%) 0%, hsl(120 50% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(200 90% 50%) 0%, hsl(175 60% 40%) 100%);
+    --gradient-hero: linear-gradient(155deg, hsl(180 30% 8%) 0%, hsl(210 35% 6%) 35%, hsl(240 30% 8%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(210 30% 12% / 0.95) 0%, hsl(210 30% 10% / 0.85) 100%);
+    --gradient-shine: linear-gradient(120deg, transparent 30%, hsl(82 85% 55% / 0.06) 50%, transparent 70%);
+    --gradient-sn-bg: linear-gradient(155deg, hsl(175 25% 8%) 0%, hsl(210 35% 6%) 40%, hsl(235 30% 8%) 100%);
+    --gradient-enterprise: linear-gradient(135deg, hsl(210 30% 12%) 0%, hsl(210 35% 8%) 100%);
 
-    --sidebar-background: 195 45% 8%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 110 74% 55%;
-    --sidebar-primary-foreground: 195 45% 8%;
-    --sidebar-accent: 195 35% 16%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 195 25% 22%;
-    --sidebar-ring: 110 74% 55%;
+    --sidebar-background: 210 35% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 82 85% 55%;
+    --sidebar-primary-foreground: 210 35% 6%;
+    --sidebar-accent: 210 25% 14%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 210 20% 18%;
+    --sidebar-ring: 82 85% 55%;
   }
 
   .dark {
-    --background: 195 45% 8%;
-    --foreground: 0 0% 100%;
-    --card: 195 40% 12%;
-    --card-foreground: 0 0% 100%;
-    --popover: 195 40% 12%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 110 74% 55%;
-    --primary-foreground: 195 45% 8%;
-    --secondary: 195 35% 16%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 195 30% 20%;
-    --muted-foreground: 195 20% 65%;
-    --accent: 200 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    --background: 210 35% 6%;
+    --foreground: 0 0% 98%;
+    --card: 210 30% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 210 30% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 82 85% 55%;
+    --primary-foreground: 210 35% 6%;
+    --secondary: 210 25% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 210 20% 18%;
+    --muted-foreground: 210 15% 55%;
+    --accent: 200 90% 50%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 195 25% 22%;
-    --input: 195 25% 22%;
-    --ring: 110 74% 55%;
+    --border: 210 20% 18%;
+    --input: 210 20% 18%;
+    --ring: 82 85% 55%;
   }
 }
 
@@ -120,7 +121,17 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Sora', system-ui, sans-serif;
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl font-bold;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold;
+    letter-spacing: -0.025em;
   }
 }
 
@@ -146,15 +157,19 @@
     background: var(--gradient-sn-bg);
   }
 
-  /* ServiceNow Glass card - matching template style */
+  /* ===== ENTERPRISE GLASS CARDS ===== */
   .glass-card {
-    @apply rounded-2xl border;
-    border-color: hsl(var(--foreground) / 0.08);
+    @apply rounded-2xl;
     background: linear-gradient(180deg, 
-      hsl(var(--card) / 0.7) 0%, 
-      hsl(var(--card) / 0.5) 100%
+      hsl(210 30% 12% / 0.95) 0%, 
+      hsl(210 30% 10% / 0.9) 100%
     );
-    backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--foreground) / 0.08);
+    box-shadow: 
+      0 4px 24px -4px hsl(0 0% 0% / 0.4),
+      0 0 0 1px hsl(var(--foreground) / 0.03) inset,
+      0 1px 0 hsl(var(--foreground) / 0.05) inset;
+    backdrop-filter: blur(20px);
     position: relative;
     overflow: hidden;
   }
@@ -163,174 +178,194 @@
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--gradient-shine);
-    animation: shine 8s infinite;
-    pointer-events: none;
-  }
-
-  /* ServiceNow Basic Glass container */
-  .sn-glass-basic {
-    @apply rounded-xl;
-    background: hsl(var(--foreground) / 0.03);
-    border: 1px solid hsl(var(--foreground) / 0.08);
-    backdrop-filter: blur(20px);
-  }
-
-  /* ServiceNow Emphasis Glass container */
-  .sn-glass-emphasis {
-    @apply rounded-xl;
-    background: linear-gradient(180deg, 
-      hsl(var(--foreground) / 0.08) 0%, 
-      hsl(var(--foreground) / 0.03) 100%
-    );
-    border: 1px solid hsl(var(--foreground) / 0.12);
-    backdrop-filter: blur(20px);
-  }
-
-  /* ServiceNow Two-tone typography */
-  .sn-heading {
-    @apply font-bold;
-  }
-
-  .sn-heading .highlight {
-    color: hsl(var(--primary));
-  }
-
-  /* Premium stat card */
-  .stat-card {
-    @apply glass-card p-6 transition-all duration-500;
-    border: 1px solid hsl(var(--primary) / 0.15);
-  }
-
-  .stat-card:hover {
-    border-color: hsl(var(--primary) / 0.35);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 20px 40px -20px hsl(var(--primary) / 0.25),
-      0 0 60px -30px hsl(var(--primary) / 0.35);
-  }
-
-  /* Metric highlight with Wasabi Green */
-  .metric-highlight {
-    @apply text-5xl font-bold tracking-tight;
-    color: hsl(var(--primary));
-  }
-
-  .metric-highlight-accent {
-    @apply text-5xl font-bold tracking-tight;
-    color: hsl(var(--accent));
-  }
-
-  /* Role badges */
-  .role-badge {
-    @apply px-4 py-2 rounded-lg text-sm font-medium border;
-    border-color: hsl(var(--primary) / 0.35);
-    color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.1);
-  }
-
-  .role-badge-filled {
-    @apply px-4 py-2 rounded-lg text-sm font-semibold;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
-
-  /* Connector line */
-  .connector-line {
-    @apply border-t-2 border-dashed;
-    border-color: hsl(var(--muted-foreground) / 0.3);
-  }
-
-  /* Team card with elegant hover */
-  .team-card {
-    @apply rounded-xl p-4 transition-all duration-300;
-    background: hsl(var(--card) / 0.5);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .team-card:hover {
-    background: hsl(var(--card) / 0.8);
-    border-color: hsl(var(--primary) / 0.4);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 12px 24px -8px hsl(var(--primary) / 0.2),
-      inset 0 1px 0 hsl(var(--foreground) / 0.05);
-  }
-
-  /* Premium pill badge with Wasabi Green */
-  .pill-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-    background: hsl(var(--primary) / 0.12);
-    color: hsl(var(--primary));
-    border: 1px solid hsl(var(--primary) / 0.25);
-  }
-
-  .pill-badge-accent {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-    background: hsl(var(--accent) / 0.12);
-    color: hsl(var(--accent));
-    border: 1px solid hsl(var(--accent) / 0.25);
-  }
-
-  /* Section divider with gradient */
-  .section-divider {
-    @apply h-px w-full;
+    left: 0;
+    right: 0;
+    height: 1px;
     background: linear-gradient(90deg, 
       transparent 0%, 
-      hsl(var(--primary) / 0.4) 50%, 
+      hsl(var(--foreground) / 0.1) 50%, 
       transparent 100%
     );
   }
 
-  /* Icon container with Wasabi glow */
-  .icon-container {
-    @apply w-12 h-12 rounded-xl flex items-center justify-center;
-    background: hsl(var(--primary) / 0.12);
+  /* Premium elevated card */
+  .card-elevated {
+    @apply rounded-2xl;
+    background: linear-gradient(180deg, 
+      hsl(210 28% 14%) 0%, 
+      hsl(210 30% 11%) 100%
+    );
+    border: 1px solid hsl(var(--foreground) / 0.1);
+    box-shadow: 
+      0 8px 32px -8px hsl(0 0% 0% / 0.5),
+      0 0 0 1px hsl(var(--foreground) / 0.04) inset;
+  }
+
+  /* Card with accent border */
+  .card-accent {
+    @apply glass-card;
+    border-left: 3px solid hsl(var(--primary));
+    border-left-radius: 0;
+  }
+
+  /* Stat card with hover glow */
+  .stat-card {
+    @apply glass-card p-6 transition-all duration-300;
+  }
+
+  .stat-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 
+      0 8px 40px -12px hsl(var(--primary) / 0.25),
+      0 0 0 1px hsl(var(--primary) / 0.1) inset;
+    transform: translateY(-2px);
+  }
+
+  /* ===== TYPOGRAPHY CLASSES ===== */
+  .slide-title {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  .slide-subtitle {
+    @apply text-lg text-muted-foreground font-medium;
+    letter-spacing: -0.01em;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold text-foreground;
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .card-title {
+    @apply text-lg font-semibold text-foreground;
+    letter-spacing: -0.01em;
+  }
+
+  .metric-value {
+    @apply text-3xl md:text-4xl font-bold tracking-tight text-primary;
+    font-family: 'Sora', system-ui, sans-serif;
+  }
+
+  .metric-label {
+    @apply text-xs uppercase tracking-wider text-muted-foreground font-medium;
+  }
+
+  /* ===== BADGE COMPONENTS ===== */
+  .badge-primary {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold;
+    background: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
     border: 1px solid hsl(var(--primary) / 0.25);
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.25);
   }
 
-  .icon-container-accent {
-    @apply w-12 h-12 rounded-xl flex items-center justify-center;
-    background: hsl(var(--accent) / 0.12);
+  .badge-accent {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold;
+    background: hsl(var(--accent) / 0.15);
+    color: hsl(var(--accent));
     border: 1px solid hsl(var(--accent) / 0.25);
-    box-shadow: 0 0 20px -5px hsl(var(--accent) / 0.25);
   }
 
-  /* Progress bar */
-  .progress-track {
+  .badge-muted {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium;
+    background: hsl(var(--muted) / 0.5);
+    color: hsl(var(--muted-foreground));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .tier-badge {
+    @apply inline-flex items-center px-4 py-2 rounded-xl text-sm font-semibold;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, hsl(var(--primary) / 0.1) 100%);
+    color: hsl(var(--primary));
+    border: 1px solid hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+  }
+
+  /* ===== ICON CONTAINERS ===== */
+  .icon-box {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, hsl(var(--primary) / 0.1) 100%);
+    border: 1px solid hsl(var(--primary) / 0.25);
+  }
+
+  .icon-box-accent {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center;
+    background: linear-gradient(135deg, hsl(var(--accent) / 0.2) 0%, hsl(var(--accent) / 0.1) 100%);
+    border: 1px solid hsl(var(--accent) / 0.25);
+  }
+
+  .icon-box-sm {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center;
+    background: hsl(var(--primary) / 0.15);
+    border: 1px solid hsl(var(--primary) / 0.2);
+  }
+
+  /* ===== DATA DISPLAY ===== */
+  .data-cell {
+    @apply p-4 rounded-xl;
+    background: hsl(var(--secondary) / 0.5);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .data-cell-highlight {
+    @apply p-4 rounded-xl;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%);
+    border: 1px solid hsl(var(--primary) / 0.2);
+  }
+
+  /* Dividers */
+  .divider-gradient {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      hsl(var(--border)) 20%,
+      hsl(var(--border)) 80%, 
+      transparent 100%
+    );
+  }
+
+  .divider-accent {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      hsl(var(--primary) / 0.5) 50%, 
+      transparent 100%
+    );
+  }
+
+  /* ===== INTERACTIVE ELEMENTS ===== */
+  .card-interactive {
+    @apply glass-card transition-all duration-300 cursor-pointer;
+  }
+
+  .card-interactive:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px -12px hsl(var(--primary) / 0.2),
+      0 0 0 1px hsl(var(--primary) / 0.1) inset;
+  }
+
+  /* Quote styling */
+  .quote-block {
+    @apply relative pl-6 py-2;
+    border-left: 3px solid hsl(var(--primary));
+  }
+
+  /* Progress indicators */
+  .progress-bar {
     @apply h-2 rounded-full overflow-hidden;
     background: hsl(var(--muted));
   }
 
   .progress-fill {
-    @apply h-full rounded-full transition-all duration-700;
-    background: hsl(var(--primary));
+    @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary-light, 82 80% 65%)) 100%);
   }
 
-  /* Data grid item */
-  .data-grid-item {
-    @apply p-4 rounded-xl;
-    background: hsl(var(--secondary) / 0.5);
-    border: 1px solid hsl(var(--border) / 0.4);
-  }
-
-  /* Quote block with Wasabi Green accent */
-  .quote-block {
-    @apply relative pl-6 py-3;
-    border-left: 3px solid hsl(var(--primary));
-  }
-
-  .quote-block::before {
-    content: '"';
-    @apply absolute -left-1 -top-2 text-4xl font-serif;
-    color: hsl(var(--primary) / 0.4);
-  }
-
-  /* ServiceNow Logo Style - Green O */
+  /* ServiceNow Logo */
   .sn-logo {
     font-family: 'Sora', system-ui, sans-serif;
     font-weight: 700;
@@ -339,6 +374,35 @@
 
   .sn-logo .o {
     color: hsl(var(--primary));
+  }
+
+  /* Legacy compatibility */
+  .role-badge { @apply badge-primary; }
+  .pill-badge { @apply badge-primary; }
+  .pill-badge-accent { @apply badge-accent; }
+  .icon-container { @apply icon-box; }
+  .icon-container-accent { @apply icon-box-accent; }
+  .section-divider { @apply divider-accent; }
+  .metric-highlight { @apply metric-value; }
+  .team-card { @apply card-interactive p-4; }
+  .data-grid-item { @apply data-cell; }
+  
+  /* ServiceNow glass containers */
+  .sn-glass-basic {
+    @apply rounded-xl;
+    background: hsl(var(--foreground) / 0.03);
+    border: 1px solid hsl(var(--foreground) / 0.08);
+    backdrop-filter: blur(20px);
+  }
+
+  .sn-glass-emphasis {
+    @apply rounded-xl;
+    background: linear-gradient(180deg, 
+      hsl(var(--foreground) / 0.08) 0%, 
+      hsl(var(--foreground) / 0.03) 100%
+    );
+    border: 1px solid hsl(var(--foreground) / 0.12);
+    backdrop-filter: blur(20px);
   }
 }
 
@@ -353,7 +417,6 @@
     background-image: var(--gradient-accent);
   }
 
-  /* ServiceNow Wasabi text */
   .text-sn-wasabi {
     color: hsl(var(--primary));
   }
@@ -362,7 +425,7 @@
     color: hsl(var(--accent));
   }
 
-  /* Subtle glow effects */
+  /* Glow effects */
   .glow-primary {
     box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.5);
   }
@@ -371,7 +434,11 @@
     box-shadow: 0 0 40px -10px hsl(var(--accent) / 0.5);
   }
 
-  /* Animation delay utilities */
+  .glow-soft {
+    box-shadow: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
+  }
+
+  /* Animation delays */
   .animation-delay-100 { animation-delay: 100ms; }
   .animation-delay-200 { animation-delay: 200ms; }
   .animation-delay-300 { animation-delay: 300ms; }
@@ -382,30 +449,28 @@
   .animation-delay-800 { animation-delay: 800ms; }
 }
 
-/* Shine animation for glass cards */
+/* ===== ANIMATIONS ===== */
 @keyframes shine {
   0% { left: -100%; }
   20%, 100% { left: 200%; }
 }
 
-/* Subtle float animation */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.5);
+  }
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
-}
-
-/* Pulse glow animation with Wasabi Green */
-@keyframes pulse-glow {
-  0%, 100% { 
-    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.35);
-  }
-  50% { 
-    box-shadow: 0 0 30px -5px hsl(var(--primary) / 0.55);
-  }
 }
 
 .animate-pulse-glow {
