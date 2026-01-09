@@ -63,30 +63,48 @@ const defaultWorkstreams = [
 
 export const BigBetsSlide = () => {
   const { data } = useAccountData();
-  const { generatedPlan, engagement } = data;
+  const { generatedPlan, accountStrategy } = data;
 
-  const isAIGenerated = !!generatedPlan?.keyWorkstreams;
-  const workstreams = generatedPlan?.keyWorkstreams?.map((ws, idx) => ({
-    title: ws.title,
-    subtitle: ws.subtitle || "Strategic Initiative",
-    dealClose: ws.targetClose,
-    dealStatus: ws.dealStatus || (idx === 0 ? "Active Pursuit" : idx === 1 ? "Strategic Initiative" : "Foundation Growth"),
-    statusColor: idx === 0 ? "bg-primary" : idx === 1 ? "bg-accent" : "bg-primary",
-    insight: ws.insight,
-    netNewACV: ws.acv,
-    steadyStateBenefit: ws.steadyStateBenefit || "TBD",
-    people: ws.people || [],
-  })) || defaultWorkstreams;
+  // Priority: accountStrategy.bigBets > generatedPlan.keyWorkstreams > defaults
+  const isFromAccountStrategy = accountStrategy?.bigBets && accountStrategy.bigBets.length > 0;
+  const isAIGenerated = !isFromAccountStrategy && !!generatedPlan?.keyWorkstreams;
+  
+  const workstreams = isFromAccountStrategy
+    ? accountStrategy.bigBets.slice(0, 3).map((bet: any, idx: number) => ({
+        title: bet.title,
+        subtitle: bet.subtitle || "Strategic Initiative",
+        dealClose: bet.targetClose,
+        dealStatus: bet.dealStatus || "Pipeline",
+        statusColor: idx === 0 ? "bg-primary" : idx === 1 ? "bg-accent" : "bg-primary",
+        insight: bet.insight,
+        netNewACV: bet.netNewACV,
+        steadyStateBenefit: bet.steadyStateBenefit || "TBD",
+        people: bet.people || [],
+      }))
+    : generatedPlan?.keyWorkstreams?.map((ws, idx) => ({
+        title: ws.title,
+        subtitle: ws.subtitle || "Strategic Initiative",
+        dealClose: ws.targetClose,
+        dealStatus: ws.dealStatus || (idx === 0 ? "Active Pursuit" : idx === 1 ? "Strategic Initiative" : "Foundation Growth"),
+        statusColor: idx === 0 ? "bg-primary" : idx === 1 ? "bg-accent" : "bg-primary",
+        insight: ws.insight,
+        netNewACV: ws.acv,
+        steadyStateBenefit: ws.steadyStateBenefit || "TBD",
+        people: ws.people || [],
+      })) || defaultWorkstreams;
 
-  const executives = engagement.knownExecutiveSponsors.length > 0
-    ? engagement.knownExecutiveSponsors.slice(0, 6).map(sponsor => {
-        const parts = sponsor.split("(");
-        return {
-          name: parts[0].trim(),
-          role: parts[1]?.replace(")", "") || "Executive Sponsor",
-        };
-      })
-    : defaultExecutives;
+  // Priority: accountStrategy.keyExecutives > engagement.knownExecutiveSponsors > defaults
+  const executives = (accountStrategy?.keyExecutives && accountStrategy.keyExecutives.length > 0)
+    ? accountStrategy.keyExecutives.slice(0, 6)
+    : data.engagement.knownExecutiveSponsors.length > 0
+      ? data.engagement.knownExecutiveSponsors.slice(0, 6).map((sponsor: string) => {
+          const parts = sponsor.split("(");
+          return {
+            name: parts[0].trim(),
+            role: parts[1]?.replace(")", "") || "Executive Sponsor",
+          };
+        })
+      : defaultExecutives;
 
   return (
     <div className="px-8 pt-6 pb-32">

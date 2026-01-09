@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X 
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -125,7 +125,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-6 lg:grid-cols-11 gap-1 h-auto p-1 bg-secondary/50">
+          <TabsList className="grid grid-cols-6 lg:grid-cols-12 gap-1 h-auto p-1 bg-secondary/50">
             <TabsTrigger value="aiAnalyzer" className="gap-2 text-xs">
               <Sparkles className="w-3 h-3" />
               <span className="hidden sm:inline">AI Import</span>
@@ -161,6 +161,10 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             <TabsTrigger value="engagement" className="gap-2 text-xs">
               <Users className="w-3 h-3" />
               <span className="hidden sm:inline">Execs</span>
+            </TabsTrigger>
+            <TabsTrigger value="accountStrategy" className="gap-2 text-xs">
+              <Zap className="w-3 h-3" />
+              <span className="hidden sm:inline">Acc Strategy</span>
             </TabsTrigger>
             <TabsTrigger value="swot" className="gap-2 text-xs">
               <Shield className="w-3 h-3" />
@@ -1016,6 +1020,11 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </Card>
           </TabsContent>
 
+          {/* Account Strategy & Big Bets */}
+          <TabsContent value="accountStrategy" className="space-y-4">
+            <AccountStrategyTab data={data} updateData={updateData} />
+          </TabsContent>
+
           {/* Section H - SWOT Analysis */}
           <TabsContent value="swot" className="space-y-4">
             <Card className="glass-card border-border/30">
@@ -1266,6 +1275,365 @@ const BusinessModelTab = ({ data, updateData, handleArrayInput }: BusinessModelT
               placeholder="Direct and indirect competitors..."
             />
           </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+};
+
+// Account Strategy Tab Component
+interface AccountStrategyTabProps {
+  data: any;
+  updateData: (section: any, value: any) => void;
+}
+
+const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
+  const [isGeneratingStrategy, setIsGeneratingStrategy] = useState(false);
+
+  const handleGenerateStrategy = async () => {
+    setIsGeneratingStrategy(true);
+    try {
+      toast.loading("Generating account strategy narrative...", { id: "gen-strategy" });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-account-strategy", {
+        body: { accountData: data }
+      });
+
+      if (error) throw error;
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate strategy");
+
+      updateData("accountStrategy", { 
+        strategyNarrative: responseData.strategyNarrative 
+      });
+      
+      toast.success("Account strategy generated!", { id: "gen-strategy" });
+    } catch (error) {
+      console.error("Strategy generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate strategy", { id: "gen-strategy" });
+    } finally {
+      setIsGeneratingStrategy(false);
+    }
+  };
+
+  const addBigBet = () => {
+    const newBet = {
+      title: "",
+      subtitle: "",
+      dealStatus: "Pipeline" as const,
+      targetClose: "",
+      netNewACV: "",
+      steadyStateBenefit: "",
+      insight: "",
+      people: [],
+    };
+    updateData("accountStrategy", {
+      bigBets: [...(data.accountStrategy.bigBets || []), newBet],
+    });
+  };
+
+  const updateBigBet = (index: number, field: string, value: any) => {
+    const newBets = [...data.accountStrategy.bigBets];
+    newBets[index] = { ...newBets[index], [field]: value };
+    updateData("accountStrategy", { bigBets: newBets });
+  };
+
+  const removeBigBet = (index: number) => {
+    const newBets = data.accountStrategy.bigBets.filter((_: any, i: number) => i !== index);
+    updateData("accountStrategy", { bigBets: newBets });
+  };
+
+  const addPersonToBet = (betIndex: number) => {
+    const newBets = [...data.accountStrategy.bigBets];
+    newBets[betIndex].people = [...(newBets[betIndex].people || []), { name: "", role: "" }];
+    updateData("accountStrategy", { bigBets: newBets });
+  };
+
+  const updatePersonInBet = (betIndex: number, personIndex: number, field: string, value: string) => {
+    const newBets = [...data.accountStrategy.bigBets];
+    newBets[betIndex].people[personIndex] = { ...newBets[betIndex].people[personIndex], [field]: value };
+    updateData("accountStrategy", { bigBets: newBets });
+  };
+
+  const removePersonFromBet = (betIndex: number, personIndex: number) => {
+    const newBets = [...data.accountStrategy.bigBets];
+    newBets[betIndex].people = newBets[betIndex].people.filter((_: any, i: number) => i !== personIndex);
+    updateData("accountStrategy", { bigBets: newBets });
+  };
+
+  const addKeyExec = () => {
+    updateData("accountStrategy", {
+      keyExecutives: [...(data.accountStrategy.keyExecutives || []), { name: "", role: "" }],
+    });
+  };
+
+  const updateKeyExec = (index: number, field: string, value: string) => {
+    const newExecs = [...data.accountStrategy.keyExecutives];
+    newExecs[index] = { ...newExecs[index], [field]: value };
+    updateData("accountStrategy", { keyExecutives: newExecs });
+  };
+
+  const removeKeyExec = (index: number) => {
+    const newExecs = data.accountStrategy.keyExecutives.filter((_: any, i: number) => i !== index);
+    updateData("accountStrategy", { keyExecutives: newExecs });
+  };
+
+  return (
+    <>
+      {/* Strategy Narrative */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary" />
+              Account Strategy Narrative
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateStrategy}
+              disabled={isGeneratingStrategy}
+              className="gap-2"
+            >
+              {isGeneratingStrategy ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3 h-3" />
+                  AI Generate Strategy
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3">
+            Describe your overall strategy for this account. What's the big picture? How will ServiceNow help them achieve their goals? AI can help draft this based on your other inputs.
+          </p>
+          <Textarea
+            value={data.accountStrategy?.strategyNarrative || ""}
+            onChange={(e) => updateData("accountStrategy", { strategyNarrative: e.target.value })}
+            rows={6}
+            placeholder="Our strategy for [Account] focuses on..."
+            className="bg-background"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Key Executives for Big Bets Slide */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              Key Executives (Execs Row)
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={addKeyExec} className="gap-2">
+              <Plus className="w-3 h-3" />
+              Add Executive
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3">
+            These executives will appear in the connected "Execs" row on the Big Bets slide.
+          </p>
+          <div className="space-y-2">
+            {(data.accountStrategy?.keyExecutives || []).map((exec: any, index: number) => (
+              <div key={index} className="flex gap-2 items-center">
+                <Input
+                  placeholder="Name (e.g., Vincent Clerc)"
+                  value={exec.name}
+                  onChange={(e) => updateKeyExec(index, "name", e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Role (e.g., CEO MAERSK)"
+                  value={exec.role}
+                  onChange={(e) => updateKeyExec(index, "role", e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeKeyExec(index)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+            {(!data.accountStrategy?.keyExecutives || data.accountStrategy.keyExecutives.length === 0) && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No executives added. Click "Add Executive" to add key stakeholders.
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Big Bets */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              Big Bets (Workstreams)
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={addBigBet} className="gap-2">
+              <Plus className="w-3 h-3" />
+              Add Big Bet
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-xs text-muted-foreground">
+            Define your key transformation workstreams. Each Big Bet will appear as a card on the Big Bets slide with title, status, close date, insight, financials, and people.
+          </p>
+
+          {(data.accountStrategy?.bigBets || []).map((bet: any, betIndex: number) => (
+            <div key={betIndex} className="p-4 rounded-lg bg-secondary/30 border border-border/30 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-primary">Big Bet #{betIndex + 1}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeBigBet(betIndex)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Remove
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Title</label>
+                  <Input
+                    value={bet.title}
+                    onChange={(e) => updateBigBet(betIndex, "title", e.target.value)}
+                    placeholder="e.g., Maersk Line Ocean – SFDC Takeout"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Subtitle</label>
+                  <Input
+                    value={bet.subtitle}
+                    onChange={(e) => updateBigBet(betIndex, "subtitle", e.target.value)}
+                    placeholder="e.g., CRM Modernisation & Service Cloud"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Deal Status</label>
+                  <Select
+                    value={bet.dealStatus}
+                    onValueChange={(value) => updateBigBet(betIndex, "dealStatus", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active Pursuit">Active Pursuit</SelectItem>
+                      <SelectItem value="Strategic Initiative">Strategic Initiative</SelectItem>
+                      <SelectItem value="Foundation Growth">Foundation Growth</SelectItem>
+                      <SelectItem value="Pipeline">Pipeline</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Target Close</label>
+                  <Input
+                    value={bet.targetClose}
+                    onChange={(e) => updateBigBet(betIndex, "targetClose", e.target.value)}
+                    placeholder="e.g., Q1 2026"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Net New ACV</label>
+                  <Input
+                    value={bet.netNewACV}
+                    onChange={(e) => updateBigBet(betIndex, "netNewACV", e.target.value)}
+                    placeholder="e.g., $5M"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Steady-State Benefit (Annual)</label>
+                  <Input
+                    value={bet.steadyStateBenefit}
+                    onChange={(e) => updateBigBet(betIndex, "steadyStateBenefit", e.target.value)}
+                    placeholder="e.g., $565M"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Insight</label>
+                <Textarea
+                  value={bet.insight}
+                  onChange={(e) => updateBigBet(betIndex, "insight", e.target.value)}
+                  rows={3}
+                  placeholder="Strategic context and rationale for this workstream..."
+                />
+              </div>
+
+              {/* People for this Big Bet */}
+              <div className="pt-3 border-t border-border/30">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium text-foreground">People (Stakeholders)</label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => addPersonToBet(betIndex)}
+                    className="gap-1 h-7 text-xs"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Person
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {(bet.people || []).map((person: any, personIndex: number) => (
+                    <div key={personIndex} className="flex gap-2 items-center">
+                      <Input
+                        placeholder="Name"
+                        value={person.name}
+                        onChange={(e) => updatePersonInBet(betIndex, personIndex, "name", e.target.value)}
+                        className="flex-1"
+                      />
+                      <Input
+                        placeholder="Role"
+                        value={person.role}
+                        onChange={(e) => updatePersonInBet(betIndex, personIndex, "role", e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removePersonFromBet(betIndex, personIndex)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  {(!bet.people || bet.people.length === 0) && (
+                    <p className="text-xs text-muted-foreground text-center py-2">
+                      No people added yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {(!data.accountStrategy?.bigBets || data.accountStrategy.bigBets.length === 0) && (
+            <div className="text-center py-8 border border-dashed border-border/50 rounded-lg">
+              <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No Big Bets defined yet.</p>
+              <p className="text-xs text-muted-foreground">Click "Add Big Bet" to create your first workstream.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </>
