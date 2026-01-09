@@ -19,88 +19,96 @@ Deno.serve(async (req) => {
     }
 
     // Build context about existing bets to avoid duplication
-    const existingBetsContext = existingBets?.length > 0 
-      ? `EXISTING BIG BETS (generate something COMPLETELY DIFFERENT from these):
-${existingBets.map((b: any, i: number) => `${i + 1}. ${b.title || "Untitled"}: ${b.subtitle || "No subtitle"}`).join("\n")}`
+    const existingBetsContext = existingBets?.length > 0
+      ? `EXISTING BIG BETS (do NOT repeat these themes, phrases, or titles):\n${existingBets
+          .map((b: any, i: number) => `${i + 1}. ${b.title || "Untitled"}: ${b.subtitle || "No subtitle"}`)
+          .join("\n")}`
       : "";
 
+    // Detect sample/template data and avoid hard-coding the sample company name into outputs
+    const sampleAccountNames = new Set(["A.P. Møller - Maersk", "Maersk"]);
+    const rawAccountName = (accountData.basics?.accountName || "").trim();
+    const isSampleAccount = !rawAccountName || sampleAccountNames.has(rawAccountName);
+    const companyRef = isSampleAccount ? "the customer" : rawAccountName;
+    const industryRef = (accountData.basics?.industry || "").trim() || "the industry";
+
     // Get overall account strategy for alignment
-    const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
+    const accountStrategyNarrativeRaw = (accountData.accountStrategy?.strategyNarrative || "").trim();
+    const accountStrategyNarrative = isSampleAccount
+      ? accountStrategyNarrativeRaw.replaceAll("Maersk", "the customer")
+      : accountStrategyNarrativeRaw;
 
     // Add variety through different strategic angles
     const angles = [
       "competitive displacement opportunity",
-      "digital transformation catalyst", 
+      "digital transformation catalyst",
       "cost optimization play",
       "customer experience differentiator",
       "operational efficiency accelerator",
       "risk mitigation initiative",
       "innovation enablement platform",
-      "strategic consolidation opportunity"
+      "strategic consolidation opportunity",
     ];
     const randomAngle = angles[Math.floor(Math.random() * angles.length)];
-    const betNumber = (existingBets?.length || 0) + 1;
 
-    const prompt = `You are a world-class strategic account executive at ServiceNow, known for creative deal-making and thought leadership. Your insights regularly win multi-million dollar enterprise deals.
+    const prompt = `You are a world-class enterprise sales strategist (ServiceNow). You create thought-leading, board-level deal narratives that do NOT sound templated.
 
-CRITICAL: Generate a BOLD, CREATIVE Big Bet that will impress C-level executives. Avoid generic language. Be specific and provocative.
+TASK
+Generate 3 DISTINCT Big Bet options for this account. Each option must be a materially different thesis (different wedge / different executive trigger / different value narrative).
 
-STYLE REQUIREMENTS:
-- Write like a confident sales leader, not a template
-- Use specific numbers, timeframes, and business outcomes
-- Reference industry-specific challenges and trends
-- Make the insight feel like a genuine strategic revelation
-- Avoid clichés like "leverage", "synergy", "optimize" - use vivid, action-oriented language
-- Think about competitive angles: what happens if they DON'T act with ServiceNow?
+NON-NEGOTIABLE QUALITY BAR
+- No generic rewording of pain points; produce a fresh *point of view*.
+- Include a second-order consequence (what breaks if they don't act) AND a competitive consequence.
+- Be specific about timing and value.
+- Avoid buzzwords ("leverage", "synergy", "optimize", "transform") unless truly necessary.
+- Do NOT copy phrases from EXISTING BIG BETS or the existing strategy narrative; keep meaning but change wording.
 
-STRATEGIC ANGLE TO EXPLORE: ${randomAngle}
-This is Big Bet #${betNumber} - make it distinctive and complementary to any existing bets.
+VOICE
+Trusted-advisor, crisp, slightly provocative, executive-ready.
 
-ACCOUNT CONTEXT:
-Company: ${accountData.basics?.accountName || "Unknown"} (${accountData.basics?.industry || "Unknown"})
+IMPORTANT NAMING
+- Unless the company name is explicitly provided by the user, refer to them as "the customer".
+- Never mention "Maersk" in the output.
+
+ANGLE TO PRIORITIZE THIS TIME: ${randomAngle}
+
+ACCOUNT CONTEXT
+Company: ${companyRef} (${industryRef})
 Current investment: ${accountData.basics?.currentContractValue || "Unknown"} → Target: ${accountData.basics?.nextFYAmbition || "Unknown"} (FY) → ${accountData.basics?.threeYearAmbition || "Unknown"} (3yr)
 
-${accountStrategyNarrative ? `OUR ACCOUNT STRATEGY:
-${accountStrategyNarrative}` : ""}
+${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align to this, but do NOT reuse wording):\n${accountStrategyNarrative}` : ""}
 
-CUSTOMER'S STRATEGIC PRIORITIES:
+CUSTOMER STRATEGY (extract what matters, don't copy):
 ${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-DIGITAL TRANSFORMATION AGENDA:
-${accountData.strategy?.digitalStrategies?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
-
-WHAT KEEPS THEIR EXECUTIVES UP AT NIGHT:
+CEO/BOARD PRESSURE:
 ${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
 
-PAIN POINTS WE CAN EXPLOIT:
+PAIN POINTS:
 ${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-WHITE SPACE OPPORTUNITIES:
+OPPORTUNITIES:
 ${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}: ${o.description}`).join("\n") || "Not specified"}
-
-COMPETITIVE LANDSCAPE:
-- Strengths: ${accountData.swot?.strengths?.slice(0, 2).join("; ") || "Not specified"}
-- Vulnerabilities: ${accountData.swot?.weaknesses?.slice(0, 2).join("; ") || "Not specified"}
-- Market opportunities: ${accountData.swot?.opportunities?.slice(0, 2).join("; ") || "Not specified"}
-- Threats to navigate: ${accountData.swot?.threats?.slice(0, 2).join("; ") || "Not specified"}
-
-MARKET INTELLIGENCE:
-${accountData.annualReport?.executiveSummaryNarrative?.slice(0, 500) || "Not available"}
 
 ${existingBetsContext}
 
-Generate a Big Bet that would make a CRO say "this is exactly how we win this account." Return JSON:
+OUTPUT
+Return ONLY valid JSON, no markdown, in this schema:
 {
-  "title": "Punchy, memorable title - think deal name that sticks (max 6 words)",
-  "subtitle": "Specific outcome-focused description",
-  "dealStatus": "Active Pursuit | Strategic Initiative | Foundation Growth | Pipeline",
-  "targetClose": "Specific quarter and year",
-  "netNewACV": "Realistic but ambitious figure with $",
-  "steadyStateBenefit": "Quantified annual business value to customer",
-  "insight": "A PROVOCATIVE 2-3 sentence insight that reveals WHY this matters NOW. Reference specific customer context. Include what they'll LOSE if they don't act. Make executives lean forward."
-}
-
-Return ONLY valid JSON, no markdown.`;
+  "options": [
+    {
+      "title": "Deal-name style (max 6 words)",
+      "subtitle": "Outcome-focused subtitle",
+      "dealStatus": "Active Pursuit | Strategic Initiative | Foundation Growth | Pipeline",
+      "targetClose": "e.g., Q3 2026",
+      "netNewACV": "e.g., $4.5M",
+      "steadyStateBenefit": "e.g., $120M/year",
+      "insight": "3 sentences max. Sentence 1: contrarian truth. Sentence 2: why now + quantified stakes. Sentence 3: why ServiceNow is the wedge and what they lose if they delay."
+    },
+    { "title": "...", "subtitle": "...", "dealStatus": "...", "targetClose": "...", "netNewACV": "...", "steadyStateBenefit": "...", "insight": "..." },
+    { "title": "...", "subtitle": "...", "dealStatus": "...", "targetClose": "...", "netNewACV": "...", "steadyStateBenefit": "...", "insight": "..." }
+  ]
+}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -109,12 +117,10 @@ Return ONLY valid JSON, no markdown.`;
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "user", content: prompt }
-        ],
-        max_tokens: 600,
-        temperature: 0.95,
+        model: "google/gemini-2.5-pro",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 900,
+        temperature: 1.05,
       }),
     });
 
@@ -138,11 +144,22 @@ Return ONLY valid JSON, no markdown.`;
 
     const result = await response.json();
     let content = result.choices?.[0]?.message?.content?.trim() || "";
-    
+
     // Clean up potential markdown formatting
     content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    
-    const bigBet = JSON.parse(content);
+
+    const parsed = JSON.parse(content);
+    const options = Array.isArray(parsed?.options) ? parsed.options : [parsed];
+    if (options.length === 0) {
+      throw new Error("AI returned no options");
+    }
+
+    // Deterministic selection when betIndex is provided; otherwise random
+    const pickIndex = typeof betIndex === "number"
+      ? Math.abs(betIndex) % options.length
+      : Math.floor(Math.random() * options.length);
+
+    const bigBet = options[pickIndex];
 
     return new Response(
       JSON.stringify({ 
