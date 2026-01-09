@@ -93,8 +93,8 @@ export const BigBetsSlide = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 opacity-0 animate-fade-in">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">Key Transformation Workstreams</h1>
-          <p className="text-muted-foreground mt-1">Aligning stakeholders to accelerate impact and outcomes</p>
+          <h1 className="text-4xl font-bold text-foreground">Big Bets</h1>
+          <p className="text-muted-foreground mt-1">Strategic transformation workstreams aligned to accelerate impact</p>
         </div>
         <div className="flex items-center gap-2">
           <RegenerateSectionButton section="keyWorkstreams" />
