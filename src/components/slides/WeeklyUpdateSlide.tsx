@@ -1,6 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, Target, Users, Calendar, ArrowRight, Flag, Zap, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, Target, Users, Calendar, ArrowRight, Flag, Zap, Sparkles, Info } from "lucide-react";
 
 const getStatusConfig = (status: string) => {
   switch (status) {
@@ -31,7 +31,8 @@ const getTrendIcon = (trend: string) => {
 
 export const WeeklyUpdateSlide = () => {
   const { data } = useAccountData();
-  const { accountStrategy, generatedPlan, basics, financial } = data;
+  const { accountStrategy, generatedPlan, basics, financial, engagement } = data;
+  const companyName = basics.accountName || "the customer";
 
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -54,7 +55,7 @@ export const WeeklyUpdateSlide = () => {
   const workstreamStatus = bigBets.length > 0 
     ? bigBets.slice(0, 3).map((bet, index) => ({
         name: bet.title,
-        status: index === 1 ? "at-risk" : "on-track", // Example status logic
+        status: index === 1 ? "at-risk" : "on-track",
         progress: bet.dealStatus === "Active Pursuit" ? 75 : bet.dealStatus === "Strategic Initiative" ? 45 : 60,
         milestone: bet.subtitle || "In Progress",
         nextMilestone: `Close ${bet.targetClose}`,
@@ -80,24 +81,15 @@ export const WeeklyUpdateSlide = () => {
   }, 0);
   
   const weeklyMetrics = [
-    { label: "Pipeline Value", value: `$${totalACV.toFixed(1)}M`, change: "+12%", trend: "up", icon: TrendingUp },
-    { label: "Active Opportunities", value: String(bigBets.length || aiWorkstreams.length), change: "+2", trend: "up", icon: Target },
-    { label: "Deals in Close", value: String(bigBets.filter(b => b.dealStatus === "Active Pursuit").length), change: "0", trend: "neutral", icon: Clock },
-    { label: "Current ACV", value: basics.currentContractValue || "$0", change: "", trend: "neutral", icon: CheckCircle2 },
+    { label: "Pipeline Value", value: totalACV > 0 ? `$${totalACV.toFixed(1)}M` : "—", change: totalACV > 0 ? "+12%" : "", trend: totalACV > 0 ? "up" : "neutral", icon: TrendingUp },
+    { label: "Active Opportunities", value: String(bigBets.length || aiWorkstreams.length || 0), change: bigBets.length > 0 ? "+2" : "", trend: bigBets.length > 0 ? "up" : "neutral", icon: Target },
+    { label: "Deals in Close", value: String(bigBets.filter(b => b.dealStatus === "Active Pursuit").length), change: "", trend: "neutral", icon: Clock },
+    { label: "Current ACV", value: basics.currentContractValue || "—", change: "", trend: "neutral", icon: CheckCircle2 },
   ];
 
-  // Key accomplishments from AI or defaults
-  const keyHighlights = weeklyContext?.keyHighlights || [
-    "Secured executive sponsorship from COO for CRM initiative",
-    "Completed technical discovery with IT architecture team",
-    "Delivered ROI analysis showing 3.2x return over 3 years",
-  ];
-
-  // Critical actions from AI or defaults
-  const criticalActions = weeklyContext?.criticalActions || [
-    "Approval for expanded POC scope (+$50K)",
-    "Alignment on contract structure (multi-year vs annual)",
-  ];
+  // Key accomplishments from AI context
+  const keyHighlights = weeklyContext?.keyHighlights || [];
+  const criticalActions = weeklyContext?.criticalActions || [];
 
   // Derive risks from AI plan
   const risksAndBlockers = (generatedPlan?.risksMitigations || []).slice(0, 2).map(r => ({
@@ -107,12 +99,13 @@ export const WeeklyUpdateSlide = () => {
   }));
 
   // Derive next priorities from engagement data
-  const nextWeekPriorities = (data.engagement?.plannedExecutiveEvents || []).slice(0, 3).map((event, i) => ({
+  const nextWeekPriorities = (engagement?.plannedExecutiveEvents || []).slice(0, 3).map((event) => ({
     action: event,
     date: `Week ${weekNumber + 1}`,
     owner: "Account Team",
   }));
 
+  const hasContent = workstreamStatus.length > 0 || keyHighlights.length > 0 || risksAndBlockers.length > 0;
   const statusConfig = getStatusConfig(overallStatus);
 
   return (
@@ -130,7 +123,7 @@ export const WeeklyUpdateSlide = () => {
               </span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-1">Weekly Stakeholder Update</h1>
-            <p className="text-muted-foreground">{currentDate} • {basics.accountName}</p>
+            <p className="text-muted-foreground">{currentDate} • {companyName}</p>
           </div>
           <div className="flex items-center gap-3">
             <RegenerateSectionButton section="weeklyUpdateContext" />
@@ -150,196 +143,212 @@ export const WeeklyUpdateSlide = () => {
           </div>
         </div>
 
-        {/* Key Metrics Row */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          {weeklyMetrics.map((metric, index) => (
-            <div
-              key={metric.label}
-              className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300 opacity-0 animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <metric.icon className="w-5 h-5 text-primary" />
-                </div>
-                {metric.change && (
-                  <div className="flex items-center gap-1">
-                    {getTrendIcon(metric.trend)}
-                    <span className={`text-sm font-medium ${
-                      metric.trend === "up" ? "text-emerald-400" : 
-                      metric.trend === "down" ? "text-red-400" : "text-slate-400"
-                    }`}>
-                      {metric.change}
-                    </span>
+        {hasContent ? (
+          <>
+            {/* Key Metrics Row */}
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              {weeklyMetrics.map((metric, index) => (
+                <div
+                  key={metric.label}
+                  className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300 opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <metric.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    {metric.change && (
+                      <div className="flex items-center gap-1">
+                        {getTrendIcon(metric.trend)}
+                        <span className={`text-sm font-medium ${
+                          metric.trend === "up" ? "text-emerald-400" : 
+                          metric.trend === "down" ? "text-red-400" : "text-slate-400"
+                        }`}>
+                          {metric.change}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="text-2xl font-bold text-foreground mb-1">{metric.value}</div>
-              <div className="text-sm text-muted-foreground">{metric.label}</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{metric.value}</div>
+                  <div className="text-sm text-muted-foreground">{metric.label}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-6">
-          {/* Workstream Progress */}
-          <div className="col-span-2 bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <Target className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Workstream Progress</h2>
+            <div className="grid grid-cols-3 gap-6 mb-6">
+              {/* Workstream Progress */}
+              <div className="col-span-2 bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Target className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-semibold text-foreground">Workstream Progress</h2>
+                </div>
+                <div className="space-y-4">
+                  {workstreamStatus.length > 0 ? workstreamStatus.map((ws, index) => {
+                    const wsStatusConfig = getStatusConfig(ws.status);
+                    return (
+                      <div
+                        key={ws.name}
+                        className="bg-background/50 rounded-xl p-4 border border-border/30 opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${200 + index * 100}ms` }}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-semibold text-foreground">{ws.name}</h3>
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${wsStatusConfig.color}/20 ${wsStatusConfig.textColor} border border-current/20`}>
+                              {wsStatusConfig.label}
+                            </span>
+                            {ws.acv && (
+                              <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                {ws.acv}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Users className="w-4 h-4" />
+                              {ws.owner}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {ws.dueDate}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-muted-foreground">{ws.milestone}</span>
+                            <span className="text-foreground font-medium">{ws.progress}%</span>
+                          </div>
+                          <div className="h-2 bg-background rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                ws.status === "on-track" ? "bg-gradient-to-r from-emerald-500 to-emerald-400" :
+                                ws.status === "at-risk" ? "bg-gradient-to-r from-amber-500 to-amber-400" :
+                                "bg-gradient-to-r from-red-500 to-red-400"
+                              }`}
+                              style={{ width: `${ws.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <ArrowRight className="w-4 h-4 text-primary" />
+                          <span className="text-muted-foreground">Next:</span>
+                          <span className="text-foreground">{ws.nextMilestone}</span>
+                        </div>
+                      </div>
+                    );
+                  }) : (
+                    <p className="text-muted-foreground text-sm">No workstreams defined. Add Big Bets in the Input Form.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Key Highlights */}
+                <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <h2 className="text-lg font-semibold text-foreground">Key Highlights</h2>
+                  </div>
+                  <ul className="space-y-3">
+                    {keyHighlights.length > 0 ? keyHighlights.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                        <span className="text-muted-foreground">{item}</span>
+                      </li>
+                    )) : (
+                      <li className="text-sm text-muted-foreground">Generate plan to populate highlights.</li>
+                    )}
+                  </ul>
+                </div>
+
+                {/* Critical Actions */}
+                <div className="bg-card/40 backdrop-blur-sm border border-amber-500/20 rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Flag className="w-5 h-5 text-amber-400" />
+                    <h2 className="text-lg font-semibold text-foreground">Decisions Needed</h2>
+                  </div>
+                  <ul className="space-y-3">
+                    {criticalActions.length > 0 ? criticalActions.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+                        <span className="text-foreground">{item}</span>
+                      </li>
+                    )) : (
+                      <li className="text-sm text-muted-foreground">No critical decisions pending.</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div className="space-y-4">
-              {workstreamStatus.length > 0 ? workstreamStatus.map((ws, index) => {
-                const wsStatusConfig = getStatusConfig(ws.status);
-                return (
-                  <div
-                    key={ws.name}
-                    className="bg-background/50 rounded-xl p-4 border border-border/30 opacity-0 animate-fade-in"
-                    style={{ animationDelay: `${200 + index * 100}ms` }}
-                  >
-                    <div className="flex items-center justify-between mb-3">
+
+            <div className="grid grid-cols-2 gap-6">
+              {/* Risks & Blockers */}
+              <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-5 h-5 text-amber-400" />
+                  <h2 className="text-lg font-semibold text-foreground">Risks & Blockers</h2>
+                </div>
+                <div className="space-y-3">
+                  {risksAndBlockers.length > 0 ? risksAndBlockers.map((risk, index) => (
+                    <div key={index} className="bg-background/50 rounded-xl p-4 border border-border/30">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
+                          risk.severity === "high" ? "bg-red-400" :
+                          risk.severity === "medium" ? "bg-amber-400" : "bg-slate-400"
+                        }`} />
+                        <div>
+                          <p className="text-sm text-foreground mb-2">{risk.issue}</p>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Zap className="w-3 h-3 text-primary" />
+                            <span className="text-muted-foreground">{risk.mitigation}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground">No risks identified. Generate plan to populate.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Next Week Priorities */}
+              <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <ArrowRight className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-semibold text-foreground">Upcoming Events</h2>
+                </div>
+                <div className="space-y-3">
+                  {nextWeekPriorities.length > 0 ? nextWeekPriorities.map((priority, index) => (
+                    <div key={index} className="flex items-center justify-between bg-background/50 rounded-xl p-4 border border-border/30">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-foreground">{ws.name}</h3>
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${wsStatusConfig.color}/20 ${wsStatusConfig.textColor} border border-current/20`}>
-                          {wsStatusConfig.label}
-                        </span>
-                        {ws.acv && (
-                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
-                            {ws.acv}
-                          </span>
-                        )}
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{priority.action}</p>
+                          <p className="text-xs text-muted-foreground">{priority.owner}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {ws.owner}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {ws.dueDate}
-                        </span>
-                      </div>
+                      <div className="text-sm text-primary font-medium">{priority.date}</div>
                     </div>
-                    <div className="mb-2">
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="text-muted-foreground">{ws.milestone}</span>
-                        <span className="text-foreground font-medium">{ws.progress}%</span>
-                      </div>
-                      <div className="h-2 bg-background rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            ws.status === "on-track" ? "bg-gradient-to-r from-emerald-500 to-emerald-400" :
-                            ws.status === "at-risk" ? "bg-gradient-to-r from-amber-500 to-amber-400" :
-                            "bg-gradient-to-r from-red-500 to-red-400"
-                          }`}
-                          style={{ width: `${ws.progress}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <ArrowRight className="w-4 h-4 text-primary" />
-                      <span className="text-muted-foreground">Next:</span>
-                      <span className="text-foreground">{ws.nextMilestone}</span>
-                    </div>
-                  </div>
-                );
-              }) : (
-                <p className="text-muted-foreground text-sm">No workstreams defined. Add Big Bets in the Input Form.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Key Highlights */}
-            <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-foreground">Key Highlights</h2>
-              </div>
-              <ul className="space-y-3">
-                {keyHighlights.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Critical Actions */}
-            <div className="bg-card/40 backdrop-blur-sm border border-amber-500/20 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Flag className="w-5 h-5 text-amber-400" />
-                <h2 className="text-lg font-semibold text-foreground">Decisions Needed</h2>
-              </div>
-              <ul className="space-y-3">
-                {criticalActions.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
-                    <span className="text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          {/* Risks & Blockers */}
-          <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
-              <h2 className="text-lg font-semibold text-foreground">Risks & Blockers</h2>
-            </div>
-            <div className="space-y-3">
-              {risksAndBlockers.length > 0 ? risksAndBlockers.map((risk, index) => (
-                <div key={index} className="bg-background/50 rounded-xl p-4 border border-border/30">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
-                      risk.severity === "high" ? "bg-red-400" :
-                      risk.severity === "medium" ? "bg-amber-400" : "bg-slate-400"
-                    }`} />
-                    <div>
-                      <p className="text-sm text-foreground mb-2">{risk.issue}</p>
-                      <div className="flex items-center gap-2 text-xs">
-                        <Zap className="w-3 h-3 text-primary" />
-                        <span className="text-muted-foreground">{risk.mitigation}</span>
-                      </div>
-                    </div>
-                  </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground">No events scheduled. Add in Executive Engagement.</p>
+                  )}
                 </div>
-              )) : (
-                <p className="text-sm text-muted-foreground">No risks identified. Generate plan to populate.</p>
-              )}
+              </div>
             </div>
+          </>
+        ) : (
+          <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <Info className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Weekly Update Data</h3>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Complete the Input Form with account details and click <span className="font-medium text-foreground">Generate with AI</span> to create a comprehensive weekly update for {companyName}.
+            </p>
           </div>
-
-          {/* Next Week Priorities */}
-          <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <ArrowRight className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Upcoming Events</h2>
-            </div>
-            <div className="space-y-3">
-              {nextWeekPriorities.length > 0 ? nextWeekPriorities.map((priority, index) => (
-                <div key={index} className="flex items-center justify-between bg-background/50 rounded-xl p-4 border border-border/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{priority.action}</p>
-                      <p className="text-xs text-muted-foreground">{priority.owner}</p>
-                    </div>
-                  </div>
-                  <div className="text-sm text-primary font-medium">{priority.date}</div>
-                </div>
-              )) : (
-                <p className="text-sm text-muted-foreground">No events scheduled. Add in Executive Engagement.</p>
-              )}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
