@@ -133,17 +133,20 @@ export interface BusinessModelCanvas {
 // AI-Generated Strategic Plan Content
 export interface AIGeneratedPlan {
   executiveSummaryNarrative: string;
+  executiveSummaryPillars?: { icon: "network" | "customer" | "technology" | "efficiency"; keyword: string; title: string; tagline: string; description: string; outcome: string }[];
   strategicObservations: { heading: string; detail: string }[];
   strategicImplications: { heading: string; detail: string }[];
   strategicTensions: { heading: string; detail: string }[];
   strategicInsights: { heading: string; detail: string }[];
   valueHypotheses: { outcome: string; mechanism: string; timeframe: string; impact: string }[];
-  strategicPriorities: { title: string; whyNow: string; ifWeLose: string }[];
-  keyWorkstreams: { title: string; status: string; targetClose: string; acv: string; insight: string }[];
+  strategicPriorities: { title: string; whyNow: string; ifWeLose: string; winningLooks?: string; alignment?: string; color?: string }[];
+  keyWorkstreams: { title: string; subtitle?: string; dealStatus?: string; targetClose: string; acv: string; steadyStateBenefit?: string; insight: string; people?: { name: string; role: string }[] }[];
   risksMitigations: { risk: string; mitigation: string; level: string }[];
   roadmapPhases: { quarter: string; title: string; activities: string[] }[];
   engagementStrategy: { executiveAlignment: string[]; keyForums: string[] };
   successMetrics: { metric: string; label: string; description: string }[];
+  coreValueDrivers?: { title: string; description: string; outcomes: string[]; alignment: string }[];
+  aiUseCases?: { title: string; description: string; priority: string; status: string }[];
 }
 
 export interface AccountData {

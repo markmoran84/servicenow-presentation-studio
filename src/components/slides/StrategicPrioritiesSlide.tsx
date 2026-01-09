@@ -1,11 +1,18 @@
-import { SectionHeader } from "@/components/SectionHeader";
-import { Target, Zap, Users, Layers, AlertCircle, Trophy } from "lucide-react";
+import { useAccountData } from "@/context/AccountDataContext";
+import { Target, Zap, Users, Layers, AlertCircle, Trophy, Sparkles, LucideIcon } from "lucide-react";
 
-const bigBets = [
+const iconMap: Record<string, LucideIcon> = {
+  users: Users,
+  zap: Zap,
+  layers: Layers,
+  target: Target,
+};
+
+const defaultBigBets = [
   {
     icon: Users,
     title: "CRM & Customer Service Modernisation",
-    whyNow: "Primary commercial wedge identified. Direct alignment to Maersk's customer experience priority.",
+    whyNow: "Primary commercial wedge identified. Direct alignment to customer experience priority.",
     ifWeLose: "Competitor platforms embed. ServiceNow becomes marginalised to IT operations only.",
     winningLooks: "Production deployment. Measurable CSAT improvement. Executive sponsorship for expansion.",
     alignment: "Customer Centricity • Digital Transformation",
@@ -14,7 +21,7 @@ const bigBets = [
   {
     icon: Zap,
     title: "AI-Led Workflow Operationalisation",
-    whyNow: "Maersk is AI-first. Opportunity to position ServiceNow as the AI operationalisation layer.",
+    whyNow: "AI-first strategy mandate. Opportunity to position as the AI operationalisation layer.",
     ifWeLose: "AI initiatives scattered. No enterprise workflow backbone. Value fragmented.",
     winningLooks: "2+ AI use cases live. Workflow automation demonstrably reducing manual effort.",
     alignment: "AI-First Ambition • Operational Excellence",
@@ -32,11 +39,34 @@ const bigBets = [
 ];
 
 export const StrategicPrioritiesSlide = () => {
+  const { data } = useAccountData();
+  const { generatedPlan, basics } = data;
+
+  // Use AI-generated priorities if available
+  const isAIGenerated = !!generatedPlan?.strategicPriorities;
+  const bigBets = generatedPlan?.strategicPriorities?.map((priority, idx) => ({
+    icon: idx === 0 ? Users : idx === 1 ? Zap : Layers,
+    title: priority.title,
+    whyNow: priority.whyNow,
+    ifWeLose: priority.ifWeLose,
+    winningLooks: priority.winningLooks || "Success criteria to be defined",
+    alignment: priority.alignment || "Strategic Alignment",
+    color: priority.color || (idx === 0 ? "from-primary to-sn-green" : idx === 1 ? "from-purple-500 to-pink-500" : "from-amber-500 to-orange-500"),
+  })) || defaultBigBets;
+
   return (
     <div className="px-8 pt-6 pb-32">
-      <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
-        Strategic Priorities FY26
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-4xl font-bold text-foreground opacity-0 animate-fade-in">
+          Strategic Priorities FY26
+        </h1>
+        {isAIGenerated && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium opacity-0 animate-fade-in">
+            <Sparkles className="w-3 h-3" />
+            AI Generated
+          </span>
+        )}
+      </div>
 
       <div className="mb-6">
         <div className="glass-card rounded-2xl p-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
@@ -45,7 +75,7 @@ export const StrategicPrioritiesSlide = () => {
             <div>
               <h2 className="font-semibold text-foreground">Must-Win Battles</h2>
               <p className="text-sm text-muted-foreground">
-                "AI-first, with an underlying platform to operationalise it." — Each bet is economically meaningful and aligned to Maersk enterprise priorities.
+                "AI-first, with an underlying platform to operationalise it." — Each bet is economically meaningful and aligned to {basics.accountName} enterprise priorities.
               </p>
             </div>
           </div>

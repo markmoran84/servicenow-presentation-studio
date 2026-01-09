@@ -88,17 +88,20 @@ ${JSON.stringify(accountData.annualReport || {}, null, 2)}
 Generate a comprehensive, enterprise-grade account plan with the following sections:
 
 1. executiveSummaryNarrative: A compelling 3-4 sentence executive summary that synthesizes the strategic opportunity
-2. strategicObservations: Array of 4 strategic observations (each with "heading" and "detail")
-3. strategicImplications: Array of 4 implications for action (each with "heading" and "detail")
-4. strategicTensions: Array of 4 tensions the customer faces (each with "heading" and "detail")
-5. strategicInsights: Array of 4 key insights (each with "heading" and "detail")
-6. valueHypotheses: Array of 4 testable value hypotheses (each with "outcome", "mechanism", "timeframe", "impact")
-7. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose")
-8. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "status", "targetClose", "acv", "insight")
-9. risksMitigations: Array of 4 risks (each with "risk", "mitigation", "level" as High/Medium/Low)
-10. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array)
-11. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
-12. successMetrics: Array of 4 metrics (each with "metric", "label", "description")
+2. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as one of "network"|"customer"|"technology"|"efficiency", "keyword", "title", "tagline", "description", "outcome")
+3. strategicObservations: Array of 4 strategic observations (each with "heading" and "detail")
+4. strategicImplications: Array of 4 implications for action (each with "heading" and "detail")
+5. strategicTensions: Array of 4 tensions the customer faces (each with "heading" and "detail")
+6. strategicInsights: Array of 4 key insights (each with "heading" and "detail")
+7. valueHypotheses: Array of 4 testable value hypotheses (each with "outcome", "mechanism", "timeframe", "impact")
+8. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient like "from-primary to-accent")
+9. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "subtitle", "dealStatus", "targetClose", "acv", "steadyStateBenefit", "insight", "people" array with name/role objects)
+10. risksMitigations: Array of 4 risks (each with "risk", "mitigation", "level" as High/Medium/Low)
+11. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array)
+12. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
+13. successMetrics: Array of 4 metrics (each with "metric", "label", "description")
+14. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 strings, "alignment")
+15. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status" as "Pilot Ready"|"Discovery"|"Scoped"|"Planned")
 
 Return ONLY valid JSON, no markdown formatting.`;
 
