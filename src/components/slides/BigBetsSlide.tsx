@@ -88,17 +88,12 @@ export const BigBetsSlide = () => {
   return (
     <div className="px-8 pt-6 pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 opacity-0 animate-fade-in">
-        <div className="flex items-center gap-5">
-          <div className="icon-box">
-            <Zap className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="slide-title">Key Transformation Workstreams</h1>
-            <p className="slide-subtitle">Aligning stakeholders to accelerate impact and outcomes</p>
-          </div>
+      <div className="flex items-center justify-between mb-4 opacity-0 animate-fade-in">
+        <div>
+          <h1 className="text-4xl font-bold text-foreground">Key Transformation Workstreams</h1>
+          <p className="text-muted-foreground mt-1">Aligning stakeholders to accelerate impact and outcomes</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <RegenerateSectionButton section="keyWorkstreams" />
           {isAIGenerated && (
             <span className="badge-accent">
@@ -111,24 +106,24 @@ export const BigBetsSlide = () => {
       </div>
 
       {/* Executive Row */}
-      <div className="glass-card p-5 mb-5 opacity-0 animate-fade-in animation-delay-100">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="glass-card p-4 mb-4 opacity-0 animate-fade-in animation-delay-100">
+        <div className="flex items-center gap-2 mb-3">
           <Users className="w-4 h-4 text-primary" />
-          <span className="metric-label text-primary">Executive Sponsors</span>
+          <span className="text-xs font-bold text-primary uppercase tracking-wider">Execs</span>
         </div>
         <div className="flex items-center justify-between">
-          {executives.map((exec, index) => (
+          {executives.map((exec) => (
             <div
               key={exec.name}
-              className="flex flex-col items-center text-center group"
+              className="flex flex-col items-center text-center"
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/25 to-accent/25 border-2 border-primary/40 flex items-center justify-center mb-2 group-hover:border-primary/60 transition-colors">
-                <span className="text-sm font-bold text-foreground">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 border-2 border-primary/50 flex items-center justify-center mb-1">
+                <span className="text-xs font-bold text-foreground">
                   {exec.name.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
-              <span className="text-xs font-semibold text-foreground">{exec.name}</span>
-              <span className="text-[10px] text-muted-foreground">{exec.role}</span>
+              <span className="text-[10px] font-semibold text-foreground">{exec.name}</span>
+              <span className="text-[9px] text-muted-foreground">{exec.role}</span>
             </div>
           ))}
         </div>
