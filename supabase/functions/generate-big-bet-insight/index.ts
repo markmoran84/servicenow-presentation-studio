@@ -18,13 +18,17 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
+    // Get overall account strategy for alignment
+    const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
+
     const prompt = `You are a strategic account planning expert for enterprise technology sales (ServiceNow). Generate a compelling strategic insight for a Big Bet / workstream.
 
 The insight should:
 - Be 2-3 sentences
 - Explain the strategic rationale and business context
 - Reference why this is important NOW for the customer
-- Connect to customer pain points or strategic priorities where relevant
+- Connect to customer pain points or strategic priorities
+- ALIGN with the overall account strategy described below
 
 Big Bet Details:
 - Title: ${bet.title || "Not specified"}
@@ -37,8 +41,14 @@ Account Context:
 - Account Name: ${accountData.basics?.accountName || "Unknown"}
 - Industry: ${accountData.basics?.industry || "Unknown"}
 
+${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align the insight to this strategy):
+${accountStrategyNarrative}` : ""}
+
 Customer Corporate Strategy:
 ${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
+
+CEO/Board Priorities:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
 
 Key Pain Points:
 ${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
@@ -46,7 +56,7 @@ ${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.descrip
 Strategic Opportunities:
 ${accountData.opportunities?.opportunities?.map((o: any) => `- ${o.title}`).join("\n") || "Not specified"}
 
-Write ONLY the insight text (2-3 sentences), no headers or formatting.`;
+Write ONLY the insight text (2-3 sentences), no headers or formatting. Make sure to explain how this Big Bet aligns with and supports the overall account strategy.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

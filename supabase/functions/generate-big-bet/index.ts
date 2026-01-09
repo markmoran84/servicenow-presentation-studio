@@ -24,12 +24,16 @@ Deno.serve(async (req) => {
 ${existingBets.map((b: any, i: number) => `${i + 1}. ${b.title || "Untitled"}: ${b.subtitle || "No subtitle"}`).join("\n")}`
       : "No existing Big Bets defined yet.";
 
+    // Get overall account strategy for alignment
+    const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
+
     const prompt = `You are a strategic account planning expert for enterprise technology sales (ServiceNow). Generate a compelling Big Bet / strategic workstream suggestion for the following account.
 
 A "Big Bet" is a major strategic initiative or deal opportunity that ServiceNow should pursue with this customer. It should be:
 - Tied to a specific customer pain point or strategic priority
 - Commercially significant (suggest realistic ACV and business benefit)
 - Actionable with clear timing
+- ALIGNED with the overall account strategy described below
 
 Account Context:
 - Account Name: ${accountData.basics?.accountName || "Unknown"}
@@ -38,11 +42,17 @@ Account Context:
 - Next FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
 - 3 Year Ambition: ${accountData.basics?.threeYearAmbition || "Unknown"}
 
+${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align the Big Bet to this strategy):
+${accountStrategyNarrative}` : ""}
+
 Customer Corporate Strategy:
 ${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
 Customer Digital Strategies:
 ${accountData.strategy?.digitalStrategies?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+
+CEO/Board Priorities:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
 
 Key Pain Points:
 ${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
@@ -61,7 +71,7 @@ ${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
 
 ${existingBetsContext}
 
-Generate a NEW Big Bet (different from existing ones) that ServiceNow should pursue. Return a JSON object with these exact fields:
+Generate a NEW Big Bet (different from existing ones) that ServiceNow should pursue. The Big Bet MUST align with the overall account strategy. Return a JSON object with these exact fields:
 {
   "title": "Short, impactful title (e.g., 'Global ITSM Consolidation')",
   "subtitle": "Descriptive subtitle (e.g., 'Unified IT Operations Platform')",
@@ -69,7 +79,7 @@ Generate a NEW Big Bet (different from existing ones) that ServiceNow should pur
   "targetClose": "e.g., Q2 2026",
   "netNewACV": "e.g., $3M",
   "steadyStateBenefit": "Annual business benefit, e.g., $250M",
-  "insight": "2-3 sentences explaining the strategic rationale and why now"
+  "insight": "2-3 sentences explaining the strategic rationale, why now, and how it aligns to the account strategy"
 }
 
 Return ONLY the JSON object, no markdown formatting or additional text.`;

@@ -18,6 +18,10 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
+    // Check if there's an existing strategy to build upon
+    const existingStrategy = accountData.accountStrategy?.strategyNarrative;
+    const existingBigBets = accountData.accountStrategy?.bigBets || [];
+
     const prompt = `You are a strategic account planning expert for enterprise technology sales. Based on the following account data, write a compelling account strategy narrative.
 
 The narrative should:
@@ -27,6 +31,8 @@ The narrative should:
 - Mention the primary commercial wedge and expansion path
 - Be written in first-person plural ("Our strategy..." "We will...")
 - Sound professional and confident, suitable for executive presentations
+${existingBigBets.length > 0 ? "- Reference and align with the defined Big Bets/workstreams" : ""}
+${existingStrategy ? "- Build upon and improve the existing strategy direction shown below" : ""}
 
 Account Data:
 - Account Name: ${accountData.basics?.accountName || "Unknown"}
@@ -41,6 +47,9 @@ ${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.de
 Customer Digital Strategies:
 ${accountData.strategy?.digitalStrategies?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
+CEO/Board Priorities:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+
 Key Pain Points:
 ${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
@@ -49,6 +58,12 @@ ${accountData.opportunities?.opportunities?.map((o: any) => `- ${o.title}: ${o.d
 
 Annual Report Highlights:
 ${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
+
+${existingBigBets.length > 0 ? `Defined Big Bets (align strategy to these workstreams):
+${existingBigBets.map((b: any) => `- ${b.title}: ${b.subtitle || ""} (${b.dealStatus}, ${b.netNewACV})`).join("\n")}` : ""}
+
+${existingStrategy ? `Existing Strategy Direction (improve and build upon this):
+${existingStrategy}` : ""}
 
 Write only the strategy narrative, no headers or formatting.`;
 
