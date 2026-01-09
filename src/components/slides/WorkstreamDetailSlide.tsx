@@ -34,10 +34,10 @@ const defaultWorkstreams = [
       { name: "Mark Graham", role: "SVP, IT Logistics" },
     ],
     opportunities: [
-      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track" },
-      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track" },
-      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating" },
-      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk" },
+      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track", oppNumber: "OPP-2024-001" },
+      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track", oppNumber: "OPP-2024-002" },
+      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating", oppNumber: "OPP-2024-003" },
+      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk", oppNumber: "OPP-2024-004" },
     ],
   },
   {
@@ -54,10 +54,10 @@ const defaultWorkstreams = [
       { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
     ],
     opportunities: [
-      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track" },
-      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track" },
-      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention" },
-      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track" },
+      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track", oppNumber: "OPP-2024-005" },
+      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track", oppNumber: "OPP-2024-006" },
+      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention", oppNumber: "OPP-2024-007" },
+      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track", oppNumber: "OPP-2024-008" },
     ],
   },
   {
@@ -74,10 +74,10 @@ const defaultWorkstreams = [
       { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
     ],
     opportunities: [
-      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating" },
-      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track" },
-      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track" },
-      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage" },
+      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating", oppNumber: "OPP-2024-009" },
+      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track", oppNumber: "OPP-2024-010" },
+      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track", oppNumber: "OPP-2024-011" },
+      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage", oppNumber: "OPP-2024-012" },
     ],
   },
 ];
@@ -137,6 +137,7 @@ export const WorkstreamDetailSlide = () => {
           stage: ["Qualification", "Discovery", "Proposal", "Negotiation"][idx % 4],
           probability: Math.floor(Math.random() * 40 + 40),
           status: ["On Track", "Accelerating", "Needs Attention", "On Track"][idx % 4],
+          oppNumber: `OPP-${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
         })) || [],
       }))
     : defaultWorkstreams;
@@ -244,6 +245,15 @@ export const WorkstreamDetailSlide = () => {
                       </Badge>
                       <span className="text-lg font-bold text-primary">{opp.value}</span>
                     </div>
+
+                    {/* Opportunity Number */}
+                    {opp.oppNumber && (
+                      <div className="mb-2">
+                        <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+                          {opp.oppNumber}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Opportunity Name */}
                     <h4 className="font-semibold text-sm text-foreground mb-2 leading-tight">{opp.name}</h4>
