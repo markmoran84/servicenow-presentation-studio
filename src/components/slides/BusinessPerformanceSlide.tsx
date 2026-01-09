@@ -1,38 +1,37 @@
-import { SectionHeader } from "@/components/SectionHeader";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3, Ship, Package, Building2 } from "lucide-react";
+import { TrendingUp, BarChart3, Ship, Package, Building2 } from "lucide-react";
 
 const financialHighlights = [
   {
     segment: "Ocean",
     revenue: "$37.4B",
-    ebit: "$4.7B",
-    change: "+113%",
+    ebitda: "$9.2B",
+    change: "+32%",
     trend: "up",
-    note: "Strong freight rates, Gemini network launch",
+    note: "Red Sea rerouting drove freight rates; Gemini network launched Feb 2025",
   },
   {
     segment: "Logistics & Services",
     revenue: "$14.9B",
-    ebit: "$538M",
-    change: "+21%",
+    ebitda: "$1.4B",
+    change: "+16%",
     trend: "up",
-    note: "Warehousing, Air, First Mile growth",
+    note: "Warehousing, Air, First Mile growth; room for improvement in middle/last mile",
   },
   {
     segment: "Terminals",
     revenue: "$4.5B",
-    ebit: "$1.3B",
-    change: "+36%",
+    ebitda: "$1.6B",
+    change: "+25%",
     trend: "up",
-    note: "Record year, strong volumes",
+    note: "Record year with strong volumes globally",
   },
 ];
 
 const keyMetrics = [
   { label: "Total Revenue", value: "$55.5B", change: "+9%" },
-  { label: "EBIT", value: "$6.5B", change: "+65%" },
+  { label: "EBIT", value: "$6.4B", change: "+65%" },
   { label: "EBITDA", value: "$12.1B", change: "+26%" },
-  { label: "Free Cash Flow", value: "$4.8B", change: "" },
+  { label: "Net Result", value: "$6.1B", change: "+55%" },
 ];
 
 export const BusinessPerformanceSlide = () => {
@@ -85,8 +84,8 @@ export const BusinessPerformanceSlide = () => {
                 <div className="text-2xl font-bold text-foreground">{segment.revenue}</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">EBIT</div>
-                <div className="text-2xl font-bold text-gradient">{segment.ebit}</div>
+                <div className="text-xs text-muted-foreground mb-1">EBITDA</div>
+                <div className="text-2xl font-bold text-gradient">{segment.ebitda}</div>
               </div>
             </div>
 
