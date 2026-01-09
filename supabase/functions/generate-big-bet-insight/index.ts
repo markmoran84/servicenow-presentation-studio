@@ -21,42 +21,57 @@ Deno.serve(async (req) => {
     // Get overall account strategy for alignment
     const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
 
-    const prompt = `You are a strategic account planning expert for enterprise technology sales (ServiceNow). Generate a compelling strategic insight for a Big Bet / workstream.
+    // Add variety through different insight angles
+    const insightAngles = [
+      "Focus on the COMPETITIVE URGENCY - what happens if a competitor gets there first?",
+      "Focus on the EXECUTIVE PRESSURE - what is the CEO/board demanding right now?",
+      "Focus on the HIDDEN COST - what is the true cost of inaction they haven't calculated?",
+      "Focus on the MARKET TIMING - why is this the perfect moment in their industry?",
+      "Focus on the TRANSFORMATION CATALYST - how does this unlock their bigger vision?",
+      "Focus on the RISK MITIGATION - what existential risk does this address?"
+    ];
+    const randomAngle = insightAngles[Math.floor(Math.random() * insightAngles.length)];
 
-The insight should:
-- Be 2-3 sentences
-- Explain the strategic rationale and business context
-- Reference why this is important NOW for the customer
-- Connect to customer pain points or strategic priorities
-- ALIGN with the overall account strategy described below
+    const prompt = `You are a legendary enterprise sales strategist known for writing insights that win $10M+ deals. Your insights make executives stop scrolling and lean in.
 
-Big Bet Details:
-- Title: ${bet.title || "Not specified"}
-- Subtitle: ${bet.subtitle || "Not specified"}
-- Deal Status: ${bet.dealStatus || "Not specified"}
-- Target Close: ${bet.targetClose || "Not specified"}
-- Net New ACV: ${bet.netNewACV || "Not specified"}
+CRITICAL: Write a PROVOCATIVE, SPECIFIC insight for this Big Bet. No generic platitudes. Make it feel like insider knowledge.
 
-Account Context:
-- Account Name: ${accountData.basics?.accountName || "Unknown"}
-- Industry: ${accountData.basics?.industry || "Unknown"}
+WRITING STYLE:
+- Sound like a trusted advisor who knows something they don't
+- Use specific numbers, timeframes, competitive references
+- Create urgency without being salesy
+- Reference their specific pain points by name
+- Include a "what they'll lose" element
+- Make it memorable - something they'd quote in their internal meetings
 
-${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align the insight to this strategy):
+ANGLE TO TAKE: ${randomAngle}
+
+BIG BET DETAILS:
+• Title: ${bet.title}
+• Subtitle: ${bet.subtitle || "Not specified"}
+• Deal Status: ${bet.dealStatus || "Not specified"}  
+• Target Close: ${bet.targetClose || "Not specified"}
+• Investment: ${bet.netNewACV || "Not specified"}
+
+ACCOUNT:
+${accountData.basics?.accountName} (${accountData.basics?.industry})
+
+${accountStrategyNarrative ? `OUR WINNING STRATEGY FOR THIS ACCOUNT:
 ${accountStrategyNarrative}` : ""}
 
-Customer Corporate Strategy:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
+WHAT THE C-SUITE IS PUSHING:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
 
-CEO/Board Priorities:
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
+THEIR STRATEGIC BETS:
+${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}`).join("\n") || "Not specified"}
 
-Key Pain Points:
-${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+PAIN POINTS TO EXPLOIT:
+${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-Strategic Opportunities:
-${accountData.opportunities?.opportunities?.map((o: any) => `- ${o.title}`).join("\n") || "Not specified"}
+OPPORTUNITIES WE'RE TARGETING:
+${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}`).join("\n") || "Not specified"}
 
-Write ONLY the insight text (2-3 sentences), no headers or formatting. Make sure to explain how this Big Bet aligns with and supports the overall account strategy.`;
+Write exactly 2-3 sentences. No headers, no bullets, no formatting. Just the insight text that makes executives say "they really understand our business."`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -69,8 +84,8 @@ Write ONLY the insight text (2-3 sentences), no headers or formatting. Make sure
         messages: [
           { role: "user", content: prompt }
         ],
-        max_tokens: 200,
-        temperature: 0.7,
+        max_tokens: 250,
+        temperature: 0.95,
       }),
     });
 
