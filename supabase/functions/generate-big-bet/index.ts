@@ -20,69 +20,87 @@ Deno.serve(async (req) => {
 
     // Build context about existing bets to avoid duplication
     const existingBetsContext = existingBets?.length > 0 
-      ? `Already defined Big Bets (avoid duplicating these themes):
+      ? `EXISTING BIG BETS (generate something COMPLETELY DIFFERENT from these):
 ${existingBets.map((b: any, i: number) => `${i + 1}. ${b.title || "Untitled"}: ${b.subtitle || "No subtitle"}`).join("\n")}`
-      : "No existing Big Bets defined yet.";
+      : "";
 
     // Get overall account strategy for alignment
     const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
 
-    const prompt = `You are a strategic account planning expert for enterprise technology sales (ServiceNow). Generate a compelling Big Bet / strategic workstream suggestion for the following account.
+    // Add variety through different strategic angles
+    const angles = [
+      "competitive displacement opportunity",
+      "digital transformation catalyst", 
+      "cost optimization play",
+      "customer experience differentiator",
+      "operational efficiency accelerator",
+      "risk mitigation initiative",
+      "innovation enablement platform",
+      "strategic consolidation opportunity"
+    ];
+    const randomAngle = angles[Math.floor(Math.random() * angles.length)];
+    const betNumber = (existingBets?.length || 0) + 1;
 
-A "Big Bet" is a major strategic initiative or deal opportunity that ServiceNow should pursue with this customer. It should be:
-- Tied to a specific customer pain point or strategic priority
-- Commercially significant (suggest realistic ACV and business benefit)
-- Actionable with clear timing
-- ALIGNED with the overall account strategy described below
+    const prompt = `You are a world-class strategic account executive at ServiceNow, known for creative deal-making and thought leadership. Your insights regularly win multi-million dollar enterprise deals.
 
-Account Context:
-- Account Name: ${accountData.basics?.accountName || "Unknown"}
-- Industry: ${accountData.basics?.industry || "Unknown"}
-- Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
-- Next FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
-- 3 Year Ambition: ${accountData.basics?.threeYearAmbition || "Unknown"}
+CRITICAL: Generate a BOLD, CREATIVE Big Bet that will impress C-level executives. Avoid generic language. Be specific and provocative.
 
-${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align the Big Bet to this strategy):
+STYLE REQUIREMENTS:
+- Write like a confident sales leader, not a template
+- Use specific numbers, timeframes, and business outcomes
+- Reference industry-specific challenges and trends
+- Make the insight feel like a genuine strategic revelation
+- Avoid clichés like "leverage", "synergy", "optimize" - use vivid, action-oriented language
+- Think about competitive angles: what happens if they DON'T act with ServiceNow?
+
+STRATEGIC ANGLE TO EXPLORE: ${randomAngle}
+This is Big Bet #${betNumber} - make it distinctive and complementary to any existing bets.
+
+ACCOUNT CONTEXT:
+Company: ${accountData.basics?.accountName || "Unknown"} (${accountData.basics?.industry || "Unknown"})
+Current investment: ${accountData.basics?.currentContractValue || "Unknown"} → Target: ${accountData.basics?.nextFYAmbition || "Unknown"} (FY) → ${accountData.basics?.threeYearAmbition || "Unknown"} (3yr)
+
+${accountStrategyNarrative ? `OUR ACCOUNT STRATEGY:
 ${accountStrategyNarrative}` : ""}
 
-Customer Corporate Strategy:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+CUSTOMER'S STRATEGIC PRIORITIES:
+${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-Customer Digital Strategies:
-${accountData.strategy?.digitalStrategies?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+DIGITAL TRANSFORMATION AGENDA:
+${accountData.strategy?.digitalStrategies?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-CEO/Board Priorities:
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}`).join("\n") || "Not specified"}
+WHAT KEEPS THEIR EXECUTIVES UP AT NIGHT:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
 
-Key Pain Points:
-${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+PAIN POINTS WE CAN EXPLOIT:
+${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-Strategic Opportunities:
-${accountData.opportunities?.opportunities?.map((o: any) => `- ${o.title}: ${o.description}`).join("\n") || "Not specified"}
+WHITE SPACE OPPORTUNITIES:
+${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}: ${o.description}`).join("\n") || "Not specified"}
 
-SWOT Analysis:
-- Strengths: ${accountData.swot?.strengths?.join(", ") || "Not specified"}
-- Weaknesses: ${accountData.swot?.weaknesses?.join(", ") || "Not specified"}
-- Opportunities: ${accountData.swot?.opportunities?.join(", ") || "Not specified"}
-- Threats: ${accountData.swot?.threats?.join(", ") || "Not specified"}
+COMPETITIVE LANDSCAPE:
+- Strengths: ${accountData.swot?.strengths?.slice(0, 2).join("; ") || "Not specified"}
+- Vulnerabilities: ${accountData.swot?.weaknesses?.slice(0, 2).join("; ") || "Not specified"}
+- Market opportunities: ${accountData.swot?.opportunities?.slice(0, 2).join("; ") || "Not specified"}
+- Threats to navigate: ${accountData.swot?.threats?.slice(0, 2).join("; ") || "Not specified"}
 
-Annual Report Insights:
-${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
+MARKET INTELLIGENCE:
+${accountData.annualReport?.executiveSummaryNarrative?.slice(0, 500) || "Not available"}
 
 ${existingBetsContext}
 
-Generate a NEW Big Bet (different from existing ones) that ServiceNow should pursue. The Big Bet MUST align with the overall account strategy. Return a JSON object with these exact fields:
+Generate a Big Bet that would make a CRO say "this is exactly how we win this account." Return JSON:
 {
-  "title": "Short, impactful title (e.g., 'Global ITSM Consolidation')",
-  "subtitle": "Descriptive subtitle (e.g., 'Unified IT Operations Platform')",
-  "dealStatus": "One of: Active Pursuit, Strategic Initiative, Foundation Growth, Pipeline",
-  "targetClose": "e.g., Q2 2026",
-  "netNewACV": "e.g., $3M",
-  "steadyStateBenefit": "Annual business benefit, e.g., $250M",
-  "insight": "2-3 sentences explaining the strategic rationale, why now, and how it aligns to the account strategy"
+  "title": "Punchy, memorable title - think deal name that sticks (max 6 words)",
+  "subtitle": "Specific outcome-focused description",
+  "dealStatus": "Active Pursuit | Strategic Initiative | Foundation Growth | Pipeline",
+  "targetClose": "Specific quarter and year",
+  "netNewACV": "Realistic but ambitious figure with $",
+  "steadyStateBenefit": "Quantified annual business value to customer",
+  "insight": "A PROVOCATIVE 2-3 sentence insight that reveals WHY this matters NOW. Reference specific customer context. Include what they'll LOSE if they don't act. Make executives lean forward."
 }
 
-Return ONLY the JSON object, no markdown formatting or additional text.`;
+Return ONLY valid JSON, no markdown.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -95,8 +113,8 @@ Return ONLY the JSON object, no markdown formatting or additional text.`;
         messages: [
           { role: "user", content: prompt }
         ],
-        max_tokens: 500,
-        temperature: 0.8,
+        max_tokens: 600,
+        temperature: 0.95,
       }),
     });
 
