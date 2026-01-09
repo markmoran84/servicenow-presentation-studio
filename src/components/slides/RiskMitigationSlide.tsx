@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { ShieldAlert, AlertTriangle, CheckCircle, ArrowRight, TrendingDown, ShieldCheck, Sparkles } from "lucide-react";
 
 export const RiskMitigationSlide = () => {
@@ -35,6 +36,7 @@ export const RiskMitigationSlide = () => {
             <p className="text-muted-foreground text-lg">Navigating challenges to achieve {data.basics.accountName} objectives</p>
           </div>
           <div className="ml-auto flex items-center gap-4">
+            <RegenerateSectionButton section="risksMitigations" />
             {plan && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />

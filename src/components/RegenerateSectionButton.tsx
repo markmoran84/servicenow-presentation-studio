@@ -11,7 +11,12 @@ export type RegeneratablePlanSection =
   | "strategicPriorities"
   | "coreValueDrivers"
   | "aiUseCases"
-  | "successMetrics";
+  | "successMetrics"
+  | "roadmapPhases"
+  | "strategicObservations"
+  | "strategicImplications"
+  | "valueHypotheses"
+  | "risksMitigations";
 
 const sectionMeta: Record<
   RegeneratablePlanSection,
@@ -40,6 +45,26 @@ const sectionMeta: Record<
   successMetrics: {
     label: "Success Metrics",
     planKeys: ["successMetrics"],
+  },
+  roadmapPhases: {
+    label: "Roadmap Phases",
+    planKeys: ["roadmapPhases"],
+  },
+  strategicObservations: {
+    label: "Strategic Observations",
+    planKeys: ["strategicObservations"],
+  },
+  strategicImplications: {
+    label: "Strategic Implications",
+    planKeys: ["strategicImplications"],
+  },
+  valueHypotheses: {
+    label: "Value Hypotheses",
+    planKeys: ["valueHypotheses"],
+  },
+  risksMitigations: {
+    label: "Risks & Mitigations",
+    planKeys: ["risksMitigations"],
   },
 };
 

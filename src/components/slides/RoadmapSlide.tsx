@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { Calendar, ArrowRight, Sparkles } from "lucide-react";
 
 export const RoadmapSlide = () => {
@@ -23,14 +24,15 @@ export const RoadmapSlide = () => {
             <h1 className="text-4xl font-bold text-foreground">Transformation Roadmap</h1>
             <p className="text-muted-foreground text-lg">FY26 phased execution plan for {data.basics.accountName}</p>
           </div>
-          {plan && (
-            <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <RegenerateSectionButton section="roadmapPhases" />
+            {plan && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />
                 AI Generated
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="flex items-start gap-4">
