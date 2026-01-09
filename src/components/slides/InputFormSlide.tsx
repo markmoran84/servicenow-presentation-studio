@@ -148,7 +148,11 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </TabsTrigger>
             <TabsTrigger value="strategy" className="gap-2 text-xs">
               <Target className="w-3 h-3" />
-              <span className="hidden sm:inline">Strategy</span>
+              <span className="hidden sm:inline">Customer Strategy</span>
+            </TabsTrigger>
+            <TabsTrigger value="accountStrategy" className="gap-2 text-xs">
+              <Zap className="w-3 h-3" />
+              <span className="hidden sm:inline">Big Bets</span>
             </TabsTrigger>
             <TabsTrigger value="painPoints" className="gap-2 text-xs">
               <AlertTriangle className="w-3 h-3" />
@@ -161,10 +165,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             <TabsTrigger value="engagement" className="gap-2 text-xs">
               <Users className="w-3 h-3" />
               <span className="hidden sm:inline">Execs</span>
-            </TabsTrigger>
-            <TabsTrigger value="accountStrategy" className="gap-2 text-xs">
-              <Zap className="w-3 h-3" />
-              <span className="hidden sm:inline">Acc Strategy</span>
             </TabsTrigger>
             <TabsTrigger value="swot" className="gap-2 text-xs">
               <Shield className="w-3 h-3" />
