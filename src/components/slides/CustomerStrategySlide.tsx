@@ -1,9 +1,10 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { Compass, Target, Rocket, Lightbulb, ArrowRight } from "lucide-react";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
+import { Compass, Target, Rocket, Lightbulb, ArrowRight, Sparkles, Link2 } from "lucide-react";
 
 export const CustomerStrategySlide = () => {
   const { data } = useAccountData();
-  const { basics, strategy } = data;
+  const { basics, strategy, generatedPlan } = data;
 
   const corporate = (strategy.corporateStrategy ?? []).filter(
     (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
@@ -18,23 +19,52 @@ export const CustomerStrategySlide = () => {
     (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
   );
 
+  // AI-generated synthesis
+  const isAIGenerated = !!generatedPlan?.customerStrategySynthesis;
+  const synthesis = generatedPlan?.customerStrategySynthesis;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <Compass className="w-7 h-7 text-primary" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
+              <Compass className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-foreground">Customer Strategy</h1>
+              <p className="text-muted-foreground text-lg">{basics.accountName} Corporate Direction</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">Customer Strategy</h1>
-            <p className="text-muted-foreground text-lg">{basics.accountName} Corporate Direction</p>
+          <div className="flex items-center gap-2">
+            <RegenerateSectionButton section="customerStrategySynthesis" />
+            {isAIGenerated && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+                <Sparkles className="w-3 h-3" />
+                AI Generated
+              </span>
+            )}
           </div>
         </div>
 
+        {/* AI Synthesis Banner */}
+        {synthesis?.narrative && (
+          <div className="glass-card p-5 mb-6 border-l-4 border-l-primary opacity-0 animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Link2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-1">Strategic Synthesis</h3>
+                <p className="text-foreground/80 leading-relaxed text-sm">{synthesis.narrative}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 3-column strategy canvas */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6 mb-6">
           {/* Left: CEO & Board */}
           <div className="space-y-4">
             <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
@@ -157,8 +187,32 @@ export const CustomerStrategySlide = () => {
             )}
           </div>
         </div>
+
+        {/* ServiceNow Alignment Row */}
+        {synthesis?.serviceNowAlignment && synthesis.serviceNowAlignment.length > 0 && (
+          <div className="glass-card p-6 opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+                <Link2 className="w-4 h-4 text-accent" />
+              </div>
+              <h3 className="font-semibold text-foreground">ServiceNow Strategic Alignment</h3>
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              {synthesis.serviceNowAlignment.map((alignment, index) => (
+                <div key={index} className="p-4 rounded-xl bg-secondary/30 border border-border/30">
+                  <p className="text-xs text-muted-foreground mb-1">Customer Priority</p>
+                  <p className="text-sm font-medium text-foreground mb-3">{alignment.customerPriority}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <ArrowRight className="w-3 h-3 text-accent" />
+                    <p className="text-xs text-accent font-medium">ServiceNow Value</p>
+                  </div>
+                  <p className="text-xs text-foreground/80">{alignment.serviceNowValue}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-

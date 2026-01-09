@@ -1,72 +1,17 @@
-import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, Target, Users, Calendar, ArrowRight, Flag, Zap } from "lucide-react";
-import { SectionHeader } from "@/components/SectionHeader";
-
-const weeklyMetrics = [
-  { label: "Pipeline Value", value: "$4.2M", change: "+12%", trend: "up", icon: TrendingUp },
-  { label: "Active Opportunities", value: "8", change: "+2", trend: "up", icon: Target },
-  { label: "Deals in Close", value: "3", change: "0", trend: "neutral", icon: Clock },
-  { label: "Win Rate (QTD)", value: "67%", change: "+5%", trend: "up", icon: CheckCircle2 },
-];
-
-const workstreamStatus = [
-  {
-    name: "CRM Modernisation",
-    status: "on-track",
-    progress: 75,
-    milestone: "POC Complete",
-    nextMilestone: "Business Case Sign-off",
-    owner: "Sarah Chen",
-    dueDate: "Feb 28",
-  },
-  {
-    name: "AI & Automation",
-    status: "at-risk",
-    progress: 45,
-    milestone: "Discovery Phase",
-    nextMilestone: "Architecture Review",
-    owner: "Michael Torres",
-    dueDate: "Mar 15",
-  },
-  {
-    name: "Platform Consolidation",
-    status: "on-track",
-    progress: 60,
-    milestone: "Vendor Shortlist",
-    nextMilestone: "Final Selection",
-    owner: "James Wilson",
-    dueDate: "Mar 7",
-  },
-];
-
-const keyAccomplishments = [
-  "Secured executive sponsorship from COO for CRM initiative",
-  "Completed technical discovery with IT architecture team",
-  "Delivered ROI analysis showing 3.2x return over 3 years",
-];
-
-const risksAndBlockers = [
-  { issue: "Budget approval delayed due to Q1 planning cycle", severity: "medium", mitigation: "Escalation meeting scheduled with CFO on Feb 12" },
-  { issue: "Key stakeholder on PTO until Feb 20", severity: "low", mitigation: "Briefing session scheduled for Feb 21" },
-];
-
-const nextWeekPriorities = [
-  { action: "Executive Briefing Center visit", date: "Feb 14", owner: "Account Team" },
-  { action: "Technical deep-dive on AI capabilities", date: "Feb 15", owner: "Solutions" },
-  { action: "Commercial proposal review", date: "Feb 16", owner: "Deal Desk" },
-];
-
-const decisionsNeeded = [
-  "Approval for expanded POC scope (+$50K)",
-  "Alignment on contract structure (multi-year vs annual)",
-];
+import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
+import { TrendingUp, TrendingDown, Minus, AlertTriangle, CheckCircle2, Clock, Target, Users, Calendar, ArrowRight, Flag, Zap, Sparkles } from "lucide-react";
 
 const getStatusConfig = (status: string) => {
   switch (status) {
     case "on-track":
+    case "On Track":
       return { color: "bg-emerald-500", textColor: "text-emerald-400", label: "On Track", icon: CheckCircle2 };
     case "at-risk":
+    case "At Risk":
       return { color: "bg-amber-500", textColor: "text-amber-400", label: "At Risk", icon: AlertTriangle };
     case "blocked":
+    case "Blocked":
       return { color: "bg-red-500", textColor: "text-red-400", label: "Blocked", icon: AlertTriangle };
     default:
       return { color: "bg-slate-500", textColor: "text-slate-400", label: "Unknown", icon: Minus };
@@ -85,6 +30,9 @@ const getTrendIcon = (trend: string) => {
 };
 
 export const WeeklyUpdateSlide = () => {
+  const { data } = useAccountData();
+  const { accountStrategy, generatedPlan, basics, financial } = data;
+
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
@@ -93,6 +41,79 @@ export const WeeklyUpdateSlide = () => {
   });
   
   const weekNumber = Math.ceil((new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
+
+  // AI-generated context
+  const isAIGenerated = !!generatedPlan?.weeklyUpdateContext;
+  const weeklyContext = generatedPlan?.weeklyUpdateContext;
+  const overallStatus = weeklyContext?.overallStatus || "On Track";
+
+  // Derive workstreams from Big Bets or AI-generated keyWorkstreams
+  const bigBets = accountStrategy?.bigBets || [];
+  const aiWorkstreams = generatedPlan?.keyWorkstreams || [];
+  
+  const workstreamStatus = bigBets.length > 0 
+    ? bigBets.slice(0, 3).map((bet, index) => ({
+        name: bet.title,
+        status: index === 1 ? "at-risk" : "on-track", // Example status logic
+        progress: bet.dealStatus === "Active Pursuit" ? 75 : bet.dealStatus === "Strategic Initiative" ? 45 : 60,
+        milestone: bet.subtitle || "In Progress",
+        nextMilestone: `Close ${bet.targetClose}`,
+        owner: bet.people?.[0]?.name || "TBD",
+        dueDate: bet.targetClose,
+        acv: bet.netNewACV,
+      }))
+    : aiWorkstreams.slice(0, 3).map((ws, index) => ({
+        name: ws.title,
+        status: index === 1 ? "at-risk" : "on-track",
+        progress: 60,
+        milestone: ws.subtitle || "In Progress",
+        nextMilestone: `Close ${ws.targetClose}`,
+        owner: ws.people?.[0]?.name || "TBD",
+        dueDate: ws.targetClose,
+        acv: ws.acv,
+      }));
+
+  // Calculate metrics from real data
+  const totalACV = bigBets.reduce((sum, bet) => {
+    const acv = parseFloat(bet.netNewACV?.replace(/[^0-9.]/g, '') || '0');
+    return sum + acv;
+  }, 0);
+  
+  const weeklyMetrics = [
+    { label: "Pipeline Value", value: `$${totalACV.toFixed(1)}M`, change: "+12%", trend: "up", icon: TrendingUp },
+    { label: "Active Opportunities", value: String(bigBets.length || aiWorkstreams.length), change: "+2", trend: "up", icon: Target },
+    { label: "Deals in Close", value: String(bigBets.filter(b => b.dealStatus === "Active Pursuit").length), change: "0", trend: "neutral", icon: Clock },
+    { label: "Current ACV", value: basics.currentContractValue || "$0", change: "", trend: "neutral", icon: CheckCircle2 },
+  ];
+
+  // Key accomplishments from AI or defaults
+  const keyHighlights = weeklyContext?.keyHighlights || [
+    "Secured executive sponsorship from COO for CRM initiative",
+    "Completed technical discovery with IT architecture team",
+    "Delivered ROI analysis showing 3.2x return over 3 years",
+  ];
+
+  // Critical actions from AI or defaults
+  const criticalActions = weeklyContext?.criticalActions || [
+    "Approval for expanded POC scope (+$50K)",
+    "Alignment on contract structure (multi-year vs annual)",
+  ];
+
+  // Derive risks from AI plan
+  const risksAndBlockers = (generatedPlan?.risksMitigations || []).slice(0, 2).map(r => ({
+    issue: r.risk,
+    severity: r.level?.toLowerCase() || "medium",
+    mitigation: r.mitigation,
+  }));
+
+  // Derive next priorities from engagement data
+  const nextWeekPriorities = (data.engagement?.plannedExecutiveEvents || []).slice(0, 3).map((event, i) => ({
+    action: event,
+    date: `Week ${weekNumber + 1}`,
+    owner: "Account Team",
+  }));
+
+  const statusConfig = getStatusConfig(overallStatus);
 
   return (
     <div className="min-h-screen p-8 pb-32">
@@ -109,13 +130,22 @@ export const WeeklyUpdateSlide = () => {
               </span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-1">Weekly Stakeholder Update</h1>
-            <p className="text-muted-foreground">{currentDate}</p>
+            <p className="text-muted-foreground">{currentDate} • {basics.accountName}</p>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground mb-1">Account Status</div>
-            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-emerald-400 font-semibold">On Track</span>
+          <div className="flex items-center gap-3">
+            <RegenerateSectionButton section="weeklyUpdateContext" />
+            {isAIGenerated && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+                <Sparkles className="w-3 h-3" />
+                AI Generated
+              </span>
+            )}
+            <div className="text-right">
+              <div className="text-sm text-muted-foreground mb-1">Account Status</div>
+              <div className={`flex items-center gap-2 ${statusConfig.color}/10 border ${statusConfig.color}/20 rounded-full px-4 py-2`}>
+                <div className={`w-2 h-2 rounded-full ${statusConfig.color} animate-pulse`} />
+                <span className={`${statusConfig.textColor} font-semibold`}>{statusConfig.label}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -125,22 +155,24 @@ export const WeeklyUpdateSlide = () => {
           {weeklyMetrics.map((metric, index) => (
             <div
               key={metric.label}
-              className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300"
+              className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300 opacity-0 animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <metric.icon className="w-5 h-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-1">
-                  {getTrendIcon(metric.trend)}
-                  <span className={`text-sm font-medium ${
-                    metric.trend === "up" ? "text-emerald-400" : 
-                    metric.trend === "down" ? "text-red-400" : "text-slate-400"
-                  }`}>
-                    {metric.change}
-                  </span>
-                </div>
+                {metric.change && (
+                  <div className="flex items-center gap-1">
+                    {getTrendIcon(metric.trend)}
+                    <span className={`text-sm font-medium ${
+                      metric.trend === "up" ? "text-emerald-400" : 
+                      metric.trend === "down" ? "text-red-400" : "text-slate-400"
+                    }`}>
+                      {metric.change}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="text-2xl font-bold text-foreground mb-1">{metric.value}</div>
               <div className="text-sm text-muted-foreground">{metric.label}</div>
@@ -156,20 +188,25 @@ export const WeeklyUpdateSlide = () => {
               <h2 className="text-lg font-semibold text-foreground">Workstream Progress</h2>
             </div>
             <div className="space-y-4">
-              {workstreamStatus.map((ws, index) => {
-                const statusConfig = getStatusConfig(ws.status);
+              {workstreamStatus.length > 0 ? workstreamStatus.map((ws, index) => {
+                const wsStatusConfig = getStatusConfig(ws.status);
                 return (
                   <div
                     key={ws.name}
-                    className="bg-background/50 rounded-xl p-4 border border-border/30"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="bg-background/50 rounded-xl p-4 border border-border/30 opacity-0 animate-fade-in"
+                    style={{ animationDelay: `${200 + index * 100}ms` }}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <h3 className="font-semibold text-foreground">{ws.name}</h3>
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusConfig.color}/20 ${statusConfig.textColor} border border-current/20`}>
-                          {statusConfig.label}
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${wsStatusConfig.color}/20 ${wsStatusConfig.textColor} border border-current/20`}>
+                          {wsStatusConfig.label}
                         </span>
+                        {ws.acv && (
+                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                            {ws.acv}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
@@ -205,20 +242,22 @@ export const WeeklyUpdateSlide = () => {
                     </div>
                   </div>
                 );
-              })}
+              }) : (
+                <p className="text-muted-foreground text-sm">No workstreams defined. Add Big Bets in the Input Form.</p>
+              )}
             </div>
           </div>
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Key Accomplishments */}
+            {/* Key Highlights */}
             <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-lg font-semibold text-foreground">This Week's Wins</h2>
+                <h2 className="text-lg font-semibold text-foreground">Key Highlights</h2>
               </div>
               <ul className="space-y-3">
-                {keyAccomplishments.map((item, index) => (
+                {keyHighlights.map((item, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
                     <span className="text-muted-foreground">{item}</span>
@@ -227,14 +266,14 @@ export const WeeklyUpdateSlide = () => {
               </ul>
             </div>
 
-            {/* Decisions Needed */}
+            {/* Critical Actions */}
             <div className="bg-card/40 backdrop-blur-sm border border-amber-500/20 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-4">
                 <Flag className="w-5 h-5 text-amber-400" />
                 <h2 className="text-lg font-semibold text-foreground">Decisions Needed</h2>
               </div>
               <ul className="space-y-3">
-                {decisionsNeeded.map((item, index) => (
+                {criticalActions.map((item, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
                     <span className="text-foreground">{item}</span>
@@ -253,7 +292,7 @@ export const WeeklyUpdateSlide = () => {
               <h2 className="text-lg font-semibold text-foreground">Risks & Blockers</h2>
             </div>
             <div className="space-y-3">
-              {risksAndBlockers.map((risk, index) => (
+              {risksAndBlockers.length > 0 ? risksAndBlockers.map((risk, index) => (
                 <div key={index} className="bg-background/50 rounded-xl p-4 border border-border/30">
                   <div className="flex items-start gap-3">
                     <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
@@ -269,7 +308,9 @@ export const WeeklyUpdateSlide = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-muted-foreground">No risks identified. Generate plan to populate.</p>
+              )}
             </div>
           </div>
 
@@ -277,10 +318,10 @@ export const WeeklyUpdateSlide = () => {
           <div className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <ArrowRight className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Next Week Priorities</h2>
+              <h2 className="text-lg font-semibold text-foreground">Upcoming Events</h2>
             </div>
             <div className="space-y-3">
-              {nextWeekPriorities.map((priority, index) => (
+              {nextWeekPriorities.length > 0 ? nextWeekPriorities.map((priority, index) => (
                 <div key={index} className="flex items-center justify-between bg-background/50 rounded-xl p-4 border border-border/30">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
@@ -293,7 +334,9 @@ export const WeeklyUpdateSlide = () => {
                   </div>
                   <div className="text-sm text-primary font-medium">{priority.date}</div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-muted-foreground">No events scheduled. Add in Executive Engagement.</p>
+              )}
             </div>
           </div>
         </div>

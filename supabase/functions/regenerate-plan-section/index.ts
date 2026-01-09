@@ -16,7 +16,10 @@ type Section =
   | "strategicObservations"
   | "strategicImplications"
   | "valueHypotheses"
-  | "risksMitigations";
+  | "risksMitigations"
+  | "fy1Retrospective"
+  | "customerStrategySynthesis"
+  | "weeklyUpdateContext";
 
 const sectionSpecs: Record<
   Section,
@@ -98,6 +101,27 @@ const sectionSpecs: Record<
       "Create exactly 4 risks with mitigation strategies. Level must be High, Medium, or Low. Be specific about the risk and actionable on mitigation.",
     outputShapeHint:
       '{"risksMitigations":[{"risk":"Incumbent Vendor Lock-in","mitigation":"Lead with differentiated AI narrative; demonstrate clear TCO advantage","level":"High"}]}',
+  },
+  fy1Retrospective: {
+    keys: ["fy1Retrospective"],
+    instruction:
+      "Create a FY-1 retrospective with exactly 4 focus areas (title + description), a keyLessons string summarizing what was learned from the previous year, and a lookingAhead string explaining how FY-1 sets up the coming year. Base this on the account history data.",
+    outputShapeHint:
+      '{"fy1Retrospective":{"focusAreas":[{"title":"Rebuilding Trust","description":"Re-establishing credibility with stakeholders..."}],"keyLessons":"Despite initial setbacks, the team demonstrated...","lookingAhead":"The foundation laid in FY-1 positions us for..."}}',
+  },
+  customerStrategySynthesis: {
+    keys: ["customerStrategySynthesis"],
+    instruction:
+      "Create a synthesis of the customer's strategy and how ServiceNow aligns. Include a 2-3 sentence narrative and exactly 4 alignment pairs showing customer priority matched to ServiceNow value.",
+    outputShapeHint:
+      '{"customerStrategySynthesis":{"narrative":"The customer is pursuing an integrated logistics strategy...","serviceNowAlignment":[{"customerPriority":"AI-First Operations","serviceNowValue":"Workflow orchestration layer for AI operationalisation"}]}}',
+  },
+  weeklyUpdateContext: {
+    keys: ["weeklyUpdateContext"],
+    instruction:
+      "Generate weekly update context based on the account's current situation. Include overallStatus (On Track/At Risk/Blocked), 3 keyHighlights for stakeholder communication, and 2-3 criticalActions that need decisions.",
+    outputShapeHint:
+      '{"weeklyUpdateContext":{"overallStatus":"On Track","keyHighlights":["Secured executive sponsorship for CRM initiative","Technical discovery completed"],"criticalActions":["Approval needed for expanded POC scope","Alignment on contract structure"]}}',
   },
 };
 
