@@ -240,11 +240,11 @@ const defaultMaerskData: AccountData = {
     currentPerception: "Medium",
   },
   financial: {
-    customerRevenue: "$55.5B (FY24)",
-    growthRate: "+9% YoY",
-    marginEBIT: "$6.4B (+65% YoY)",
-    costPressureAreas: "Red Sea rerouting costs, fuel costs, port congestion, technology sprawl, labour costs",
-    strategicInvestmentAreas: "AI & automation, Gemini network alliance, digital customer experience, green methanol fleet, integrated logistics platform",
+    customerRevenue: "$40.7B (9M 2025)",
+    growthRate: "~flat YoY",
+    marginEBIT: "$3.0-3.5B (FY25 Guidance)",
+    costPressureAreas: "Normalising freight rates, Red Sea uncertainty, fuel costs, technology sprawl",
+    strategicInvestmentAreas: "Gemini Cooperation, AI & automation, Fulfilled by Maersk, green methanol fleet, integrated logistics platform",
   },
   strategy: {
     corporateStrategy: [
