@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { Rocket, DollarSign, Clock, TrendingUp, Target, Sparkles } from "lucide-react";
 
 export const ValueHypothesisSlide = () => {
@@ -30,6 +31,7 @@ export const ValueHypothesisSlide = () => {
             <p className="text-muted-foreground text-lg">Point of View — Step 5: Testable Business Outcomes</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <RegenerateSectionButton section="valueHypotheses" />
             {plan && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />

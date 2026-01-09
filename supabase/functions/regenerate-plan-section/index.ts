@@ -11,7 +11,12 @@ type Section =
   | "strategicPriorities"
   | "coreValueDrivers"
   | "aiUseCases"
-  | "successMetrics";
+  | "successMetrics"
+  | "roadmapPhases"
+  | "strategicObservations"
+  | "strategicImplications"
+  | "valueHypotheses"
+  | "risksMitigations";
 
 const sectionSpecs: Record<
   Section,
@@ -58,6 +63,41 @@ const sectionSpecs: Record<
       "Create exactly 4 success metrics with measurable targets and plain-language descriptions.",
     outputShapeHint:
       '{"successMetrics":[{"metric":"$X","label":"...","description":"..."}]}',
+  },
+  roadmapPhases: {
+    keys: ["roadmapPhases"],
+    instruction:
+      "Create exactly 3 transformation roadmap phases with quarter (e.g., Q1 FY26), title, and 3-4 activities per phase.",
+    outputShapeHint:
+      '{"roadmapPhases":[{"quarter":"Q1 FY26","title":"Foundation","activities":["Activity 1","Activity 2","Activity 3"]}]}',
+  },
+  strategicObservations: {
+    keys: ["strategicObservations"],
+    instruction:
+      "Create exactly 4 strategic observations. Each should be a verifiable fact about the account's current situation with clear business implications.",
+    outputShapeHint:
+      '{"strategicObservations":[{"heading":"AI-First Ambition","detail":"Declared AI-first strategy with execution infrastructure lagging behind ambition."}]}',
+  },
+  strategicImplications: {
+    keys: ["strategicImplications"],
+    instruction:
+      "Create exactly 4 strategic implications. Each should explain what must change based on the observations - be specific about the transformation required.",
+    outputShapeHint:
+      '{"strategicImplications":[{"heading":"Workflow Automation","detail":"Manual processes cannot scale with AI ambition. Every workflow must be automatable."}]}',
+  },
+  valueHypotheses: {
+    keys: ["valueHypotheses"],
+    instruction:
+      "Create exactly 4 value hypotheses. Each must have a testable outcome, mechanism, timeframe, and economic impact.",
+    outputShapeHint:
+      '{"valueHypotheses":[{"outcome":"Reduce cost-to-serve by 30%","mechanism":"Platform consolidation eliminates duplicate systems","timeframe":"12-18 months","impact":"$15-20M annual savings"}]}',
+  },
+  risksMitigations: {
+    keys: ["risksMitigations"],
+    instruction:
+      "Create exactly 4 risks with mitigation strategies. Level must be High, Medium, or Low. Be specific about the risk and actionable on mitigation.",
+    outputShapeHint:
+      '{"risksMitigations":[{"risk":"Incumbent Vendor Lock-in","mitigation":"Lead with differentiated AI narrative; demonstrate clear TCO advantage","level":"High"}]}',
   },
 };
 

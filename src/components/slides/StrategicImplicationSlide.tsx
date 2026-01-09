@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { ArrowRight, Cog, Users, Zap, Target, Sparkles } from "lucide-react";
 
 export const StrategicImplicationSlide = () => {
@@ -30,6 +31,7 @@ export const StrategicImplicationSlide = () => {
             <p className="text-muted-foreground text-lg">Point of View — Step 2: What Must Change</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <RegenerateSectionButton section="strategicImplications" />
             {plan && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />
