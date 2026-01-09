@@ -90,8 +90,7 @@ ${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}: ${o
 
 ${existingBetsContext}
 
-CRITICAL: Return ONLY a valid JSON object. No markdown, no explanation, no prose. Just the JSON.
-
+OUTPUT: Return ONLY valid JSON:
 {
   "options": [
     {
@@ -115,16 +114,10 @@ CRITICAL: Return ONLY a valid JSON object. No markdown, no explanation, no prose
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { 
-            role: "system", 
-            content: "You are a JSON generator. You ONLY output valid JSON. Never include explanations, markdown formatting, or any text outside the JSON object. Your entire response must be parseable by JSON.parse()." 
-          },
-          { role: "user", content: prompt }
-        ],
-        max_tokens: 1200,
-        temperature: 0.9,
+        model: "google/gemini-2.5-pro",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 900,
+        temperature: 1.05,
       }),
     });
 
@@ -149,33 +142,10 @@ CRITICAL: Return ONLY a valid JSON object. No markdown, no explanation, no prose
     const result = await response.json();
     let content = result.choices?.[0]?.message?.content?.trim() || "";
 
-    // Robust JSON extraction
-    // Remove markdown code blocks
-    content = content.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
-    
-    // Try to find JSON object in the response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("No JSON found in response:", content.substring(0, 200));
-      throw new Error("AI response did not contain valid JSON");
-    }
-    content = jsonMatch[0];
-    
-    // Fix common JSON issues
-    // Replace smart quotes with regular quotes
-    content = content.replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'");
-    // Fix trailing commas before closing brackets
-    content = content.replace(/,\s*([}\]])/g, "$1");
-    // Fix unescaped newlines in strings
-    content = content.replace(/(?<!\\)\n(?=[^"]*"[^"]*$)/gm, "\\n");
+    // Clean up potential markdown formatting
+    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch (parseError) {
-      console.error("JSON parse error:", parseError, "Content:", content.substring(0, 300));
-      throw new Error("Failed to parse AI response as JSON");
-    }
+    const parsed = JSON.parse(content);
     const options = Array.isArray(parsed?.options) ? parsed.options : [parsed];
     if (options.length === 0) {
       throw new Error("AI returned no options");
