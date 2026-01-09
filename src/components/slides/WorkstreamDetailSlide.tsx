@@ -27,17 +27,16 @@ const defaultWorkstreams = [
     dealStatus: "Active Pursuit",
     netNewACV: "$5M",
     steadyStateBenefit: "$565M",
-    products: ["CSM", "Service Cloud", "AI Control Tower"],
     insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value.",
     people: [
       { name: "Tan Gill", role: "SVP, IT Logistics" },
       { name: "Mark Graham", role: "SVP, IT Logistics" },
     ],
     opportunities: [
-      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track", oppNumber: "OPP-2024-001", closeDate: "Mar 2025" },
-      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track", oppNumber: "OPP-2024-002", closeDate: "Jun 2025" },
-      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating", oppNumber: "OPP-2024-003", closeDate: "Feb 2025" },
-      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk", oppNumber: "OPP-2024-004", closeDate: "Sep 2025" },
+      { name: "Service Cloud Migration", value: "$2.5M", stage: "Proposal", probability: 75, status: "On Track", oppNumber: "OPP-2024-001", closeDate: "Mar 2025", products: ["Service Cloud", "CSM"] },
+      { name: "AI-Powered Case Routing", value: "$1.2M", stage: "Discovery", probability: 60, status: "On Track", oppNumber: "OPP-2024-002", closeDate: "Jun 2025", products: ["AI Control Tower", "Now Assist"] },
+      { name: "Customer Portal Modernization", value: "$800K", stage: "Negotiation", probability: 85, status: "Accelerating", oppNumber: "OPP-2024-003", closeDate: "Feb 2025", products: ["CSM", "Portal"] },
+      { name: "Integration Layer", value: "$500K", stage: "Qualification", probability: 40, status: "At Risk", oppNumber: "OPP-2024-004", closeDate: "Sep 2025", products: ["Integration Hub"] },
     ],
   },
   {
@@ -47,17 +46,16 @@ const defaultWorkstreams = [
     dealStatus: "Strategic Initiative",
     netNewACV: "$2M",
     steadyStateBenefit: "TBD",
-    products: ["Now Assist", "Document Intelligence", "CPQ"],
     insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI.",
     people: [
       { name: "Jakob Skovsgaard", role: "Head of CX" },
       { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
     ],
     opportunities: [
-      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track", oppNumber: "OPP-2024-005", closeDate: "Apr 2025" },
-      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track", oppNumber: "OPP-2024-006", closeDate: "Jul 2025" },
-      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention", oppNumber: "OPP-2024-007", closeDate: "Oct 2025" },
-      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track", oppNumber: "OPP-2024-008", closeDate: "May 2025" },
+      { name: "Now Assist Deployment", value: "$800K", stage: "Proof of Value", probability: 70, status: "On Track", oppNumber: "OPP-2024-005", closeDate: "Apr 2025", products: ["Now Assist"] },
+      { name: "Document Intelligence", value: "$600K", stage: "Discovery", probability: 55, status: "On Track", oppNumber: "OPP-2024-006", closeDate: "Jul 2025", products: ["Document Intelligence"] },
+      { name: "Predictive Analytics Suite", value: "$400K", stage: "Qualification", probability: 45, status: "Needs Attention", oppNumber: "OPP-2024-007", closeDate: "Oct 2025", products: ["Analytics", "AI"] },
+      { name: "Workflow Automation Pack", value: "$200K", stage: "Proposal", probability: 65, status: "On Track", oppNumber: "OPP-2024-008", closeDate: "May 2025", products: ["Flow Designer", "CPQ"] },
     ],
   },
   {
@@ -67,17 +65,16 @@ const defaultWorkstreams = [
     dealStatus: "Foundation Growth",
     netNewACV: "$3M",
     steadyStateBenefit: "$320M",
-    products: ["SecOps", "ITOM", "Discovery", "ITSM"],
     insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion.",
     people: [
       { name: "Scott Horn", role: "SVP, IT Logistics" },
       { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
     ],
     opportunities: [
-      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating", oppNumber: "OPP-2024-009", closeDate: "Feb 2025" },
-      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track", oppNumber: "OPP-2024-010", closeDate: "May 2025" },
-      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track", oppNumber: "OPP-2024-011", closeDate: "Aug 2025" },
-      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage", oppNumber: "OPP-2024-012", closeDate: "Nov 2025" },
+      { name: "SecOps Implementation", value: "$1.5M", stage: "Negotiation", probability: 80, status: "Accelerating", oppNumber: "OPP-2024-009", closeDate: "Feb 2025", products: ["SecOps", "SOAR"] },
+      { name: "ITOM Discovery", value: "$800K", stage: "Proposal", probability: 70, status: "On Track", oppNumber: "OPP-2024-010", closeDate: "May 2025", products: ["ITOM", "Discovery"] },
+      { name: "Event Management", value: "$500K", stage: "Discovery", probability: 50, status: "On Track", oppNumber: "OPP-2024-011", closeDate: "Aug 2025", products: ["Event Management"] },
+      { name: "Service Mapping", value: "$200K", stage: "Qualification", probability: 35, status: "Early Stage", oppNumber: "OPP-2024-012", closeDate: "Nov 2025", products: ["Service Mapping", "CMDB"] },
     ],
   },
 ];
@@ -127,7 +124,6 @@ export const WorkstreamDetailSlide = () => {
         dealStatus: bet.dealStatus,
         netNewACV: bet.netNewACV,
         steadyStateBenefit: bet.steadyStateBenefit || "TBD",
-        products: bet.products || [],
         insight: bet.insight,
         people: bet.people || [],
         // Generate sample opportunities based on products if not defined
@@ -143,6 +139,7 @@ export const WorkstreamDetailSlide = () => {
             status: ["On Track", "Accelerating", "Needs Attention", "On Track"][idx % 4],
             oppNumber: `OPP-${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`,
             closeDate: `${closeMonth} ${closeYear}`,
+            products: [product],
           };
         }) || [],
       }))
@@ -197,22 +194,6 @@ export const WorkstreamDetailSlide = () => {
                   </div>
                   <h2 className="text-xl font-bold text-foreground">{workstream.title}</h2>
                   <p className="text-sm text-primary mt-0.5">{workstream.subtitle}</p>
-                  
-                  {/* Products */}
-                  {workstream.products.length > 0 && (
-                    <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-                      <Box className="w-3.5 h-3.5 text-muted-foreground" />
-                      {workstream.products.map((product: string) => (
-                        <Badge 
-                          key={product}
-                          variant="outline"
-                          className="text-xs px-2 py-0.5 bg-accent/10 border-accent/30 text-accent"
-                        >
-                          {product}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Value Summary */}
@@ -269,6 +250,21 @@ export const WorkstreamDetailSlide = () => {
 
                     {/* Opportunity Name */}
                     <h4 className="font-semibold text-sm text-foreground mb-2 leading-tight">{opp.name}</h4>
+
+                    {/* Products */}
+                    {opp.products && opp.products.length > 0 && (
+                      <div className="flex items-center gap-1 mb-2 flex-wrap">
+                        {opp.products.map((product: string) => (
+                          <Badge 
+                            key={product}
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0 bg-accent/10 border-accent/30 text-accent"
+                          >
+                            {product}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
 
                     {/* Stage & Progress */}
                     <div className="space-y-2">
