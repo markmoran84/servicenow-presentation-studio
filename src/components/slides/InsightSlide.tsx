@@ -11,12 +11,11 @@ export const InsightSlide = () => {
   const isAIGenerated = !!generatedPlan?.insight;
   const insight = generatedPlan?.insight;
   
-  const mainInsight = insight?.mainInsight || "";
-  const supportingText = insight?.supportingText || "";
-  const paradigmShifts = insight?.paradigmShifts || [];
-  const evidence = insight?.evidence || [];
+  const headline = insight?.headline || "";
+  const observations = insight?.observations || [];
+  const recommendation = insight?.recommendation || "";
   
-  const hasContent = mainInsight || paradigmShifts.length > 0;
+  const hasContent = headline || observations.length > 0;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32 flex items-center">
@@ -46,7 +45,7 @@ export const InsightSlide = () => {
 
         {hasContent ? (
           <>
-            {/* Main Insight */}
+            {/* Main Insight Headline */}
             <div className="glass-card p-8 mb-8 border-l-4 border-l-accent">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
@@ -54,60 +53,39 @@ export const InsightSlide = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-foreground mb-4">
-                    {mainInsight}
+                    {headline}
                   </h2>
-                  <p className="text-lg text-muted-foreground">
-                    {supportingText}
-                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Paradigm Shifts */}
-            {paradigmShifts.length > 0 && (
+            {/* Supporting Observations */}
+            {observations.length > 0 && (
               <>
-                <h3 className="text-xl font-bold text-foreground mb-6">The Paradigm Shift</h3>
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {paradigmShifts.slice(0, 4).map((shift, index) => (
+                <h3 className="text-xl font-bold text-foreground mb-6">Key Observations</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  {observations.slice(0, 3).map((obs, index) => (
                     <div 
                       key={index}
                       className="glass-card p-5 opacity-0 animate-fade-in"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1 p-3 rounded-lg bg-destructive/5 border border-destructive/20">
-                          <span className="text-xs font-semibold text-destructive uppercase tracking-wider block mb-1">Old</span>
-                          <p className="text-sm text-foreground/80">{shift.old}</p>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1 p-3 rounded-lg bg-accent/5 border border-accent/20">
-                          <span className="text-xs font-semibold text-accent uppercase tracking-wider block mb-1">New</span>
-                          <p className="text-sm text-foreground/80">{shift.new}</p>
-                        </div>
-                      </div>
+                      <h4 className="font-semibold text-foreground mb-2">{obs.title}</h4>
+                      <p className="text-sm text-muted-foreground">{obs.detail}</p>
                     </div>
                   ))}
                 </div>
               </>
             )}
 
-            {/* Evidence */}
-            {evidence.length > 0 && (
-              <div className="grid grid-cols-3 gap-4">
-                {evidence.slice(0, 3).map((item, index) => (
-                  <div 
-                    key={index}
-                    className="glass-card p-6 text-center opacity-0 animate-fade-in"
-                    style={{ animationDelay: `${500 + index * 100}ms` }}
-                  >
-                    <p className={`text-4xl font-bold mb-2 ${
-                      index === 0 ? 'text-gradient' : index === 1 ? 'text-gradient-accent' : 'text-primary'
-                    }`}>{item.stat}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                ))}
+            {/* Recommendation */}
+            {recommendation && (
+              <div className="glass-card p-6 bg-accent/5 border border-accent/20">
+                <div className="flex items-center gap-3 mb-3">
+                  <ArrowRight className="w-5 h-5 text-accent" />
+                  <h3 className="text-lg font-semibold text-foreground">Recommended Action</h3>
+                </div>
+                <p className="text-foreground/90">{recommendation}</p>
               </div>
             )}
           </>

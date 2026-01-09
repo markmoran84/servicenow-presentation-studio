@@ -1,6 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Layers, Shield, Zap, Eye, GitBranch, Info, Sparkles, LucideIcon } from "lucide-react";
+import { Layers, Info, Sparkles, Zap, Shield, GitBranch, Eye, LucideIcon } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
   gitbranch: GitBranch,
@@ -16,8 +16,10 @@ export const PlatformSlide = () => {
   const companyName = basics.accountName || "the customer";
 
   // Use AI-generated platform capabilities if available
-  const isAIGenerated = !!generatedPlan?.platformCapabilities;
-  const capabilities = generatedPlan?.platformCapabilities || [];
+  const platformData = generatedPlan?.platformCapabilities;
+  const isAIGenerated = !!platformData;
+  const capabilities = platformData?.capabilities || [];
+  const narrative = platformData?.narrative || "";
   const hasCapabilities = capabilities.length > 0;
 
   return (
@@ -43,26 +45,41 @@ export const PlatformSlide = () => {
         </div>
 
         {hasCapabilities ? (
-          <div className="grid grid-cols-2 gap-6">
-            {capabilities.slice(0, 4).map((cap, i) => {
-              const IconComponent = iconMap[cap.icon?.toLowerCase()] || Layers;
-              return (
-                <div 
-                  key={cap.title} 
-                  className="glass-card p-6 opacity-0 animate-fade-in" 
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-primary" />
+          <>
+            {/* Narrative */}
+            {narrative && (
+              <div className="glass-card p-6 mb-6 border-l-4 border-l-primary opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
+                <p className="text-foreground/90">{narrative}</p>
+              </div>
+            )}
+
+            {/* Capabilities Grid */}
+            <div className="grid grid-cols-2 gap-6">
+              {capabilities.slice(0, 4).map((cap, i) => {
+                const IconComponent = Layers;
+                return (
+                  <div 
+                    key={cap.title} 
+                    className="glass-card p-6 opacity-0 animate-fade-in" 
+                    style={{ animationDelay: `${100 + i * 100}ms` }}
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                        <IconComponent className="w-6 h-6 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-bold text-foreground">{cap.title}</h3>
                     </div>
-                    <h3 className="text-xl font-bold text-foreground">{cap.title}</h3>
+                    <p className="text-muted-foreground mb-3">{cap.description}</p>
+                    {cap.value && (
+                      <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
+                        <p className="text-sm text-accent font-medium">{cap.value}</p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-muted-foreground">{cap.description}</p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
             <Info className="w-16 h-16 text-muted-foreground mx-auto mb-4" />

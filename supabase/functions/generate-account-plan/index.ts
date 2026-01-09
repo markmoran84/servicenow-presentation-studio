@@ -91,7 +91,7 @@ Generate a comprehensive, enterprise-grade account plan with the following secti
 2. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as one of "network"|"customer"|"technology"|"efficiency", "keyword", "title", "tagline", "description", "outcome")
 3. strategicObservations: Array of 4 strategic observations (each with "heading" and "detail")
 4. strategicImplications: Array of 4 implications for action (each with "heading" and "detail")
-5. strategicTensions: Array of 4 tensions the customer faces (each with "heading" and "detail")
+5. strategicTensions: Array of 4 strategic tensions (each with "heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma" - representing opposing forces the customer must balance)
 6. strategicInsights: Array of 4 key insights (each with "heading" and "detail")
 7. valueHypotheses: Array of 4 testable value hypotheses (each with "outcome", "mechanism", "timeframe", "impact")
 8. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient like "from-primary to-accent")
@@ -105,6 +105,11 @@ Generate a comprehensive, enterprise-grade account plan with the following secti
 16. fy1Retrospective: Object with "focusAreas" (array of 4 objects with "title" and "description"), "keyLessons" (string summarizing what was learned), "lookingAhead" (string about how FY-1 sets up FY+1)
 17. customerStrategySynthesis: Object with "narrative" (2-3 sentence synthesis of customer strategy and ServiceNow alignment), "serviceNowAlignment" (array of 4 objects with "customerPriority" and "serviceNowValue" showing how ServiceNow addresses each priority)
 18. weeklyUpdateContext: Object with "overallStatus" ("On Track"|"At Risk"|"Blocked"), "keyHighlights" (array of 3 key points for stakeholder update), "criticalActions" (array of 2-3 decisions or actions needed)
+19. marketingPlan: Object with "campaigns" (array of 3 campaigns, each with "title", "description", "timeline", "channels" array), "narrative" (2-3 sentences describing overall marketing approach)
+20. insight: Object with "headline" (provocative strategic insight headline), "observations" (array of 3 objects with "title" and "detail"), "recommendation" (actionable next step)
+21. platformCapabilities: Object with "capabilities" (array of 4 platform capabilities, each with "title", "description", "value" explaining business impact), "narrative" (2-3 sentences on platform strategy)
+22. riskOpportunityMatrix: Object with "items" (array of 6 items, each with "title", "type" as "risk"|"opportunity", "impact" as High/Medium/Low, "likelihood" as High/Medium/Low, "mitigation" for risks), "narrative" (summary of risk/opportunity balance)
+23. strategicAlignment: Object with "alignments" (array of 4 alignment pairs, each with "customerObjective", "serviceNowCapability", "outcome"), "narrative" (2-3 sentences on strategic fit)
 
 Return ONLY valid JSON, no markdown formatting.`;
 
