@@ -1,18 +1,14 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { ShieldAlert, AlertTriangle, CheckCircle, ArrowRight, TrendingDown, ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldAlert, AlertTriangle, CheckCircle, TrendingDown, ShieldCheck, Sparkles, AlertCircle } from "lucide-react";
 
 export const RiskMitigationSlide = () => {
   const { data } = useAccountData();
-  const plan = data.generatedPlan;
+  const { basics, generatedPlan } = data;
 
-  // Use AI-generated risks or fallback to defaults
-  const risks = plan?.risksMitigations?.slice(0, 4) || [
-    { risk: "Incumbent Vendor Lock-in", mitigation: "Lead with differentiated AI narrative; demonstrate clear TCO advantage", level: "High" },
-    { risk: "Decision Delay", mitigation: "Early stakeholder mapping; proactive governance cadence", level: "Medium" },
-    { risk: "Budget Constraints", mitigation: "Strong business case with clear ROI; phased approach with quick wins", level: "Medium" },
-    { risk: "Competitive Displacement", mitigation: "Highlight platform breadth; customer success stories", level: "Medium" },
-  ];
+  // Use AI-generated risks if available
+  const isAIGenerated = !!generatedPlan?.risksMitigations && generatedPlan.risksMitigations.length > 0;
+  const risks = generatedPlan?.risksMitigations?.slice(0, 4) || [];
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -22,6 +18,8 @@ export const RiskMitigationSlide = () => {
       default: return { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
     }
   };
+
+  const hasData = risks.length > 0;
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
@@ -33,92 +31,110 @@ export const RiskMitigationSlide = () => {
           </div>
           <div>
             <h1 className="text-4xl font-bold text-foreground">Risk & Mitigation</h1>
-            <p className="text-muted-foreground text-lg">Navigating challenges to achieve {data.basics.accountName} objectives</p>
+            <p className="text-muted-foreground text-lg">
+              {basics.accountName ? `Navigating challenges to achieve ${basics.accountName} objectives` : "Navigating challenges to achieve objectives"}
+            </p>
           </div>
           <div className="ml-auto flex items-center gap-4">
             <RegenerateSectionButton section="risksMitigations" />
-            {plan && (
+            {isAIGenerated && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />
                 AI Generated
               </span>
             )}
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded-full bg-destructive" />
-              <span className="text-muted-foreground">High</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <span className="text-muted-foreground">Medium</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="text-muted-foreground">Low</span>
-            </div>
+            {hasData && (
+              <>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-full bg-destructive" />
+                  <span className="text-muted-foreground">High</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-full bg-amber-500" />
+                  <span className="text-muted-foreground">Medium</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <span className="text-muted-foreground">Low</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Risk Cards Grid */}
-        <div className="grid grid-cols-2 gap-5">
-          {risks.map((riskItem, index) => {
-            const colors = getLevelColor(riskItem.level);
-            return (
-              <div
-                key={index}
-                className="glass-card overflow-hidden opacity-0 animate-fade-in"
-                style={{ animationDelay: `${100 + index * 100}ms` }}
-              >
-                {/* Risk Header */}
-                <div className="p-5 border-b border-border/50">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                        <AlertTriangle className="w-5 h-5 text-destructive" />
-                      </div>
-                      <h3 className="font-bold text-foreground">{riskItem.risk}</h3>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${colors.bg} ${colors.text} ${colors.border}`}>
-                      {riskItem.level}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mt-3">
-                    <TrendingDown className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Risk Level:</span>
-                    <span className={`text-xs font-semibold ${colors.text}`}>{riskItem.level}</span>
-                  </div>
-                </div>
-
-                {/* Mitigation */}
-                <div className="p-5 bg-primary/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ShieldCheck className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Mitigation Strategy</span>
-                  </div>
-                  <p className="text-sm text-foreground/90 leading-relaxed">{riskItem.mitigation}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Risk Summary Footer */}
-        <div className="mt-6 glass-card p-5 flex items-center gap-6 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0 animate-pulse-glow">
-            <CheckCircle className="w-6 h-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-foreground mb-1">Risk Management Approach</h3>
-            <p className="text-sm text-muted-foreground">
-              Proactive risk identification with clear ownership. Regular review in governance cadence. 
-              Escalation path to executive sponsors when blockers emerge.
+        {!hasData ? (
+          <div className="glass-card p-12 text-center opacity-0 animate-fade-in">
+            <AlertCircle className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Risks Identified</h3>
+            <p className="text-sm text-muted-foreground/70 max-w-md mx-auto">
+              Generate an AI-powered strategic plan to identify risks and mitigation strategies aligned to your account context.
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-primary">{risks.length}</p>
-            <p className="text-xs text-muted-foreground">Active Risks</p>
-          </div>
-        </div>
+        ) : (
+          <>
+            {/* Risk Cards Grid */}
+            <div className="grid grid-cols-2 gap-5">
+              {risks.map((riskItem, index) => {
+                const colors = getLevelColor(riskItem.level);
+                return (
+                  <div
+                    key={index}
+                    className="glass-card overflow-hidden opacity-0 animate-fade-in"
+                    style={{ animationDelay: `${100 + index * 100}ms` }}
+                  >
+                    {/* Risk Header */}
+                    <div className="p-5 border-b border-border/50">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                          </div>
+                          <h3 className="font-bold text-foreground">{riskItem.risk}</h3>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${colors.bg} ${colors.text} ${colors.border}`}>
+                          {riskItem.level}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mt-3">
+                        <TrendingDown className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Risk Level:</span>
+                        <span className={`text-xs font-semibold ${colors.text}`}>{riskItem.level}</span>
+                      </div>
+                    </div>
+
+                    {/* Mitigation */}
+                    <div className="p-5 bg-primary/5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wider">Mitigation Strategy</span>
+                      </div>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{riskItem.mitigation}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Risk Summary Footer */}
+            <div className="mt-6 glass-card p-5 flex items-center gap-6 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
+              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0 animate-pulse-glow">
+                <CheckCircle className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground mb-1">Risk Management Approach</h3>
+                <p className="text-sm text-muted-foreground">
+                  Proactive risk identification with clear ownership. Regular review in governance cadence. 
+                  Escalation path to executive sponsors when blockers emerge.
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-primary">{risks.length}</p>
+                <p className="text-xs text-muted-foreground">Active Risks</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
