@@ -96,6 +96,7 @@ export interface BigBet {
   steadyStateBenefit: string;
   insight: string;
   people: { name: string; role: string }[];
+  products: string[]; // ServiceNow products e.g. CSM, AI Control Tower, CPQ
 }
 
 // Section G2 — Account Strategy
@@ -308,6 +309,7 @@ const defaultMaerskData: AccountData = {
         netNewACV: "$5M",
         steadyStateBenefit: "$565M",
         insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
+        products: ["CSM", "Service Cloud", "AI Control Tower"],
         people: [
           { name: "Tan Gill", role: "SVP, IT Logistics" },
           { name: "Mark Graham", role: "SVP, IT Logistics" },
@@ -323,6 +325,7 @@ const defaultMaerskData: AccountData = {
         netNewACV: "$2M",
         steadyStateBenefit: "TBD",
         insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
+        products: ["Now Assist", "Document Intelligence", "CPQ"],
         people: [
           { name: "Jakob Skovsgaard", role: "Head of CX" },
           { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
@@ -338,6 +341,7 @@ const defaultMaerskData: AccountData = {
         netNewACV: "$3M",
         steadyStateBenefit: "$320M",
         insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
+        products: ["SecOps", "ITOM", "Discovery", "ITSM"],
         people: [
           { name: "Scott Horn", role: "SVP, IT Logistics" },
           { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },

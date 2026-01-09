@@ -1419,6 +1419,7 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
       steadyStateBenefit: "",
       insight: "",
       people: [],
+      products: [],
     };
     updateData("accountStrategy", {
       bigBets: [...(data.accountStrategy.bigBets || []), newBet],
@@ -1673,7 +1674,7 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
                     placeholder="e.g., $5M"
                   />
                 </div>
-                <div>
+              <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Steady-State Benefit (Annual)</label>
                   <Input
                     value={bet.steadyStateBenefit}
@@ -1681,6 +1682,17 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
                     placeholder="e.g., $565M"
                   />
                 </div>
+              </div>
+
+              {/* Products Field */}
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">ServiceNow Products (comma separated)</label>
+                <Input
+                  value={(bet.products || []).join(", ")}
+                  onChange={(e) => updateBigBet(betIndex, "products", e.target.value.split(",").map((p: string) => p.trim()).filter(Boolean))}
+                  placeholder="e.g., CSM, AI Control Tower, CPQ, ITSM"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Products involved in this workstream</p>
               </div>
 
               <div>

@@ -1,6 +1,7 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Zap, TrendingUp, Calendar, Users, Lightbulb, Sparkles } from "lucide-react";
+import { Zap, TrendingUp, Calendar, Users, Lightbulb, Sparkles, Box } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const defaultExecutives = [
   { name: "Vincent Clerc", role: "CEO MAERSK" },
@@ -21,6 +22,7 @@ const defaultWorkstreams = [
     insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
     netNewACV: "$5M",
     steadyStateBenefit: "$565M",
+    products: ["CSM", "Service Cloud", "AI Control Tower"],
     people: [
       { name: "Tan Gill", role: "SVP, IT Logistics" },
       { name: "Mark Graham", role: "SVP, IT Logistics" },
@@ -37,6 +39,7 @@ const defaultWorkstreams = [
     insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
     netNewACV: "$2M",
     steadyStateBenefit: "TBD",
+    products: ["Now Assist", "Document Intelligence", "CPQ"],
     people: [
       { name: "Jakob Skovsgaard", role: "Head of CX" },
       { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
@@ -53,6 +56,7 @@ const defaultWorkstreams = [
     insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
     netNewACV: "$3M",
     steadyStateBenefit: "$320M",
+    products: ["SecOps", "ITOM", "Discovery", "ITSM"],
     people: [
       { name: "Scott Horn", role: "SVP, IT Logistics" },
       { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
@@ -103,6 +107,7 @@ export const BigBetsSlide = () => {
         insight: bet.insight,
         netNewACV: bet.netNewACV,
         steadyStateBenefit: bet.steadyStateBenefit || "TBD",
+        products: bet.products || [],
         people: bet.people || [],
       }))
     : generatedPlan?.keyWorkstreams?.map((ws, idx) => ({
@@ -114,6 +119,7 @@ export const BigBetsSlide = () => {
         insight: ws.insight,
         netNewACV: ws.acv,
         steadyStateBenefit: ws.steadyStateBenefit || "TBD",
+        products: [],
         people: ws.people || [],
       })) || defaultWorkstreams;
 
@@ -196,6 +202,22 @@ export const BigBetsSlide = () => {
               </div>
               <h3 className="font-bold text-foreground text-sm leading-tight">{stream.title}</h3>
               <p className="text-xs text-primary mt-0.5">{stream.subtitle}</p>
+              
+              {/* Products Tags */}
+              {stream.products && stream.products.length > 0 && (
+                <div className="flex items-center gap-1 mt-2 flex-wrap">
+                  <Box className="w-3 h-3 text-muted-foreground" />
+                  {stream.products.map((product: string) => (
+                    <Badge 
+                      key={product} 
+                      variant="outline" 
+                      className="text-[9px] px-1.5 py-0 h-4 bg-accent/10 border-accent/30 text-accent"
+                    >
+                      {product}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Insight Section */}
