@@ -61,6 +61,30 @@ const defaultWorkstreams = [
   },
 ];
 
+const normalizeInsightText = (raw: string) => {
+  const text = (raw || "").trim();
+  if (!text) return "";
+  if (!text.includes('"options"')) return raw;
+
+  try {
+    const parsed = JSON.parse(text);
+    const opts = Array.isArray(parsed?.options) ? parsed.options : [];
+    const first = opts.find((o: any) => typeof o === "string" && o.trim()) as string | undefined;
+    if (first) return first.trim();
+  } catch {
+    // Fall back to loose extraction from malformed/truncated JSON
+    const idx = text.indexOf("[");
+    if (idx !== -1) {
+      const slice = text.slice(idx);
+      const matches = [...slice.matchAll(/"((?:\\.|[^"\\])*)"/g)].map((m) => m[1].replace(/\\"/g, '"'));
+      const first = matches.find((m) => m.trim());
+      if (first) return first.trim();
+    }
+  }
+
+  return raw;
+};
+
 export const BigBetsSlide = () => {
   const { data } = useAccountData();
   const { generatedPlan, accountStrategy } = data;
@@ -68,7 +92,7 @@ export const BigBetsSlide = () => {
   // Priority: accountStrategy.bigBets > generatedPlan.keyWorkstreams > defaults
   const isFromAccountStrategy = accountStrategy?.bigBets && accountStrategy.bigBets.length > 0;
   const isAIGenerated = !isFromAccountStrategy && !!generatedPlan?.keyWorkstreams;
-  
+
   const workstreams = isFromAccountStrategy
     ? accountStrategy.bigBets.slice(0, 3).map((bet: any, idx: number) => ({
         title: bet.title,
@@ -181,7 +205,7 @@ export const BigBetsSlide = () => {
                 <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Insights</span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {stream.insight}
+                {normalizeInsightText(stream.insight)}
               </p>
             </div>
 
