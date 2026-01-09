@@ -1,5 +1,6 @@
 import { SectionHeader } from "@/components/SectionHeader";
-import { Ship, Globe, TrendingUp, Target, Cpu, DollarSign } from "lucide-react";
+import { Ship, Globe, TrendingUp, Target, Cpu, DollarSign, Users } from "lucide-react";
+import { useAccountData } from "@/context/AccountDataContext";
 
 const strategicPillars = [
   {
@@ -44,6 +45,9 @@ const keyPriorities = [
 ];
 
 export const CustomerOverviewSlide = () => {
+  const { data } = useAccountData();
+  const competitors = data.businessModel.competitors || [];
+
   return (
     <div className="px-8 pt-6 pb-32">
       <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
@@ -123,6 +127,32 @@ export const CustomerOverviewSlide = () => {
           </div>
         </div>
       </div>
+
+      {/* Competitive Landscape Section */}
+      {competitors.length > 0 && (
+        <div className="mt-6 glass-card rounded-2xl p-6 opacity-0 animate-fade-in" style={{ animationDelay: "800ms" }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Competitive Landscape</h3>
+              <p className="text-sm text-muted-foreground">Key competitors in the market</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {competitors.map((competitor, index) => (
+              <div
+                key={index}
+                className="px-4 py-2 bg-card/50 rounded-lg border border-border/50 text-sm font-medium text-foreground hover:border-primary/30 transition-all duration-300 opacity-0 animate-fade-in"
+                style={{ animationDelay: `${850 + index * 50}ms` }}
+              >
+                {competitor}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
