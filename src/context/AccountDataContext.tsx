@@ -7,6 +7,18 @@ export interface CoreTeamMember {
   title: string;
 }
 
+// Extended Team Member for Account Team Slide
+export interface ExtendedTeamMember {
+  firstName: string;
+  lastName: string;
+  title: string;
+  email: string;
+  phone?: string;
+  responsibilities: string[];
+  subTeams?: string[];
+  region?: string;
+}
+
 // Section A — Account Basics
 export interface AccountBasics {
   accountName: string;
@@ -20,6 +32,7 @@ export interface AccountBasics {
   renewalDates: string;
   visionStatement: string; // Account team vision for ServiceNow at [Customer]
   coreTeamMembers: CoreTeamMember[];
+  extendedTeam: ExtendedTeamMember[];
 }
 
 // Section B — Account History / Prior Plan
@@ -201,6 +214,20 @@ const defaultMaerskData: AccountData = {
       { firstName: "Jakob", lastName: "Hjortsø", title: "Client Director" },
       { firstName: "Morten", lastName: "Kristensen", title: "Sr Solution Consultant" },
       { firstName: "Mark", lastName: "Moran", title: "Sr Advisory Enterprise Architect" },
+    ],
+    extendedTeam: [
+      { firstName: "Jakob", lastName: "Hjortso", title: "Global Client Director", email: "jakob.hjortso@servicenow.com", phone: "+45 2889 0604", responsibilities: ["Governance and relationship", "Vision and Strategy", "Global team orchestration"], region: "EMEA" },
+      { firstName: "Manfred", lastName: "Birkhoff", title: "Global Solution Consultant", email: "manfred.birkhoff@servicenow.com", phone: "+49 173 2328903", responsibilities: ["Technology Strategy and Solutions", "Discovery and technical fit"], region: "EMEA" },
+      { firstName: "Sarah", lastName: "Mitchell", title: "Strategic Account Manager", email: "sarah.mitchell@servicenow.com", phone: "+44 7700 900123", responsibilities: ["Commercial strategy execution", "Stakeholder alignment", "Pipeline development"], region: "EMEA" },
+      { firstName: "Ciara", lastName: "Breslin", title: "Account Executive NA", email: "ciara.breslin@servicenow.com", responsibilities: ["Regional commercial execution", "Drives global strategy in local territory"], subTeams: ["Solution sales teams", "Commercial and legal support"], region: "NA" },
+      { firstName: "Markus", lastName: "Maurer", title: "Customer Success Executive", email: "markus.maurer@servicenow.com", responsibilities: ["Interlock to Post-Sales", "Drives Business Value for customer"], region: "EMEA" },
+      { firstName: "Fikret", lastName: "Uenlue", title: "Services Account Executive", email: "fikret.uenlue@servicenow.com", responsibilities: ["Expert Services and Success offerings"], subTeams: ["Expert services, training", "Impact"], region: "EMEA" },
+      { firstName: "Laura", lastName: "Chen", title: "Solution Consultant APAC", email: "laura.chen@servicenow.com", responsibilities: ["Technical solutions for APAC region", "Cross-regional alignment"], region: "APAC" },
+      { firstName: "Matthias", lastName: "Gruen", title: "Value Advisory", email: "matthias.gruen@servicenow.com", responsibilities: ["Business case development", "Value realization tracking"], region: "EMEA" },
+      { firstName: "Manoj", lastName: "Patel", title: "Enterprise Architecture", email: "manoj.patel@servicenow.com", responsibilities: ["Technical architecture", "Platform roadmap"], region: "Global" },
+      { firstName: "David", lastName: "Kim", title: "Regional Sales Lead APAC", email: "david.kim@servicenow.com", responsibilities: ["APAC commercial leadership", "Regional expansion strategy"], region: "APAC" },
+      { firstName: "Emma", lastName: "Schmidt", title: "Partner Manager", email: "emma.schmidt@servicenow.com", responsibilities: ["Partner ecosystem", "Implementation partner coordination"], region: "EMEA" },
+      { firstName: "Carlos", lastName: "Rodriguez", title: "Account Executive LATAM", email: "carlos.rodriguez@servicenow.com", responsibilities: ["LATAM territory development", "Local market strategy"], region: "LATAM" },
     ],
   },
   history: {
