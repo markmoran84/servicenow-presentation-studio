@@ -203,346 +203,88 @@ export interface AccountData {
   generatedPlan?: AIGeneratedPlan;
 }
 
-// Default Maersk data
-const defaultMaerskData: AccountData = {
+// Default placeholder data (generic)
+const defaultData: AccountData = {
   basics: {
-    accountName: "A.P. Møller - Maersk",
-    industry: "Integrated Logistics & Shipping",
-    region: "Global (HQ: Copenhagen)",
-    tier: "Strategic",
-    numberOfEmployees: "100,000+",
-    currentContractValue: "$8.5M ARR",
-    nextFYAmbition: "$12M ARR",
-    threeYearAmbition: "$25M ARR",
-    renewalDates: "October 2026",
-    visionStatement: "ServiceNow will be the digital backbone powering Maersk's AI-first operations strategy, unifying 700+ fragmented applications into a single intelligent platform that accelerates decision-making from days to minutes and enables the 'All the Way' integrated logistics vision.",
-    coreTeamMembers: [
-      { firstName: "Jakob", lastName: "Hjortsø", title: "Client Director" },
-      { firstName: "Morten", lastName: "Kristensen", title: "Sr Solution Consultant" },
-      { firstName: "Mark", lastName: "Moran", title: "Sr Advisory Enterprise Architect" },
-    ],
-    extendedTeam: [
-      { firstName: "Jakob", lastName: "Hjortso", title: "Global Client Director", email: "jakob.hjortso@servicenow.com", phone: "+45 2889 0604", responsibilities: ["Governance and relationship", "Vision and Strategy", "Global team orchestration"], region: "EMEA" },
-      { firstName: "Manfred", lastName: "Birkhoff", title: "Global Solution Consultant", email: "manfred.birkhoff@servicenow.com", phone: "+49 173 2328903", responsibilities: ["Technology Strategy and Solutions", "Discovery and technical fit"], region: "EMEA" },
-      { firstName: "Sarah", lastName: "Mitchell", title: "Strategic Account Manager", email: "sarah.mitchell@servicenow.com", phone: "+44 7700 900123", responsibilities: ["Commercial strategy execution", "Stakeholder alignment", "Pipeline development"], region: "EMEA" },
-      { firstName: "Ciara", lastName: "Breslin", title: "Account Executive NA", email: "ciara.breslin@servicenow.com", responsibilities: ["Regional commercial execution", "Drives global strategy in local territory"], subTeams: ["Solution sales teams", "Commercial and legal support"], region: "NA" },
-      { firstName: "Markus", lastName: "Maurer", title: "Customer Success Executive", email: "markus.maurer@servicenow.com", responsibilities: ["Interlock to Post-Sales", "Drives Business Value for customer"], region: "EMEA" },
-      { firstName: "Fikret", lastName: "Uenlue", title: "Services Account Executive", email: "fikret.uenlue@servicenow.com", responsibilities: ["Expert Services and Success offerings"], subTeams: ["Expert services, training", "Impact"], region: "EMEA" },
-      { firstName: "Laura", lastName: "Chen", title: "Solution Consultant APAC", email: "laura.chen@servicenow.com", responsibilities: ["Technical solutions for APAC region", "Cross-regional alignment"], region: "APAC" },
-      { firstName: "Matthias", lastName: "Gruen", title: "Value Advisory", email: "matthias.gruen@servicenow.com", responsibilities: ["Business case development", "Value realization tracking"], region: "EMEA" },
-      { firstName: "Manoj", lastName: "Patel", title: "Enterprise Architecture", email: "manoj.patel@servicenow.com", responsibilities: ["Technical architecture", "Platform roadmap"], region: "Global" },
-      { firstName: "David", lastName: "Kim", title: "Regional Sales Lead APAC", email: "david.kim@servicenow.com", responsibilities: ["APAC commercial leadership", "Regional expansion strategy"], region: "APAC" },
-      { firstName: "Emma", lastName: "Schmidt", title: "Partner Manager", email: "emma.schmidt@servicenow.com", responsibilities: ["Partner ecosystem", "Implementation partner coordination"], region: "EMEA" },
-      { firstName: "Carlos", lastName: "Rodriguez", title: "Account Executive LATAM", email: "carlos.rodriguez@servicenow.com", responsibilities: ["LATAM territory development", "Local market strategy"], region: "LATAM" },
-    ],
+    accountName: "",
+    industry: "",
+    region: "",
+    tier: "Enterprise",
+    numberOfEmployees: "",
+    currentContractValue: "",
+    nextFYAmbition: "",
+    threeYearAmbition: "",
+    renewalDates: "",
+    visionStatement: "",
+    coreTeamMembers: [],
+    extendedTeam: [],
   },
   history: {
-    lastPlanDate: "March 2025",
-    plannerName: "Sarah Mitchell",
-    plannerRole: "Strategic Account Executive",
-    lastPlanSummary: "FY25 plan focused on ITSM expansion and initial CRM pilot. Achieved 95% renewal but CRM pilot stalled due to change management challenges.",
-    whatDidNotWork: "Over-customisation constrained value perception, slow adoption of new capabilities, CRM pilot stalled",
-    priorTransformationAttempts: "CRM pilot (2022) stalled due to change management, HR service delivery postponed",
+    lastPlanDate: "",
+    plannerName: "",
+    plannerRole: "",
+    lastPlanSummary: "",
+    whatDidNotWork: "",
+    priorTransformationAttempts: "",
     currentPerception: "Medium",
   },
   financial: {
-    customerRevenue: "$40.7B (9M 2025)",
-    growthRate: "~flat YoY",
-    marginEBIT: "$3.0-3.5B (FY25 Guidance)",
-    costPressureAreas: "Normalising freight rates, Red Sea uncertainty, fuel costs, technology sprawl",
-    strategicInvestmentAreas: "Gemini Cooperation, AI & automation, Fulfilled by Maersk, green methanol fleet, integrated logistics platform",
+    customerRevenue: "",
+    growthRate: "",
+    marginEBIT: "",
+    costPressureAreas: "",
+    strategicInvestmentAreas: "",
   },
   strategy: {
-    corporateStrategy: [
-      { title: "Integrated Logistics ('All the Way')", description: "Transform from a container shipping company to an integrated logistics provider offering end-to-end supply chain solutions." },
-      { title: "Customer Experience Excellence", description: "Deliver seamless, consistent customer experiences across all touchpoints and channels." },
-      { title: "AI-First Operations", description: "Deploy AI across operations, customer service, and decision-making with explicit executive mandate." },
-      { title: "Net Zero 2040", description: "Industry-leading sustainability commitment through green methanol fleet and operational efficiency." },
-    ],
-    digitalStrategies: [
-      { title: "AI-First Operations", description: "Deploy AI across operations, customer service, and decision-making with explicit executive mandate. Target 5-7% annual productivity improvement through intelligent automation and predictive analytics." },
-      { title: "Platform Consolidation", description: "Reduce 700+ application footprint through strategic platform decisions, eliminating redundancy and creating unified data foundation." },
-    ],
-    ceoBoardPriorities: [
-      { title: "Operational resilience (Red Sea/Cape routing)", description: "Navigate geopolitical disruptions through flexible routing and network optimization while maintaining service levels and cost efficiency." },
-      { title: "Cost discipline with ROIC focus", description: "$2B share buyback program signals capital discipline. Target consistent returns on invested capital through operational excellence." },
-      { title: "Digital transformation acceleration", description: "Accelerate technology modernization and platform consolidation to enable AI-first operations and improve customer experience." },
-      { title: "Platform consolidation", description: "Reduce 700+ application footprint through strategic platform decisions, eliminating redundancy and creating unified data foundation." },
-    ],
-    transformationThemes: [
-      { title: "End-to-end supply chain visibility", description: "Enable real-time tracking and predictive insights across the entire supply chain journey." },
-      { title: "Predictive analytics and AI operationalisation", description: "Move AI from pilots to production through unified workflow orchestration." },
-      { title: "Customer-centric service delivery", description: "Consistent service levels across all touchpoints with proactive engagement." },
-      { title: "Technology standardisation", description: "Consolidate fragmented technology landscape onto unified platforms." },
-    ],
+    corporateStrategy: [],
+    digitalStrategies: [],
+    ceoBoardPriorities: [],
+    transformationThemes: [],
   },
   painPoints: {
-    painPoints: [
-      {
-        title: "Fragmented CRM Landscape",
-        description: "Multiple CRM systems across regions creating inconsistent customer data, duplicate processes, and $15M+ in redundant licensing costs",
-      },
-      {
-        title: "AI Operationalisation Gap",
-        description: "18-24 month implementation cycles for AI initiatives with no central orchestration layer, causing 60% of AI pilots to fail production deployment",
-      },
-      {
-        title: "Technology Sprawl",
-        description: "700+ applications in the technology landscape with multiple ITSM tools by region, no unified service catalog, and limited integration",
-      },
-      {
-        title: "Customer Experience Inconsistency",
-        description: "Inconsistent service levels across touchpoints, limited self-service capabilities, and slow resolution times impacting NPS by 15+ points",
-      },
-    ],
+    painPoints: [],
   },
   opportunities: {
-    opportunities: [
-      {
-        title: "Unified Service Excellence Platform",
-        description: "Transform customer experience with AI-powered self-service and intelligent case routing, driving NPS improvement of 15+ points and reducing time-to-resolution by 50%",
-      },
-      {
-        title: "AI-First Operations Enablement",
-        description: "Accelerate AI operationalisation from 18 months to 6 months through unified workflow orchestration, enabling production-ready model governance and 5-7% annual productivity improvement",
-      },
-      {
-        title: "Cost-to-Serve Optimisation",
-        description: "Reduce cost-to-serve by 30% through intelligent automation of case handling, document processing, and proactive customer notifications",
-      },
-      {
-        title: "Platform Consolidation",
-        description: "Unify fragmented CRM and ITSM landscape onto single platform, eliminating $15M+ in redundant licensing and creating single source of truth for customer interactions",
-      },
-    ],
+    opportunities: [],
   },
   engagement: {
-    knownExecutiveSponsors: [
-      "Navneet Kapoor (EVP & CTIO)",
-      "Narin Pohl (EVP & CPO L&S)",
-      "John Ball (EVP CRM)",
-      "Karsten Kildahl (CCO)",
-    ],
-    plannedExecutiveEvents: [
-      "EBC Santa Clara (March 2026)",
-      "Quarterly Business Review (May 2026)",
-      "Innovation Day (September 2026)",
-    ],
-    decisionDeadlines: "Q1 2026 for CRM decision, Q2 2026 for AI use cases",
-    renewalRFPTiming: "Renewal discussions begin August 2026",
+    knownExecutiveSponsors: [],
+    plannedExecutiveEvents: [],
+    decisionDeadlines: "",
+    renewalRFPTiming: "",
   },
   accountStrategy: {
-    strategyNarrative: "Our strategy for Maersk focuses on three transformational workstreams that align ServiceNow's platform capabilities with Maersk's AI-first operations mandate. We will position ServiceNow as the operational backbone for their digital transformation, replacing fragmented point solutions with unified workflow orchestration. Success in CRM Modernisation opens the door to AI operationalisation and broader platform consolidation.",
-    bigBets: [
-      {
-        title: "Maersk Line Ocean – SFDC Takeout",
-        subtitle: "CRM Modernisation & Service Cloud",
-        dealStatus: "Active Pursuit",
-        targetClose: "Q1 2026",
-        netNewACV: "$5M",
-        steadyStateBenefit: "$565M",
-        insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
-        products: ["CSM", "Service Cloud", "AI Control Tower"],
-        people: [
-          { name: "Tan Gill", role: "SVP, IT Logistics" },
-          { name: "Mark Graham", role: "SVP, IT Logistics" },
-          { name: "Arjun Ghattaura", role: "Procurement Lead" },
-          { name: "Sarah Sharples", role: "Head of strategic vendors" },
-        ],
-      },
-      {
-        title: "AI Use Cases & Workflow Automation",
-        subtitle: "Operationalising AI-First Strategy",
-        dealStatus: "Strategic Initiative",
-        targetClose: "Q2 2026",
-        netNewACV: "$2M",
-        steadyStateBenefit: "TBD",
-        insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
-        products: ["Now Assist", "Document Intelligence", "CPQ"],
-        people: [
-          { name: "Jakob Skovsgaard", role: "Head of CX" },
-          { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
-          { name: "Oscar Ohde", role: "CPQ Platform Owner" },
-          { name: "Sunil Kumar", role: "Engineering Director" },
-        ],
-      },
-      {
-        title: "IT & Security Operations",
-        subtitle: "SecOps & ITOM Expansion",
-        dealStatus: "Foundation Growth",
-        targetClose: "Q3 2026",
-        netNewACV: "$3M",
-        steadyStateBenefit: "$320M",
-        insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
-        products: ["SecOps", "ITOM", "Discovery", "ITSM"],
-        people: [
-          { name: "Scott Horn", role: "SVP, IT Logistics" },
-          { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
-          { name: "Geoffrey Breed", role: "Director FbM Platform" },
-        ],
-      },
-    ],
-    keyExecutives: [
-      { name: "Vincent Clerc", role: "CEO MAERSK" },
-      { name: "Navneet Kapoor", role: "EVP & CTIO" },
-      { name: "Narin Pohl", role: "EVP & CPO L&S" },
-      { name: "John Ball", role: "EVP CRM" },
-      { name: "Karsten Kildahl", role: "CCO" },
-      { name: "Bill McDermott", role: "CEO ServiceNow" },
-    ],
+    strategyNarrative: "",
+    bigBets: [],
+    keyExecutives: [],
   },
   swot: {
-    strengths: [
-      "Global leader in integrated logistics with 130+ country presence",
-      "Strong financial position with $6.5B EBIT",
-      "Industry-leading sustainability commitment (Net Zero 2040)",
-      "Established technology infrastructure and digital platforms",
-    ],
-    weaknesses: [
-      "700+ fragmented applications across the technology landscape",
-      "Over-customisation of existing platforms limiting agility",
-      "Slow adoption of new capabilities and extended change cycles",
-      "Multiple ITSM and CRM tools by region creating inconsistency",
-    ],
-    opportunities: [
-      "AI-first strategy with explicit executive mandate",
-      "Platform consolidation to reduce complexity",
-      "Customer experience differentiation through digital",
-      "Operational efficiency through automation",
-    ],
-    threats: [
-      "High incumbent vendor risk (Salesforce, SAP, Microsoft)",
-      "Geopolitical disruptions (Red Sea, supply chain volatility)",
-      "Competitive pressure from digital-native logistics players",
-      "Rising fuel and operational costs",
-    ],
+    strengths: [],
+    weaknesses: [],
+    opportunities: [],
+    threats: [],
   },
   annualReport: {
-    revenue: "$55.5B",
-    revenueComparison: "2023: $51.1B",
-    ebitImprovement: "+65%",
-    netZeroTarget: "2040",
-    keyMilestones: [
-      "Gemini network launch with MSC strengthened reliability",
-      "Green methanol vessel fleet expansion to 25 ships",
-      "AI-first strategy formally adopted by executive team",
-      "Customer NPS improved by 12 points YoY",
-    ],
-    strategicAchievements: [
-      "Successfully navigated Red Sea disruption via Cape routing",
-      "Completed Landside logistics integration in 45 countries",
-      "Launched unified digital booking platform",
-      "$2B share buyback program initiated",
-    ],
-    executiveSummaryNarrative: "We are the world's leading integrated logistics company. Maersk operates across 130+ countries, connecting and simplifying global trade for customers. We provide end-to-end supply chain solutions underpinned by market-leading technology, creating seamless experiences.",
-    strategicPillars: [
-      {
-        icon: "network",
-        keyword: "BETTER",
-        title: "NETWORK",
-        tagline: "More reliable. More predictable. More integrated.",
-        description: "Strengthened network reliability and operational discipline across Ocean, Logistics & Services, and Terminals — operating as one connected system through network redesign, capacity discipline, and digitised execution.",
-        outcome: "schedule reliability, resilience, and end-to-end flow"
-      },
-      {
-        icon: "customer",
-        keyword: "BETTER",
-        title: "CUSTOMER EXPERIENCE",
-        tagline: "Connected journeys, not fragmented interactions.",
-        description: "Improving customer experience by simplifying engagement, reducing handoffs, and connecting customer-facing processes to operational execution with aligned digital channels and service operations.",
-        outcome: "trust, transparency, and reduced friction"
-      },
-      {
-        icon: "technology",
-        keyword: "BETTER",
-        title: "TECHNOLOGY & AI",
-        tagline: "From digital ambition to operational execution.",
-        description: "Accelerated AI-first agenda by embedding intelligence into core workflows — moving beyond pilots to operational use cases with data, automation, and AI improving decision-making and execution speed.",
-        outcome: "AI in execution, not experimentation"
-      },
-      {
-        icon: "efficiency",
-        keyword: "BETTER",
-        title: "EFFICIENCY",
-        tagline: "Lower cost-to-serve through standardisation and automation.",
-        description: "Continued to reduce structural cost-to-serve by simplifying systems, standardising processes, and automating manual work — improving productivity and reducing complexity.",
-        outcome: "efficiency as a structural advantage"
-      }
-    ],
+    revenue: "",
+    revenueComparison: "",
+    ebitImprovement: "",
+    netZeroTarget: "",
+    keyMilestones: [],
+    strategicAchievements: [],
+    executiveSummaryNarrative: "",
+    strategicPillars: [],
   },
   businessModel: {
-    keyPartners: [
-      "Port authorities and terminal operators globally",
-      "MSC (Gemini network alliance)",
-      "Technology vendors (SAP, Salesforce, Microsoft)",
-      "Green fuel suppliers (methanol producers)",
-      "Freight forwarders and customs brokers",
-    ],
-    keyActivities: [
-      "Container shipping and ocean freight",
-      "End-to-end logistics orchestration",
-      "Port and terminal operations",
-      "Digital platform development",
-      "Fleet management and vessel operations",
-    ],
-    keyResources: [
-      "Global fleet of 700+ vessels",
-      "130+ country operational network",
-      "Digital booking and visibility platforms",
-      "Port terminals and logistics hubs",
-      "100,000+ employees worldwide",
-    ],
-    valueProposition: [
-      "End-to-end integrated logistics ('All the Way')",
-      "Global network with local expertise",
-      "Digital visibility and real-time tracking",
-      "Sustainable shipping (Net Zero 2040)",
-      "Reliability through operational excellence",
-    ],
-    customerRelationships: [
-      "Dedicated key account management",
-      "Digital self-service platforms",
-      "24/7 customer service centers",
-      "Industry-specific solutions teams",
-      "Strategic partnership programs",
-    ],
-    channels: [
-      "Direct sales force",
-      "Digital booking platform (maersk.com)",
-      "Freight forwarder partnerships",
-      "Industry trade shows and events",
-      "API integrations with shipper systems",
-    ],
-    customerSegments: [
-      "Global enterprises (Fortune 500)",
-      "SME exporters and importers",
-      "Retail and e-commerce companies",
-      "Automotive and manufacturing",
-      "Chemical and pharmaceutical",
-    ],
-    costStructure: [
-      "Fuel and bunker costs (30% of operating)",
-      "Port and terminal fees",
-      "Crew and vessel operating costs",
-      "Technology and digital investments",
-      "Green fleet transition investments",
-    ],
-    revenueStreams: [
-      "Ocean freight (container shipping)",
-      "Logistics services (warehousing, trucking)",
-      "Terminal handling and port services",
-      "Value-added services (customs, insurance)",
-      "Digital platform subscriptions",
-    ],
-    competitors: [
-      "MSC - Mediterranean Shipping Company",
-      "CMA CGM Group",
-      "COSCO Shipping",
-      "Hapag-Lloyd",
-      "Evergreen Marine",
-      "Kuehne + Nagel (logistics)",
-      "DHL Supply Chain (logistics)",
-    ],
+    keyPartners: [],
+    keyActivities: [],
+    keyResources: [],
+    valueProposition: [],
+    customerRelationships: [],
+    channels: [],
+    customerSegments: [],
+    costStructure: [],
+    revenueStreams: [],
+    competitors: [],
   },
 };
 
@@ -557,7 +299,7 @@ interface AccountDataContextType {
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
 
 export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
-  const [data, setData] = useState<AccountData>(defaultMaerskData);
+  const [data, setData] = useState<AccountData>(defaultData);
 
   const updateData = (section: keyof AccountData, value: Partial<AccountData[keyof AccountData]>) => {
     setData((prev) => ({
@@ -583,7 +325,7 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
-  const resetToDefaults = () => setData(defaultMaerskData);
+  const resetToDefaults = () => setData(defaultData);
 
   return (
     <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan }}>
