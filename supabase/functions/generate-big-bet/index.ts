@@ -116,7 +116,7 @@ OUTPUT: Return ONLY valid JSON:
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 900,
+        max_tokens: 2000,
         temperature: 1.05,
       }),
     });
