@@ -44,42 +44,44 @@ Deno.serve(async (req) => {
     ];
     const randomAngle = insightAngles[Math.floor(Math.random() * insightAngles.length)];
 
-    const prompt = `You are a top-tier enterprise strategist. Write insights that feel like genuine thought leadership (not paraphrased inputs).
+    const prompt = `You are writing internal account intelligence briefings for enterprise sales. Your tone is JOURNALISTIC and FACTUAL - like an analyst briefing, not a sales pitch.
 
-TASK
-Generate 3 materially different insight options for the Big Bet below. They must be different angles, different wording, and different framing.
+STUDY THESE EXAMPLES OF EXCELLENT INSIGHTS:
+- "${companyRef} is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, ${companyRef} plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1."
+- "${companyRef}'s CPQ process has been a long-standing challenge, with significant gaps still filled using Excel. Over 230 people currently maintain the existing system. The goal is to start with a small-scale implementation and expand over time."
+- "${companyRef} Logistics currently lacks a CSM system, and the business line is relatively immature. ServiceNow is running a pilot, and the team is awaiting results from the Ocean RFP before further decisions."
 
-QUALITY RULES
-- No company-name shoutouts. Refer to the account as "the customer".
-- Do NOT reuse phrases from any prior insight.
-- Include: (1) a contrarian truth, (2) quantified stakes or consequence, (3) why now + competitive risk.
-- 3 sentences max per option.
+CRITICAL STYLE RULES:
+- Start with "${companyRef} is..." or "${companyRef}'s [process] has..."
+- Use SPECIFIC numbers where possible (headcount, timeline, cost)
+- Name competitors if relevant (Salesforce, Microsoft, Oracle, SAP)
+- SHORT declarative sentences
+- Sound like an informed insider writing a briefing note
+- NO buzzwords, NO hype, NO "leverage/synergy/transform"
+- Include decision timelines or current state context
 
-ANGLE TO PRIORITIZE THIS TIME: ${randomAngle}
-
-BIG BET
+BIG BET CONTEXT:
 Title: ${bet.title}
 Subtitle: ${bet.subtitle || ""}
-Deal Status: ${bet.dealStatus || ""}
 Target Close: ${bet.targetClose || ""}
 Investment: ${bet.netNewACV || ""}
 
-ACCOUNT
-${companyRef} (${industryRef})
+ACCOUNT: ${companyRef} (${industryRef})
 
-${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align to this, but do NOT reuse wording):\n${accountStrategyNarrative}` : ""}
+${accountStrategyNarrative ? `STRATEGY CONTEXT:\n${accountStrategyNarrative}` : ""}
 
-PAIN POINTS
+PAIN POINTS:
 ${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-CEO/BOARD PRESSURE
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
+CEO/BOARD PRIORITIES:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}`).join("\n") || "Not specified"}
 
-${priorInsight ? `PRIOR INSIGHT (do NOT paraphrase this; create a NEW framing):\n${priorInsight}` : ""}
+${priorInsight ? `PRIOR INSIGHT (write something COMPLETELY DIFFERENT):\n${priorInsight}` : ""}
 
-OUTPUT
-Return ONLY JSON:
-{ "options": ["insight option 1", "insight option 2", "insight option 3"] }`; 
+TASK: Generate 3 DIFFERENT insight options, each with a different angle. Each insight should be 2-3 short sentences in the journalistic style shown above.
+
+OUTPUT: Return ONLY JSON:
+{ "options": ["insight 1", "insight 2", "insight 3"] }`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

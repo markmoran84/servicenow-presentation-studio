@@ -51,37 +51,35 @@ Deno.serve(async (req) => {
     ];
     const randomAngle = angles[Math.floor(Math.random() * angles.length)];
 
-    const prompt = `You are a world-class enterprise sales strategist (ServiceNow). You create thought-leading, board-level deal narratives that do NOT sound templated.
+    const prompt = `You are writing internal account intelligence briefings for enterprise sales. Your tone is JOURNALISTIC and FACTUAL - like an analyst briefing, not a sales pitch.
 
-TASK
-Generate 3 DISTINCT Big Bet options for this account. Each option must be a materially different thesis (different wedge / different executive trigger / different value narrative).
+STUDY THESE EXAMPLES OF GOOD INSIGHTS:
+- "${companyRef} is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, ${companyRef} plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1."
+- "${companyRef}'s CPQ process has been a long-standing challenge, with significant gaps still filled using Excel. Over 230 people currently maintain the existing system. The goal is to start with a small-scale implementation and expand over time."
+- "${companyRef} Logistics currently lacks a CSM system, and the business line is relatively immature. ServiceNow is running a pilot, and the team is awaiting results from the Ocean RFP before further decisions."
 
-NON-NEGOTIABLE QUALITY BAR
-- No generic rewording of pain points; produce a fresh *point of view*.
-- Include a second-order consequence (what breaks if they don't act) AND a competitive consequence.
-- Be specific about timing and value.
-- Avoid buzzwords ("leverage", "synergy", "optimize", "transform") unless truly necessary.
-- Do NOT copy phrases from EXISTING BIG BETS or the existing strategy narrative; keep meaning but change wording.
+NOTICE THE STYLE:
+- Starts with "[Customer] is..." or "[Customer]'s [process] has..."
+- Uses SPECIFIC numbers (230 people, Q1 decision, 18 months)
+- Names competitors directly (Salesforce, Microsoft, Oracle, SAP)
+- Short, declarative sentences
+- Sounds like an informed insider, not a salesperson
+- No buzzwords, no hype, no "transform" or "leverage"
+- Mentions decision timelines and current state
 
-VOICE
-Trusted-advisor, crisp, slightly provocative, executive-ready.
-
-IMPORTANT NAMING
-- Unless the company name is explicitly provided by the user, refer to them as "the customer".
-- Never mention "Maersk" in the output.
-
-ANGLE TO PRIORITIZE THIS TIME: ${randomAngle}
+TASK: Generate 3 distinct Big Bet options. Each must have a DIFFERENT strategic angle.
 
 ACCOUNT CONTEXT
 Company: ${companyRef} (${industryRef})
-Current investment: ${accountData.basics?.currentContractValue || "Unknown"} → Target: ${accountData.basics?.nextFYAmbition || "Unknown"} (FY) → ${accountData.basics?.threeYearAmbition || "Unknown"} (3yr)
+Current ServiceNow: ${accountData.basics?.currentContractValue || "Unknown"} 
+Target: ${accountData.basics?.nextFYAmbition || "Unknown"} (next FY)
 
-${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align to this, but do NOT reuse wording):\n${accountStrategyNarrative}` : ""}
+${accountStrategyNarrative ? `ACCOUNT STRATEGY:\n${accountStrategyNarrative}` : ""}
 
-CUSTOMER STRATEGY (extract what matters, don't copy):
+CUSTOMER PRIORITIES:
 ${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-CEO/BOARD PRESSURE:
+CEO/BOARD FOCUS:
 ${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
 
 PAIN POINTS:
@@ -92,21 +90,20 @@ ${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}: ${o
 
 ${existingBetsContext}
 
-OUTPUT
-Return ONLY valid JSON, no markdown, in this schema:
+OUTPUT: Return ONLY valid JSON:
 {
   "options": [
     {
-      "title": "Deal-name style (max 6 words)",
-      "subtitle": "Outcome-focused subtitle",
+      "title": "Short deal name (4-6 words)",
+      "subtitle": "Outcome description",
       "dealStatus": "Active Pursuit | Strategic Initiative | Foundation Growth | Pipeline",
-      "targetClose": "e.g., Q3 2026",
-      "netNewACV": "e.g., $4.5M",
-      "steadyStateBenefit": "e.g., $120M/year",
-      "insight": "3 sentences max. Sentence 1: contrarian truth. Sentence 2: why now + quantified stakes. Sentence 3: why ServiceNow is the wedge and what they lose if they delay."
+      "targetClose": "Q# YYYY",
+      "netNewACV": "$XM",
+      "steadyStateBenefit": "$XM annual",
+      "insight": "Write 2-3 SHORT SENTENCES in the journalistic style shown above. Start with the customer's situation. Include specific numbers, competitor context, and timeline. Sound like an internal briefing."
     },
-    { "title": "...", "subtitle": "...", "dealStatus": "...", "targetClose": "...", "netNewACV": "...", "steadyStateBenefit": "...", "insight": "..." },
-    { "title": "...", "subtitle": "...", "dealStatus": "...", "targetClose": "...", "netNewACV": "...", "steadyStateBenefit": "...", "insight": "..." }
+    {...},
+    {...}
   ]
 }`;
 
