@@ -10,7 +10,8 @@ import { CustomerStrategySlide } from "@/components/slides/CustomerStrategySlide
 import { AccountStrategySlide } from "@/components/slides/AccountStrategySlide";
 import { FY1RetrospectiveSlide } from "@/components/slides/FY1RetrospectiveSlide";
 import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
-import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
+import { CoreAccountTeamSlide } from "@/components/slides/CoreAccountTeamSlide";
+import { ExtendedAccountTeamSlide } from "@/components/slides/ExtendedAccountTeamSlide";
 import { SWOTSlide } from "@/components/slides/SWOTSlide";
 import { CoreValueDriversSlide } from "@/components/slides/CoreValueDriversSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
@@ -33,19 +34,20 @@ const slides = [
   { component: AccountStrategySlide, label: "4. Account Strategy" },
   { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
   { component: StrategicAlignmentSlide, label: "6. Strategic Alignment" },
-  { component: AccountTeamSlide, label: "7. Account Team" },
-  { component: SWOTSlide, label: "8. SWOT Analysis" },
-  { component: CoreValueDriversSlide, label: "9. Value Drivers" },
-  { component: BigBetsSlide, label: "10. Key Workstreams" },
-  { component: WorkstreamDetailSlide, label: "11. Workstream Detail" },
-  { component: AIUseCasesSlide, label: "12. AI Portfolio" },
-  { component: PlatformSlide, label: "13. Platform Vision" },
-  { component: RoadmapSlide, label: "14. Roadmap" },
-  { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
-  { component: GovernanceSlide, label: "16. Governance" },
-  { component: ExecutiveEngagementSlide, label: "17. Engagement" },
-  { component: PursuitPlanSlide, label: "18. Pursuit Plan" },
-  { component: SuccessSlide, label: "19. Success Metrics" },
+  { component: CoreAccountTeamSlide, label: "7. Core Team" },
+  { component: ExtendedAccountTeamSlide, label: "8. Extended Team" },
+  { component: SWOTSlide, label: "9. SWOT Analysis" },
+  { component: CoreValueDriversSlide, label: "10. Value Drivers" },
+  { component: BigBetsSlide, label: "11. Key Workstreams" },
+  { component: WorkstreamDetailSlide, label: "12. Workstream Detail" },
+  { component: AIUseCasesSlide, label: "13. AI Portfolio" },
+  { component: PlatformSlide, label: "14. Platform Vision" },
+  { component: RoadmapSlide, label: "15. Roadmap" },
+  { component: RiskMitigationSlide, label: "16. Risk & Mitigation" },
+  { component: GovernanceSlide, label: "17. Governance" },
+  { component: ExecutiveEngagementSlide, label: "18. Engagement" },
+  { component: PursuitPlanSlide, label: "19. Pursuit Plan" },
+  { component: SuccessSlide, label: "20. Success Metrics" },
 ];
 
 const Index = () => {
