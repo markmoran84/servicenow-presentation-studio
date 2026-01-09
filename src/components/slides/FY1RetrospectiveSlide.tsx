@@ -1,151 +1,103 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { History, AlertTriangle, CheckCircle, XCircle, Eye } from "lucide-react";
+import { Eye, ExternalLink, CheckCircle } from "lucide-react";
 
 export const FY1RetrospectiveSlide = () => {
   const { data } = useAccountData();
+
+  const focusAreas = [
+    {
+      title: "Rebuilding Trust",
+      description: "Re-establishing credibility with key stakeholders after constrained the perceived value of existing investments"
+    },
+    {
+      title: "Platform Stabilisation",
+      description: "Addressing technical debt and performance issues from prior implementations"
+    },
+    {
+      title: "CRM Modernisation",
+      description: "Participating in a customer-led commercial evaluation to address cost-to-serve, execution risk, and scalability of the customer service platform"
+    },
+    {
+      title: "Foundation Setting",
+      description: "Creating conditions for FY26 expansion through governance and value demonstration"
+    }
+  ];
 
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-            <History className="w-7 h-7 text-primary" />
+        <h1 className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent mb-8">
+          FY-1 Retrospective
+        </h1>
+
+        {/* Top Row - Date and Planner Cards */}
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          {/* Previous Account Plan Date */}
+          <div className="glass-card p-5 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm">Previous Account Plan Date:</span>
+            <span className="text-foreground font-medium">{data.history.lastPlanDate || "MM/DD/YYY"}</span>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">FY-1 Retrospective</h1>
-            <p className="text-muted-foreground text-lg">What Actually Happened — Honest Assessment</p>
-          </div>
-          <div className="ml-auto pill-badge">
-            FY25 Review
+
+          {/* Previous Account Planner */}
+          <div className="glass-card p-5 flex items-center justify-between">
+            <span className="text-muted-foreground text-sm">Previous Account Planner:</span>
+            <div className="text-right">
+              <div className="text-foreground font-semibold">{data.history.plannerName}</div>
+              <div className="text-muted-foreground text-sm">{data.history.plannerRole}</div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Column - What Happened */}
-          <div className="space-y-6">
-            {/* What FY25 Focused On */}
-            <div className="glass-card p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Eye className="w-5 h-5 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold text-foreground">What FY25 Focused On</h2>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <span className="font-medium text-foreground">Platform Stabilisation</span>
-                    <p className="text-sm text-muted-foreground">
-                      Addressing technical debt and performance issues from prior implementations
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <span className="font-medium text-foreground">Trust Rebuilding</span>
-                    <p className="text-sm text-muted-foreground">
-                      Re-establishing credibility with key stakeholders after over-customisation challenges
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                  <div>
-                    <span className="font-medium text-foreground">Foundation Setting</span>
-                    <p className="text-sm text-muted-foreground">
-                      Creating conditions for FY26 expansion through governance and value demonstration
-                    </p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            {/* Prior Plan Summary */}
-            <div className="glass-card p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Prior Plan Summary</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {data.history.lastPlanDate} • {data.history.plannerName}, {data.history.plannerRole}
-                  </p>
-                </div>
-              </div>
-              <p className="text-foreground/90 leading-relaxed">
-                {data.history.lastPlanSummary}
-              </p>
-            </div>
+        {/* Main Content - Two Columns */}
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          {/* Left Column - Summary Narrative */}
+          <div className="glass-card p-6">
+            <p className="text-foreground/90 leading-relaxed mb-4">
+              {data.history.lastPlanSummary}
+            </p>
+            <p className="text-foreground/90 leading-relaxed">
+              {data.history.whatDidNotWork}
+            </p>
           </div>
 
-          {/* Right Column - Challenges & Context */}
-          <div className="space-y-6">
-            {/* What Did Not Work */}
-            <div className="glass-card p-6 border-l-4 border-l-destructive/50">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-destructive" />
+          {/* Right Column - What FY Focused On */}
+          <div className="glass-card p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <Eye className="w-4 h-4 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground">What Did Not Work</h2>
+                <h2 className="text-lg font-semibold text-foreground">What 2025 focused on</h2>
               </div>
-              <p className="text-foreground/90 leading-relaxed mb-4">
-                {data.history.whatDidNotWork}
-              </p>
-              <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20">
-                <h4 className="text-sm font-semibold text-destructive mb-2">Prior Transformation Attempts</h4>
-                <p className="text-sm text-muted-foreground">
-                  {data.history.priorTransformationAttempts}
-                </p>
-              </div>
+              <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                FY25 Account Strategy
+              </span>
             </div>
 
-            {/* Why Stabilisation Was Necessary */}
-            <div className="glass-card p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
+            <div className="space-y-4">
+              {focusAreas.map((area, index) => (
+                <div key={index}>
+                  <h3 className="text-primary font-semibold text-sm mb-1">{area.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{area.description}</p>
                 </div>
-                <h2 className="text-xl font-bold text-foreground">Why Stabilisation Was Necessary</h2>
-              </div>
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-secondary/30">
-                  <span className="text-sm font-medium text-foreground">Over-Customisation</span>
-                  <p className="text-xs text-muted-foreground">
-                    Deviated from platform best practices, creating upgrade complexity and maintenance burden
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-secondary/30">
-                  <span className="text-sm font-medium text-foreground">Value Perception Gap</span>
-                  <p className="text-xs text-muted-foreground">
-                    Platform capability masked by implementation challenges — not delivering promised outcomes
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-secondary/30">
-                  <span className="text-sm font-medium text-foreground">Trust Deficit</span>
-                  <p className="text-xs text-muted-foreground">
-                    Executive confidence eroded — required demonstration of reliability before expansion
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
+          </div>
+        </div>
 
-            {/* What Was Deprioritised */}
-            <div className="glass-card p-6">
-              <h3 className="font-semibold text-foreground mb-3">What Was Deliberately Deprioritised</h3>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs">CRM Expansion</span>
-                <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs">AI Use Cases</span>
-                <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs">HR Service Delivery</span>
-                <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs">SecOps Rollout</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                These initiatives were paused to focus resources on platform health — now ready for FY26.
-              </p>
-            </div>
+        {/* Bottom Row - Link and Status */}
+        <div className="glass-card p-4 flex items-center justify-between">
+          <a 
+            href="#" 
+            className="text-primary hover:text-primary/80 flex items-center gap-2 text-sm font-medium transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Link of Last Account Plan Summary
+          </a>
+          <div className="flex items-center gap-2 text-green-400">
+            <CheckCircle className="w-4 h-4" />
+            <span className="text-sm font-medium">Approved</span>
           </div>
         </div>
       </div>
