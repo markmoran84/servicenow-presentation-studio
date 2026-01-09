@@ -14,6 +14,7 @@ import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
 import { SWOTSlide } from "@/components/slides/SWOTSlide";
 import { CoreValueDriversSlide } from "@/components/slides/CoreValueDriversSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
+import { WorkstreamDetailSlide } from "@/components/slides/WorkstreamDetailSlide";
 import { AIUseCasesSlide } from "@/components/slides/AIUseCasesSlide";
 import { PlatformSlide } from "@/components/slides/PlatformSlide";
 import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
@@ -36,14 +37,15 @@ const slides = [
   { component: SWOTSlide, label: "8. SWOT Analysis" },
   { component: CoreValueDriversSlide, label: "9. Value Drivers" },
   { component: BigBetsSlide, label: "10. Key Workstreams" },
-  { component: AIUseCasesSlide, label: "11. AI Portfolio" },
-  { component: PlatformSlide, label: "12. Platform Vision" },
-  { component: RoadmapSlide, label: "13. Roadmap" },
-  { component: RiskMitigationSlide, label: "14. Risk & Mitigation" },
-  { component: GovernanceSlide, label: "15. Governance" },
-  { component: ExecutiveEngagementSlide, label: "16. Engagement" },
-  { component: PursuitPlanSlide, label: "17. Pursuit Plan" },
-  { component: SuccessSlide, label: "18. Success Metrics" },
+  { component: WorkstreamDetailSlide, label: "11. Workstream Detail" },
+  { component: AIUseCasesSlide, label: "12. AI Portfolio" },
+  { component: PlatformSlide, label: "13. Platform Vision" },
+  { component: RoadmapSlide, label: "14. Roadmap" },
+  { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
+  { component: GovernanceSlide, label: "16. Governance" },
+  { component: ExecutiveEngagementSlide, label: "17. Engagement" },
+  { component: PursuitPlanSlide, label: "18. Pursuit Plan" },
+  { component: SuccessSlide, label: "19. Success Metrics" },
 ];
 
 const Index = () => {
