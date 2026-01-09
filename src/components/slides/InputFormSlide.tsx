@@ -125,7 +125,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-6 lg:grid-cols-12 gap-1 h-auto p-1 bg-secondary/50">
+          <TabsList className="grid grid-cols-6 lg:grid-cols-11 gap-2 h-auto p-1 bg-secondary/50">
             <TabsTrigger value="aiAnalyzer" className="gap-2 text-xs">
               <Sparkles className="w-3 h-3" />
               <span className="hidden sm:inline">AI Import</span>
@@ -907,7 +907,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-accent" />
-                  Strategic Opportunities
+                  Account Strategy
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
