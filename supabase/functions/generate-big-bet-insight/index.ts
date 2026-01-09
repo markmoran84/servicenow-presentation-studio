@@ -24,29 +24,19 @@ function scrubSampleText(input: string, companyRef: string) {
   return text;
 }
 
-function pickDistinct<T>(arr: T[], n: number) {
-  const copy = [...arr];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy.slice(0, Math.min(n, copy.length));
+function safeText(input: any, isSample: boolean, companyRef: string) {
+  const text = (input ?? "").toString();
+  return isSample ? scrubSampleText(text, companyRef) : text;
 }
 
-function extractOptionsLoosely(raw: string): string[] {
-  const text = (raw || "").trim();
-  if (!text || !text.includes('"options"')) return [];
-
-  const start = text.indexOf('"options"');
-  if (start === -1) return [];
-
-  const arrStart = text.indexOf("[", start);
-  if (arrStart === -1) return [];
-
-  const slice = text.slice(arrStart);
-  const matches = [...slice.matchAll(/"((?:\\.|[^"\\])*)"/g)].map((m) => m[1].replace(/\\"/g, '"'));
-  return matches.map((s) => s.trim()).filter(Boolean);
-}
+const insightAngles = [
+  "competitive urgency (what happens if a competitor wins first)",
+  "board pressure (which KPI or mandate forces action now)",
+  "hidden cost (the cost of inaction they haven't priced in)",
+  "market timing (why the next 6–12 months matter)",
+  "transformation unlock (what this unlocks next)",
+  "risk (the operational / compliance / reputational failure mode)",
+];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -66,101 +56,71 @@ Deno.serve(async (req) => {
     const companyRef = isSampleAccount ? "the customer" : rawAccountName;
     const industryRef = (accountData?.basics?.industry || "").trim() || "the industry";
 
-    const accountStrategyNarrativeRaw = (accountData?.accountStrategy?.strategyNarrative || "").trim();
-    const accountStrategyNarrative = isSampleAccount
-      ? scrubSampleText(accountStrategyNarrativeRaw, companyRef)
-      : accountStrategyNarrativeRaw;
+    const angle = insightAngles[Math.floor(Math.random() * insightAngles.length)];
 
-    const betTitleRaw = (bet?.title || "").toString();
-    const betSubtitleRaw = (bet?.subtitle || "").toString();
-    const betTitle = isSampleAccount ? scrubSampleText(betTitleRaw, companyRef) : betTitleRaw;
-    const betSubtitle = isSampleAccount ? scrubSampleText(betSubtitleRaw, companyRef) : betSubtitleRaw;
+    const strategyNarrative = safeText(accountData?.accountStrategy?.strategyNarrative, isSampleAccount, companyRef).trim();
 
-    const priorInsightRaw = (bet?.insight || "").toString().trim();
-    const priorInsight = isSampleAccount ? scrubSampleText(priorInsightRaw, companyRef) : priorInsightRaw;
+    const betTitle = safeText(bet?.title, isSampleAccount, companyRef).trim();
+    const betSubtitle = safeText(bet?.subtitle, isSampleAccount, companyRef).trim();
+    const betTargetClose = safeText(bet?.targetClose, isSampleAccount, companyRef).trim();
+    const betInvestment = safeText(bet?.netNewACV, isSampleAccount, companyRef).trim();
 
-    const insightAngles = [
-      "competitive urgency (what happens if a competitor wins first)",
-      "board pressure (which KPI or mandate forces action now)",
-      "hidden cost (the cost of inaction they haven't priced in)",
-      "market timing (why the next 6–12 months matter)",
-      "transformation unlock (how this unlocks the broader strategy)",
-      "risk (the operational / compliance / reputational failure mode)",
-    ];
-    const [angle1, angle2, angle3] = pickDistinct(insightAngles, 3);
+    const priorInsight = safeText(bet?.insight, isSampleAccount, companyRef).trim();
 
-    const prompt = `You are writing internal account intelligence briefings for enterprise sales.
-Your tone is JOURNALISTIC and FACTUAL — like an analyst briefing, not a sales pitch.
+    const painPoints = Array.isArray(accountData?.painPoints?.painPoints)
+      ? accountData.painPoints.painPoints
+          .map((p: any) => `• ${safeText(p?.title, isSampleAccount, companyRef)}: ${safeText(p?.description, isSampleAccount, companyRef)}`)
+          .join("\n")
+      : "Not specified";
 
-STUDY THESE EXAMPLES OF EXCELLENT INSIGHTS (tone/voice only):
+    const boardPriorities = Array.isArray(accountData?.strategy?.ceoBoardPriorities)
+      ? accountData.strategy.ceoBoardPriorities
+          .map((s: any) => `• ${safeText(s?.title, isSampleAccount, companyRef)}${s?.description ? `: ${safeText(s?.description, isSampleAccount, companyRef)}` : ""}`)
+          .join("\n")
+      : "Not specified";
+
+    const decisionDeadlines = safeText(accountData?.engagement?.decisionDeadlines, isSampleAccount, companyRef).trim() || "Unknown";
+
+    const prompt = `You are writing an internal account intelligence briefing note for enterprise sales.
+Tone: JOURNALISTIC and FACTUAL — like an analyst briefing, not a sales pitch.
+
+EXAMPLES (voice only):
 - "${companyRef} is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, ${companyRef} plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1."
 - "${companyRef}'s CPQ process has been a long-standing challenge, with significant gaps still filled using Excel. Over 230 people currently maintain the existing system. The goal is to start with a small-scale implementation and expand over time."
-- "${companyRef} Logistics currently lacks a CSM system, and the business line is relatively immature. ServiceNow is running a pilot, and the team is awaiting results from the Ocean RFP before further decisions."
 
-CRITICAL STYLE RULES:
-- Start with "${companyRef} is..." or "${companyRef}'s [process] has..."
-- Short declarative sentences (2–3 sentences total)
-- Name competitors if relevant (Salesforce, Microsoft, Oracle, SAP, ServiceNow)
-- Include decision timelines or "current state" details
-- NO buzzwords, NO hype, NO "leverage/synergy/transform"
-- Do NOT invent numbers. If you use numbers, they must appear in the context below.
+STYLE RULES (mandatory):
+- Start with "${companyRef} is..." OR "${companyRef}'s [process] has..."
+- 2–3 short declarative sentences total
+- Include at least ONE concrete detail taken from the context below (a number, date/quarter, or a specific stated issue)
+- Include a decision timeline IF it is in the context
+- No buzzwords. No hype. No "leverage", "synergy", "transform"
+- Do NOT invent numbers. Only use numbers/dates explicitly present below.
+- Output ONLY the insight text (no bullets, no labels, no JSON, no quotes)
+${isSampleAccount ? "- IMPORTANT: Never use the word 'Maersk' or 'A.P. Møller'. Only refer to the company as 'the customer'." : ""}
 
-ANGLE REQUIREMENT:
-- Write 3 DIFFERENT options, each using a different angle:
-  1) ${angle1}
-  2) ${angle2}
-  3) ${angle3}
+ANGLE TO EMPHASIZE: ${angle}
 
 BIG BET CONTEXT:
-- Title: ${betTitle}
-- Subtitle: ${betSubtitle || ""}
-- Target Close: ${bet?.targetClose || ""}
-- Investment: ${bet?.netNewACV || ""}
+Title: ${betTitle}
+Subtitle: ${betSubtitle}
+Target Close: ${betTargetClose}
+Investment: ${betInvestment}
 
-ACCOUNT: ${companyRef} (${industryRef})
+ACCOUNT CONTEXT:
+Company: ${companyRef} (${industryRef})
 Current Contract: ${accountData?.basics?.currentContractValue || "Unknown"}
 FY Ambition: ${accountData?.basics?.nextFYAmbition || "Unknown"}
-Decision Deadlines: ${accountData?.engagement?.decisionDeadlines || "Unknown"}
+Decision Deadlines: ${decisionDeadlines}
 
-${accountStrategyNarrative ? `STRATEGY CONTEXT:\n${accountStrategyNarrative}` : ""}
+${strategyNarrative ? `STRATEGY CONTEXT:\n${strategyNarrative}` : ""}
 
 PAIN POINTS:
-${accountData?.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+${painPoints}
 
 CEO/BOARD PRIORITIES:
-${accountData?.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}${s.description ? `: ${s.description}` : ""}`).join("\n") || "Not specified"}
+${boardPriorities}
 
-${priorInsight ? `PRIOR INSIGHT (write something COMPLETELY DIFFERENT):\n${priorInsight}` : ""}
-
-Return 3 insight options.`;
-
-    const body: any = {
-      model: "google/gemini-2.5-pro",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 450,
-      temperature: 0.95,
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "return_insight_options",
-            description: "Return 3 distinct insight options as short factual briefing notes.",
-            parameters: {
-              type: "object",
-              properties: {
-                options: {
-                  type: "array",
-                  items: { type: "string" },
-                },
-              },
-              required: ["options"],
-              additionalProperties: false,
-            },
-          },
-        },
-      ],
-      tool_choice: { type: "function", function: { name: "return_insight_options" } },
-    };
+${priorInsight ? `PRIOR INSIGHT (do NOT restate; write something materially different):\n${priorInsight}` : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -168,7 +128,12 @@ Return 3 insight options.`;
         "Content-Type": "application/json",
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model: "google/gemini-2.5-pro",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 220,
+        temperature: 0.95,
+      }),
     });
 
     if (!response.ok) {
@@ -184,59 +149,36 @@ Return 3 insight options.`;
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-
       const errorText = await response.text();
       console.error("Lovable AI error:", errorText);
       throw new Error(`AI API error: ${response.status}`);
     }
 
     const result = await response.json();
+    let insight = (result?.choices?.[0]?.message?.content || "").toString().trim();
 
-    let options: string[] = [];
-    const message = result?.choices?.[0]?.message;
+    // Clean up potential markdown formatting
+    insight = insight.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    // Preferred: tool-calling
-    const toolArgsRaw = message?.tool_calls?.[0]?.function?.arguments;
-    if (typeof toolArgsRaw === "string" && toolArgsRaw.trim()) {
+    // Guardrail: if the model violates instructions and returns JSON, try to extract the first option
+    if (insight.includes('"options"')) {
       try {
-        const parsedArgs = JSON.parse(toolArgsRaw);
-        if (Array.isArray(parsedArgs?.options)) {
-          options = parsedArgs.options.map((s: any) => (s ?? "").toString().trim()).filter(Boolean);
-        }
+        const parsed = JSON.parse(insight);
+        const opts = Array.isArray(parsed?.options) ? parsed.options : [];
+        const first = opts.find((o: any) => typeof o === "string" && o.trim()) as string | undefined;
+        if (first) insight = first.trim();
       } catch {
-        // fall through to content parsing
+        // ignore
       }
     }
-
-    // Fallback: try to parse any returned content
-    if (!options.length) {
-      const contentRaw = (message?.content || "").toString().trim();
-      const cleaned = contentRaw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-      try {
-        const parsed = JSON.parse(cleaned);
-        if (Array.isArray(parsed?.options)) {
-          options = parsed.options.map((s: any) => (s ?? "").toString().trim()).filter(Boolean);
-        }
-      } catch {
-        options = extractOptionsLoosely(cleaned);
-      }
-
-      if (!options.length && cleaned) options = [cleaned];
-    }
-
-    // Pick one option (avoid returning raw JSON to the client)
-    let insight = options[Math.floor(Math.random() * options.length)] || "";
-    insight = insight.toString().trim();
 
     if (isSampleAccount) {
       insight = scrubSampleText(insight, companyRef);
     }
 
-    // Final guardrail: don't return JSON blobs to the UI
-    if (insight.includes('"options"')) {
-      const extracted = extractOptionsLoosely(insight);
-      if (extracted.length) insight = extracted[0];
+    insight = insight.trim();
+    if (!insight) {
+      throw new Error("AI returned an empty insight. Please try again.");
     }
 
     return new Response(
@@ -254,4 +196,3 @@ Return 3 insight options.`;
     );
   }
 });
-
