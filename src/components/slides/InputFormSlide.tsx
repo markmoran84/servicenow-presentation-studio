@@ -20,13 +20,40 @@ interface InputFormSlideProps {
 }
 
 export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
-  const { data, updateData, resetToDefaults } = useAccountData();
+  const { data, updateData, resetToDefaults, setGeneratedPlan } = useAccountData();
   const [activeTab, setActiveTab] = useState("aiAnalyzer");
   const [isGeneratingVision, setIsGeneratingVision] = useState(false);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
 
-  const handleGenerate = () => {
-    toast.success("Account plan generated! Navigating to slides...");
-    onGenerate?.();
+  const handleGenerate = async () => {
+    setIsGeneratingPlan(true);
+    try {
+      toast.loading("Generating enterprise account plan with AI...", { id: "plan-gen" });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-account-plan", {
+        body: { accountData: data }
+      });
+
+      if (error) {
+        console.error("Plan generation error:", error);
+        throw error;
+      }
+      
+      if (!responseData?.success) {
+        throw new Error(responseData?.error || "Failed to generate plan");
+      }
+
+      // Store the AI-generated plan
+      setGeneratedPlan(responseData.plan);
+      
+      toast.success("Enterprise account plan generated!", { id: "plan-gen" });
+      onGenerate?.();
+    } catch (error) {
+      console.error("Plan generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate plan. Please try again.", { id: "plan-gen" });
+    } finally {
+      setIsGeneratingPlan(false);
+    }
   };
 
   const handleArrayInput = (
@@ -81,9 +108,18 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               <RotateCcw className="w-4 h-4" />
               Reset to Defaults
             </Button>
-            <Button onClick={handleGenerate} className="gap-2">
-              <ArrowRight className="w-4 h-4" />
-              Save & Generate
+            <Button onClick={handleGenerate} className="gap-2" disabled={isGeneratingPlan}>
+              {isGeneratingPlan ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating Plan...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate with AI
+                </>
+              )}
             </Button>
           </div>
         </div>
