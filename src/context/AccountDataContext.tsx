@@ -86,6 +86,25 @@ export interface ExecutiveEngagement {
   renewalRFPTiming: string;
 }
 
+// Big Bet / Key Workstream
+export interface BigBet {
+  title: string;
+  subtitle: string;
+  dealStatus: "Active Pursuit" | "Strategic Initiative" | "Foundation Growth" | "Pipeline";
+  targetClose: string;
+  netNewACV: string;
+  steadyStateBenefit: string;
+  insight: string;
+  people: { name: string; role: string }[];
+}
+
+// Section G2 — Account Strategy
+export interface AccountStrategy {
+  strategyNarrative: string;
+  bigBets: BigBet[];
+  keyExecutives: { name: string; role: string }[];
+}
+
 // Section H — SWOT Analysis
 export interface SWOTAnalysis {
   strengths: string[];
@@ -157,6 +176,7 @@ export interface AccountData {
   painPoints: StrategicPainPoints;
   opportunities: StrategicOpportunities;
   engagement: ExecutiveEngagement;
+  accountStrategy: AccountStrategy;
   swot: SWOTAnalysis;
   annualReport: AnnualReportHighlights;
   businessModel: BusinessModelCanvas;
@@ -276,6 +296,63 @@ const defaultMaerskData: AccountData = {
     ],
     decisionDeadlines: "Q1 2026 for CRM decision, Q2 2026 for AI use cases",
     renewalRFPTiming: "Renewal discussions begin August 2026",
+  },
+  accountStrategy: {
+    strategyNarrative: "Our strategy for Maersk focuses on three transformational workstreams that align ServiceNow's platform capabilities with Maersk's AI-first operations mandate. We will position ServiceNow as the operational backbone for their digital transformation, replacing fragmented point solutions with unified workflow orchestration. Success in CRM Modernisation opens the door to AI operationalisation and broader platform consolidation.",
+    bigBets: [
+      {
+        title: "Maersk Line Ocean – SFDC Takeout",
+        subtitle: "CRM Modernisation & Service Cloud",
+        dealStatus: "Active Pursuit",
+        targetClose: "Q1 2026",
+        netNewACV: "$5M",
+        steadyStateBenefit: "$565M",
+        insight: "Maersk is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, Maersk plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1.",
+        people: [
+          { name: "Tan Gill", role: "SVP, IT Logistics" },
+          { name: "Mark Graham", role: "SVP, IT Logistics" },
+          { name: "Arjun Ghattaura", role: "Procurement Lead" },
+          { name: "Sarah Sharples", role: "Head of strategic vendors" },
+        ],
+      },
+      {
+        title: "AI Use Cases & Workflow Automation",
+        subtitle: "Operationalising AI-First Strategy",
+        dealStatus: "Strategic Initiative",
+        targetClose: "Q2 2026",
+        netNewACV: "$2M",
+        steadyStateBenefit: "TBD",
+        insight: "Maersk explicitly AI-first. ServiceNow positioned as the operationalisation layer for AI — connecting intelligence to automated workflows. Focus on predictive case routing, intelligent document processing as CRM modernisation use cases.",
+        people: [
+          { name: "Jakob Skovsgaard", role: "Head of CX" },
+          { name: "Thomas Lassen", role: "SVP, Global Process Lead" },
+          { name: "Oscar Ohde", role: "CPQ Platform Owner" },
+          { name: "Sunil Kumar", role: "Engineering Director" },
+        ],
+      },
+      {
+        title: "IT & Security Operations",
+        subtitle: "SecOps & ITOM Expansion",
+        dealStatus: "Foundation Growth",
+        targetClose: "Q3 2026",
+        netNewACV: "$3M",
+        steadyStateBenefit: "$320M",
+        insight: "Existing ITSM footprint provides platform for SecOps and ITOM expansion. Maersk's global operations require unified visibility. Security orchestration and discovery completing the IT operations picture.",
+        people: [
+          { name: "Scott Horn", role: "SVP, IT Logistics" },
+          { name: "Krishnan Srinivasan", role: "SVP of AI and Data" },
+          { name: "Geoffrey Breed", role: "Director FbM Platform" },
+        ],
+      },
+    ],
+    keyExecutives: [
+      { name: "Vincent Clerc", role: "CEO MAERSK" },
+      { name: "Navneet Kapoor", role: "EVP & CTIO" },
+      { name: "Narin Pohl", role: "EVP & CPO L&S" },
+      { name: "John Ball", role: "EVP CRM" },
+      { name: "Karsten Kildahl", role: "CCO" },
+      { name: "Bill McDermott", role: "CEO ServiceNow" },
+    ],
   },
   swot: {
     strengths: [
