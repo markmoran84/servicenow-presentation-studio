@@ -437,6 +437,7 @@ interface AccountDataContextType {
   updateData: (section: keyof AccountData, value: Partial<AccountData[keyof AccountData]>) => void;
   resetToDefaults: () => void;
   setGeneratedPlan: (plan: AIGeneratedPlan) => void;
+  patchGeneratedPlan: (patch: Partial<AIGeneratedPlan>) => void;
 }
 
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
@@ -458,10 +459,20 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const patchGeneratedPlan = (patch: Partial<AIGeneratedPlan>) => {
+    setData((prev) => ({
+      ...prev,
+      generatedPlan: {
+        ...(prev.generatedPlan ?? ({} as AIGeneratedPlan)),
+        ...patch,
+      },
+    }));
+  };
+
   const resetToDefaults = () => setData(defaultMaerskData);
 
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan }}>
       {children}
     </AccountDataContext.Provider>
   );

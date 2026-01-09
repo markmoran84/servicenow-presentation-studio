@@ -45,7 +45,7 @@ export const CustomerStrategySlide = () => {
                   <Rocket className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-primary font-semibold uppercase tracking-wider">Strategic Transformation</p>
+                  <p className="text-xs text-primary font-semibold uppercase tracking-wider">Corporate Strategy</p>
                   <h2 className="text-2xl font-bold text-foreground">
                     {mainStrategy?.title || "Corporate Strategy (add in Input Form)"}
                   </h2>
@@ -59,7 +59,7 @@ export const CustomerStrategySlide = () => {
                   <p className="text-sm font-semibold text-foreground">No corporate strategy found</p>
                   <p className="text-sm text-muted-foreground">
                     Go to <span className="font-medium text-foreground">Input Form → Strategy</span> and add at least one Corporate Strategy item (title + description), then click{" "}
-                    <span className="font-medium text-foreground">Save & Generate</span>.
+                    <span className="font-medium text-foreground">Generate with AI</span>.
                   </p>
                 </div>
               )}
@@ -88,24 +88,37 @@ export const CustomerStrategySlide = () => {
             </div>
           </div>
 
-          {/* Right Column - Supporting Pillars */}
+          {/* Right Column - Corporate Strategies + CEO Priorities */}
           <div className="space-y-4">
             <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
               <div className="flex items-center gap-2 mb-4">
                 <Target className="w-5 h-5 text-primary" />
-                <h3 className="font-bold text-foreground">Strategic Pillars</h3>
+                <h3 className="font-bold text-foreground">Corporate Strategies</h3>
               </div>
               <div className="space-y-3">
-                {supportingStrategies.map((item, index) => (
-                  <div
-                    key={`${item.title}-${index}`}
-                    className="p-3 rounded-lg bg-secondary/50 border-l-2 border-l-primary opacity-0 animate-fade-in"
-                    style={{ animationDelay: `${250 + index * 75}ms` }}
-                  >
-                    <h4 className="font-semibold text-foreground text-sm mb-1">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
-                  </div>
-                ))}
+                {corporate.length > 0 ? (
+                  corporate.slice(0, 4).map((item, index) => (
+                    <div
+                      key={`${item.title}-${index}`}
+                      className="p-3 rounded-lg bg-secondary/50 border-l-2 border-l-primary opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${250 + index * 75}ms` }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <h4 className="font-semibold text-foreground text-sm">{item.title}</h4>
+                        {index === 0 && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary">Primary</span>
+                        )}
+                      </div>
+                      {item.description && (
+                        <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Add Corporate Strategies in <span className="font-medium text-foreground">Input Form → Strategy</span>.
+                  </p>
+                )}
               </div>
             </div>
 

@@ -1,4 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { Target, Zap, Users, Layers, AlertCircle, Trophy, Sparkles, LucideIcon } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -60,12 +61,15 @@ export const StrategicPrioritiesSlide = () => {
         <h1 className="text-4xl font-bold text-foreground opacity-0 animate-fade-in">
           Strategic Priorities FY26
         </h1>
-        {isAIGenerated && (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium opacity-0 animate-fade-in">
-            <Sparkles className="w-3 h-3" />
-            AI Generated
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          <RegenerateSectionButton section="strategicPriorities" />
+          {isAIGenerated && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium opacity-0 animate-fade-in">
+              <Sparkles className="w-3 h-3" />
+              AI Generated
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mb-6">
