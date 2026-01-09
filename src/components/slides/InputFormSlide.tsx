@@ -1290,6 +1290,7 @@ interface AccountStrategyTabProps {
 const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
   const [isGeneratingStrategy, setIsGeneratingStrategy] = useState(false);
   const [generatingBetIndex, setGeneratingBetIndex] = useState<number | null>(null);
+  const [generatingInsightIndex, setGeneratingInsightIndex] = useState<number | null>(null);
 
   const handleGenerateStrategy = async () => {
     setIsGeneratingStrategy(true);
@@ -1356,6 +1357,42 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
     }
   };
 
+  const handleGenerateInsight = async (betIndex: number) => {
+    const bet = data.accountStrategy?.bigBets?.[betIndex];
+    if (!bet?.title) {
+      toast.error("Please enter a title first");
+      return;
+    }
+
+    setGeneratingInsightIndex(betIndex);
+    try {
+      toast.loading("Generating insight...", { id: `gen-insight-${betIndex}` });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-big-bet-insight", {
+        body: { 
+          accountData: data,
+          bet: bet
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate insight");
+
+      const newBets = [...(data.accountStrategy?.bigBets || [])];
+      newBets[betIndex] = {
+        ...newBets[betIndex],
+        insight: responseData.insight,
+      };
+      
+      updateData("accountStrategy", { bigBets: newBets });
+      toast.success("Insight generated!", { id: `gen-insight-${betIndex}` });
+    } catch (error) {
+      console.error("Insight generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate insight", { id: `gen-insight-${betIndex}` });
+    } finally {
+      setGeneratingInsightIndex(null);
+    }
+  };
   const addBigBet = () => {
     const newBet = {
       title: "",
@@ -1631,7 +1668,30 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
               </div>
 
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Insight</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs text-muted-foreground">Insight</label>
+                  {bet.title && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleGenerateInsight(betIndex)}
+                      disabled={generatingInsightIndex === betIndex}
+                      className="gap-1 h-6 text-xs px-2"
+                    >
+                      {generatingInsightIndex === betIndex ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3 h-3" />
+                          AI Generate Insight
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
                 <Textarea
                   value={bet.insight}
                   onChange={(e) => updateBigBet(betIndex, "insight", e.target.value)}
