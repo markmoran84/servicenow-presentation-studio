@@ -1367,23 +1367,39 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
     setGeneratingInsightIndex(betIndex);
     try {
       toast.loading("Generating insight...", { id: `gen-insight-${betIndex}` });
-      
+
       const { data: responseData, error } = await supabase.functions.invoke("generate-big-bet-insight", {
-        body: { 
+        body: {
           accountData: data,
-          bet: bet
-        }
+          bet: bet,
+        },
       });
 
       if (error) throw error;
       if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate insight");
 
+      // Defensive: older versions sometimes returned { options: [...] } as a string.
+      const rawInsight = (responseData.insight || "").toString();
+      let nextInsight = rawInsight;
+
+      const trimmed = rawInsight.trim();
+      if (trimmed.startsWith("{") && trimmed.includes('"options"')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          const opts = Array.isArray(parsed?.options) ? parsed.options : [];
+          const first = opts.find((o: any) => typeof o === "string" && o.trim());
+          if (first) nextInsight = first.trim();
+        } catch {
+          // ignore; keep raw string
+        }
+      }
+
       const newBets = [...(data.accountStrategy?.bigBets || [])];
       newBets[betIndex] = {
         ...newBets[betIndex],
-        insight: responseData.insight,
+        insight: nextInsight,
       };
-      
+
       updateData("accountStrategy", { bigBets: newBets });
       toast.success("Insight generated!", { id: `gen-insight-${betIndex}` });
     } catch (error) {
