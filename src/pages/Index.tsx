@@ -20,6 +20,7 @@ import { PlatformSlide } from "@/components/slides/PlatformSlide";
 import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
 import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
+import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
 import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
@@ -43,7 +44,8 @@ const slides = [
   { component: RoadmapSlide, label: "14. Roadmap" },
   { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
   { component: GovernanceSlide, label: "16. Governance" },
-  { component: ExecutiveEngagementSlide, label: "17. Engagement" },
+  { component: WeeklyUpdateSlide, label: "17. Weekly Update" },
+  { component: ExecutiveEngagementSlide, label: "18. Engagement" },
   { component: PursuitPlanSlide, label: "18. Pursuit Plan" },
   { component: SuccessSlide, label: "19. Success Metrics" },
 ];
