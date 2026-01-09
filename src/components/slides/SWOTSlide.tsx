@@ -1,9 +1,10 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { Shield, AlertTriangle, Lightbulb, Flame, TrendingUp, TrendingDown, Target } from "lucide-react";
+import { Shield, AlertTriangle, Lightbulb, Flame, TrendingUp, TrendingDown, Target, Info } from "lucide-react";
 
 export const SWOTSlide = () => {
   const { data } = useAccountData();
   const { swot, basics } = data;
+  const companyName = basics.accountName || "the customer";
 
   const quadrants = [
     {
@@ -56,6 +57,8 @@ export const SWOTSlide = () => {
     },
   ];
 
+  const hasAnyContent = quadrants.some(q => q.items.length > 0);
+
   return (
     <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
@@ -67,7 +70,7 @@ export const SWOTSlide = () => {
             </div>
             <div>
               <h1 className="slide-title">SWOT Analysis</h1>
-              <p className="slide-subtitle">{basics.accountName} — Strategic Assessment</p>
+              <p className="slide-subtitle">{companyName} — Strategic Assessment</p>
             </div>
           </div>
           <div className="flex items-center gap-5">
@@ -82,59 +85,77 @@ export const SWOTSlide = () => {
           </div>
         </div>
 
-        {/* SWOT Grid */}
-        <div className="grid grid-cols-2 gap-6">
-          {quadrants.map((quadrant, qIndex) => (
-            <div
-              key={quadrant.title}
-              className={`glass-card p-6 border-l-4 ${quadrant.borderColor} opacity-0 animate-fade-in`}
-              style={{ animationDelay: `${100 + qIndex * 100}ms` }}
-            >
-              <div className="flex items-center gap-4 mb-5">
-                <div className={`w-11 h-11 rounded-xl ${quadrant.iconBg} flex items-center justify-center border border-white/5`}>
-                  <quadrant.icon className={`w-5 h-5 ${quadrant.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <h2 className="section-title">{quadrant.title}</h2>
-                  <p className="text-xs text-muted-foreground">{quadrant.subtitle}</p>
-                </div>
-                <div className="ml-auto">
-                  {quadrant.position === "positive" ? (
-                    <TrendingUp className="w-5 h-5 text-primary/40" />
-                  ) : (
-                    <TrendingDown className="w-5 h-5 text-destructive/40" />
-                  )}
-                </div>
-              </div>
-
-              <ul className="space-y-2.5">
-                {quadrant.items.map((item, index) => (
-                  <li 
-                    key={index}
-                    className={`flex items-start gap-3 p-3 rounded-xl ${quadrant.itemBg} border border-white/[0.03]`}
-                  >
-                    <div className={`w-1.5 h-1.5 rounded-full ${quadrant.dotColor} mt-2 flex-shrink-0`} />
-                    <span className="text-sm text-foreground/90 leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Strategic Implications Footer */}
-        <div className="mt-6 glass-card p-5 flex items-center gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
-          <div className="icon-box flex-shrink-0">
-            <Lightbulb className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="card-title mb-1">Strategic Implication</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              ServiceNow can address weaknesses (technology sprawl, slow adoption) while capitalising on opportunities 
-              (AI-first mandate, platform consolidation) — positioning as the execution backbone for transformation.
+        {!hasAnyContent ? (
+          <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <Info className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No SWOT Analysis Data</h3>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Complete the Input Form with SWOT analysis details or upload an Annual Report to auto-populate this strategic assessment.
             </p>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* SWOT Grid */}
+            <div className="grid grid-cols-2 gap-6">
+              {quadrants.map((quadrant, qIndex) => (
+                <div
+                  key={quadrant.title}
+                  className={`glass-card p-6 border-l-4 ${quadrant.borderColor} opacity-0 animate-fade-in`}
+                  style={{ animationDelay: `${100 + qIndex * 100}ms` }}
+                >
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className={`w-11 h-11 rounded-xl ${quadrant.iconBg} flex items-center justify-center border border-white/5`}>
+                      <quadrant.icon className={`w-5 h-5 ${quadrant.iconColor}`} />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="section-title">{quadrant.title}</h2>
+                      <p className="text-xs text-muted-foreground">{quadrant.subtitle}</p>
+                    </div>
+                    <div className="ml-auto">
+                      {quadrant.position === "positive" ? (
+                        <TrendingUp className="w-5 h-5 text-primary/40" />
+                      ) : (
+                        <TrendingDown className="w-5 h-5 text-destructive/40" />
+                      )}
+                    </div>
+                  </div>
+
+                  {quadrant.items.length > 0 ? (
+                    <ul className="space-y-2.5">
+                      {quadrant.items.map((item, index) => (
+                        <li 
+                          key={index}
+                          className={`flex items-start gap-3 p-3 rounded-xl ${quadrant.itemBg} border border-white/[0.03]`}
+                        >
+                          <div className={`w-1.5 h-1.5 rounded-full ${quadrant.dotColor} mt-2 flex-shrink-0`} />
+                          <span className="text-sm text-foreground/90 leading-relaxed">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">
+                      No {quadrant.title.toLowerCase()} defined yet
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Strategic Implications Footer */}
+            <div className="mt-6 glass-card p-5 flex items-center gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
+              <div className="icon-box flex-shrink-0">
+                <Lightbulb className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="card-title mb-1">Strategic Implication</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Leverage identified strengths and opportunities while addressing weaknesses to mitigate threats — 
+                  positioning as the execution backbone for {companyName}'s transformation.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
