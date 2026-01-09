@@ -90,22 +90,7 @@ ${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}: ${o
 
 ${existingBetsContext}
 
-OUTPUT: Return ONLY valid JSON:
-{
-  "options": [
-    {
-      "title": "Short deal name (4-6 words)",
-      "subtitle": "Outcome description",
-      "dealStatus": "Active Pursuit | Strategic Initiative | Foundation Growth | Pipeline",
-      "targetClose": "Q# YYYY",
-      "netNewACV": "$XM",
-      "steadyStateBenefit": "$XM annual",
-      "insight": "Write 2-3 SHORT SENTENCES in the journalistic style shown above. Start with the customer's situation. Include specific numbers, competitor context, and timeline. Sound like an internal briefing."
-    },
-    {...},
-    {...}
-  ]
-}`;
+Generate 3 distinct Big Bet options using the suggest_big_bets tool.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -114,10 +99,43 @@ OUTPUT: Return ONLY valid JSON:
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 2000,
-        temperature: 1.05,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "suggest_big_bets",
+              description: "Return 3 distinct Big Bet options for the account",
+              parameters: {
+                type: "object",
+                properties: {
+                  options: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Short deal name (4-6 words)" },
+                        subtitle: { type: "string", description: "Outcome description" },
+                        dealStatus: { type: "string", enum: ["Active Pursuit", "Strategic Initiative", "Foundation Growth", "Pipeline"] },
+                        targetClose: { type: "string", description: "Target close quarter e.g. Q2 2025" },
+                        netNewACV: { type: "string", description: "Net new ACV e.g. $2.5M" },
+                        steadyStateBenefit: { type: "string", description: "Annual benefit e.g. $1.2M annual" },
+                        insight: { type: "string", description: "2-3 sentences in journalistic style about customer situation" }
+                      },
+                      required: ["title", "subtitle", "dealStatus", "targetClose", "netNewACV", "steadyStateBenefit", "insight"],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ["options"],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "suggest_big_bets" } },
+        temperature: 1.0,
       }),
     });
 
@@ -140,14 +158,16 @@ OUTPUT: Return ONLY valid JSON:
     }
 
     const result = await response.json();
-    let content = result.choices?.[0]?.message?.content?.trim() || "";
+    const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (!toolCall || toolCall.function.name !== "suggest_big_bets") {
+      throw new Error("AI did not return expected tool call");
+    }
 
-    // Clean up potential markdown formatting
-    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-
-    const parsed = JSON.parse(content);
-    const options = Array.isArray(parsed?.options) ? parsed.options : [parsed];
-    if (options.length === 0) {
+    const parsed = JSON.parse(toolCall.function.arguments);
+    const options = parsed.options;
+    
+    if (!Array.isArray(options) || options.length === 0) {
       throw new Error("AI returned no options");
     }
 
@@ -159,10 +179,7 @@ OUTPUT: Return ONLY valid JSON:
     const bigBet = options[pickIndex];
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        bigBet 
-      }),
+      JSON.stringify({ success: true, bigBet }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
