@@ -1,42 +1,20 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { Rocket, DollarSign, Clock, TrendingUp, Target } from "lucide-react";
+import { Rocket, DollarSign, Clock, TrendingUp, Target, Sparkles } from "lucide-react";
 
 export const ValueHypothesisSlide = () => {
   const { data } = useAccountData();
+  const plan = data.generatedPlan;
 
-  const hypotheses = [
-    {
-      outcome: "Reduce cost-to-serve by 30%",
-      mechanism: "CRM consolidation eliminates duplicate systems and automates case handling",
-      timeframe: "12-18 months",
-      economicImpact: "$15-20M annual savings",
-      icon: DollarSign,
-      color: "primary",
-    },
-    {
-      outcome: "Accelerate AI operationalisation 5x",
-      mechanism: "Unified workflow platform provides production-ready AI orchestration layer",
-      timeframe: "6-12 months",
-      economicImpact: "Avoided cost of failed AI initiatives",
-      icon: Rocket,
-      color: "accent",
-    },
-    {
-      outcome: "Improve CSAT by 15 points",
-      mechanism: "Predictive case routing and AI-augmented service delivery",
-      timeframe: "9-12 months",
-      economicImpact: "Customer retention and lifetime value",
-      icon: TrendingUp,
-      color: "primary",
-    },
-    {
-      outcome: "Reduce time-to-resolution by 50%",
-      mechanism: "Intelligent automation and proactive notifications",
-      timeframe: "6-9 months",
-      economicImpact: "Operational efficiency gains",
-      icon: Clock,
-      color: "accent",
-    },
+  // Use AI-generated value hypotheses or fallback to defaults
+  const hypotheses = plan?.valueHypotheses?.slice(0, 4).map((h, i) => ({
+    ...h,
+    icon: [DollarSign, Rocket, TrendingUp, Clock][i % 4],
+    color: i % 2 === 0 ? "primary" : "accent",
+  })) || [
+    { outcome: "Reduce cost-to-serve by 30%", mechanism: "Platform consolidation eliminates duplicate systems and automates handling", timeframe: "12-18 months", impact: "$15-20M annual savings", icon: DollarSign, color: "primary" },
+    { outcome: "Accelerate AI operationalisation 5x", mechanism: "Unified workflow platform provides production-ready AI orchestration layer", timeframe: "6-12 months", impact: "Avoided cost of failed initiatives", icon: Rocket, color: "accent" },
+    { outcome: "Improve CSAT by 15 points", mechanism: "Predictive case routing and AI-augmented service delivery", timeframe: "9-12 months", impact: "Customer retention value", icon: TrendingUp, color: "primary" },
+    { outcome: "Reduce time-to-resolution by 50%", mechanism: "Intelligent automation and proactive notifications", timeframe: "6-9 months", impact: "Operational efficiency", icon: Clock, color: "accent" },
   ];
 
   return (
@@ -51,8 +29,14 @@ export const ValueHypothesisSlide = () => {
             <h1 className="text-4xl font-bold text-foreground">Value Hypothesis</h1>
             <p className="text-muted-foreground text-lg">Point of View — Step 5: Testable Business Outcomes</p>
           </div>
-          <div className="ml-auto pill-badge">
-            PoV Framework
+          <div className="ml-auto flex items-center gap-2">
+            {plan && (
+              <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3" />
+                AI Generated
+              </span>
+            )}
+            <span className="pill-badge">PoV Framework</span>
           </div>
         </div>
 
@@ -60,7 +44,7 @@ export const ValueHypothesisSlide = () => {
         <div className="grid grid-cols-2 gap-6 mb-8">
           {hypotheses.map((hypothesis, index) => (
             <div 
-              key={hypothesis.outcome}
+              key={index}
               className="glass-card p-6 opacity-0 animate-fade-in"
               style={{ animationDelay: `${index * 100}ms` }}
             >
@@ -87,7 +71,7 @@ export const ValueHypothesisSlide = () => {
                     </div>
                     <div className="p-3 rounded-lg bg-secondary/50">
                       <span className="text-xs text-muted-foreground block mb-1">Economic Impact</span>
-                      <span className="font-semibold text-foreground">{hypothesis.economicImpact}</span>
+                      <span className="font-semibold text-foreground">{hypothesis.impact}</span>
                     </div>
                   </div>
                 </div>
@@ -100,22 +84,12 @@ export const ValueHypothesisSlide = () => {
         <div className="glass-card p-6 border-t-4 border-t-primary">
           <h3 className="font-bold text-foreground mb-4">Hypothesis Validation Approach</h3>
           <div className="grid grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl bg-primary/5 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">1</div>
-              <p className="text-sm text-foreground">Define baseline metrics</p>
-            </div>
-            <div className="p-4 rounded-xl bg-primary/5 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">2</div>
-              <p className="text-sm text-foreground">Execute pilot scope</p>
-            </div>
-            <div className="p-4 rounded-xl bg-primary/5 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">3</div>
-              <p className="text-sm text-foreground">Measure outcomes</p>
-            </div>
-            <div className="p-4 rounded-xl bg-primary/5 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">4</div>
-              <p className="text-sm text-foreground">Scale or pivot</p>
-            </div>
+            {["Define baseline metrics", "Execute pilot scope", "Measure outcomes", "Scale or pivot"].map((step, i) => (
+              <div key={i} className="p-4 rounded-xl bg-primary/5 text-center">
+                <div className="text-2xl font-bold text-primary mb-1">{i + 1}</div>
+                <p className="text-sm text-foreground">{step}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

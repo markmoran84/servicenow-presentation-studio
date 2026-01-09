@@ -130,6 +130,22 @@ export interface BusinessModelCanvas {
   competitors: string[];
 }
 
+// AI-Generated Strategic Plan Content
+export interface AIGeneratedPlan {
+  executiveSummaryNarrative: string;
+  strategicObservations: { heading: string; detail: string }[];
+  strategicImplications: { heading: string; detail: string }[];
+  strategicTensions: { heading: string; detail: string }[];
+  strategicInsights: { heading: string; detail: string }[];
+  valueHypotheses: { outcome: string; mechanism: string; timeframe: string; impact: string }[];
+  strategicPriorities: { title: string; whyNow: string; ifWeLose: string }[];
+  keyWorkstreams: { title: string; status: string; targetClose: string; acv: string; insight: string }[];
+  risksMitigations: { risk: string; mitigation: string; level: string }[];
+  roadmapPhases: { quarter: string; title: string; activities: string[] }[];
+  engagementStrategy: { executiveAlignment: string[]; keyForums: string[] };
+  successMetrics: { metric: string; label: string; description: string }[];
+}
+
 export interface AccountData {
   basics: AccountBasics;
   history: AccountHistory;
@@ -141,6 +157,7 @@ export interface AccountData {
   swot: SWOTAnalysis;
   annualReport: AnnualReportHighlights;
   businessModel: BusinessModelCanvas;
+  generatedPlan?: AIGeneratedPlan;
 }
 
 // Default Maersk data
@@ -416,6 +433,7 @@ interface AccountDataContextType {
   data: AccountData;
   updateData: (section: keyof AccountData, value: Partial<AccountData[keyof AccountData]>) => void;
   resetToDefaults: () => void;
+  setGeneratedPlan: (plan: AIGeneratedPlan) => void;
 }
 
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
@@ -430,10 +448,17 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const setGeneratedPlan = (plan: AIGeneratedPlan) => {
+    setData((prev) => ({
+      ...prev,
+      generatedPlan: plan,
+    }));
+  };
+
   const resetToDefaults = () => setData(defaultMaerskData);
 
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan }}>
       {children}
     </AccountDataContext.Provider>
   );

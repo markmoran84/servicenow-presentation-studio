@@ -1,70 +1,24 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { ShieldAlert, AlertTriangle, CheckCircle, ArrowRight, TrendingDown, ShieldCheck } from "lucide-react";
-
-interface Risk {
-  title: string;
-  description: string;
-  likelihood: "High" | "Medium" | "Low";
-  impact: "High" | "Medium" | "Low";
-  mitigation: string;
-  owner: string;
-}
+import { ShieldAlert, AlertTriangle, CheckCircle, ArrowRight, TrendingDown, ShieldCheck, Sparkles } from "lucide-react";
 
 export const RiskMitigationSlide = () => {
   const { data } = useAccountData();
-  const { swot, basics } = data;
+  const plan = data.generatedPlan;
 
-  // Derive risks from SWOT threats and add mitigation strategies
-  const risks: Risk[] = [
-    {
-      title: "Incumbent Vendor Lock-in",
-      description: "High incumbent vendor risk with Salesforce, SAP, and Microsoft deeply embedded in customer operations",
-      likelihood: "High",
-      impact: "High",
-      mitigation: "Lead with differentiated AI operationalisation narrative; demonstrate clear TCO advantage; executive sponsorship engagement",
-      owner: "Client Director",
-    },
-    {
-      title: "Decision Delay",
-      description: "Complex procurement processes and multiple stakeholder alignment may delay key decisions beyond target dates",
-      likelihood: "Medium",
-      impact: "High",
-      mitigation: "Early stakeholder mapping; proactive governance cadence; executive alignment on decision timeline",
-      owner: "Account Team",
-    },
-    {
-      title: "Budget Constraints",
-      description: "Economic uncertainty and cost discipline may limit available investment budget for transformation",
-      likelihood: "Medium",
-      impact: "Medium",
-      mitigation: "Strong business case with clear ROI; phased approach with quick wins; align to existing budget cycles",
-      owner: "Value Advisory",
-    },
-    {
-      title: "Competitive Displacement",
-      description: "Alternative platforms may position aggressively with pricing or feature advantages",
-      likelihood: "Medium",
-      impact: "High",
-      mitigation: "Highlight platform breadth; customer success stories; technical differentiation on workflow orchestration",
-      owner: "Solution Consultant",
-    },
+  // Use AI-generated risks or fallback to defaults
+  const risks = plan?.risksMitigations?.slice(0, 4) || [
+    { risk: "Incumbent Vendor Lock-in", mitigation: "Lead with differentiated AI narrative; demonstrate clear TCO advantage", level: "High" },
+    { risk: "Decision Delay", mitigation: "Early stakeholder mapping; proactive governance cadence", level: "Medium" },
+    { risk: "Budget Constraints", mitigation: "Strong business case with clear ROI; phased approach with quick wins", level: "Medium" },
+    { risk: "Competitive Displacement", mitigation: "Highlight platform breadth; customer success stories", level: "Medium" },
   ];
 
-  const getLikelihoodColor = (level: string) => {
+  const getLevelColor = (level: string) => {
     switch (level) {
-      case "High": return "bg-destructive/20 text-destructive border-destructive/30";
-      case "Medium": return "bg-amber-500/20 text-amber-500 border-amber-500/30";
-      case "Low": return "bg-primary/20 text-primary border-primary/30";
-      default: return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getImpactColor = (level: string) => {
-    switch (level) {
-      case "High": return "text-destructive";
-      case "Medium": return "text-amber-500";
-      case "Low": return "text-primary";
-      default: return "text-muted-foreground";
+      case "High": return { bg: "bg-destructive/20", text: "text-destructive", border: "border-destructive/30", dot: "bg-destructive" };
+      case "Medium": return { bg: "bg-amber-500/20", text: "text-amber-500", border: "border-amber-500/30", dot: "bg-amber-500" };
+      case "Low": return { bg: "bg-primary/20", text: "text-primary", border: "border-primary/30", dot: "bg-primary" };
+      default: return { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
     }
   };
 
@@ -78,9 +32,15 @@ export const RiskMitigationSlide = () => {
           </div>
           <div>
             <h1 className="text-4xl font-bold text-foreground">Risk & Mitigation</h1>
-            <p className="text-muted-foreground text-lg">Navigating challenges to achieve {basics.accountName} objectives</p>
+            <p className="text-muted-foreground text-lg">Navigating challenges to achieve {data.basics.accountName} objectives</p>
           </div>
           <div className="ml-auto flex items-center gap-4">
+            {plan && (
+              <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3" />
+                AI Generated
+              </span>
+            )}
             <div className="flex items-center gap-2 text-xs">
               <div className="w-3 h-3 rounded-full bg-destructive" />
               <span className="text-muted-foreground">High</span>
@@ -98,58 +58,46 @@ export const RiskMitigationSlide = () => {
 
         {/* Risk Cards Grid */}
         <div className="grid grid-cols-2 gap-5">
-          {risks.map((risk, index) => (
-            <div
-              key={risk.title}
-              className="glass-card overflow-hidden opacity-0 animate-fade-in"
-              style={{ animationDelay: `${100 + index * 100}ms` }}
-            >
-              {/* Risk Header */}
-              <div className="p-5 border-b border-border/50">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-destructive" />
+          {risks.map((riskItem, index) => {
+            const colors = getLevelColor(riskItem.level);
+            return (
+              <div
+                key={index}
+                className="glass-card overflow-hidden opacity-0 animate-fade-in"
+                style={{ animationDelay: `${100 + index * 100}ms` }}
+              >
+                {/* Risk Header */}
+                <div className="p-5 border-b border-border/50">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                      </div>
+                      <h3 className="font-bold text-foreground">{riskItem.risk}</h3>
                     </div>
-                    <h3 className="font-bold text-foreground">{risk.title}</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getLikelihoodColor(risk.likelihood)}`}>
-                      {risk.likelihood}
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${colors.bg} ${colors.text} ${colors.border}`}>
+                      {riskItem.level}
                     </span>
                   </div>
-                </div>
-                <p className="text-sm text-muted-foreground">{risk.description}</p>
-                
-                {/* Likelihood/Impact Indicators */}
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center gap-2">
+                  
+                  <div className="flex items-center gap-2 mt-3">
                     <TrendingDown className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Likelihood:</span>
-                    <span className={`text-xs font-semibold ${getImpactColor(risk.likelihood)}`}>{risk.likelihood}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Impact:</span>
-                    <span className={`text-xs font-semibold ${getImpactColor(risk.impact)}`}>{risk.impact}</span>
+                    <span className="text-xs text-muted-foreground">Risk Level:</span>
+                    <span className={`text-xs font-semibold ${colors.text}`}>{riskItem.level}</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Mitigation */}
-              <div className="p-5 bg-primary/5">
-                <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Mitigation Strategy</span>
-                </div>
-                <p className="text-sm text-foreground/90 leading-relaxed mb-3">{risk.mitigation}</p>
-                <div className="flex items-center gap-2">
-                  <ArrowRight className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Owner: <span className="font-medium text-foreground">{risk.owner}</span></span>
+                {/* Mitigation */}
+                <div className="p-5 bg-primary/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Mitigation Strategy</span>
+                  </div>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{riskItem.mitigation}</p>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Risk Summary Footer */}
@@ -165,7 +113,7 @@ export const RiskMitigationSlide = () => {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-primary">4</p>
+            <p className="text-2xl font-bold text-primary">{risks.length}</p>
             <p className="text-xs text-muted-foreground">Active Risks</p>
           </div>
         </div>
