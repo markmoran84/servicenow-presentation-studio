@@ -86,6 +86,27 @@ Write only the strategy narrative, no headers or formatting.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Lovable API error:", errorText);
+      
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "Not enough AI credits. Please add credits to your Lovable workspace in Settings → Workspace → Usage." 
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "AI rate limit exceeded. Please wait a moment and try again." 
+          }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       throw new Error(`AI API error: ${response.status}`);
     }
 
