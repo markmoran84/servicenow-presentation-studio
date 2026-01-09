@@ -129,61 +129,85 @@ export const BigBetsSlide = () => {
         </div>
       </div>
 
-      {/* Workstreams Grid - Clean Table Layout */}
-      <div className="glass-card overflow-hidden opacity-0 animate-fade-in animation-delay-200">
-        {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 p-4 bg-secondary/50 border-b border-border/50 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-          <div className="col-span-3">Workstream</div>
-          <div className="col-span-3">Strategic Insight</div>
-          <div className="col-span-2 text-center">Net New ACV</div>
-          <div className="col-span-2 text-center">Steady-State</div>
-          <div className="col-span-2 text-center">Target Close</div>
-        </div>
-
-        {/* Workstream Rows */}
+      {/* Workstreams Grid */}
+      <div className="grid grid-cols-3 gap-4">
         {workstreams.map((stream, index) => (
           <div
             key={stream.title}
-            className={`grid grid-cols-12 gap-4 p-5 items-center border-b border-border/30 last:border-b-0 hover:bg-secondary/20 transition-colors`}
+            className="glass-card p-0 overflow-hidden opacity-0 animate-fade-in"
+            style={{ animationDelay: `${200 + index * 100}ms` }}
           >
-            {/* Workstream Name */}
-            <div className="col-span-3">
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-12 rounded-full ${stream.statusColor}`} />
-                <div>
-                  <h3 className="font-bold text-foreground">{stream.title}</h3>
-                  <p className="text-xs text-primary mt-0.5">{stream.subtitle}</p>
-                  <span className={`inline-block mt-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full ${stream.statusColor}/20 text-foreground`}>
-                    {stream.dealStatus}
-                  </span>
+            {/* Stream Header */}
+            <div className={`p-4 ${stream.statusColor}/10 border-b border-border/30`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stream.statusColor} text-white`}>
+                  {stream.dealStatus}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">Close: {stream.dealClose}</span>
                 </div>
               </div>
+              <h3 className="font-bold text-foreground text-sm leading-tight">{stream.title}</h3>
+              <p className="text-xs text-primary mt-0.5">{stream.subtitle}</p>
             </div>
 
-            {/* Insight */}
-            <div className="col-span-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
+            {/* Insight Section */}
+            <div className="p-4 border-b border-border/30">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Lightbulb className="w-3.5 h-3.5 text-accent" />
+                <span className="text-[10px] font-bold text-accent uppercase tracking-wider">Insights</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {stream.insight}
               </p>
             </div>
 
-            {/* Net New ACV */}
-            <div className="col-span-2 text-center">
-              <span className="text-2xl font-bold text-primary">{stream.netNewACV}</span>
-            </div>
-
-            {/* Steady State Benefit */}
-            <div className="col-span-2 text-center">
-              <span className="text-2xl font-bold text-accent">{stream.steadyStateBenefit}</span>
-            </div>
-
-            {/* Target Close */}
-            <div className="col-span-2 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <span className="font-semibold text-foreground">{stream.dealClose}</span>
+            {/* Financials */}
+            <div className="p-4 bg-secondary/30 border-b border-border/30">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Net new ACV</span>
+                  <span className="text-xl font-bold text-gradient">{stream.netNewACV}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] text-muted-foreground block mb-0.5">Steady-state benefit</span>
+                  <span className="text-xl font-bold text-gradient-accent">{stream.steadyStateBenefit}</span>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div className="mt-3 h-1 rounded-full bg-border/50 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${stream.statusColor}`}
+                  style={{ width: index === 0 ? '75%' : index === 1 ? '40%' : '25%' }}
+                />
               </div>
             </div>
+
+            {/* People Section */}
+            {stream.people.length > 0 && (
+              <div className="p-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Users className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">People</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {stream.people.slice(0, 4).map((person) => (
+                    <div key={person.name} className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[8px] font-bold text-foreground">
+                          {person.name.split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-medium text-foreground block truncate">{person.name}</span>
+                        <span className="text-[9px] text-muted-foreground block truncate">{person.role}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
