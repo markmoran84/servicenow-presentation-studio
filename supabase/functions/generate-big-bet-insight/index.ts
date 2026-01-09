@@ -18,60 +18,68 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
+    // Detect sample/template data and avoid hard-coding the sample company name into outputs
+    const sampleAccountNames = new Set(["A.P. Møller - Maersk", "Maersk"]);
+    const rawAccountName = (accountData.basics?.accountName || "").trim();
+    const isSampleAccount = !rawAccountName || sampleAccountNames.has(rawAccountName);
+    const companyRef = isSampleAccount ? "the customer" : rawAccountName;
+    const industryRef = (accountData.basics?.industry || "").trim() || "the industry";
+
     // Get overall account strategy for alignment
-    const accountStrategyNarrative = accountData.accountStrategy?.strategyNarrative || "";
+    const accountStrategyNarrativeRaw = (accountData.accountStrategy?.strategyNarrative || "").trim();
+    const accountStrategyNarrative = isSampleAccount
+      ? accountStrategyNarrativeRaw.replaceAll("Maersk", "the customer")
+      : accountStrategyNarrativeRaw;
+
+    const priorInsight = (bet?.insight || "").trim();
 
     // Add variety through different insight angles
     const insightAngles = [
-      "Focus on the COMPETITIVE URGENCY - what happens if a competitor gets there first?",
-      "Focus on the EXECUTIVE PRESSURE - what is the CEO/board demanding right now?",
-      "Focus on the HIDDEN COST - what is the true cost of inaction they haven't calculated?",
-      "Focus on the MARKET TIMING - why is this the perfect moment in their industry?",
-      "Focus on the TRANSFORMATION CATALYST - how does this unlock their bigger vision?",
-      "Focus on the RISK MITIGATION - what existential risk does this address?"
+      "Competitive urgency: what happens if a competitor gets there first?",
+      "Board pressure: which KPI or mandate forces action now?",
+      "Hidden cost: the cost of inaction they haven't priced in.",
+      "Market timing: why the next 6-12 months matter.",
+      "Transformation unlock: how this unlocks the larger strategy.",
+      "Risk: the operational / compliance / reputational failure mode.",
     ];
     const randomAngle = insightAngles[Math.floor(Math.random() * insightAngles.length)];
 
-    const prompt = `You are a legendary enterprise sales strategist known for writing insights that win $10M+ deals. Your insights make executives stop scrolling and lean in.
+    const prompt = `You are a top-tier enterprise strategist. Write insights that feel like genuine thought leadership (not paraphrased inputs).
 
-CRITICAL: Write a PROVOCATIVE, SPECIFIC insight for this Big Bet. No generic platitudes. Make it feel like insider knowledge.
+TASK
+Generate 3 materially different insight options for the Big Bet below. They must be different angles, different wording, and different framing.
 
-WRITING STYLE:
-- Sound like a trusted advisor who knows something they don't
-- Use specific numbers, timeframes, competitive references
-- Create urgency without being salesy
-- Reference their specific pain points by name
-- Include a "what they'll lose" element
-- Make it memorable - something they'd quote in their internal meetings
+QUALITY RULES
+- No company-name shoutouts. Refer to the account as "the customer".
+- Do NOT reuse phrases from any prior insight.
+- Include: (1) a contrarian truth, (2) quantified stakes or consequence, (3) why now + competitive risk.
+- 3 sentences max per option.
 
-ANGLE TO TAKE: ${randomAngle}
+ANGLE TO PRIORITIZE THIS TIME: ${randomAngle}
 
-BIG BET DETAILS:
-• Title: ${bet.title}
-• Subtitle: ${bet.subtitle || "Not specified"}
-• Deal Status: ${bet.dealStatus || "Not specified"}  
-• Target Close: ${bet.targetClose || "Not specified"}
-• Investment: ${bet.netNewACV || "Not specified"}
+BIG BET
+Title: ${bet.title}
+Subtitle: ${bet.subtitle || ""}
+Deal Status: ${bet.dealStatus || ""}
+Target Close: ${bet.targetClose || ""}
+Investment: ${bet.netNewACV || ""}
 
-ACCOUNT:
-${accountData.basics?.accountName} (${accountData.basics?.industry})
+ACCOUNT
+${companyRef} (${industryRef})
 
-${accountStrategyNarrative ? `OUR WINNING STRATEGY FOR THIS ACCOUNT:
-${accountStrategyNarrative}` : ""}
+${accountStrategyNarrative ? `OVERALL ACCOUNT STRATEGY (align to this, but do NOT reuse wording):\n${accountStrategyNarrative}` : ""}
 
-WHAT THE C-SUITE IS PUSHING:
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
-
-THEIR STRATEGIC BETS:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}`).join("\n") || "Not specified"}
-
-PAIN POINTS TO EXPLOIT:
+PAIN POINTS
 ${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-OPPORTUNITIES WE'RE TARGETING:
-${accountData.opportunities?.opportunities?.map((o: any) => `• ${o.title}`).join("\n") || "Not specified"}
+CEO/BOARD PRESSURE
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description || ""}`).join("\n") || "Not specified"}
 
-Write exactly 2-3 sentences. No headers, no bullets, no formatting. Just the insight text that makes executives say "they really understand our business."`;
+${priorInsight ? `PRIOR INSIGHT (do NOT paraphrase this; create a NEW framing):\n${priorInsight}` : ""}
+
+OUTPUT
+Return ONLY JSON:
+{ "options": ["insight option 1", "insight option 2", "insight option 3"] }`; 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -80,12 +88,10 @@ Write exactly 2-3 sentences. No headers, no bullets, no formatting. Just the ins
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "user", content: prompt }
-        ],
-        max_tokens: 250,
-        temperature: 0.95,
+        model: "google/gemini-2.5-pro",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 400,
+        temperature: 1.1,
       }),
     });
 
@@ -108,7 +114,23 @@ Write exactly 2-3 sentences. No headers, no bullets, no formatting. Just the ins
     }
 
     const result = await response.json();
-    const insight = result.choices?.[0]?.message?.content?.trim() || "";
+    let content = result.choices?.[0]?.message?.content?.trim() || "";
+
+    content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+    let insight = "";
+    try {
+      const parsed = JSON.parse(content);
+      const opts = Array.isArray(parsed?.options) ? parsed.options : [];
+      if (opts.length) {
+        insight = opts[Math.floor(Math.random() * opts.length)]?.toString()?.trim() || "";
+      }
+    } catch {
+      // If the model didn't return JSON, fall back to raw text
+      insight = content;
+    }
+
+    if (!insight) insight = content;
 
     return new Response(
       JSON.stringify({ 
