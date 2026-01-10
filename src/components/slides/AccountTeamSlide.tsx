@@ -68,82 +68,59 @@ export const AccountTeamSlide = () => {
       ) : (
         <div className="space-y-6">
           {/* All team members in a responsive grid */}
-          <div className="glass-card rounded-2xl p-6 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="glass-card rounded-2xl p-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
               {extendedTeam.map((member, index) => (
                 <div
                   key={member.email || index}
-                  className={`relative p-4 rounded-xl bg-gradient-to-br ${getRegionColor(member.region || "Global")} border backdrop-blur-sm opacity-0 animate-fade-in transition-all hover:scale-[1.02] hover:shadow-lg`}
-                  style={{ animationDelay: `${200 + index * 50}ms` }}
+                  className={`relative p-3 rounded-lg bg-gradient-to-br ${getRegionColor(member.region || "Global")} border backdrop-blur-sm opacity-0 animate-fade-in transition-all hover:scale-[1.02] hover:shadow-lg`}
+                  style={{ animationDelay: `${150 + index * 30}ms` }}
                 >
                   {/* Region Badge */}
-                  <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-medium ${getRegionBadgeColor(member.region || "Global")}`}>
+                  <div className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium ${getRegionBadgeColor(member.region || "Global")}`}>
                     {member.region || "Global"}
                   </div>
 
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/40 flex items-center justify-center mb-3">
-                    <span className="text-lg font-bold text-primary">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/40 flex items-center justify-center mb-2">
+                    <span className="text-sm font-bold text-primary">
                       {member.firstName.charAt(0)}{member.lastName.charAt(0)}
                     </span>
                   </div>
 
                   {/* Name & Title */}
-                  <h4 className="font-semibold text-foreground text-sm leading-tight">
+                  <h4 className="font-semibold text-foreground text-xs leading-tight">
                     {member.firstName} {member.lastName}
                   </h4>
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
                     {member.title}
                   </p>
 
                   {/* Contact Info */}
-                  <div className="mt-3 space-y-1">
+                  <div className="mt-2 space-y-0.5">
                     <a
                       href={`mailto:${member.email}`}
-                      className="text-primary hover:text-primary/80 text-[10px] flex items-center gap-1.5 truncate transition-colors"
+                      className="text-primary hover:text-primary/80 text-[9px] flex items-center gap-1 truncate transition-colors"
                     >
-                      <Mail className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">{member.email}</span>
+                      <Mail className="w-2.5 h-2.5 flex-shrink-0" />
+                      <span className="truncate">{member.email.split("@")[0]}</span>
                     </a>
-                    {member.phone && (
-                      <p className="text-muted-foreground text-[10px] flex items-center gap-1.5">
-                        <Phone className="w-3 h-3 flex-shrink-0" />
-                        {member.phone}
-                      </p>
-                    )}
                   </div>
 
-                  {/* Responsibilities */}
-                  {member.responsibilities && member.responsibilities.length > 0 && (
-                    <ul className="mt-3 space-y-0.5">
-                      {member.responsibilities.slice(0, 2).map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-[9px] text-muted-foreground flex items-start gap-1"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-primary mt-1 flex-shrink-0" />
-                          <span className="line-clamp-1">{item}</span>
-                        </li>
-                      ))}
-                      {member.responsibilities.length > 2 && (
-                        <li className="text-[9px] text-muted-foreground/60">
-                          +{member.responsibilities.length - 2} more
-                        </li>
-                      )}
-                    </ul>
-                  )}
-
-                  {/* Sub Teams */}
+                  {/* Sub Teams - compact display */}
                   {member.subTeams && member.subTeams.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {member.subTeams.map((team, idx) => (
+                    <div className="mt-1.5 flex flex-wrap gap-0.5">
+                      {member.subTeams.slice(0, 1).map((team, idx) => (
                         <span
                           key={idx}
-                          className="px-1.5 py-0.5 rounded bg-secondary/50 text-[8px] text-muted-foreground"
+                          className="px-1 py-0.5 rounded bg-secondary/50 text-[7px] text-muted-foreground truncate max-w-full"
                         >
                           {team}
                         </span>
                       ))}
+                      {member.subTeams.length > 1 && (
+                        <span className="text-[7px] text-muted-foreground/60">+{member.subTeams.length - 1}</span>
+                      )}
                     </div>
                   )}
                 </div>

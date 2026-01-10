@@ -178,8 +178,8 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
 
   addCard(pptx, slide, MX, topY, leftW, 4.0);
 
-  const pillars = data.annualReport.strategicPillars || data.generatedPlan?.strategicPillars || [];
-  const narrative = data.annualReport.executiveSummaryNarrative || data.generatedPlan?.narrative || "No executive summary generated.";
+  const pillars = data.annualReport.strategicPillars || data.generatedPlan?.executiveSummaryPillars || [];
+  const narrative = data.annualReport.executiveSummaryNarrative || data.generatedPlan?.executiveSummaryNarrative || "No executive summary generated.";
 
   slide.addText("Strategic Vision", {
     x: MX + 0.15, y: topY + 0.1, w: leftW - 0.3, h: 0.3,
@@ -211,7 +211,7 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
 
   const rCards = [
     { label: "Revenue", value: data.annualReport.revenue || data.financial.customerRevenue || "—" },
-    { label: "Growth", value: data.annualReport.growthRate || data.financial.growthRate || "—" },
+    { label: "Growth", value: data.financial.growthRate || "—" },
   ];
   rCards.forEach((c, i) => {
     const cy = topY + i * 0.95;
@@ -447,8 +447,8 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
   const topY = 0.95;
   const colW = (CONTENT_W - 0.12) / 2;
 
-  const customerPriorities = data.accountStrategy?.customerPriorities || [];
-  const strategicOpportunities = data.accountStrategy?.strategicOpportunities || [];
+  const customerPriorities = data.strategy.ceoBoardPriorities || [];
+  const strategicOpportunities = data.opportunities.opportunities || [];
 
   addCard(pptx, slide, MX, topY, colW, 2.8);
   slide.addText("Customer Priorities", {
@@ -496,7 +496,7 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
         x: rx + 0.25, y: oy, w: colW - 0.4, h: 0.2,
         fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
       });
-      slide.addText(truncate(o.outcome, 70), {
+      slide.addText(truncate(o.description, 70), {
         x: rx + 0.25, y: oy + 0.2, w: colW - 0.4, h: 0.2,
         fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
@@ -550,8 +550,8 @@ const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
     fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
   });
   
-  const lessons = data.generatedPlan?.fy1Retrospective?.lessonsLearned || [];
-  slide.addText(lessons.slice(0, 2).join(" • ") || "Understanding past challenges enables strategic positioning.", {
+  const lessonsText = data.generatedPlan?.fy1Retrospective?.keyLessons || "";
+  slide.addText(lessonsText || "Understanding past challenges enables strategic positioning.", {
     x: MX + 0.12, y: lessonY + 0.3, w: CONTENT_W - 0.24, h: 0.3,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
   });
@@ -836,11 +836,11 @@ const createWorkstreamDetailSlide = (pptx: pptxgen, data: AccountData) => {
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
     
-    if (w.status) {
-      addBadge(slide, MX + 3.2, wy + 0.08, w.status, C.accent);
+    if (w.dealStatus) {
+      addBadge(slide, MX + 3.2, wy + 0.08, w.dealStatus, C.accent);
     }
     
-    slide.addText(truncate(w.description, 100), {
+    slide.addText(truncate(w.subtitle || w.insight || "", 100), {
       x: MX + 0.12, y: wy + 0.35, w: CONTENT_W - 0.24, h: 0.28,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
@@ -954,7 +954,7 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Transformation Roadmap", "Phased execution plan");
 
   const topY = 1.0;
-  const roadmapItems = data.generatedPlan?.roadmapItems || [];
+  const roadmapItems = data.generatedPlan?.roadmapPhases || [];
   const cardW = (CONTENT_W - 0.24) / 3;
   const cardH = 2.6;
 
@@ -970,7 +970,7 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
   roadmapItems.slice(0, 3).forEach((item, i) => {
     const cx = MX + i * (cardW + 0.12);
     addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: C.primary });
-    slide.addText(item.quarter || item.phase || `Phase ${i + 1}`, {
+    slide.addText(item.quarter || `Phase ${i + 1}`, {
       x: cx + 0.1, y: topY + 0.1, w: cardW - 0.2, h: 0.35,
       fontSize: 18, bold: true, color: C.primary, fontFace: FONT_HEADING,
     });
@@ -979,8 +979,8 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
       fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_BODY,
     });
     
-    const milestones = item.milestones || [];
-    milestones.slice(0, 4).forEach((m, j) => {
+    const activities = item.activities || [];
+    activities.slice(0, 4).forEach((m, j) => {
       slide.addText(`→  ${truncate(m, 30)}`, {
         x: cx + 0.1, y: topY + 0.85 + j * 0.28, w: cardW - 0.2, h: 0.26,
         fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
@@ -1000,7 +1000,7 @@ const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Risk & Mitigation", "Proactive risk management approach");
 
   const topY = 0.95;
-  const risks = data.generatedPlan?.risks || [];
+  const risks = data.generatedPlan?.risksMitigations || [];
   const cardH = 0.75;
 
   if (risks.length === 0) {
@@ -1021,7 +1021,7 @@ const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
       x: MX + 0.12, y: ry + 0.12, w: 0.7, h: 0.22,
       fontSize: TINY_SIZE, bold: true, color: levelColor, fontFace: FONT_BODY,
     });
-    slide.addText(r.risk || r.title || "", {
+    slide.addText(r.risk || "", {
       x: MX + 0.9, y: ry + 0.12, w: 2.5, h: 0.22,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
@@ -1115,7 +1115,7 @@ const createWeeklyUpdateSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Weekly Update", "Current status and next steps");
 
   const topY = 0.95;
-  const update = data.generatedPlan?.weeklyUpdate;
+  const update = data.generatedPlan?.weeklyUpdateContext;
 
   if (!update) {
     addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
@@ -1133,7 +1133,7 @@ const createWeeklyUpdateSlide = (pptx: pptxgen, data: AccountData) => {
     x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.primary, fontFace: FONT_HEADING,
   });
-  (update.wins || []).slice(0, 3).forEach((w, i) => {
+  (update.keyHighlights || []).slice(0, 3).forEach((w, i) => {
     slide.addText(`✓ ${truncate(w, 50)}`, {
       x: MX + 0.12, y: topY + 0.38 + i * 0.28, w: colW - 0.24, h: 0.26,
       fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
@@ -1146,7 +1146,7 @@ const createWeeklyUpdateSlide = (pptx: pptxgen, data: AccountData) => {
     x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.accent, fontFace: FONT_HEADING,
   });
-  (update.nextSteps || []).slice(0, 3).forEach((n, i) => {
+  (update.criticalActions || []).slice(0, 3).forEach((n, i) => {
     slide.addText(`→ ${truncate(n, 50)}`, {
       x: rx + 0.12, y: topY + 0.38 + i * 0.28, w: colW - 0.24, h: 0.26,
       fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
@@ -1155,15 +1155,13 @@ const createWeeklyUpdateSlide = (pptx: pptxgen, data: AccountData) => {
 
   const blockersY = topY + 1.45;
   addCard(pptx, slide, MX, blockersY, CONTENT_W, 1.0, { accentBorder: C.warning });
-  slide.addText("Blockers & Risks", {
+  slide.addText("Status", {
     x: MX + 0.12, y: blockersY + 0.08, w: CONTENT_W - 0.24, h: 0.22,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.warning, fontFace: FONT_HEADING,
   });
-  (update.blockers || []).slice(0, 2).forEach((b, i) => {
-    slide.addText(`⚠ ${truncate(b, 80)}`, {
-      x: MX + 0.12, y: blockersY + 0.38 + i * 0.28, w: CONTENT_W - 0.24, h: 0.26,
-      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
-    });
+  slide.addText(update.overallStatus || "On Track", {
+    x: MX + 0.12, y: blockersY + 0.38, w: CONTENT_W - 0.24, h: 0.26,
+    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
   });
 
   return slide;
@@ -1235,7 +1233,7 @@ const createPursuitPlanSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Pursuit Plan", "Key milestones and decision points");
 
   const topY = 1.0;
-  const pursuits = data.generatedPlan?.pursuitPlan || [];
+  const pursuits = data.generatedPlan?.keyWorkstreams || [];
   const cardW = (CONTENT_W - 0.36) / 4;
   const cardH = 2.0;
 
@@ -1252,21 +1250,22 @@ const createPursuitPlanSlide = (pptx: pptxgen, data: AccountData) => {
     const cx = MX + i * (cardW + 0.12);
     addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: C.primary });
 
-    slide.addText(p.stage || `Stage ${i + 1}`, {
+    slide.addText(p.dealStatus || `Workstream ${i + 1}`, {
       x: cx + 0.08, y: topY + 0.1, w: cardW - 0.16, h: 0.3,
       fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING, align: "center",
     });
     
-    if (p.dueDate) {
-      addBadge(slide, cx + (cardW - 0.6) / 2, topY + 0.45, p.dueDate, C.accent);
+    if (p.targetClose) {
+      addBadge(slide, cx + (cardW - 0.6) / 2, topY + 0.45, p.targetClose, C.accent);
     }
 
-    const actions = p.actions || [];
-    actions.slice(0, 3).forEach((a, j) => {
-      slide.addText(`• ${truncate(a, 25)}`, {
-        x: cx + 0.08, y: topY + 0.8 + j * 0.28, w: cardW - 0.16, h: 0.26,
-        fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
+    slide.addText(p.title || "", {
+      x: cx + 0.08, y: topY + 0.8, w: cardW - 0.16, h: 0.26,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(p.insight || "", 60), {
+      x: cx + 0.08, y: topY + 1.1, w: cardW - 0.16, h: 0.5,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
   });
 
