@@ -18,33 +18,60 @@ Deno.serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const prompt = `You are a strategic account planning expert for enterprise technology sales at ServiceNow. Generate an executive-ready description for the following account strategy/priority.
+    const prompt = `You are an elite McKinsey-caliber strategic account planner for ServiceNow enterprise sales. Generate a single, powerful description for this account strategy.
 
-Strategy Title: "${priorityTitle}"
+STRATEGY TITLE: "${priorityTitle}"
 
-Account Context:
-- Account Name: ${accountData.basics?.accountName || "Unknown"}
+ACCOUNT CONTEXT:
+- Account: ${accountData.basics?.accountName || "Enterprise Customer"}
 - Industry: ${accountData.basics?.industry || "Unknown"}
 - Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
-- Next FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
+- FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
 
-Customer Corporate Strategy:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+CUSTOMER PRIORITIES:
+${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-Customer Pain Points:
-${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+CUSTOMER PAIN POINTS:
+${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-Annual Report Highlights:
+ANNUAL REPORT INTELLIGENCE:
 ${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
 
-Write a compelling 2-3 sentence description that:
-- Is executive-ready and outcome-focused
-- Connects to the customer's stated priorities and pain points
-- Includes specific, quantified business value where possible
-- Uses the customer's language and terminology
-- Explains why this strategy matters NOW
+═══════════════════════════════════════════════════════════════
+EXEMPLARY DESCRIPTIONS (match this caliber exactly):
+═══════════════════════════════════════════════════════════════
 
-Return ONLY the description text, no quotes or formatting.`;
+1. "Building on the FY25 commercial evaluation to deliver a scalable, orchestrated customer service and commercial execution foundation that reduces cost-to-serve and enables growth."
+
+2. "Operationalising AI beyond isolated use cases to improve execution speed, decision quality, and productivity across customer, commercial, and operational workflows."
+
+3. "FY26 focuses on broadening platform adoption beyond IT, using customer and service workflows as the entry point to enable enterprise-wide workflow orchestration aligned to ${accountData.basics?.accountName || "the customer"}'s integrator strategy."
+
+4. "Evolving the relationship from execution recovery toward long-term strategic partner underpinning ${accountData.basics?.accountName || "the customer"}'s digital, AI, and operating model ambitions."
+
+═══════════════════════════════════════════════════════════════
+MANDATORY REQUIREMENTS:
+═══════════════════════════════════════════════════════════════
+
+FORMAT: Single sentence, 25-40 words. No bullet points. No headers.
+
+STRUCTURE: [Action verb] + [specific approach/mechanism] + [to achieve] + [quantified/specific outcomes] + [aligned to customer context]
+
+ACTION VERBS TO USE: Building, Delivering, Operationalising, Expanding, Evolving, Accelerating, Orchestrating, Transforming, Enabling, Maturing
+
+MUST INCLUDE:
+• Reference to customer's actual priorities, language, or stated strategy
+• Specific, measurable outcomes (cost reduction, speed improvement, growth enablement)
+• Clear "from → to" transformation or scope expansion
+• Connection to FY timing or prior work where relevant
+
+MUST AVOID:
+• Generic phrases ("drive digital transformation", "leverage technology")
+• Vague outcomes ("improve efficiency", "enhance capabilities")  
+• ServiceNow product names unless contextually essential
+• Fluffy adjectives without substance
+
+Return ONLY the description. No quotes. No explanation. One sentence.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
