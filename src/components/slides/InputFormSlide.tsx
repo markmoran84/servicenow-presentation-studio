@@ -178,7 +178,10 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
           {/* AI Annual Report Analyzer */}
           <TabsContent value="aiAnalyzer" className="space-y-4">
-            <AnnualReportAnalyzer />
+            <AnnualReportAnalyzer onGeneratePlan={async () => {
+              // Navigate to first slide after generation
+              onGenerate?.();
+            }} />
           </TabsContent>
 
           {/* Section A - Account Basics */}

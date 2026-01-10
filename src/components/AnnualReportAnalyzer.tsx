@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type InputMode = "paste" | "pdf" | "url";
@@ -18,8 +18,12 @@ interface DataSourceInfo {
   usedWebSearch: boolean;
 }
 
-export const AnnualReportAnalyzer = () => {
-  const { data, updateData } = useAccountData();
+interface AnnualReportAnalyzerProps {
+  onGeneratePlan?: () => Promise<void>;
+}
+
+export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerProps) => {
+  const { data, updateData, setGeneratedPlan } = useAccountData();
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -28,7 +32,117 @@ export const AnnualReportAnalyzer = () => {
   const [inputMode, setInputMode] = useState<InputMode>("paste");
   const [dataSourceInfo, setDataSourceInfo] = useState<DataSourceInfo | null>(null);
   const [isResyncing, setIsResyncing] = useState(false);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [autoGenerate, setAutoGenerate] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Generate the full plan using AI with provided extracted data
+  const handleGenerateFullPlan = async (extractedData?: any) => {
+    setIsGeneratingPlan(true);
+    try {
+      // Build account data from extracted data + existing context
+      // This ensures we use fresh data, not stale React state
+      const accountData = extractedData ? {
+        ...data,
+        basics: {
+          ...data.basics,
+          ...(extractedData.accountName && { accountName: extractedData.accountName }),
+          ...(extractedData.industry && { industry: extractedData.industry }),
+        },
+        financial: {
+          ...data.financial,
+          ...(extractedData.revenue && { customerRevenue: extractedData.revenue }),
+          ...(extractedData.growthRate && { growthRate: extractedData.growthRate }),
+          ...(extractedData.marginEBIT && { marginEBIT: extractedData.marginEBIT }),
+          ...(extractedData.costPressureAreas && { costPressureAreas: extractedData.costPressureAreas }),
+          ...(extractedData.strategicInvestmentAreas && { strategicInvestmentAreas: extractedData.strategicInvestmentAreas }),
+        },
+        strategy: {
+          ...data.strategy,
+          ...(extractedData.corporateStrategy?.length && { 
+            corporateStrategy: extractedData.corporateStrategy.map((item: any) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extractedData.digitalStrategies?.length && { 
+            digitalStrategies: extractedData.digitalStrategies.map((item: any) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extractedData.ceoBoardPriorities?.length && { 
+            ceoBoardPriorities: extractedData.ceoBoardPriorities.map((item: any) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+          ...(extractedData.transformationThemes?.length && { 
+            transformationThemes: extractedData.transformationThemes.map((item: any) => ({
+              title: item.title || "",
+              description: item.description || ""
+            }))
+          }),
+        },
+        painPoints: {
+          painPoints: extractedData.painPoints?.map((pp: any) => ({
+            title: pp.title || "",
+            description: pp.description || ""
+          })) || data.painPoints.painPoints
+        },
+        opportunities: {
+          opportunities: extractedData.opportunities?.map((op: any) => ({
+            title: op.title || "",
+            description: op.description || ""
+          })) || data.opportunities.opportunities
+        },
+        swot: {
+          strengths: extractedData.strengths || data.swot.strengths,
+          weaknesses: extractedData.weaknesses || data.swot.weaknesses,
+          opportunities: extractedData.swotOpportunities || data.swot.opportunities,
+          threats: extractedData.threats || data.swot.threats,
+        },
+        annualReport: {
+          ...data.annualReport,
+          ...(extractedData.revenue && { revenue: extractedData.revenue }),
+          ...(extractedData.revenueComparison && { revenueComparison: extractedData.revenueComparison }),
+          ...(extractedData.ebitImprovement && { ebitImprovement: extractedData.ebitImprovement }),
+          ...(extractedData.netZeroTarget && { netZeroTarget: extractedData.netZeroTarget }),
+          ...(extractedData.keyMilestones?.length && { keyMilestones: extractedData.keyMilestones }),
+          ...(extractedData.strategicAchievements?.length && { strategicAchievements: extractedData.strategicAchievements }),
+          ...(extractedData.executiveSummaryNarrative && { executiveSummaryNarrative: extractedData.executiveSummaryNarrative }),
+        }
+      } : data;
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-account-plan", {
+        body: { accountData }
+      });
+
+      if (error) {
+        console.error("Plan generation error:", error);
+        throw error;
+      }
+      
+      if (!responseData?.success) {
+        throw new Error(responseData?.error || "Failed to generate plan");
+      }
+
+      // Store the AI-generated plan
+      setGeneratedPlan(responseData.plan);
+      
+      toast.success("Full account plan generated!", { id: "auto-plan-gen" });
+      
+      // Call the parent callback to navigate to slides
+      if (onGeneratePlan) {
+        await onGeneratePlan();
+      }
+    } catch (error) {
+      console.error("Plan generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate plan", { id: "auto-plan-gen" });
+    } finally {
+      setIsGeneratingPlan(false);
+    }
+  };
 
   const analyzeContent = async (textContent: string) => {
     if (textContent.trim().length < 100) {
@@ -162,6 +276,12 @@ export const AnnualReportAnalyzer = () => {
 
       setAnalysisComplete(true);
       toast.success("Analysis complete! Data populated across all relevant tabs.");
+
+      // Auto-generate the full plan if enabled - pass extracted data directly
+      if (autoGenerate) {
+        toast.loading("Now generating full account plan...", { id: "auto-plan-gen" });
+        await handleGenerateFullPlan(extracted);
+      }
     } catch (error) {
       console.error("Analysis error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to analyze report");
@@ -312,7 +432,7 @@ export const AnnualReportAnalyzer = () => {
     }
   };
 
-  const isLoading = isAnalyzing || isFetching;
+  const isLoading = isAnalyzing || isFetching || isGeneratingPlan;
 
   return (
     <Card className="glass-card border-primary/30">
@@ -323,9 +443,43 @@ export const AnnualReportAnalyzer = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Upload or paste an annual report to auto-populate <strong>Basics, Financial, Strategy, Pain Points, Opportunities,</strong> and <strong>Annual Report</strong> tabs.
-        </p>
+        {/* One-Click Flow Description */}
+        <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-full bg-primary/20">
+              <Rocket className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                One-Click AI Generation
+                <Badge variant="secondary" className="text-xs">Recommended</Badge>
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload an annual report → AI extracts all data → Automatically generates your full 23-slide account plan. No manual input required.
+              </p>
+            </div>
+          </div>
+          
+          {/* Auto-generate toggle */}
+          <div className="mt-3 flex items-center justify-between p-2 rounded bg-background/50">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Auto-generate full plan after analysis</span>
+            </div>
+            <button
+              onClick={() => setAutoGenerate(!autoGenerate)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                autoGenerate ? 'bg-primary' : 'bg-muted'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  autoGenerate ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
 
         <Tabs value={inputMode} onValueChange={(v) => setInputMode(v as InputMode)}>
           <TabsList className="grid w-full grid-cols-3">
@@ -366,11 +520,22 @@ Example: Copy text from sections like:
                 onClick={handlePasteAnalyze} 
                 disabled={isLoading || content.length < 100}
                 className="gap-2"
+                size="lg"
               >
-                {isAnalyzing ? (
+                {isGeneratingPlan ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing...
+                    Generating Plan...
+                  </>
+                ) : isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Analyzing Report...
+                  </>
+                ) : autoGenerate ? (
+                  <>
+                    <Rocket className="w-4 h-4" />
+                    Analyze & Generate Plan
                   </>
                 ) : (
                   <>
@@ -401,11 +566,27 @@ Example: Copy text from sections like:
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
                 className="gap-2"
+                size="lg"
               >
-                {isFetching ? (
+                {isGeneratingPlan ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Processing...
+                    Generating Plan...
+                  </>
+                ) : isFetching ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing PDF...
+                  </>
+                ) : isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : autoGenerate ? (
+                  <>
+                    <Rocket className="w-4 h-4" />
+                    Upload & Generate Plan
                   </>
                 ) : (
                   <>
@@ -437,8 +618,14 @@ Example: Copy text from sections like:
               onClick={handleUrlFetch} 
               disabled={isLoading || !url.trim()}
               className="gap-2"
+              size="lg"
             >
-              {isFetching ? (
+              {isGeneratingPlan ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating Plan...
+                </>
+              ) : isFetching ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Fetching...
@@ -447,6 +634,11 @@ Example: Copy text from sections like:
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Analyzing...
+                </>
+              ) : autoGenerate ? (
+                <>
+                  <Rocket className="w-4 h-4" />
+                  Fetch & Generate Plan
                 </>
               ) : (
                 <>
