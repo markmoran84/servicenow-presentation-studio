@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Camera } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
+import { captureElementAsImage, createPowerPointFromImages } from "@/utils/captureSlides";
 import { useAccountData } from "@/context/AccountDataContext";
 import { toast } from "sonner";
 
@@ -11,6 +12,10 @@ interface SlideNavigationProps {
   onPrevious: () => void;
   onNext: () => void;
   slideLabels: string[];
+  onExportStart?: () => void;
+  onExportSlide?: (index: number) => Promise<void>;
+  onExportEnd?: () => void;
+  getSlideElement?: () => HTMLElement | null;
 }
 
 export const SlideNavigation = ({
@@ -19,11 +24,66 @@ export const SlideNavigation = ({
   onPrevious,
   onNext,
   slideLabels,
+  onExportStart,
+  onExportSlide,
+  onExportEnd,
+  getSlideElement,
 }: SlideNavigationProps) => {
   const { data } = useAccountData();
   const [isExporting, setIsExporting] = useState(false);
+  const [exportMode, setExportMode] = useState<"shapes" | "images">("images");
 
-  const handleExport = async () => {
+  const handleExportImages = async () => {
+    if (isExporting || !onExportSlide) return;
+
+    setIsExporting(true);
+    const toastId = toast.loading("Capturing slides as images…");
+
+    try {
+      onExportStart?.();
+      
+      const images: string[] = [];
+      const exportableSlides = slideLabels.slice(1); // Skip input form
+      
+      // Iterate through all slides (skip index 0 which is input form)
+      for (let i = 1; i < totalSlides; i++) {
+        toast.loading(`Capturing slide ${i} of ${totalSlides - 1}…`, { id: toastId });
+        
+        // Navigate to slide and wait for render
+        await onExportSlide(i);
+        
+        // Small delay to ensure render is complete
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Capture the slide element
+        const element = getSlideElement?.();
+        if (element) {
+          try {
+            const imageData = await captureElementAsImage(element);
+            images.push(imageData);
+          } catch (err) {
+            console.error(`Failed to capture slide ${i}:`, err);
+            images.push("");
+          }
+        } else {
+          images.push("");
+        }
+      }
+
+      toast.loading("Generating PowerPoint…", { id: toastId });
+      await createPowerPointFromImages(images, exportableSlides, data);
+      
+      toast.success("PowerPoint downloaded!", { id: toastId });
+    } catch (err) {
+      console.error("PowerPoint export failed:", err);
+      toast.error("Export failed — check console for details.", { id: toastId });
+    } finally {
+      setIsExporting(false);
+      onExportEnd?.();
+    }
+  };
+
+  const handleExportShapes = async () => {
     if (isExporting) return;
 
     setIsExporting(true);
@@ -40,13 +100,21 @@ export const SlideNavigation = ({
     }
   };
 
+  const handleExport = () => {
+    if (exportMode === "images" && onExportSlide) {
+      handleExportImages();
+    } else {
+      handleExportShapes();
+    }
+  };
+
   return (
     <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-sn-navy/90 backdrop-blur-md rounded-full px-6 py-3 shadow-2xl border border-white/10">
       <Button
         variant="ghost"
         size="icon"
         onClick={onPrevious}
-        disabled={currentSlide === 0}
+        disabled={currentSlide === 0 || isExporting}
         className="text-white hover:bg-white/10 disabled:opacity-30"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -67,20 +135,48 @@ export const SlideNavigation = ({
       </div>
 
       <div className="text-white/70 text-sm font-medium min-w-[100px] text-center">
-        {slideLabels[currentSlide]}
+        {isExporting ? "Exporting…" : slideLabels[currentSlide]}
       </div>
 
       <Button
         variant="ghost"
         size="icon"
         onClick={onNext}
-        disabled={currentSlide === totalSlides - 1}
+        disabled={currentSlide === totalSlides - 1 || isExporting}
         className="text-white hover:bg-white/10 disabled:opacity-30"
       >
         <ChevronRight className="w-5 h-5" />
       </Button>
 
       <div className="w-px h-6 bg-white/20 mx-2" />
+
+      {/* Export mode toggle */}
+      <div className="flex items-center gap-1 bg-white/10 rounded-full p-0.5">
+        <button
+          onClick={() => setExportMode("images")}
+          disabled={isExporting}
+          className={`px-2 py-1 rounded-full text-xs transition-all ${
+            exportMode === "images"
+              ? "bg-primary text-white"
+              : "text-white/60 hover:text-white"
+          }`}
+          title="Pixel-perfect export (as images)"
+        >
+          <Camera className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => setExportMode("shapes")}
+          disabled={isExporting}
+          className={`px-2 py-1 rounded-full text-xs transition-all ${
+            exportMode === "shapes"
+              ? "bg-primary text-white"
+              : "text-white/60 hover:text-white"
+          }`}
+          title="Editable export (shapes/text)"
+        >
+          Edit
+        </button>
+      </div>
 
       <Button
         variant="ghost"

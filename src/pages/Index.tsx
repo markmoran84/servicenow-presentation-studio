@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AccountDataProvider } from "@/context/AccountDataContext";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
@@ -52,6 +52,10 @@ const slides = [
 
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
+  const slideContainerRef = useRef<HTMLDivElement>(null);
+  const savedSlideRef = useRef<number>(0);
 
   const goToPrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(0, prev - 1));
@@ -65,8 +69,35 @@ const Index = () => {
     setCurrentSlide(1); // Navigate to Cover slide
   }, []);
 
+  // Export handlers
+  const handleExportStart = useCallback(() => {
+    savedSlideRef.current = currentSlide;
+    setIsExporting(true);
+  }, [currentSlide]);
+
+  const handleExportSlide = useCallback(async (index: number) => {
+    setExportSlideIndex(index);
+    setCurrentSlide(index);
+    // Return a promise that resolves after state update and render
+    return new Promise<void>((resolve) => {
+      setTimeout(resolve, 100);
+    });
+  }, []);
+
+  const handleExportEnd = useCallback(() => {
+    setIsExporting(false);
+    setExportSlideIndex(null);
+    setCurrentSlide(savedSlideRef.current);
+  }, []);
+
+  const getSlideElement = useCallback(() => {
+    return slideContainerRef.current;
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isExporting) return; // Disable keyboard nav during export
+      
       // Ignore if user is typing in an input/textarea
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
@@ -84,7 +115,7 @@ const Index = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNext, goToPrevious]);
+  }, [goToNext, goToPrevious, isExporting]);
 
   const currentSlideConfig = slides[currentSlide];
   const CurrentSlideComponent = currentSlideConfig.component;
@@ -97,7 +128,17 @@ const Index = () => {
           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
         </div>
 
-        <div className="relative z-10 animate-fade-in" key={currentSlide}>
+        <div 
+          ref={slideContainerRef}
+          className="relative z-10 animate-fade-in" 
+          key={currentSlide}
+          style={isExporting ? {
+            width: '1920px',
+            height: '1080px',
+            transform: 'scale(1)',
+            transformOrigin: 'top left',
+          } : undefined}
+        >
           {currentSlideConfig.isForm ? (
             <CurrentSlideComponent onGenerate={goToFirstSlide} />
           ) : (
@@ -111,6 +152,10 @@ const Index = () => {
           onPrevious={goToPrevious}
           onNext={goToNext}
           slideLabels={slides.map((s) => s.label)}
+          onExportStart={handleExportStart}
+          onExportSlide={handleExportSlide}
+          onExportEnd={handleExportEnd}
+          getSlideElement={getSlideElement}
         />
 
         <SlideFooter />
