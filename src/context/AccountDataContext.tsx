@@ -17,6 +17,7 @@ export interface ExtendedTeamMember {
   responsibilities: string[];
   subTeams?: string[];
   region?: string;
+  roleType?: "Guiding the Team" | "Building the PoV" | "Supporting the Team" | "Mapping the Value";
 }
 
 // Section A — Account Basics
