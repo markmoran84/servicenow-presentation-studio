@@ -58,44 +58,47 @@ EXECUTIVE NARRATIVE:
 ${accountContext?.annualReport?.executiveSummaryNarrative || "Not available"}
 `;
 
-    const systemPrompt = `You are a strategic advisor crafting a vision statement for a ServiceNow account plan.
+    const systemPrompt = `You are an elite McKinsey-caliber strategic advisor crafting a vision statement that will anchor a $50M+ ServiceNow engagement for ${companyName}.
 
-TASK: Write ONE single sentence that defines ServiceNow's strategic role for ${companyName}.
+VISION STATEMENT EXCELLENCE:
+The vision statement must be memorable enough that the CIO quotes it in their next board meeting. It defines ServiceNow's strategic role and creates executive conviction.
 
-TONE: Strategic, precise, confident. No hype. No generic transformation language. Use the customer's own strategic terminology.
+CRAFT CRITERIA:
+1. SINGLE SENTENCE: Start with "To..." and complete in ONE powerful statement (max 25 words)
+2. USE THEIR LANGUAGE: Reference the customer's stated strategic priorities and terminology
+3. OUTCOME FOCUSED: Describe the end state, not activities
+4. DIFFERENTIATED: No generic transformation language. Be specific to their context.
+5. MEMORABLE: Would a CEO remember and repeat this?
 
-FORMAT: Start with "To..." and complete in one clear, purposeful sentence. Maximum 25 words.
+PROVEN VISION PATTERNS (select and adapt the most relevant):
 
-VISION THEMES TO DRAW FROM (pick the most relevant to their strategy):
+PLATFORM FOR INNOVATION:
+• "To be ${companyName}'s platform for enterprise innovation, unlocking strategic value as the foundation for AI-powered operations."
 
-Platform for Innovation:
-• "To be ${companyName}'s platform for innovation, unlocking value as a trusted partner, delivering best-in-class user experiences."
+CUSTOMER EXPERIENCE ORCHESTRATION:
+• "To enable seamless, end-to-end customer journeys that differentiate ${companyName} in every interaction."
+• "To power consistent, predictable customer outcomes that drive loyalty and lifetime value at enterprise scale."
 
-Customer Experience:
-• "To enable seamless, end-to-end customer journeys across every interaction and channel."
-• "To connect customer experience, service delivery, and commercial execution into one flow."
-• "To power consistent, predictable customer outcomes at enterprise scale."
+AI OPERATIONS PLATFORM:
+• "To operationalise AI at enterprise scale by embedding intelligence directly into ${companyName}'s critical workflows."
+• "To serve as the execution layer that transforms AI ambition into measurable business outcomes across every function."
 
-AI at Scale:
-• "To operationalise AI at scale by embedding intelligence directly into enterprise workflows."
-• "To serve as the execution layer that turns AI ambition into measurable business outcomes."
-• "To enable intelligent operations where decisions are augmented, automated, and continuously improved."
-• "To provide the platform through which AI moves from pilots to production."
+ENTERPRISE BACKBONE:
+• "To serve as the digital backbone orchestrating ${companyName}'s enterprise execution across people, processes, and systems."
+• "To unify fragmented operations into one governed, scalable execution platform that enables ${companyName}'s strategic vision."
 
-Enterprise Backbone:
-• "To serve as the digital backbone that orchestrates enterprise execution across people, processes, and systems."
-• "To create a single operational nervous system that connects strategy to execution in real time."
-• "To unify fragmented operations into one governed, scalable execution platform."
-• "To provide a resilient enterprise backbone that enables consistent execution at global scale."
-• "To act as the control plane that aligns teams, workflows, and decisions across the enterprise."
+OPERATIONAL EXCELLENCE:
+• "To enable operational excellence by automating complexity and surfacing intelligence where decisions are made."
+• "To provide the control plane that aligns teams, workflows, and decisions across ${companyName}'s global operations."
 
-NEVER DO THIS:
+AVOID AT ALL COSTS:
 • "To help the customer with digital transformation." (too generic)
-• "To partner with the customer to drive value." (meaningless)
-• "ServiceNow will be instrumental in..." (weak, passive)
-• Listing multiple capabilities or using "and" excessively
+• "To partner with the customer to drive value." (meaningless platitude)
+• "ServiceNow will be instrumental in..." (weak, passive voice)
+• Any sentence with "and" that lists multiple disconnected ideas
+• Vague terms like "leverage", "synergies", "best-in-class" without specifics
 
-Generate ONE sentence tailored to their specific strategy and priorities. Be precise. No fluff.`;
+Generate ONE sentence tailored to ${companyName}'s specific strategic context. Be precise. Be bold. Be memorable.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -104,10 +107,10 @@ Generate ONE sentence tailored to their specific strategy and priorities. Be pre
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Based on this account context, generate a compelling vision statement for "ServiceNow at ${companyName}":\n\n${contextSummary}` }
+          { role: "user", content: `Based on this comprehensive account context, generate a compelling, memorable vision statement for "ServiceNow at ${companyName}" that would resonate with their C-suite:\n\n${contextSummary}` }
         ],
         tools: [
           {

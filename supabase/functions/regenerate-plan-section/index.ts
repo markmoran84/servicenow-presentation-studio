@@ -201,15 +201,21 @@ serve(async (req) => {
 
     const spec = sectionSpecs[section as Section];
 
-    const systemPrompt = `You are an expert enterprise account strategist for ServiceNow.
-Your job: regenerate ONE section of an enterprise account plan based on provided account context.
+    const systemPrompt = `You are an elite McKinsey-caliber enterprise account strategist for ServiceNow.
+Your task: Regenerate ONE section of an enterprise account plan with institutional-quality strategic content.
 
-CRITICAL RULES:
-- Be specific and actionable (no generic platitudes)
-- Use executive-level, board-ready language
-- Stay consistent with the rest of the plan where possible
-- Return ONLY valid JSON (no markdown)
-- Output must contain ONLY the keys requested for this section`;
+EXCELLENCE STANDARDS:
+- Every insight must be specific, quantified where possible, and defensible
+- Use executive-level, board-ready language that a CEO could quote verbatim
+- Reference the customer's actual situation, terminology, and stated priorities
+- Stay consistent with the rest of the plan while elevating quality
+- Connect all insights to ServiceNow's differentiated value
+- Ensure commercial rigor with quantified outcomes where credible
+
+OUTPUT RULES:
+- Return ONLY valid JSON (no markdown code blocks)
+- Include ONLY the keys requested for this section
+- Every element must pass the "Would this impress a Fortune 100 executive?" test`;
 
     const userPrompt = `Regenerate ONLY this section: ${section}
 
@@ -260,12 +266,12 @@ Return ONLY valid JSON.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.7,
+        temperature: 0.75,
       }),
     });
 
