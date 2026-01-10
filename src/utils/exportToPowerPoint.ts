@@ -20,7 +20,7 @@ const C = {
   blue: "3B82F6",
 };
 
-// Slide dimensions (LAYOUT_16x9: 10" × 5.625")
+// 16:9 Slide dimensions (10" × 5.625")
 const W = 10;
 const H = 5.625;
 
@@ -118,6 +118,11 @@ const addBadge = (slide: pptxgen.Slide, x: number, y: number, text: string, colo
   });
 };
 
+const truncate = (str: string | undefined, len: number) => {
+  if (!str) return "";
+  return str.length > len ? str.substring(0, len) + "…" : str;
+};
+
 // =============================================================================
 // SLIDE 1: COVER (matches web CoverSlide)
 // =============================================================================
@@ -159,7 +164,7 @@ const createCoverSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 2: EXECUTIVE SUMMARY (matches web ExecutiveSummarySlide)
+// SLIDE 2: EXECUTIVE SUMMARY
 // =============================================================================
 const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -171,44 +176,42 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
   const rightX = MX + leftW + 0.15;
   const rightW = CONTENT_W - leftW - 0.15;
 
-  // Left card - Narrative
   addCard(pptx, slide, MX, topY, leftW, 4.0);
 
-  const lastName = data.basics.accountName.split(" ").pop()?.toUpperCase() || "PARTNER";
-  slide.addText(`Powering A STRONGER ${lastName}`, {
-    x: MX + 0.15, y: topY + 0.1, w: leftW - 0.3, h: 0.35,
+  const pillars = data.annualReport.strategicPillars || data.generatedPlan?.strategicPillars || [];
+  const narrative = data.annualReport.executiveSummaryNarrative || data.generatedPlan?.narrative || "No executive summary generated.";
+
+  slide.addText("Strategic Vision", {
+    x: MX + 0.15, y: topY + 0.1, w: leftW - 0.3, h: 0.3,
     fontSize: HEADING_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING,
   });
 
-  slide.addText(data.annualReport.executiveSummaryNarrative || "No executive summary provided.", {
-    x: MX + 0.15, y: topY + 0.5, w: leftW - 0.3, h: 0.9,
+  slide.addText(truncate(narrative, 400), {
+    x: MX + 0.15, y: topY + 0.45, w: leftW - 0.3, h: 1.0,
     fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
   });
 
-  // Strategic Pillars from data
   slide.addText("Strategic Pillars", {
     x: MX + 0.15, y: topY + 1.5, w: leftW - 0.3, h: 0.25,
     fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
 
-  const pillars = data.annualReport.strategicPillars?.slice(0, 4) || [];
-  pillars.forEach((p, i) => {
+  pillars.slice(0, 4).forEach((p, i) => {
     const py = topY + 1.8 + i * 0.5;
     addLeftBorder(pptx, slide, MX + 0.15, py, 0.4, C.primary);
     slide.addText(p.title || "", {
       x: MX + 0.3, y: py, w: leftW - 0.45, h: 0.2,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText((p.tagline || "").substring(0, 80), {
+    slide.addText(truncate(p.tagline || p.description, 80), {
       x: MX + 0.3, y: py + 0.18, w: leftW - 0.45, h: 0.2,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
 
-  // Right column - Key Metrics
   const rCards = [
-    { label: "FY Revenue", value: data.annualReport.revenue || data.financial.customerRevenue, sub: data.annualReport.revenueComparison },
-    { label: "EBIT Improvement", value: data.annualReport.ebitImprovement || data.financial.marginEBIT, sub: "YoY" },
+    { label: "Revenue", value: data.annualReport.revenue || data.financial.customerRevenue || "—" },
+    { label: "Growth", value: data.annualReport.growthRate || data.financial.growthRate || "—" },
   ];
   rCards.forEach((c, i) => {
     const cy = topY + i * 0.95;
@@ -217,40 +220,22 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
       x: rightX + 0.1, y: cy + 0.08, w: rightW / 2 - 0.2, h: 0.18,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
-    slide.addText(c.value || "—", {
+    slide.addText(c.value, {
       x: rightX + 0.1, y: cy + 0.28, w: rightW / 2 - 0.2, h: 0.4,
-      fontSize: 26, bold: true, color: C.primary, fontFace: FONT_HEADING,
-    });
-    slide.addText(c.sub ? `(${c.sub})` : "", {
-      x: rightX + 0.1, y: cy + 0.65, w: rightW / 2 - 0.2, h: 0.15,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      fontSize: 22, bold: true, color: C.primary, fontFace: FONT_HEADING,
     });
   });
 
-  // Key Milestones
   const mileY = topY + 2.0;
-  addCard(pptx, slide, rightX, mileY, rightW, 1.1);
+  addCard(pptx, slide, rightX, mileY, rightW, 1.9);
   slide.addText("Key Milestones", {
     x: rightX + 0.1, y: mileY + 0.08, w: rightW - 0.2, h: 0.22,
     fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  (data.annualReport.keyMilestones || []).slice(0, 4).forEach((m, i) => {
-    slide.addText(`• ${m}`, {
-      x: rightX + 0.1, y: mileY + 0.32 + i * 0.19, w: rightW - 0.2, h: 0.19,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-    });
-  });
-
-  // Strategic Achievements
-  const achY = topY + 3.2;
-  addCard(pptx, slide, rightX, achY, rightW, 0.7);
-  slide.addText("Strategic Achievements", {
-    x: rightX + 0.1, y: achY + 0.06, w: rightW - 0.2, h: 0.2,
-    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
-  });
-  (data.annualReport.strategicAchievements || []).slice(0, 2).forEach((a, i) => {
-    slide.addText(`• ${a}`, {
-      x: rightX + 0.1, y: achY + 0.28 + i * 0.19, w: rightW - 0.2, h: 0.19,
+  const milestones = data.annualReport.keyMilestones || [];
+  milestones.slice(0, 6).forEach((m, i) => {
+    slide.addText(`• ${truncate(m, 60)}`, {
+      x: rightX + 0.1, y: mileY + 0.32 + i * 0.25, w: rightW - 0.2, h: 0.23,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
@@ -259,7 +244,7 @@ const createExecutiveSummarySlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 3: CUSTOMER SNAPSHOT (matches web CustomerSnapshotSlide)
+// SLIDE 3: CUSTOMER SNAPSHOT
 // =============================================================================
 const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -267,10 +252,6 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Customer Snapshot", `${data.basics.accountName} at a Glance`);
 
   const topY = 0.95;
-  const cardGap = 0.12;
-  const colW = (CONTENT_W - cardGap) / 2;
-
-  // Key Metrics Row
   const metrics = [
     { label: "Annual Revenue", value: data.financial.customerRevenue || "—" },
     { label: "Growth Rate", value: data.financial.growthRate || "—" },
@@ -292,7 +273,7 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
     });
   });
 
-  // Company Overview
+  const colW = (CONTENT_W - 0.12) / 2;
   const overviewY = topY + 1.0;
   addCard(pptx, slide, MX, overviewY, colW, 1.8);
   slide.addText("Company Overview", {
@@ -303,8 +284,8 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
   const overviewItems = [
     { label: "Account", value: data.basics.accountName || "—" },
     { label: "FY Ambition", value: data.basics.nextFYAmbition || "—" },
-    { label: "Cost Pressures", value: data.financial.costPressureAreas || "—" },
-    { label: "Investment Areas", value: data.financial.strategicInvestmentAreas || "—" },
+    { label: "Cost Pressures", value: truncate(data.financial.costPressureAreas, 50) || "—" },
+    { label: "Investment Areas", value: truncate(data.financial.strategicInvestmentAreas, 50) || "—" },
   ];
 
   overviewItems.forEach((item, i) => {
@@ -312,14 +293,13 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
       x: MX + 0.12, y: overviewY + 0.38 + i * 0.35, w: 1.3, h: 0.18,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText(item.value.substring(0, 50), {
+    slide.addText(item.value, {
       x: MX + 1.4, y: overviewY + 0.38 + i * 0.35, w: colW - 1.6, h: 0.18,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
 
-  // ServiceNow Position
-  const rx = MX + colW + cardGap;
+  const rx = MX + colW + 0.12;
   addCard(pptx, slide, rx, overviewY, colW, 1.8, { accentBorder: C.primary });
   slide.addText("ServiceNow Position", {
     x: rx + 0.12, y: overviewY + 0.08, w: colW - 0.24, h: 0.22,
@@ -327,24 +307,23 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
   });
 
   const snItems = [
-    { label: "Current Contract Value", value: data.basics.currentContractValue || "—" },
-    { label: "FY26 Ambition", value: data.basics.nextFYAmbition || "—" },
+    { label: "Current ACV", value: data.basics.currentContractValue || "—" },
+    { label: "FY Ambition", value: data.basics.nextFYAmbition || "—" },
     { label: "3-Year Target", value: data.basics.threeYearAmbition || "—" },
     { label: "Renewal Date", value: data.basics.renewalDates || "—" },
   ];
 
   snItems.forEach((item, i) => {
     slide.addText(`${item.label}:`, {
-      x: rx + 0.12, y: overviewY + 0.38 + i * 0.35, w: 1.6, h: 0.18,
+      x: rx + 0.12, y: overviewY + 0.38 + i * 0.35, w: 1.5, h: 0.18,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText(item.value.substring(0, 40), {
-      x: rx + 1.7, y: overviewY + 0.38 + i * 0.35, w: colW - 1.9, h: 0.18,
+    slide.addText(item.value, {
+      x: rx + 1.6, y: overviewY + 0.38 + i * 0.35, w: colW - 1.8, h: 0.18,
       fontSize: SMALL_SIZE, color: C.primary, fontFace: FONT_BODY,
     });
   });
 
-  // Vision Statement
   const visY = overviewY + 1.95;
   addCard(pptx, slide, MX, visY, CONTENT_W, 0.75, { accentBorder: C.primary });
   slide.addText("ServiceNow Vision", {
@@ -360,7 +339,7 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 4: CUSTOMER STRATEGY (matches web CustomerStrategySlide)
+// SLIDE 4: CUSTOMER STRATEGY
 // =============================================================================
 const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -368,10 +347,8 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Customer Strategy", `${data.basics.accountName} Strategic Direction`);
 
   const topY = 0.95;
-  const cardGap = 0.12;
-  const colW = (CONTENT_W - cardGap) / 2;
+  const colW = (CONTENT_W - 0.12) / 2;
 
-  // Corporate Strategy
   addCard(pptx, slide, MX, topY, colW, 2.0);
   slide.addText("Corporate Strategy", {
     x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
@@ -392,15 +369,14 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
         x: MX + 0.22, y: sy, w: colW - 0.35, h: 0.18,
         fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
       });
-      slide.addText((s.description || "").substring(0, 60), {
+      slide.addText(truncate(s.description, 60), {
         x: MX + 0.22, y: sy + 0.17, w: colW - 0.35, h: 0.18,
         fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
     });
   }
 
-  // Digital Strategy
-  const rx = MX + colW + cardGap;
+  const rx = MX + colW + 0.12;
   addCard(pptx, slide, rx, topY, colW, 2.0);
   slide.addText("Digital Strategy", {
     x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
@@ -421,14 +397,13 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
         x: rx + 0.22, y: sy, w: colW - 0.35, h: 0.18,
         fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
       });
-      slide.addText((s.description || "").substring(0, 60), {
+      slide.addText(truncate(s.description, 60), {
         x: rx + 0.22, y: sy + 0.17, w: colW - 0.35, h: 0.18,
         fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
     });
   }
 
-  // CEO/Board Priorities
   const prioY = topY + 2.15;
   addCard(pptx, slide, MX, prioY, colW, 1.2);
   slide.addText("CEO/Board Priorities", {
@@ -444,7 +419,6 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
     });
   });
 
-  // Transformation Themes
   addCard(pptx, slide, rx, prioY, colW, 1.2);
   slide.addText("Transformation Themes", {
     x: rx + 0.12, y: prioY + 0.08, w: colW - 0.24, h: 0.22,
@@ -463,7 +437,77 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 5: FY-1 RETROSPECTIVE (matches web FY1RetrospectiveSlide)
+// SLIDE 5: ACCOUNT STRATEGY
+// =============================================================================
+const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  setBackground(slide);
+  addTitle(slide, "Account Strategy", "ServiceNow Strategic Opportunities");
+
+  const topY = 0.95;
+  const colW = (CONTENT_W - 0.12) / 2;
+
+  const customerPriorities = data.accountStrategy?.customerPriorities || [];
+  const strategicOpportunities = data.accountStrategy?.strategicOpportunities || [];
+
+  addCard(pptx, slide, MX, topY, colW, 2.8);
+  slide.addText("Customer Priorities", {
+    x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.accent, fontFace: FONT_HEADING,
+  });
+
+  if (customerPriorities.length === 0) {
+    slide.addText("No customer priorities defined", {
+      x: MX + 0.12, y: topY + 0.4, w: colW - 0.24, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  } else {
+    customerPriorities.slice(0, 5).forEach((p, i) => {
+      const py = topY + 0.4 + i * 0.48;
+      addLeftBorder(pptx, slide, MX + 0.12, py, 0.4, C.accent);
+      slide.addText(p.title || "", {
+        x: MX + 0.25, y: py, w: colW - 0.4, h: 0.2,
+        fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+      });
+      slide.addText(truncate(p.description, 70), {
+        x: MX + 0.25, y: py + 0.2, w: colW - 0.4, h: 0.2,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
+  }
+
+  const rx = MX + colW + 0.12;
+  addCard(pptx, slide, rx, topY, colW, 2.8, { accentBorder: C.primary });
+  slide.addText("Strategic Opportunities", {
+    x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.primary, fontFace: FONT_HEADING,
+  });
+
+  if (strategicOpportunities.length === 0) {
+    slide.addText("No strategic opportunities defined", {
+      x: rx + 0.12, y: topY + 0.4, w: colW - 0.24, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  } else {
+    strategicOpportunities.slice(0, 5).forEach((o, i) => {
+      const oy = topY + 0.4 + i * 0.48;
+      addLeftBorder(pptx, slide, rx + 0.12, oy, 0.4, C.primary);
+      slide.addText(o.title || "", {
+        x: rx + 0.25, y: oy, w: colW - 0.4, h: 0.2,
+        fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+      });
+      slide.addText(truncate(o.outcome, 70), {
+        x: rx + 0.25, y: oy + 0.2, w: colW - 0.4, h: 0.2,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
+  }
+
+  return slide;
+};
+
+// =============================================================================
+// SLIDE 6: FY-1 RETROSPECTIVE
 // =============================================================================
 const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -471,54 +515,44 @@ const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "FY-1 Retrospective", "What Actually Happened — Honest Assessment");
 
   const topY = 0.9;
-  const cardGap = 0.15;
-  const colW = (CONTENT_W - cardGap) / 2;
+  const colW = (CONTENT_W - 0.15) / 2;
 
-  // Prior Plan Summary
   addCard(pptx, slide, MX, topY, colW, 1.8);
   slide.addText("Prior Plan Summary", {
     x: MX + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.22,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  slide.addText(`${data.history.lastPlanDate || "—"} • ${data.history.plannerName || "—"}, ${data.history.plannerRole || "—"}`, {
+  slide.addText(`${data.history.lastPlanDate || "—"} • ${data.history.plannerName || "—"}`, {
     x: MX + 0.15, y: topY + 0.35, w: colW - 0.3, h: 0.16,
     fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
-  slide.addText((data.history.lastPlanSummary || "No prior plan summary available.").substring(0, 250), {
+  slide.addText(truncate(data.history.lastPlanSummary, 250) || "No prior plan summary available.", {
     x: MX + 0.15, y: topY + 0.55, w: colW - 0.3, h: 1.15,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
 
-  // What Did Not Work
-  const rx = MX + colW + cardGap;
+  const rx = MX + colW + 0.15;
   addCard(pptx, slide, rx, topY, colW, 1.8);
   addLeftBorder(pptx, slide, rx, topY, 1.8, C.danger);
   slide.addText("What Did Not Work", {
     x: rx + 0.2, y: topY + 0.1, w: colW - 0.35, h: 0.22,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  slide.addText((data.history.whatDidNotWork || "No information available.").substring(0, 200), {
-    x: rx + 0.2, y: topY + 0.38, w: colW - 0.35, h: 0.7,
+  slide.addText(truncate(data.history.whatDidNotWork, 200) || "No information available.", {
+    x: rx + 0.2, y: topY + 0.38, w: colW - 0.35, h: 1.3,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
-  slide.addText("Prior Transformation Attempts", {
-    x: rx + 0.2, y: topY + 1.15, w: colW - 0.35, h: 0.18,
-    fontSize: TINY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
-  });
-  slide.addText((data.history.priorTransformationAttempts || "—").substring(0, 100), {
-    x: rx + 0.2, y: topY + 1.35, w: colW - 0.35, h: 0.35,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-  });
 
-  // Summary Box
-  const sumY = topY + 2.0;
-  addCard(pptx, slide, MX, sumY, CONTENT_W, 0.65, { accentBorder: C.primary });
-  slide.addText("FY-1 Insight", {
-    x: MX + 0.12, y: sumY + 0.08, w: CONTENT_W - 0.24, h: 0.18,
+  const lessonY = topY + 2.0;
+  addCard(pptx, slide, MX, lessonY, CONTENT_W, 0.65, { accentBorder: C.primary });
+  slide.addText("Key Lessons Learned", {
+    x: MX + 0.12, y: lessonY + 0.08, w: CONTENT_W - 0.24, h: 0.18,
     fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
   });
-  slide.addText("Understanding past challenges enables strategic positioning for future growth.", {
-    x: MX + 0.12, y: sumY + 0.3, w: CONTENT_W - 0.24, h: 0.3,
+  
+  const lessons = data.generatedPlan?.fy1Retrospective?.lessonsLearned || [];
+  slide.addText(lessons.slice(0, 2).join(" • ") || "Understanding past challenges enables strategic positioning.", {
+    x: MX + 0.12, y: lessonY + 0.3, w: CONTENT_W - 0.24, h: 0.3,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
   });
 
@@ -526,17 +560,16 @@ const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 6: STRATEGIC ALIGNMENT (matches web StrategicAlignmentSlide)
+// SLIDE 7: STRATEGIC ALIGNMENT
 // =============================================================================
 const createStrategicAlignmentSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Strategic Alignment", "Connecting corporate priorities to ServiceNow value");
+  addTitle(slide, "Strategic Alignment", "Connecting priorities to ServiceNow value");
 
   const topY = 1.0;
   const colW = (CONTENT_W - 0.12) / 2;
 
-  // Vision Statement at top
   addCard(pptx, slide, MX, topY, CONTENT_W, 0.75, { accentBorder: C.primary });
   slide.addText(`ServiceNow Vision for ${data.basics.accountName}`, {
     x: MX + 0.12, y: topY + 0.08, w: CONTENT_W - 0.24, h: 0.2,
@@ -547,80 +580,43 @@ const createStrategicAlignmentSlide = (pptx: pptxgen, data: AccountData) => {
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
 
-  // Digital Strategies
-  const dsY = topY + 0.85;
-  addCard(pptx, slide, MX, dsY, colW, 1.5);
-  slide.addText("Digital Strategies", {
-    x: MX + 0.1, y: dsY + 0.08, w: colW - 0.2, h: 0.22,
+  const alignY = topY + 0.85;
+  const alignments = data.generatedPlan?.strategicAlignment?.alignments || [];
+
+  addCard(pptx, slide, MX, alignY, CONTENT_W, 2.3);
+  slide.addText("Strategic Alignment Matrix", {
+    x: MX + 0.12, y: alignY + 0.08, w: CONTENT_W - 0.24, h: 0.25,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  (data.strategy.digitalStrategies || []).slice(0, 3).forEach((ds, i) => {
-    const dy = dsY + 0.35 + i * 0.38;
-    slide.addText(ds.title || "", {
-      x: MX + 0.15, y: dy, w: colW - 0.3, h: 0.18,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-    });
-    slide.addText((ds.description || "").substring(0, 70), {
-      x: MX + 0.15, y: dy + 0.18, w: colW - 0.3, h: 0.18,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-    });
-  });
 
-  // Transformation Themes
-  const rx = MX + colW + 0.12;
-  addCard(pptx, slide, rx, dsY, colW, 1.5);
-  slide.addText("Transformation Themes", {
-    x: rx + 0.1, y: dsY + 0.08, w: colW - 0.2, h: 0.22,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
-  });
-  (data.strategy.transformationThemes || []).slice(0, 3).forEach((t, i) => {
-    const ty = dsY + 0.35 + i * 0.38;
-    slide.addText(t.title || "", {
-      x: rx + 0.15, y: ty, w: colW - 0.3, h: 0.18,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+  if (alignments.length === 0) {
+    slide.addText("No strategic alignment data. Generate AI plan to populate.", {
+      x: MX + 0.12, y: alignY + 0.5, w: CONTENT_W - 0.24, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
-    slide.addText((t.description || "").substring(0, 70), {
-      x: rx + 0.15, y: ty + 0.18, w: colW - 0.3, h: 0.18,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  } else {
+    alignments.slice(0, 4).forEach((a, i) => {
+      const ay = alignY + 0.4 + i * 0.45;
+      slide.addText(`${a.customerObjective}`, {
+        x: MX + 0.15, y: ay, w: colW - 0.3, h: 0.2,
+        fontSize: SMALL_SIZE, bold: true, color: C.accent, fontFace: FONT_BODY,
+      });
+      slide.addText(`→ ${a.serviceNowCapability}`, {
+        x: MX + colW, y: ay, w: colW - 0.3, h: 0.2,
+        fontSize: SMALL_SIZE, color: C.primary, fontFace: FONT_BODY,
+      });
+      slide.addText(truncate(a.outcome, 80), {
+        x: MX + 0.15, y: ay + 0.2, w: CONTENT_W - 0.3, h: 0.2,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
     });
-  });
-
-  // Financial Context
-  const finY = dsY + 1.6;
-  addCard(pptx, slide, MX, finY, colW, 0.75);
-  slide.addText("Financial Context", {
-    x: MX + 0.1, y: finY + 0.06, w: colW - 0.2, h: 0.18,
-    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-  });
-  slide.addText(`Revenue: ${data.financial.customerRevenue || "—"}  |  Growth: ${data.financial.growthRate || "—"}  |  EBIT: ${data.financial.marginEBIT || "—"}`, {
-    x: MX + 0.1, y: finY + 0.28, w: colW - 0.2, h: 0.18,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-  });
-  slide.addText(`Investments: ${(data.financial.strategicInvestmentAreas || "").substring(0, 50)}`, {
-    x: MX + 0.1, y: finY + 0.48, w: colW - 0.2, h: 0.18,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-  });
-
-  // Account Position
-  addCard(pptx, slide, rx, finY, colW, 0.75);
-  slide.addText("Account Position", {
-    x: rx + 0.1, y: finY + 0.06, w: colW - 0.2, h: 0.18,
-    fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-  });
-  slide.addText(`Current: ${data.basics.currentContractValue || "—"} → FY: ${data.basics.nextFYAmbition || "—"} → 3Y: ${data.basics.threeYearAmbition || "—"}`, {
-    x: rx + 0.1, y: finY + 0.28, w: colW - 0.2, h: 0.18,
-    fontSize: TINY_SIZE, color: C.primary, fontFace: FONT_BODY,
-  });
-  slide.addText(`Renewal: ${data.basics.renewalDates || "—"}`, {
-    x: rx + 0.1, y: finY + 0.48, w: colW - 0.2, h: 0.18,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-  });
+  }
 
   return slide;
 };
 
 // =============================================================================
-// SLIDE 7: ACCOUNT TEAM (simplified version of web AccountTeamSlide)
+// SLIDE 8: ACCOUNT TEAM
 // =============================================================================
 const createAccountTeamSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -654,12 +650,8 @@ const createAccountTeamSlide = (pptx: pptxgen, data: AccountData) => {
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "center",
     });
     slide.addText(m.title || "", {
-      x: cx + 0.1, y: cy + 0.45, w: cardW - 0.2, h: 0.5,
+      x: cx + 0.1, y: cy + 0.45, w: cardW - 0.2, h: 0.6,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, align: "center",
-    });
-    slide.addText("", {
-      x: cx + 0.1, y: cy + 0.7, w: cardW - 0.2, h: 0.18,
-      fontSize: 6, color: C.primary, fontFace: FONT_BODY, align: "center",
     });
   });
 
@@ -667,7 +659,7 @@ const createAccountTeamSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 8: SWOT ANALYSIS (matches web SWOTSlide)
+// SLIDE 9: SWOT ANALYSIS
 // =============================================================================
 const createSWOTSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -693,19 +685,26 @@ const createSWOTSlide = (pptx: pptxgen, data: AccountData) => {
       fontSize: HEADING_SIZE - 2, bold: true, color: section.color, fontFace: FONT_HEADING,
     });
 
-    section.items.slice(0, 4).forEach((item, i) => {
-      slide.addText(`• ${item.substring(0, 60)}`, {
-        x: section.x + 0.12, y: section.y + 0.4 + i * 0.3, w: cardW - 0.24, h: 0.28,
-        fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+    if (section.items.length === 0) {
+      slide.addText("No data available", {
+        x: section.x + 0.12, y: section.y + 0.4, w: cardW - 0.24, h: 0.28,
+        fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
-    });
+    } else {
+      section.items.slice(0, 4).forEach((item, i) => {
+        slide.addText(`• ${truncate(item, 55)}`, {
+          x: section.x + 0.12, y: section.y + 0.4 + i * 0.3, w: cardW - 0.24, h: 0.28,
+          fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+        });
+      });
+    }
   });
 
   return slide;
 };
 
 // =============================================================================
-// SLIDE 9: VALUE DRIVERS (matches web CoreValueDriversSlide)
+// SLIDE 10: VALUE DRIVERS
 // =============================================================================
 const createValueDriversSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -716,33 +715,33 @@ const createValueDriversSlide = (pptx: pptxgen, data: AccountData) => {
   const cardW = (CONTENT_W - 0.24) / 2;
   const cardH = 1.55;
 
-  const drivers = [
-    { title: "Operational Efficiency", desc: "Streamlined workflows reduce manual effort and accelerate delivery", color: C.primary },
-    { title: "Cost Optimisation", desc: "Platform consolidation and automation drive significant cost reduction", color: C.accent },
-    { title: "Customer Experience", desc: "Unified service delivery improves satisfaction and retention", color: C.blue },
-    { title: "Digital Transformation", desc: "Modern platform enables AI-first strategy and innovation", color: C.purple },
-  ];
+  const drivers = data.generatedPlan?.coreValueDrivers || [];
+  const colors = [C.primary, C.accent, C.blue, C.purple];
 
-  drivers.forEach((d, i) => {
+  if (drivers.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No value drivers defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
+
+  drivers.slice(0, 4).forEach((d, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const cx = MX + col * (cardW + 0.12);
     const cy = topY + row * (cardH + 0.1);
+    const color = colors[i % colors.length];
 
-    addCard(pptx, slide, cx, cy, cardW, cardH, { accentBorder: d.color });
+    addCard(pptx, slide, cx, cy, cardW, cardH, { accentBorder: color });
 
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: cx + 0.15, y: cy + 0.15, w: 0.35, h: 0.35,
-      fill: { color: d.color, transparency: 70 },
-      line: { color: d.color },
-    });
-
-    slide.addText(d.title, {
-      x: cx + 0.6, y: cy + 0.18, w: cardW - 0.75, h: 0.28,
+    slide.addText(d.title || "", {
+      x: cx + 0.15, y: cy + 0.15, w: cardW - 0.3, h: 0.28,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
     });
-    slide.addText(d.desc, {
-      x: cx + 0.15, y: cy + 0.6, w: cardW - 0.3, h: 0.8,
+    slide.addText(truncate(d.description, 120), {
+      x: cx + 0.15, y: cy + 0.5, w: cardW - 0.3, h: 0.9,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
   });
@@ -751,39 +750,99 @@ const createValueDriversSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 10: KEY WORKSTREAMS / BIG BETS (matches web BigBetsSlide)
+// SLIDE 11: KEY WORKSTREAMS (BIG BETS)
 // =============================================================================
 const createBigBetsSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
   addTitle(slide, "Key Transformation Workstreams", "Priority initiatives for value realisation");
-  addBadge(slide, W - MX - 1.1, MY + 0.05, "FY26 Big Bets", C.primary);
 
   const topY = 0.95;
+  const workstreams = data.generatedPlan?.keyWorkstreams || data.accountStrategy?.bigBets || [];
   const cardW = (CONTENT_W - 0.24) / 3;
   const cardH = 2.3;
+  const colors = [C.primary, C.accent, C.blue];
 
-  const streams = [
-    { title: "CRM Modernisation", status: "Active", acv: "$5M", color: C.primary },
-    { title: "AI Use Cases", status: "Strategic", acv: "$2M", color: C.accent },
-    { title: "Platform Expansion", status: "Foundation", acv: "$3M", color: C.blue },
-  ];
+  if (workstreams.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No workstreams defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
 
-  streams.forEach((s, i) => {
+  workstreams.slice(0, 3).forEach((w, i) => {
     const cx = MX + i * (cardW + 0.12);
-    addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: s.color });
-    addBadge(slide, cx + 0.08, topY + 0.08, s.status, s.color);
-    slide.addText(s.title, {
+    const color = colors[i % colors.length];
+    addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: color });
+    
+    if (w.status) {
+      addBadge(slide, cx + 0.08, topY + 0.08, w.status, color);
+    }
+    
+    slide.addText(w.title || w.workflow || "", {
       x: cx + 0.1, y: topY + 0.4, w: cardW - 0.2, h: 0.35,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
     });
-    slide.addText("Target ACV", {
-      x: cx + 0.1, y: topY + 1.0, w: cardW - 0.2, h: 0.16,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+    
+    slide.addText(truncate(w.description || w.outcome, 100), {
+      x: cx + 0.1, y: topY + 0.8, w: cardW - 0.2, h: 0.6,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
-    slide.addText(s.acv, {
-      x: cx + 0.1, y: topY + 1.2, w: cardW - 0.2, h: 0.5,
-      fontSize: 24, bold: true, color: s.color, fontFace: FONT_HEADING,
+    
+    if (w.targetACV) {
+      slide.addText("Target ACV", {
+        x: cx + 0.1, y: topY + 1.5, w: cardW - 0.2, h: 0.16,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+      slide.addText(w.targetACV, {
+        x: cx + 0.1, y: topY + 1.7, w: cardW - 0.2, h: 0.4,
+        fontSize: 20, bold: true, color: color, fontFace: FONT_HEADING,
+      });
+    }
+  });
+
+  return slide;
+};
+
+// =============================================================================
+// SLIDE 12: WORKSTREAM DETAIL
+// =============================================================================
+const createWorkstreamDetailSlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  setBackground(slide);
+  addTitle(slide, "Workstream Detail", "Detailed breakdown of key initiatives");
+
+  const topY = 0.95;
+  const workstreams = data.generatedPlan?.keyWorkstreams || [];
+
+  if (workstreams.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No workstream details. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
+
+  const cardH = 0.7;
+  workstreams.slice(0, 4).forEach((w, i) => {
+    const wy = topY + i * (cardH + 0.1);
+    addCard(pptx, slide, MX, wy, CONTENT_W, cardH, { accentBorder: C.primary });
+    
+    slide.addText(w.title || "", {
+      x: MX + 0.12, y: wy + 0.08, w: 3.0, h: 0.22,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    
+    if (w.status) {
+      addBadge(slide, MX + 3.2, wy + 0.08, w.status, C.accent);
+    }
+    
+    slide.addText(truncate(w.description, 100), {
+      x: MX + 0.12, y: wy + 0.35, w: CONTENT_W - 0.24, h: 0.28,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
 
@@ -791,7 +850,7 @@ const createBigBetsSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 11: AI USE CASES (matches web AIUseCasesSlide)
+// SLIDE 13: AI USE CASES
 // =============================================================================
 const createAIUseCasesSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -799,30 +858,36 @@ const createAIUseCasesSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "AI-Led Use Case Portfolio", "Priority AI use cases aligned to strategy");
 
   const topY = 0.95;
+  const useCases = data.generatedPlan?.aiUseCases || [];
   const cardW = (CONTENT_W - 0.12) / 2;
   const cardH = 1.5;
 
-  const useCases = [
-    { title: "Predictive Case Routing", desc: "AI-powered case classification and intelligent routing", status: "Pilot Ready" },
-    { title: "Intelligent Document Processing", desc: "Automated extraction and processing of documents", status: "Discovery" },
-    { title: "Customer Sentiment Analysis", desc: "Real-time sentiment detection for case prioritisation", status: "Scoped" },
-    { title: "AI Knowledge Management", desc: "Generative AI-powered knowledge recommendations", status: "Planned" },
-  ];
+  if (useCases.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No AI use cases defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
 
-  useCases.forEach((uc, i) => {
+  useCases.slice(0, 4).forEach((uc, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const cx = MX + col * (cardW + 0.12);
     const cy = topY + row * (cardH + 0.1);
 
     addCard(pptx, slide, cx, cy, cardW, cardH, { accentBorder: C.accent });
-    addBadge(slide, cx + cardW - 1.0, cy + 0.08, uc.status, C.accent);
+    
+    if (uc.status) {
+      addBadge(slide, cx + cardW - 1.0, cy + 0.08, uc.status, C.accent);
+    }
 
-    slide.addText(uc.title, {
+    slide.addText(uc.title || "", {
       x: cx + 0.12, y: cy + 0.4, w: cardW - 0.24, h: 0.25,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
     });
-    slide.addText(uc.desc, {
+    slide.addText(truncate(uc.description, 100), {
       x: cx + 0.12, y: cy + 0.7, w: cardW - 0.24, h: 0.65,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
@@ -832,7 +897,7 @@ const createAIUseCasesSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 12: PLATFORM VISION (matches web PlatformSlide)
+// SLIDE 14: PLATFORM VISION
 // =============================================================================
 const createPlatformSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -840,61 +905,83 @@ const createPlatformSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Platform Vision", "ServiceNow as the enterprise backbone");
 
   const topY = 1.0;
-  const layers = [
-    { title: "Experience Layer", items: ["Customer Portal", "Employee Center", "Mobile"], color: C.accent },
-    { title: "Workflow Layer", items: ["Case Management", "Fulfillment", "Approvals", "SLAs"], color: C.primary },
-    { title: "Integration Layer", items: ["API Hub", "IntegrationHub", "Spokes"], color: C.purple },
-    { title: "Data & AI Layer", items: ["CMDB", "AI Search", "Predictive Intelligence"], color: C.blue },
-  ];
+  const capabilities = data.generatedPlan?.platformCapabilities?.capabilities || [];
+  const narrative = data.generatedPlan?.platformCapabilities?.narrative;
 
-  const layerH = 0.85;
-  layers.forEach((l, i) => {
-    const ly = topY + i * (layerH + 0.08);
-    addCard(pptx, slide, MX, ly, CONTENT_W, layerH, { accentBorder: l.color });
-    slide.addText(l.title, {
-      x: MX + 0.12, y: ly + 0.08, w: 2.0, h: 0.22,
-      fontSize: BODY_SIZE, bold: true, color: l.color, fontFace: FONT_HEADING,
+  if (capabilities.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.5);
+    slide.addText("No platform capabilities defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
-    slide.addText(l.items.join("  •  "), {
-      x: MX + 2.2, y: ly + 0.08, w: CONTENT_W - 2.4, h: layerH - 0.16,
+    return slide;
+  }
+
+  const colors = [C.accent, C.primary, C.purple, C.blue];
+  const layerH = 0.75;
+  
+  capabilities.slice(0, 4).forEach((cap, i) => {
+    const ly = topY + i * (layerH + 0.08);
+    const color = colors[i % colors.length];
+    addCard(pptx, slide, MX, ly, CONTENT_W, layerH, { accentBorder: color });
+    slide.addText(cap.title || "", {
+      x: MX + 0.12, y: ly + 0.08, w: 2.2, h: 0.22,
+      fontSize: BODY_SIZE, bold: true, color: color, fontFace: FONT_HEADING,
+    });
+    slide.addText(truncate(cap.description, 80), {
+      x: MX + 2.4, y: ly + 0.08, w: CONTENT_W - 2.6, h: layerH - 0.16,
       fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "middle",
     });
   });
+
+  if (narrative) {
+    const narY = topY + capabilities.slice(0, 4).length * (layerH + 0.08) + 0.1;
+    slide.addText(truncate(narrative, 150), {
+      x: MX, y: narY, w: CONTENT_W, h: 0.4,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  }
 
   return slide;
 };
 
 // =============================================================================
-// SLIDE 13: ROADMAP (matches web RoadmapSlide)
+// SLIDE 15: ROADMAP
 // =============================================================================
 const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
-  addTitle(slide, "Transformation Roadmap", "FY26 phased execution plan");
-
-  const phases = [
-    { quarter: "Q1 FY26", title: "Foundation", items: ["Decision forum", "EBC execution", "Pilot scoping"] },
-    { quarter: "Q2 FY26", title: "Commercialisation", items: ["Contract finalisation", "SOW development", "Kick-off planning"] },
-    { quarter: "Q3-Q4", title: "Expansion", items: ["AI use case deployment", "Integration", "Platform scaling"] },
-  ];
+  addTitle(slide, "Transformation Roadmap", "Phased execution plan");
 
   const topY = 1.0;
+  const roadmapItems = data.generatedPlan?.roadmapItems || [];
   const cardW = (CONTENT_W - 0.24) / 3;
   const cardH = 2.6;
 
-  phases.forEach((p, i) => {
+  if (roadmapItems.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No roadmap defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
+
+  roadmapItems.slice(0, 3).forEach((item, i) => {
     const cx = MX + i * (cardW + 0.12);
     addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: C.primary });
-    slide.addText(p.quarter, {
+    slide.addText(item.quarter || item.phase || `Phase ${i + 1}`, {
       x: cx + 0.1, y: topY + 0.1, w: cardW - 0.2, h: 0.35,
-      fontSize: 20, bold: true, color: C.primary, fontFace: FONT_HEADING,
+      fontSize: 18, bold: true, color: C.primary, fontFace: FONT_HEADING,
     });
-    slide.addText(p.title, {
+    slide.addText(item.title || "", {
       x: cx + 0.1, y: topY + 0.5, w: cardW - 0.2, h: 0.25,
       fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    p.items.forEach((item, j) => {
-      slide.addText(`→  ${item}`, {
+    
+    const milestones = item.milestones || [];
+    milestones.slice(0, 4).forEach((m, j) => {
+      slide.addText(`→  ${truncate(m, 30)}`, {
         x: cx + 0.1, y: topY + 0.85 + j * 0.28, w: cardW - 0.2, h: 0.26,
         fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
@@ -905,7 +992,7 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 14: RISK & MITIGATION (matches web RiskMitigationSlide)
+// SLIDE 16: RISK & MITIGATION
 // =============================================================================
 const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -913,27 +1000,32 @@ const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Risk & Mitigation", "Proactive risk management approach");
 
   const topY = 0.95;
-  const risks = [
-    { risk: "Budget Constraints", mitigation: "Phased investment approach; quick-win ROI demonstration", level: "High" },
-    { risk: "Change Resistance", mitigation: "Executive sponsorship; clear communication plan", level: "Medium" },
-    { risk: "Technical Complexity", mitigation: "Proven methodology; experienced delivery team", level: "Medium" },
-    { risk: "Timeline Pressure", mitigation: "Agile delivery; milestone-based progress tracking", level: "Low" },
-  ];
-
+  const risks = data.generatedPlan?.risks || [];
   const cardH = 0.75;
-  risks.forEach((r, i) => {
-    const ry = topY + i * (cardH + 0.1);
-    addCard(pptx, slide, MX, ry, CONTENT_W, cardH, { accentBorder: r.level === "High" ? C.danger : r.level === "Medium" ? C.warning : C.primary });
 
-    slide.addText(r.level, {
-      x: MX + 0.12, y: ry + 0.12, w: 0.7, h: 0.22,
-      fontSize: TINY_SIZE, bold: true, color: r.level === "High" ? C.danger : r.level === "Medium" ? C.warning : C.primary, fontFace: FONT_BODY,
+  if (risks.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No risks identified. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
-    slide.addText(r.risk, {
+    return slide;
+  }
+
+  risks.slice(0, 4).forEach((r, i) => {
+    const ry = topY + i * (cardH + 0.1);
+    const levelColor = r.level === "High" ? C.danger : r.level === "Medium" ? C.warning : C.primary;
+    addCard(pptx, slide, MX, ry, CONTENT_W, cardH, { accentBorder: levelColor });
+
+    slide.addText(r.level || "Medium", {
+      x: MX + 0.12, y: ry + 0.12, w: 0.7, h: 0.22,
+      fontSize: TINY_SIZE, bold: true, color: levelColor, fontFace: FONT_BODY,
+    });
+    slide.addText(r.risk || r.title || "", {
       x: MX + 0.9, y: ry + 0.12, w: 2.5, h: 0.22,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText(r.mitigation, {
+    slide.addText(truncate(r.mitigation, 100), {
       x: MX + 0.12, y: ry + 0.4, w: CONTENT_W - 0.24, h: 0.28,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
@@ -943,7 +1035,7 @@ const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 15: GOVERNANCE (matches web GovernanceSlide)
+// SLIDE 17: GOVERNANCE
 // =============================================================================
 const createGovernanceSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -951,61 +1043,63 @@ const createGovernanceSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Governance Model");
 
   const topY = 0.85;
-  const cardGap = 0.15;
-  const colW = (CONTENT_W - cardGap) / 2;
+  const colW = (CONTENT_W - 0.15) / 2;
   const mainH = 3.0;
 
-  // Execution Governance
   addCard(pptx, slide, MX, topY, colW, mainH);
   slide.addText("Execution Governance", {
     x: MX + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.25,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
 
-  const govItems = [
-    { title: "Executive Steering Committee", freq: "Quarterly" },
-    { title: "Operational Cadence", freq: "Bi-weekly" },
-    { title: "Value Tracking", freq: "Monthly" },
-  ];
-
-  govItems.forEach((g, i) => {
-    const gy = topY + 0.45 + i * 0.8;
-    slide.addText(g.title, {
-      x: MX + 0.2, y: gy, w: colW - 1.4, h: 0.22,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+  const events = data.engagement.plannedExecutiveEvents || [];
+  const sponsors = data.engagement.knownExecutiveSponsors || [];
+  
+  slide.addText("Key Forums & Events", {
+    x: MX + 0.15, y: topY + 0.4, w: colW - 0.3, h: 0.2,
+    fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  });
+  
+  events.slice(0, 3).forEach((e, i) => {
+    slide.addText(`• ${truncate(e, 40)}`, {
+      x: MX + 0.15, y: topY + 0.65 + i * 0.25, w: colW - 0.3, h: 0.23,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
     });
-    addBadge(slide, MX + colW - 1.1, gy, g.freq, C.primary);
   });
 
-  // Prioritisation Framework
-  const rx = MX + colW + cardGap;
+  slide.addText("Executive Sponsors", {
+    x: MX + 0.15, y: topY + 1.5, w: colW - 0.3, h: 0.2,
+    fontSize: SMALL_SIZE, bold: true, color: C.accent, fontFace: FONT_BODY,
+  });
+  
+  sponsors.slice(0, 3).forEach((s, i) => {
+    slide.addText(`• ${truncate(s, 40)}`, {
+      x: MX + 0.15, y: topY + 1.75 + i * 0.25, w: colW - 0.3, h: 0.23,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+    });
+  });
+
+  const rx = MX + colW + 0.15;
   addCard(pptx, slide, rx, topY, colW, mainH);
-  slide.addText("Prioritisation Framework", {
+  slide.addText("Success Metrics", {
     x: rx + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.25,
     fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
 
-  const steps = [
-    { step: "1", label: "Strategic Alignment" },
-    { step: "2", label: "Economic Impact" },
-    { step: "3", label: "Execution Readiness" },
-    { step: "4", label: "Stakeholder Commitment" },
-  ];
-
-  steps.forEach((s, i) => {
-    const sy = topY + 0.45 + i * 0.6;
-    slide.addShape(pptx.ShapeType.ellipse, {
-      x: rx + 0.2, y: sy + 0.02, w: 0.28, h: 0.28,
-      fill: { color: C.primary, transparency: 60 },
-      line: { color: C.primary },
+  const metrics = data.generatedPlan?.successMetrics || [];
+  metrics.slice(0, 4).forEach((m, i) => {
+    const my = topY + 0.45 + i * 0.6;
+    slide.addText(m.metric || "", {
+      x: rx + 0.2, y: my, w: 1.0, h: 0.28,
+      fontSize: 16, bold: true, color: C.primary, fontFace: FONT_HEADING,
     });
-    slide.addText(s.step, {
-      x: rx + 0.2, y: sy + 0.02, w: 0.28, h: 0.28,
-      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING, align: "center", valign: "middle",
-    });
-    slide.addText(s.label, {
-      x: rx + 0.55, y: sy + 0.02, w: colW - 0.75, h: 0.28,
+    slide.addText(m.label || "", {
+      x: rx + 1.3, y: my, w: colW - 1.5, h: 0.28,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, valign: "middle",
+    });
+    slide.addText(truncate(m.description, 50), {
+      x: rx + 0.2, y: my + 0.28, w: colW - 0.4, h: 0.2,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
   });
 
@@ -1013,7 +1107,70 @@ const createGovernanceSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 16: EXECUTIVE ENGAGEMENT (matches web ExecutiveEngagementSlide)
+// SLIDE 18: WEEKLY UPDATE
+// =============================================================================
+const createWeeklyUpdateSlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  setBackground(slide);
+  addTitle(slide, "Weekly Update", "Current status and next steps");
+
+  const topY = 0.95;
+  const update = data.generatedPlan?.weeklyUpdate;
+
+  if (!update) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No weekly update data. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
+
+  const colW = (CONTENT_W - 0.12) / 2;
+
+  addCard(pptx, slide, MX, topY, colW, 1.3, { accentBorder: C.primary });
+  slide.addText("This Week's Wins", {
+    x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.primary, fontFace: FONT_HEADING,
+  });
+  (update.wins || []).slice(0, 3).forEach((w, i) => {
+    slide.addText(`✓ ${truncate(w, 50)}`, {
+      x: MX + 0.12, y: topY + 0.38 + i * 0.28, w: colW - 0.24, h: 0.26,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+    });
+  });
+
+  const rx = MX + colW + 0.12;
+  addCard(pptx, slide, rx, topY, colW, 1.3, { accentBorder: C.accent });
+  slide.addText("Next Steps", {
+    x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.accent, fontFace: FONT_HEADING,
+  });
+  (update.nextSteps || []).slice(0, 3).forEach((n, i) => {
+    slide.addText(`→ ${truncate(n, 50)}`, {
+      x: rx + 0.12, y: topY + 0.38 + i * 0.28, w: colW - 0.24, h: 0.26,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+    });
+  });
+
+  const blockersY = topY + 1.45;
+  addCard(pptx, slide, MX, blockersY, CONTENT_W, 1.0, { accentBorder: C.warning });
+  slide.addText("Blockers & Risks", {
+    x: MX + 0.12, y: blockersY + 0.08, w: CONTENT_W - 0.24, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.warning, fontFace: FONT_HEADING,
+  });
+  (update.blockers || []).slice(0, 2).forEach((b, i) => {
+    slide.addText(`⚠ ${truncate(b, 80)}`, {
+      x: MX + 0.12, y: blockersY + 0.38 + i * 0.28, w: CONTENT_W - 0.24, h: 0.26,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+    });
+  });
+
+  return slide;
+};
+
+// =============================================================================
+// SLIDE 19: EXECUTIVE ENGAGEMENT
 // =============================================================================
 const createEngagementSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -1021,10 +1178,8 @@ const createEngagementSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Executive Engagement Model", "Tiered engagement structure and key forums");
 
   const topY = 0.95;
-  const cardGap = 0.12;
-  const colW = (CONTENT_W - cardGap) / 2;
+  const colW = (CONTENT_W - 0.12) / 2;
 
-  // Executive Sponsors
   addCard(pptx, slide, MX, topY, colW, 2.2);
   slide.addText("Executive Sponsors", {
     x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.25,
@@ -1046,8 +1201,7 @@ const createEngagementSlide = (pptx: pptxgen, data: AccountData) => {
     });
   }
 
-  // Planned Events
-  const rx = MX + colW + cardGap;
+  const rx = MX + colW + 0.12;
   addCard(pptx, slide, rx, topY, colW, 2.2, { accentBorder: C.accent });
   slide.addText("Planned Executive Events", {
     x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.25,
@@ -1073,7 +1227,7 @@ const createEngagementSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 17: PURSUIT PLAN (matches web PursuitPlanSlide)
+// SLIDE 20: PURSUIT PLAN
 // =============================================================================
 const createPursuitPlanSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -1081,28 +1235,35 @@ const createPursuitPlanSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Pursuit Plan", "Key milestones and decision points");
 
   const topY = 1.0;
-  const stages = [
-    { stage: "Discovery", actions: ["Stakeholder mapping", "Requirements gathering"], due: "Q1" },
-    { stage: "Proposal", actions: ["Solution design", "Business case development"], due: "Q1" },
-    { stage: "Negotiation", actions: ["Commercial alignment", "Contract finalisation"], due: "Q2" },
-    { stage: "Close", actions: ["Executive sign-off", "Implementation kick-off"], due: "Q2" },
-  ];
-
+  const pursuits = data.generatedPlan?.pursuitPlan || [];
   const cardW = (CONTENT_W - 0.36) / 4;
   const cardH = 2.0;
 
-  stages.forEach((s, i) => {
+  if (pursuits.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No pursuit plan defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+    return slide;
+  }
+
+  pursuits.slice(0, 4).forEach((p, i) => {
     const cx = MX + i * (cardW + 0.12);
     addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: C.primary });
 
-    slide.addText(s.stage, {
+    slide.addText(p.stage || `Stage ${i + 1}`, {
       x: cx + 0.08, y: topY + 0.1, w: cardW - 0.16, h: 0.3,
       fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING, align: "center",
     });
-    addBadge(slide, cx + (cardW - 0.6) / 2, topY + 0.45, s.due, C.accent);
+    
+    if (p.dueDate) {
+      addBadge(slide, cx + (cardW - 0.6) / 2, topY + 0.45, p.dueDate, C.accent);
+    }
 
-    s.actions.forEach((a, j) => {
-      slide.addText(`• ${a}`, {
+    const actions = p.actions || [];
+    actions.slice(0, 3).forEach((a, j) => {
+      slide.addText(`• ${truncate(a, 25)}`, {
         x: cx + 0.08, y: topY + 0.8 + j * 0.28, w: cardW - 0.16, h: 0.26,
         fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
@@ -1113,7 +1274,7 @@ const createPursuitPlanSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 18: SUCCESS METRICS (matches web SuccessSlide)
+// SLIDE 21: SUCCESS METRICS
 // =============================================================================
 const createSuccessMetricsSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -1121,50 +1282,42 @@ const createSuccessMetricsSlide = (pptx: pptxgen, data: AccountData) => {
   addTitle(slide, "Success Metrics", "Measuring impact and value realisation");
 
   const topY = 1.0;
-  const metrics = [
-    { metric: "30%", label: "Cost Reduction", sub: "Operational efficiency gains" },
-    { metric: "15pt", label: "CSAT Improvement", sub: "Customer satisfaction increase" },
-    { metric: "50%", label: "Time Savings", sub: "Faster resolution times" },
-    { metric: "$10M+", label: "ACV Target", sub: "Revenue opportunity" },
-  ];
-
+  const metrics = data.generatedPlan?.successMetrics || [];
   const cardW = (CONTENT_W - 0.36) / 4;
   const cardH = 1.6;
 
-  metrics.forEach((m, i) => {
-    const cx = MX + i * (cardW + 0.12);
-    addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: i % 2 === 0 ? C.primary : C.accent });
-    slide.addText(m.metric, {
-      x: cx + 0.1, y: topY + 0.2, w: cardW - 0.2, h: 0.6,
-      fontSize: 36, bold: true, color: i % 2 === 0 ? C.primary : C.accent, fontFace: FONT_HEADING, align: "center",
+  if (metrics.length === 0) {
+    addCard(pptx, slide, MX, topY, CONTENT_W, 2.0);
+    slide.addText("No success metrics defined. Generate AI plan to populate.", {
+      x: MX + 0.15, y: topY + 0.5, w: CONTENT_W - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
     });
-    slide.addText(m.label, {
-      x: cx + 0.1, y: topY + 0.85, w: cardW - 0.2, h: 0.25,
+    return slide;
+  }
+
+  metrics.slice(0, 4).forEach((m, i) => {
+    const cx = MX + i * (cardW + 0.12);
+    const color = i % 2 === 0 ? C.primary : C.accent;
+    addCard(pptx, slide, cx, topY, cardW, cardH, { accentBorder: color });
+    slide.addText(m.metric || "", {
+      x: cx + 0.1, y: topY + 0.2, w: cardW - 0.2, h: 0.5,
+      fontSize: 28, bold: true, color: color, fontFace: FONT_HEADING, align: "center",
+    });
+    slide.addText(m.label || "", {
+      x: cx + 0.1, y: topY + 0.75, w: cardW - 0.2, h: 0.25,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "center",
     });
-    slide.addText(m.sub, {
-      x: cx + 0.1, y: topY + 1.12, w: cardW - 0.2, h: 0.2,
+    slide.addText(truncate(m.description, 40), {
+      x: cx + 0.1, y: topY + 1.05, w: cardW - 0.2, h: 0.35,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, align: "center",
     });
-  });
-
-  // Vision statement at bottom
-  const visY = topY + cardH + 0.2;
-  addCard(pptx, slide, MX, visY, CONTENT_W, 0.7, { accentBorder: C.primary });
-  slide.addText("Strategic Vision", {
-    x: MX + 0.12, y: visY + 0.08, w: CONTENT_W - 0.24, h: 0.2,
-    fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING,
-  });
-  slide.addText(data.basics.visionStatement || "Partner to transform operations and accelerate strategic objectives.", {
-    x: MX + 0.12, y: visY + 0.32, w: CONTENT_W - 0.24, h: 0.32,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
   });
 
   return slide;
 };
 
 // =============================================================================
-// SLIDE 19: CLOSING / THANK YOU
+// SLIDE 22: CLOSING / THANK YOU
 // =============================================================================
 const createClosingSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -1201,7 +1354,7 @@ const createClosingSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// MAIN EXPORT FUNCTION - MATCHING WEB SLIDE ORDER
+// MAIN EXPORT FUNCTION - EXACT MATCH TO WEB SLIDE ORDER
 // =============================================================================
 export const exportToPowerPoint = async (data: AccountData) => {
   const pptx = new pptxgen();
@@ -1213,46 +1366,52 @@ export const exportToPowerPoint = async (data: AccountData) => {
 
   const slides: pptxgen.Slide[] = [];
 
-  // Web Order (skipping Input Form):
+  // EXACT WEB ORDER (skipping Input Form):
   // 1. Cover
   // 2. Executive Summary
   // 3. Customer Snapshot
   // 4. Customer Strategy
-  // 5. FY-1 Retrospective
-  // 6. Strategic Alignment
-  // 7. Account Team
-  // 8. SWOT Analysis
-  // 9. Value Drivers
-  // 10. Key Workstreams (Big Bets)
-  // 11. AI Portfolio
-  // 12. Platform Vision
-  // 13. Roadmap
-  // 14. Risk & Mitigation
-  // 15. Governance
-  // 16. Engagement
-  // 17. Pursuit Plan
-  // 18. Success Metrics
-  // 19. Thank You
+  // 5. Account Strategy
+  // 6. FY-1 Retrospective
+  // 7. Strategic Alignment
+  // 8. Account Team
+  // 9. SWOT Analysis
+  // 10. Value Drivers
+  // 11. Key Workstreams (Big Bets)
+  // 12. Workstream Detail
+  // 13. AI Portfolio
+  // 14. Platform Vision
+  // 15. Roadmap
+  // 16. Risk & Mitigation
+  // 17. Governance
+  // 18. Weekly Update
+  // 19. Engagement
+  // 20. Pursuit Plan
+  // 21. Success Metrics
+  // 22. Thank You
 
   slides.push(createCoverSlide(pptx, data));                    // 1
   slides.push(createExecutiveSummarySlide(pptx, data));         // 2
   slides.push(createCustomerSnapshotSlide(pptx, data));         // 3
   slides.push(createCustomerStrategySlide(pptx, data));         // 4
-  slides.push(createRetrospectiveSlide(pptx, data));            // 5
-  slides.push(createStrategicAlignmentSlide(pptx, data));       // 6
-  slides.push(createAccountTeamSlide(pptx, data));              // 7
-  slides.push(createSWOTSlide(pptx, data));                     // 8
-  slides.push(createValueDriversSlide(pptx, data));             // 9
-  slides.push(createBigBetsSlide(pptx, data));                  // 10
-  slides.push(createAIUseCasesSlide(pptx, data));               // 11
-  slides.push(createPlatformSlide(pptx, data));                 // 12
-  slides.push(createRoadmapSlide(pptx, data));                  // 13
-  slides.push(createRiskMitigationSlide(pptx, data));           // 14
-  slides.push(createGovernanceSlide(pptx, data));               // 15
-  slides.push(createEngagementSlide(pptx, data));               // 16
-  slides.push(createPursuitPlanSlide(pptx, data));              // 17
-  slides.push(createSuccessMetricsSlide(pptx, data));           // 18
-  slides.push(createClosingSlide(pptx, data));                  // 19
+  slides.push(createAccountStrategySlide(pptx, data));          // 5
+  slides.push(createRetrospectiveSlide(pptx, data));            // 6
+  slides.push(createStrategicAlignmentSlide(pptx, data));       // 7
+  slides.push(createAccountTeamSlide(pptx, data));              // 8
+  slides.push(createSWOTSlide(pptx, data));                     // 9
+  slides.push(createValueDriversSlide(pptx, data));             // 10
+  slides.push(createBigBetsSlide(pptx, data));                  // 11
+  slides.push(createWorkstreamDetailSlide(pptx, data));         // 12
+  slides.push(createAIUseCasesSlide(pptx, data));               // 13
+  slides.push(createPlatformSlide(pptx, data));                 // 14
+  slides.push(createRoadmapSlide(pptx, data));                  // 15
+  slides.push(createRiskMitigationSlide(pptx, data));           // 16
+  slides.push(createGovernanceSlide(pptx, data));               // 17
+  slides.push(createWeeklyUpdateSlide(pptx, data));             // 18
+  slides.push(createEngagementSlide(pptx, data));               // 19
+  slides.push(createPursuitPlanSlide(pptx, data));              // 20
+  slides.push(createSuccessMetricsSlide(pptx, data));           // 21
+  slides.push(createClosingSlide(pptx, data));                  // 22
 
   const exportId = new Date()
     .toISOString()
@@ -1260,17 +1419,15 @@ export const exportToPowerPoint = async (data: AccountData) => {
     .replace(/[-:]/g, "")
     .replace("T", "_");
 
-  // Add footers + speaker notes
   slides.forEach((slide, i) => {
     slide.addNotes(`export_id: ${exportId}\nslide: ${i + 1}/${slides.length}`);
 
-    // Add footers to all slides except cover (0) and closing (last)
     if (i > 0 && i < slides.length - 1) {
       addFooter(slide, i + 1, slides.length, data.basics.accountName);
     }
   });
 
   await pptx.writeFile({
-    fileName: `${data.basics.accountName.replace(/[^a-zA-Z0-9]/g, "_")}_Account_Plan_FY26_${exportId}.pptx`,
+    fileName: `${data.basics.accountName.replace(/[^a-zA-Z0-9]/g, "_")}_Account_Plan_${exportId}.pptx`,
   });
 };
