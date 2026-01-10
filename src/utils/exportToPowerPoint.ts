@@ -519,116 +519,120 @@ const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   const keyLessons = generatedPlan?.fy1Retrospective?.keyLessons || history.lastPlanSummary || "";
   const lookingAhead = generatedPlan?.fy1Retrospective?.lookingAhead || "";
 
-  const topY = 0.85;
-  const cardH = 0.45;
-  const halfW = (CONTENT_W - 0.12) / 2;
+  // Start content below title+subtitle (title at 0.35, subtitle at 0.8, so content at 1.05)
+  const topY = 1.05;
+  const cardH = 0.38;
+  const halfW = (CONTENT_W - 0.15) / 2;
+  const gap = 0.1;
 
-  // Top row - Date and Planner info cards
+  // Top row - Date and Planner info cards (inline with subtitle style)
   addCard(pptx, slide, MX, topY, halfW, cardH);
   slide.addText("Previous Account Plan Date:", {
-    x: MX + 0.12, y: topY + 0.1, w: 2.2, h: 0.25,
+    x: MX + 0.1, y: topY + 0.09, w: 2.0, h: 0.2,
     fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
   slide.addText(history.lastPlanDate || "Not specified", {
-    x: MX + 2.4, y: topY + 0.1, w: halfW - 2.6, h: 0.25,
+    x: MX + halfW - 1.8, y: topY + 0.09, w: 1.7, h: 0.2,
     fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "right",
   });
 
-  addCard(pptx, slide, MX + halfW + 0.12, topY, halfW, cardH);
+  const rx = MX + halfW + 0.15;
+  addCard(pptx, slide, rx, topY, halfW, cardH);
   slide.addText("Previous Account Planner:", {
-    x: MX + halfW + 0.24, y: topY + 0.1, w: 2.2, h: 0.25,
+    x: rx + 0.1, y: topY + 0.09, w: 2.0, h: 0.2,
     fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
   const plannerInfo = history.plannerName ? 
     (history.plannerRole ? `${history.plannerName} (${history.plannerRole})` : history.plannerName) : 
     "Not specified";
   slide.addText(plannerInfo, {
-    x: MX + halfW + 2.6, y: topY + 0.1, w: halfW - 2.5, h: 0.25,
+    x: rx + halfW - 1.8, y: topY + 0.09, w: 1.7, h: 0.2,
     fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "right",
   });
 
   // Main content row
-  const mainY = topY + cardH + 0.12;
-  const mainH = 1.65;
+  const mainY = topY + cardH + gap;
+  const mainH = 1.5;
 
   // Left column - What Happened
   addCard(pptx, slide, MX, mainY, halfW, mainH);
   slide.addText("What Happened", {
-    x: MX + 0.15, y: mainY + 0.1, w: halfW - 0.3, h: 0.22,
+    x: MX + 0.12, y: mainY + 0.1, w: halfW - 0.24, h: 0.2,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
   
   if (history.lastPlanSummary) {
-    slide.addText(truncate(history.lastPlanSummary, 200), {
-      x: MX + 0.15, y: mainY + 0.35, w: halfW - 0.3, h: 0.7,
+    slide.addText(truncate(history.lastPlanSummary, 180), {
+      x: MX + 0.12, y: mainY + 0.32, w: halfW - 0.24, h: 0.6,
       fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
     });
   } else {
     slide.addText("No summary provided", {
-      x: MX + 0.15, y: mainY + 0.35, w: halfW - 0.3, h: 0.3,
+      x: MX + 0.12, y: mainY + 0.32, w: halfW - 0.24, h: 0.25,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, italic: true,
     });
   }
 
   // Challenges section within left card
   if (history.whatDidNotWork) {
-    const chalY = mainY + 1.1;
+    const chalY = mainY + 0.95;
     slide.addShape(pptx.ShapeType.roundRect, {
-      x: MX + 0.12, y: chalY, w: halfW - 0.24, h: 0.48,
+      x: MX + 0.1, y: chalY, w: halfW - 0.2, h: 0.45,
       fill: { color: C.danger, transparency: 90 },
       line: { color: C.danger, width: 0.5, transparency: 70 },
-      rectRadius: 0.05,
+      rectRadius: 0.04,
     });
     slide.addText("Challenges Encountered", {
-      x: MX + 0.18, y: chalY + 0.05, w: halfW - 0.36, h: 0.15,
+      x: MX + 0.15, y: chalY + 0.04, w: halfW - 0.3, h: 0.14,
       fontSize: TINY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
     });
-    slide.addText(truncate(history.whatDidNotWork, 100), {
-      x: MX + 0.18, y: chalY + 0.22, w: halfW - 0.36, h: 0.22,
+    slide.addText(truncate(history.whatDidNotWork, 90), {
+      x: MX + 0.15, y: chalY + 0.18, w: halfW - 0.3, h: 0.22,
       fontSize: TINY_SIZE, color: C.white, fontFace: FONT_BODY,
     });
   }
 
   // Right column - What FY-1 Focused On
-  const rx = MX + halfW + 0.12;
   addCard(pptx, slide, rx, mainY, halfW, mainH);
   slide.addText("What FY-1 Focused On", {
-    x: rx + 0.15, y: mainY + 0.1, w: halfW - 0.6, h: 0.22,
+    x: rx + 0.12, y: mainY + 0.1, w: 2.5, h: 0.2,
     fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
-  addBadge(slide, rx + halfW - 1.6, mainY + 0.12, "Previous Strategy", C.primary);
+  // Badge positioned at right edge of card
+  addBadge(slide, rx + halfW - 1.35, mainY + 0.1, "Previous Strategy", C.primary);
 
   if (focusAreas.length > 0) {
     focusAreas.slice(0, 4).forEach((area, i) => {
-      const ay = mainY + 0.4 + i * 0.3;
+      const ay = mainY + 0.38 + i * 0.27;
       slide.addText(area.title || "", {
-        x: rx + 0.15, y: ay, w: halfW - 0.3, h: 0.15,
+        x: rx + 0.12, y: ay, w: halfW - 0.24, h: 0.13,
         fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
       });
-      slide.addText(truncate(area.description, 60) || "", {
-        x: rx + 0.15, y: ay + 0.14, w: halfW - 0.3, h: 0.14,
+      slide.addText(truncate(area.description, 55) || "", {
+        x: rx + 0.12, y: ay + 0.12, w: halfW - 0.24, h: 0.13,
         fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
       });
     });
   } else {
     slide.addText("Generate an AI plan to see focus area analysis", {
-      x: rx + 0.15, y: mainY + 0.4, w: halfW - 0.3, h: 0.3,
+      x: rx + 0.12, y: mainY + 0.38, w: halfW - 0.24, h: 0.25,
       fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, italic: true,
     });
   }
 
   // Bottom row - Key Lessons & Looking Ahead
-  const bottomY = mainY + mainH + 0.12;
-  const bottomH = 0.7;
+  const bottomY = mainY + mainH + gap;
+  const bottomH = 0.62;
 
   if (keyLessons) {
     addCard(pptx, slide, MX, bottomY, halfW, bottomH, { accentBorder: C.warning });
+    addLeftBorder(pptx, slide, MX, bottomY, bottomH, C.warning);
     slide.addText("Key Lessons Learned", {
-      x: MX + 0.15, y: bottomY + 0.08, w: halfW - 0.3, h: 0.18,
+      x: MX + 0.12, y: bottomY + 0.06, w: halfW - 0.24, h: 0.16,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText(truncate(keyLessons, 150), {
-      x: MX + 0.15, y: bottomY + 0.28, w: halfW - 0.3, h: 0.35,
+    slide.addText(truncate(keyLessons, 140), {
+      x: MX + 0.12, y: bottomY + 0.24, w: halfW - 0.24, h: 0.32,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
   }
@@ -636,24 +640,24 @@ const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   if (lookingAhead) {
     addCard(pptx, slide, rx, bottomY, halfW, bottomH, { accentBorder: C.primary });
     slide.addText(`Looking Ahead${basics.accountName ? ` to ${basics.accountName}` : ""}`, {
-      x: rx + 0.15, y: bottomY + 0.08, w: halfW - 0.3, h: 0.18,
+      x: rx + 0.12, y: bottomY + 0.06, w: halfW - 0.24, h: 0.16,
       fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
     });
-    slide.addText(truncate(lookingAhead, 150), {
-      x: rx + 0.15, y: bottomY + 0.28, w: halfW - 0.3, h: 0.35,
+    slide.addText(truncate(lookingAhead, 140), {
+      x: rx + 0.12, y: bottomY + 0.24, w: halfW - 0.24, h: 0.32,
       fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
     });
   }
 
-  // Status bar
-  const statusY = bottomY + bottomH + 0.1;
-  addCard(pptx, slide, MX, statusY, CONTENT_W, 0.32);
+  // Status bar at bottom
+  const statusY = bottomY + bottomH + gap;
+  addCard(pptx, slide, MX, statusY, CONTENT_W, 0.28);
   slide.addText("Historical context for strategic planning", {
-    x: MX + 0.15, y: statusY + 0.06, w: CONTENT_W / 2, h: 0.2,
+    x: MX + 0.12, y: statusY + 0.05, w: CONTENT_W / 2, h: 0.18,
     fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
   slide.addText("✓ Context Loaded", {
-    x: MX + CONTENT_W / 2, y: statusY + 0.06, w: CONTENT_W / 2 - 0.3, h: 0.2,
+    x: MX + CONTENT_W / 2, y: statusY + 0.05, w: CONTENT_W / 2 - 0.24, h: 0.18,
     fontSize: TINY_SIZE, color: C.primary, fontFace: FONT_BODY, align: "right",
   });
 
