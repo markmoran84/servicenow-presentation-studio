@@ -113,6 +113,46 @@ ANNUAL REPORT INTELLIGENCE
 ${JSON.stringify(accountData.annualReport || {}, null, 2)}
 
 ═══════════════════════════════════════════════════════════════
+ACCOUNT PRIORITIES (Pre-Defined Strategic Focus Areas)
+═══════════════════════════════════════════════════════════════
+These are the user-defined strategic priorities for this account. You MUST incorporate these into the plan and ensure strategic coherence:
+${JSON.stringify(accountData.strategy?.corporateStrategy || [], null, 2)}
+
+DIGITAL/AI PRIORITIES:
+${JSON.stringify(accountData.strategy?.digitalStrategies || [], null, 2)}
+
+CEO/BOARD PRIORITIES:
+${JSON.stringify(accountData.strategy?.ceoBoardPriorities || [], null, 2)}
+
+TRANSFORMATION PRIORITIES:
+${JSON.stringify(accountData.strategy?.transformationThemes || [], null, 2)}
+
+═══════════════════════════════════════════════════════════════
+ACCOUNT STRATEGY & BIG BETS (Pre-Defined Workstreams)
+═══════════════════════════════════════════════════════════════
+Strategy Narrative: ${accountData.accountStrategy?.strategyNarrative || "Not yet defined"}
+
+Big Bets / Key Workstreams (These are the user's defined initiatives—incorporate and enhance):
+${JSON.stringify(accountData.accountStrategy?.bigBets || [], null, 2)}
+
+Key Executives:
+${JSON.stringify(accountData.accountStrategy?.keyExecutives || [], null, 2)}
+
+═══════════════════════════════════════════════════════════════
+BUSINESS MODEL CANVAS
+═══════════════════════════════════════════════════════════════
+${JSON.stringify(accountData.businessModel || {}, null, 2)}
+
+═══════════════════════════════════════════════════════════════
+CRITICAL SYNTHESIS INSTRUCTIONS
+═══════════════════════════════════════════════════════════════
+1. THREAD ALL INPUT DATA: Every section you generate must reference and build upon the input data provided above.
+2. RESPECT USER-DEFINED PRIORITIES: The Account Priorities and Big Bets are user-defined inputs—enhance and elaborate on them, don't replace them.
+3. STRATEGIC COHERENCE: Observations → Implications → Priorities → Workstreams must tell ONE unified story.
+4. CUSTOMER LANGUAGE: Use terminology from the annual report and customer strategies throughout.
+5. QUANTIFIED OUTCOMES: Reference financial data to create credible impact projections.
+
+═══════════════════════════════════════════════════════════════
 REQUIRED OUTPUT STRUCTURE
 ═══════════════════════════════════════════════════════════════
 Generate a comprehensive, board-ready account plan with these sections. Each section must demonstrate strategic depth and commercial acumen:
