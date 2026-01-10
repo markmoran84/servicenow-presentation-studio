@@ -52,8 +52,8 @@ export const SlideNavigation = ({
         // Navigate to slide and wait for render
         await onExportSlide(i);
         
-        // Small delay to ensure render is complete
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Longer delay to ensure full render with styles
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Capture the slide element
         const element = getSlideElement?.();
@@ -61,11 +61,13 @@ export const SlideNavigation = ({
           try {
             const imageData = await captureElementAsImage(element);
             images.push(imageData);
+            console.log(`Captured slide ${i}: ${imageData.length} bytes`);
           } catch (err) {
             console.error(`Failed to capture slide ${i}:`, err);
             images.push("");
           }
         } else {
+          console.error(`Slide element not found for slide ${i}`);
           images.push("");
         }
       }
