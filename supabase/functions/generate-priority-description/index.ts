@@ -57,7 +57,7 @@ Return ONLY the description text, no quotes or formatting.`;
         messages: [
           { role: "user", content: prompt }
         ],
-        max_tokens: 300,
+        max_completion_tokens: 300,
         temperature: 0.7,
       }),
     });
