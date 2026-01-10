@@ -1,27 +1,31 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Calendar, ArrowRight, Sparkles, Info, Target, Compass, Zap, TrendingUp } from "lucide-react";
+import { Calendar, ArrowRight, Sparkles, Info, Target, Flag, Users, TrendingUp, CheckCircle } from "lucide-react";
 
 export const RoadmapSlide = () => {
   const { data } = useAccountData();
   const plan = data.generatedPlan;
   const companyName = data.basics.accountName || "the customer";
 
-  // Pull strategic data from various sources
+  // Get big bets as initiatives
+  const bigBets = data.accountStrategy?.bigBets?.filter(b => b.title) || [];
+  const hasInitiatives = bigBets.length > 0;
+  
+  // Roadmap phases from AI generation
   const phases = plan?.roadmapPhases?.slice(0, 3) || [];
   const hasPhases = phases.length > 0;
   
-  // Customer strategy themes (drivers)
-  const transformationThemes = data.strategy.transformationThemes?.filter(t => t.title).slice(0, 4) || [];
-  
-  // Strategic priorities mapped to workstreams
-  const strategicPriorities = plan?.strategicPriorities?.slice(0, 4) || [];
-  
   // Success metrics as target outcomes
   const successMetrics = plan?.successMetrics?.slice(0, 4) || [];
-  
-  // Vision statement
-  const vision = data.basics.visionStatement || data.annualReport?.executiveSummaryNarrative || "";
+
+  // Default phases if not generated
+  const defaultPhases = [
+    { quarter: "Now", title: "Foundation", activities: ["Current initiatives", "Quick wins", "Foundation setup"] },
+    { quarter: "Next", title: "Expansion", activities: ["Scale successful pilots", "New workstreams", "Integration focus"] },
+    { quarter: "Later", title: "Transformation", activities: ["Full platform adoption", "Advanced capabilities", "Business outcomes"] },
+  ];
+
+  const displayPhases = hasPhases ? phases : defaultPhases;
 
   return (
     <div className="min-h-screen p-6 md:p-8 pb-32 bg-gradient-to-br from-background via-background to-primary/5">
@@ -33,7 +37,7 @@ export const RoadmapSlide = () => {
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-foreground">Strategic Roadmap for {companyName}</h1>
-            <p className="text-muted-foreground">Transformation journey connecting strategy to execution</p>
+            <p className="text-muted-foreground">Transformation journey connecting initiatives to outcomes</p>
           </div>
           <div className="flex items-center gap-2">
             <RegenerateSectionButton section="roadmapPhases" />
@@ -46,95 +50,97 @@ export const RoadmapSlide = () => {
           </div>
         </div>
 
-        {hasPhases ? (
-          <div className="grid grid-cols-12 gap-3">
-            {/* Column 1: Purpose/Vision */}
-            <div className="col-span-2 flex flex-col">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Purpose</div>
-              <div className="flex-1 relative">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-primary/5 rounded-xl border border-primary/30" />
-                <div className="relative h-full flex items-center justify-center p-4">
-                  <div className="writing-mode-vertical text-center">
-                    <p className="text-sm font-medium text-primary leading-relaxed">
-                      {vision || `Enabling ${companyName}'s digital transformation through strategic partnership`}
-                    </p>
-                  </div>
-                </div>
+        {hasInitiatives ? (
+          <div className="grid grid-cols-12 gap-4">
+            {/* Column 1: Initiatives (Big Bets) */}
+            <div className="col-span-3 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Initiatives</span>
               </div>
-            </div>
-
-            {/* Column 2: Business Objectives */}
-            <div className="col-span-2 flex flex-col">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Business Objectives</div>
               <div className="flex-1 space-y-2">
-                {(transformationThemes.length > 0 ? transformationThemes : [
-                  { title: "Customer Growth", description: "Drive profitable growth" },
-                  { title: "Operational Excellence", description: "Faster, safer, lower cost" },
-                  { title: "Technology Transformation", description: "Enable agility & innovation" },
-                  { title: "AI & Data at Scale", description: "Predict, decide, act faster" }
-                ]).map((theme, i) => (
-                  <div key={i} className="glass-card p-3 border-l-2 border-l-accent opacity-0 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                    <div className="text-xs font-bold text-foreground">{theme.title}</div>
-                    <div className="text-[10px] text-muted-foreground line-clamp-2">{theme.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Column 3: CX Drivers */}
-            <div className="col-span-2 flex flex-col">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">CX Drivers</div>
-              <div className="flex-1 space-y-2">
-                {(strategicPriorities.length > 0 ? strategicPriorities : [
-                  { title: "Elevate Customer Experience" },
-                  { title: "Lower Cost to Serve" },
-                  { title: "Unlock Commercial Agility" },
-                  { title: "Embed AI as Core Capability" }
-                ]).map((priority, i) => (
-                  <div key={i} className="bg-secondary/80 backdrop-blur rounded-lg p-3 border border-border/50 opacity-0 animate-fade-in flex items-center gap-2" style={{ animationDelay: `${(i + 4) * 100}ms` }}>
-                    <div className="w-6 h-6 rounded bg-primary/20 flex items-center justify-center shrink-0">
-                      {i === 0 && <Target className="w-3 h-3 text-primary" />}
-                      {i === 1 && <TrendingUp className="w-3 h-3 text-primary" />}
-                      {i === 2 && <Zap className="w-3 h-3 text-primary" />}
-                      {i === 3 && <Compass className="w-3 h-3 text-primary" />}
+                {bigBets.slice(0, 6).map((bet, i) => (
+                  <div 
+                    key={i} 
+                    className="glass-card p-3 border-l-3 border-l-primary opacity-0 animate-fade-in"
+                    style={{ animationDelay: `${i * 80}ms`, borderLeftWidth: '3px' }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="text-sm font-bold text-foreground line-clamp-1">{bet.title}</div>
+                        {bet.subtitle && (
+                          <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{bet.subtitle}</div>
+                        )}
+                      </div>
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium ${
+                        bet.dealStatus === "Active Pursuit" ? "bg-accent/20 text-accent" :
+                        bet.dealStatus === "Strategic Initiative" ? "bg-primary/20 text-primary" :
+                        bet.dealStatus === "Foundation Growth" ? "bg-amber-500/20 text-amber-400" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {bet.dealStatus?.split(" ")[0] || "Pipeline"}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold text-foreground">{priority.title}</span>
+                    {bet.sponsor && (
+                      <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/30">
+                        <Users className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground">Sponsor: {bet.sponsor}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Column 4: Strategic Roadmap Timeline */}
-            <div className="col-span-4 flex flex-col">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Strategic Roadmap</div>
+            {/* Column 2: Strategic Roadmap Timeline */}
+            <div className="col-span-6 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <Flag className="w-4 h-4 text-accent" />
+                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Strategic Roadmap</span>
+              </div>
               
               {/* Timeline Header */}
-              <div className="flex items-center justify-between px-4 mb-2">
-                <span className="text-[10px] font-medium text-accent">Now</span>
-                <div className="flex-1 mx-2 border-t border-dashed border-muted-foreground/30 relative">
-                  <ArrowRight className="w-3 h-3 text-muted-foreground/50 absolute right-0 -top-1.5" />
+              <div className="flex items-center justify-between px-4 mb-3 py-2 bg-secondary/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-accent" />
+                  <span className="text-sm font-bold text-accent">Now</span>
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground">Next</span>
-                <div className="flex-1 mx-2 border-t border-dashed border-muted-foreground/30 relative">
-                  <ArrowRight className="w-3 h-3 text-muted-foreground/50 absolute right-0 -top-1.5" />
+                <div className="flex-1 mx-4 border-t-2 border-dashed border-muted-foreground/30 relative">
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 absolute right-0 -top-2" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/60">Later</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-primary/60" />
+                  <span className="text-sm font-medium text-muted-foreground">Next</span>
+                </div>
+                <div className="flex-1 mx-4 border-t-2 border-dashed border-muted-foreground/30 relative">
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 absolute right-0 -top-2" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-muted-foreground/40" />
+                  <span className="text-sm font-medium text-muted-foreground/60">Later</span>
+                </div>
               </div>
 
               {/* Roadmap Phases */}
-              <div className="flex-1 grid grid-cols-3 gap-2">
-                {phases.map((phase, i) => (
+              <div className="flex-1 grid grid-cols-3 gap-3">
+                {displayPhases.map((phase, i) => (
                   <div 
                     key={i} 
-                    className={`glass-card p-3 opacity-0 animate-fade-in ${i === 0 ? 'border-accent/50 bg-accent/5' : ''}`}
-                    style={{ animationDelay: `${(i + 8) * 100}ms` }}
+                    className={`glass-card p-4 opacity-0 animate-fade-in ${
+                      i === 0 ? 'border-accent/50 bg-accent/5 ring-1 ring-accent/20' : ''
+                    }`}
+                    style={{ animationDelay: `${(i + 6) * 80}ms` }}
                   >
-                    <div className={`text-sm font-bold mb-1 ${i === 0 ? 'text-accent' : 'text-primary'}`}>{phase.quarter}</div>
-                    <div className="text-xs font-semibold text-foreground mb-2">{phase.title}</div>
-                    <ul className="space-y-1">
-                      {(phase.activities || []).slice(0, 3).map((item, j) => (
-                        <li key={j} className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
-                          <ArrowRight className="w-2.5 h-2.5 text-accent mt-0.5 shrink-0" />
+                    <div className={`text-lg font-bold mb-1 ${i === 0 ? 'text-accent' : i === 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {phase.quarter}
+                    </div>
+                    <div className="text-sm font-semibold text-foreground mb-3">{phase.title}</div>
+                    <ul className="space-y-2">
+                      {(phase.activities || []).slice(0, 4).map((item, j) => (
+                        <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <CheckCircle className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
+                            i === 0 ? 'text-accent' : 'text-primary/60'
+                          }`} />
                           <span className="line-clamp-2">{item}</span>
                         </li>
                       ))}
@@ -144,44 +150,57 @@ export const RoadmapSlide = () => {
               </div>
             </div>
 
-            {/* Column 5: Target Outcomes */}
-            <div className="col-span-2 flex flex-col">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 text-center">Target Outcomes</div>
+            {/* Column 3: Target Outcomes */}
+            <div className="col-span-3 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Target Outcomes</span>
+              </div>
               <div className="flex-1 space-y-2">
                 {(successMetrics.length > 0 ? successMetrics : [
                   { metric: "TBD", label: "Customer Satisfaction" },
                   { metric: "TBD", label: "Cost Reduction" },
-                  { metric: "TBD", label: "Revenue Growth" },
+                  { metric: "TBD", label: "Revenue Impact" },
                   { metric: "TBD", label: "Time to Value" }
                 ]).map((outcome, i) => (
-                  <div key={i} className="relative opacity-0 animate-fade-in" style={{ animationDelay: `${(i + 11) * 100}ms` }}>
-                    <div className="bg-gradient-to-r from-accent/20 to-primary/20 rounded-lg p-3 border border-accent/30">
-                      <div className="text-lg font-bold text-accent">{outcome.metric}</div>
-                      <div className="text-[10px] text-muted-foreground">{outcome.label}</div>
+                  <div 
+                    key={i} 
+                    className="relative opacity-0 animate-fade-in" 
+                    style={{ animationDelay: `${(i + 9) * 80}ms` }}
+                  >
+                    <div className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg p-3 border border-accent/20">
+                      <div className="text-xl font-bold text-accent">{outcome.metric}</div>
+                      <div className="text-xs text-muted-foreground">{outcome.label}</div>
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Summary Box */}
+              <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="text-xs font-medium text-primary mb-1">FY26 Platform Vision</div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {data.basics.visionStatement 
+                    ? data.basics.visionStatement.substring(0, 120) + (data.basics.visionStatement.length > 120 ? "..." : "")
+                    : `Enabling ${companyName}'s transformation through strategic ServiceNow adoption.`}
+                </p>
               </div>
             </div>
           </div>
         ) : (
           <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
             <Info className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No Roadmap Generated</h3>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Complete the Input Form with account details and click <span className="font-medium text-foreground">Generate with AI</span> to create a transformation roadmap tailored to {companyName}.
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Initiatives Defined</h3>
+            <p className="text-muted-foreground max-w-lg mx-auto mb-4">
+              Add Big Bets in the Input Form (Big Bets tab) to populate the initiatives on this roadmap. Each Big Bet title will appear as an initiative with its sponsor.
             </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-primary">
+              <ArrowRight className="w-4 h-4" />
+              Go to Input Form → Big Bets tab → Add your initiatives
+            </div>
           </div>
         )}
       </div>
-
-      <style>{`
-        .writing-mode-vertical {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-        }
-      `}</style>
     </div>
   );
 };

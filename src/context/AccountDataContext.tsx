@@ -103,6 +103,7 @@ export interface ExecutiveEngagement {
 export interface BigBet {
   title: string;
   subtitle: string;
+  sponsor: string; // Executive sponsor for this initiative
   dealStatus: "Active Pursuit" | "Strategic Initiative" | "Foundation Growth" | "Pipeline";
   targetClose: string;
   netNewACV: string;
