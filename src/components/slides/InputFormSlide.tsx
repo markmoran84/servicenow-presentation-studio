@@ -152,7 +152,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-2 text-xs">
               <Lightbulb className="w-3 h-3" />
-              <span className="hidden sm:inline">Priorities</span>
+              <span className="hidden sm:inline">Acc. Strategies</span>
             </TabsTrigger>
             <TabsTrigger value="accountStrategy" className="gap-2 text-xs">
               <Zap className="w-3 h-3" />
@@ -1373,41 +1373,77 @@ const BusinessModelTab = ({ data, updateData, handleArrayInput }: BusinessModelT
   );
 };
 
-// Account Priorities Tab Component
-interface AccountPrioritiesTabProps {
+// Account Strategies Tab Component
+interface AccountStrategiesTabProps {
   data: any;
   updateData: (section: any, value: any) => void;
 }
 
-const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) => {
+const AccountPrioritiesTab = ({ data, updateData }: AccountStrategiesTabProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
+  const [generatingDescIndex, setGeneratingDescIndex] = useState<number | null>(null);
 
   const handleGeneratePriorities = async (mode: "generate" | "improve") => {
     const setLoading = mode === "generate" ? setIsGenerating : setIsImproving;
     setLoading(true);
     
     try {
-      toast.loading(mode === "generate" ? "Generating priorities with AI..." : "Improving priorities with AI...", { id: "gen-priorities" });
+      toast.loading(mode === "generate" ? "Generating strategies with AI..." : "Improving strategies with AI...", { id: "gen-priorities" });
       
       const { data: responseData, error } = await supabase.functions.invoke("generate-priorities", {
         body: { accountData: data, mode }
       });
 
       if (error) throw error;
-      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate priorities");
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate strategies");
 
       updateData("opportunities", { opportunities: responseData.priorities });
-      toast.success(mode === "generate" ? "Priorities generated!" : "Priorities improved!", { id: "gen-priorities" });
+      toast.success(mode === "generate" ? "Strategies generated!" : "Strategies improved!", { id: "gen-priorities" });
     } catch (error) {
-      console.error("Priority generation error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to generate priorities", { id: "gen-priorities" });
+      console.error("Strategy generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate strategies", { id: "gen-priorities" });
     } finally {
       setLoading(false);
     }
   };
 
-  const hasPriorities = data.opportunities?.opportunities?.some((p: any) => p.title?.trim());
+  const handleGenerateDescription = async (index: number) => {
+    const priority = data.opportunities?.opportunities?.[index];
+    if (!priority?.title?.trim()) {
+      toast.error("Please enter a strategy title first");
+      return;
+    }
+
+    setGeneratingDescIndex(index);
+    try {
+      toast.loading("Generating description...", { id: `gen-desc-${index}` });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-priority-description", {
+        body: { 
+          accountData: data, 
+          priorityTitle: priority.title,
+          priorityIndex: index
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate description");
+
+      const updated = [...data.opportunities.opportunities];
+      updated[index] = { ...updated[index], description: responseData.description };
+      updateData("opportunities", { opportunities: updated });
+      
+      toast.success("Description generated!", { id: `gen-desc-${index}` });
+    } catch (error) {
+      console.error("Description generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate description", { id: `gen-desc-${index}` });
+    } finally {
+      setGeneratingDescIndex(null);
+    }
+  };
+
+  const hasStrategies = data.opportunities?.opportunities?.some((p: any) => p.title?.trim());
 
   return (
     <Card className="glass-card border-border/30">
@@ -1415,7 +1451,7 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="w-5 h-5 text-accent" />
-            Account Team Priorities
+            Account Strategies
           </CardTitle>
           <div className="flex gap-2">
             <Button
@@ -1437,7 +1473,7 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
                 </>
               )}
             </Button>
-            {hasPriorities && (
+            {hasStrategies && (
               <Button
                 variant="outline"
                 size="sm"
@@ -1461,18 +1497,18 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
           </div>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Strategic priorities for your account team - aligned with customer strategies and pain points
+          Strategic priorities for your account team - auto-populated from annual report or generate with AI
         </p>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4">
         <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-primary">Account Team Priorities</span>
+            <span className="text-sm font-semibold text-primary">Account Team Strategies</span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {data.opportunities.opportunities.map((priority: any, index: number) => (
-              <Collapsible key={index}>
-                <div className="flex items-center gap-2">
+              <div key={index} className="p-3 rounded-lg bg-background/50 border border-border/20">
+                <div className="flex items-center gap-2 mb-2">
                   <Input
                     value={priority.title}
                     onChange={(e) => {
@@ -1480,12 +1516,9 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
                       updated[index] = { ...updated[index], title: e.target.value };
                       updateData("opportunities", { opportunities: updated });
                     }}
-                    placeholder={`Priority ${index + 1}`}
-                    className="flex-1"
+                    placeholder={`Strategy ${index + 1}`}
+                    className="flex-1 font-medium"
                   />
-                  <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                    <Plus className="w-4 h-4" />
-                  </CollapsibleTrigger>
                   {data.opportunities.opportunities.length > 1 && (
                     <button
                       className="text-muted-foreground hover:text-destructive transition-colors"
@@ -1498,7 +1531,7 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
                     </button>
                   )}
                 </div>
-                <CollapsibleContent className="mt-2 pr-12">
+                <div className="relative">
                   <Textarea
                     value={priority.description}
                     onChange={(e) => {
@@ -1508,9 +1541,28 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
                     }}
                     placeholder="Exec-ready, outcome-focused description..."
                     rows={2}
+                    className="pr-24"
                   />
-                </CollapsibleContent>
-              </Collapsible>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleGenerateDescription(index)}
+                    disabled={generatingDescIndex === index || !priority.title?.trim()}
+                    className="absolute right-2 top-1 gap-1 h-7 text-xs"
+                  >
+                    {generatingDescIndex === index ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3" />
+                        AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
           <Button
@@ -1523,7 +1575,7 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) =
               });
             }}
           >
-            <Plus className="w-4 h-4 mr-1" /> Add Priority
+            <Plus className="w-4 h-4 mr-1" /> Add Strategy
           </Button>
         </div>
       </CardContent>
