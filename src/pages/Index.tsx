@@ -123,20 +123,24 @@ const Index = () => {
   return (
     <AccountDataProvider>
       <div className="min-h-screen gradient-hero relative overflow-y-auto">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
-        </div>
+        {/* Background decorations - hidden during export */}
+        {!isExporting && (
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
+          </div>
+        )}
 
+        {/* Slide container - sized for export when exporting */}
         <div 
           ref={slideContainerRef}
-          className="relative z-10 animate-fade-in" 
+          className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'}`}
           key={currentSlide}
           style={isExporting ? {
             width: '1920px',
             height: '1080px',
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
+            overflow: 'hidden',
+            background: 'linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)',
           } : undefined}
         >
           {currentSlideConfig.isForm ? (
