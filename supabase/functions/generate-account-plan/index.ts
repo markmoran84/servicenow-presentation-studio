@@ -172,7 +172,7 @@ Return ONLY valid JSON. No markdown. Every element must reflect institutional-qu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "openai/gpt-5.2",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
