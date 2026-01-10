@@ -212,12 +212,12 @@ Return ONLY valid JSON. No markdown. Every element must reflect institutional-qu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5.2",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.75,
+        temperature: 0.7,
       }),
     });
 

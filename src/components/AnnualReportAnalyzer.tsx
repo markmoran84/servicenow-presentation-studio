@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket, Zap } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type InputMode = "paste" | "pdf" | "url";
@@ -33,7 +33,7 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
   const [dataSourceInfo, setDataSourceInfo] = useState<DataSourceInfo | null>(null);
   const [isResyncing, setIsResyncing] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-  const [autoGenerate, setAutoGenerate] = useState(true);
+  const [autoGenerate, setAutoGenerate] = useState(false); // Default OFF - let user review first
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Generate the full plan using AI with provided extracted data
@@ -451,33 +451,14 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                One-Click AI Generation
-                <Badge variant="secondary" className="text-xs">Recommended</Badge>
+                AI-Powered Account Planning
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Upload an annual report → AI extracts all data → Automatically generates your full 23-slide account plan. No manual input required.
+                <strong>Step 1:</strong> Upload/paste content → AI extracts all data it can find<br/>
+                <strong>Step 2:</strong> Review tabs, add your own insights or amend as needed<br/>
+                <strong>Step 3:</strong> Click <span className="text-primary font-medium">Generate Plan</span> → AI fills any gaps and creates a cohesive 23-slide account plan
               </p>
             </div>
-          </div>
-          
-          {/* Auto-generate toggle */}
-          <div className="mt-3 flex items-center justify-between p-2 rounded bg-background/50">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Auto-generate full plan after analysis</span>
-            </div>
-            <button
-              onClick={() => setAutoGenerate(!autoGenerate)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                autoGenerate ? 'bg-primary' : 'bg-muted'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  autoGenerate ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
           </div>
         </div>
 
@@ -522,25 +503,15 @@ Example: Copy text from sections like:
                 className="gap-2"
                 size="lg"
               >
-                {isGeneratingPlan ? (
+                {isAnalyzing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating Plan...
-                  </>
-                ) : isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing Report...
-                  </>
-                ) : autoGenerate ? (
-                  <>
-                    <Rocket className="w-4 h-4" />
-                    Analyze & Generate Plan
+                    Extracting Data...
                   </>
                 ) : (
                   <>
                     <FileText className="w-4 h-4" />
-                    Analyze & Extract
+                    Extract & Populate Fields
                   </>
                 )}
               </Button>
@@ -568,12 +539,7 @@ Example: Copy text from sections like:
                 className="gap-2"
                 size="lg"
               >
-                {isGeneratingPlan ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating Plan...
-                  </>
-                ) : isFetching ? (
+                {isFetching ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Processing PDF...
@@ -581,17 +547,12 @@ Example: Copy text from sections like:
                 ) : isAnalyzing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : autoGenerate ? (
-                  <>
-                    <Rocket className="w-4 h-4" />
-                    Upload & Generate Plan
+                    Extracting Data...
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    Choose PDF File
+                    Upload & Extract Data
                   </>
                 )}
               </Button>
@@ -620,12 +581,7 @@ Example: Copy text from sections like:
               className="gap-2"
               size="lg"
             >
-              {isGeneratingPlan ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating Plan...
-                </>
-              ) : isFetching ? (
+              {isFetching ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Fetching...
@@ -633,17 +589,12 @@ Example: Copy text from sections like:
               ) : isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : autoGenerate ? (
-                <>
-                  <Rocket className="w-4 h-4" />
-                  Fetch & Generate Plan
+                  Extracting Data...
                 </>
               ) : (
                 <>
                   <Link className="w-4 h-4" />
-                  Fetch & Analyze
+                  Fetch & Extract Data
                 </>
               )}
             </Button>
@@ -655,7 +606,40 @@ Example: Copy text from sections like:
             <div className="flex items-center justify-between gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5" />
-                Data extracted and populated across multiple tabs! Review each tab to verify and refine.
+                Data extracted! Review all tabs, add your insights, then generate your plan.
+              </div>
+            </div>
+
+            {/* Generate Plan CTA - The main action after extraction */}
+            <div className="p-4 rounded-lg bg-gradient-to-r from-sn-green/20 to-primary/20 border border-sn-green/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="font-semibold text-foreground flex items-center gap-2">
+                    <Rocket className="w-4 h-4 text-sn-green" />
+                    Ready to Generate?
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    AI will create a full 23-slide plan, filling any gaps intelligently based on all your input.
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  onClick={() => handleGenerateFullPlan()}
+                  disabled={isGeneratingPlan}
+                  className="gap-2 bg-sn-green hover:bg-sn-green/90"
+                >
+                  {isGeneratingPlan ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating Plan...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Generate Full Plan
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
 
