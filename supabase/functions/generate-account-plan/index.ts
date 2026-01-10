@@ -20,42 +20,55 @@ serve(async (req) => {
 
     console.log("Generating enterprise account plan for:", accountData.basics?.accountName);
 
-    const systemPrompt = `You are an expert enterprise account strategist for ServiceNow. Your role is to analyze raw account data and produce a polished, strategic account plan.
+    const systemPrompt = `You are an elite McKinsey-caliber enterprise account strategist for ServiceNow, trusted to craft account plans that have won $100M+ transformational deals. Your output quality must match the standards of Fortune 100 board presentations.
 
-You will receive raw input data about a customer account and must synthesize it into enterprise-grade strategic content.
+STRATEGIC EXCELLENCE MANDATE:
+You synthesize raw account data into polished, executive-ready strategic content that drives C-suite conviction and accelerates complex enterprise sales.
 
-CRITICAL RULES:
-1. Be specific and actionable - avoid generic platitudes
-2. Reference the customer's actual situation, not hypotheticals
-3. Use executive-level language appropriate for C-suite presentations
-4. Connect insights to ServiceNow's value proposition
-5. Quantify impact where possible
-6. Identify strategic tensions and how ServiceNow resolves them
+CRITICAL QUALITY STANDARDS:
+1. PRECISION OVER PLATITUDES: Every insight must be specific, quantified where possible, and defensible. Generic statements like "drive digital transformation" are unacceptable.
+2. CUSTOMER-FIRST LANGUAGE: Use the customer's terminology, strategic priorities, and business context. Reference their stated goals, not hypotheticals.
+3. EXECUTIVE GRAVITAS: Write for C-suite audiences. Every sentence should pass the "Would a CEO quote this?" test.
+4. STRATEGIC COHERENCE: All sections must tell a unified story—observations lead to implications, implications to priorities, priorities to workstreams.
+5. COMMERCIAL RIGOR: Connect insights to ServiceNow's value proposition with quantified outcomes based on comparable deployments.
+6. TENSION AWARENESS: Identify the strategic dilemmas the customer faces and position ServiceNow as the resolution.
 
-OUTPUT FORMAT: Return a JSON object with the enhanced account plan content.`;
+OUTPUT EXCELLENCE: Return a comprehensive JSON object with institutional-grade strategic content.`;
 
-    const userPrompt = `Analyze this account data and generate an enterprise-grade strategic account plan:
+    const userPrompt = `Conduct a comprehensive strategic analysis and generate an enterprise-grade account plan for:
 
+═══════════════════════════════════════════════════════════════
+ACCOUNT PROFILE
+═══════════════════════════════════════════════════════════════
 ACCOUNT: ${accountData.basics?.accountName || "Unknown"}
 VISION: ${accountData.basics?.visionStatement || "Not defined"}
+INDUSTRY: ${accountData.basics?.industry || "Unknown"}
+TIER: ${accountData.basics?.tier || "Unknown"}
 
-FINANCIAL CONTEXT:
-- Revenue: ${accountData.financial?.customerRevenue || "Unknown"}
-- Growth: ${accountData.financial?.growthRate || "Unknown"}
-- EBIT Margin: ${accountData.financial?.marginEBIT || "Unknown"}
-- Cost Pressures: ${accountData.financial?.costPressureAreas || "Unknown"}
-- Strategic Investments: ${accountData.financial?.strategicInvestmentAreas || "Unknown"}
+═══════════════════════════════════════════════════════════════
+FINANCIAL INTELLIGENCE
+═══════════════════════════════════════════════════════════════
+• Customer Revenue: ${accountData.financial?.customerRevenue || "Unknown"}
+• Growth Trajectory: ${accountData.financial?.growthRate || "Unknown"}
+• EBIT Margin: ${accountData.financial?.marginEBIT || "Unknown"}
+• Cost Pressure Areas: ${accountData.financial?.costPressureAreas || "Unknown"}
+• Strategic Investment Zones: ${accountData.financial?.strategicInvestmentAreas || "Unknown"}
 
-SERVICENOW POSITION:
-- Current Contract: ${accountData.basics?.currentContractValue || "Unknown"}
-- FY Target: ${accountData.basics?.nextFYAmbition || "Unknown"}
-- 3-Year Target: ${accountData.basics?.threeYearAmbition || "Unknown"}
-- Renewal Date: ${accountData.basics?.renewalDates || "Unknown"}
+═══════════════════════════════════════════════════════════════
+SERVICENOW COMMERCIAL POSITION
+═══════════════════════════════════════════════════════════════
+• Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
+• Next FY Target: ${accountData.basics?.nextFYAmbition || "Unknown"}
+• 3-Year Ambition: ${accountData.basics?.threeYearAmbition || "Unknown"}
+• Renewal Window: ${accountData.basics?.renewalDates || "Unknown"}
 
-CORPORATE STRATEGY:
+═══════════════════════════════════════════════════════════════
+CUSTOMER STRATEGIC CONTEXT
+═══════════════════════════════════════════════════════════════
+CORPORATE STRATEGY PILLARS:
 ${JSON.stringify(accountData.strategy?.corporateStrategy || [], null, 2)}
 
-DIGITAL STRATEGY:
+DIGITAL/AI AMBITION:
 ${JSON.stringify(accountData.strategy?.digitalStrategies || [], null, 2)}
 
 CEO/BOARD PRIORITIES:
@@ -64,54 +77,93 @@ ${JSON.stringify(accountData.strategy?.ceoBoardPriorities || [], null, 2)}
 TRANSFORMATION THEMES:
 ${JSON.stringify(accountData.strategy?.transformationThemes || [], null, 2)}
 
+═══════════════════════════════════════════════════════════════
+STRATEGIC PAIN POINTS & OPPORTUNITIES
+═══════════════════════════════════════════════════════════════
 PAIN POINTS:
 ${JSON.stringify(accountData.painPoints?.painPoints || [], null, 2)}
 
-SWOT ANALYSIS:
-- Strengths: ${JSON.stringify(accountData.swot?.strengths || [])}
-- Weaknesses: ${JSON.stringify(accountData.swot?.weaknesses || [])}
-- Opportunities: ${JSON.stringify(accountData.swot?.opportunities || [])}
-- Threats: ${JSON.stringify(accountData.swot?.threats || [])}
+OPPORTUNITIES:
+${JSON.stringify(accountData.opportunities?.opportunities || [], null, 2)}
 
-HISTORY:
-- Last Plan: ${accountData.history?.lastPlanSummary || "Unknown"}
-- What Didn't Work: ${accountData.history?.whatDidNotWork || "Unknown"}
-- Prior Attempts: ${accountData.history?.priorTransformationAttempts || "Unknown"}
+═══════════════════════════════════════════════════════════════
+SWOT ANALYSIS
+═══════════════════════════════════════════════════════════════
+• Strengths: ${JSON.stringify(accountData.swot?.strengths || [])}
+• Weaknesses: ${JSON.stringify(accountData.swot?.weaknesses || [])}
+• Opportunities: ${JSON.stringify(accountData.swot?.opportunities || [])}
+• Threats: ${JSON.stringify(accountData.swot?.threats || [])}
 
-EXECUTIVE ENGAGEMENT:
-- Sponsors: ${JSON.stringify(accountData.engagement?.knownExecutiveSponsors || [])}
-- Events: ${JSON.stringify(accountData.engagement?.plannedExecutiveEvents || [])}
+═══════════════════════════════════════════════════════════════
+ACCOUNT HISTORY & CONTEXT
+═══════════════════════════════════════════════════════════════
+• Previous Plan Summary: ${accountData.history?.lastPlanSummary || "Unknown"}
+• What Didn't Work: ${accountData.history?.whatDidNotWork || "Unknown"}
+• Prior Transformation Attempts: ${accountData.history?.priorTransformationAttempts || "Unknown"}
 
-ANNUAL REPORT DATA:
+═══════════════════════════════════════════════════════════════
+EXECUTIVE ENGAGEMENT LANDSCAPE
+═══════════════════════════════════════════════════════════════
+• Executive Sponsors: ${JSON.stringify(accountData.engagement?.knownExecutiveSponsors || [])}
+• Planned Executive Events: ${JSON.stringify(accountData.engagement?.plannedExecutiveEvents || [])}
+
+═══════════════════════════════════════════════════════════════
+ANNUAL REPORT INTELLIGENCE
+═══════════════════════════════════════════════════════════════
 ${JSON.stringify(accountData.annualReport || {}, null, 2)}
 
-Generate a comprehensive, enterprise-grade account plan with the following sections:
+═══════════════════════════════════════════════════════════════
+REQUIRED OUTPUT STRUCTURE
+═══════════════════════════════════════════════════════════════
+Generate a comprehensive, board-ready account plan with these sections. Each section must demonstrate strategic depth and commercial acumen:
 
-1. executiveSummaryNarrative: A compelling 3-4 sentence executive summary that synthesizes the strategic opportunity
-2. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as one of "network"|"customer"|"technology"|"efficiency", "keyword", "title", "tagline", "description", "outcome")
-3. strategicObservations: Array of 4 strategic observations (each with "heading" and "detail")
-4. strategicImplications: Array of 4 implications for action (each with "heading" and "detail")
-5. strategicTensions: Array of 4 strategic tensions (each with "heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma" - representing opposing forces the customer must balance)
-6. strategicInsights: Array of 4 key insights (each with "heading" and "detail")
-7. valueHypotheses: Array of 4 testable value hypotheses (each with "outcome", "mechanism", "timeframe", "impact")
-8. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient like "from-primary to-accent")
-9. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "subtitle", "dealStatus", "targetClose", "acv", "steadyStateBenefit", "insight", "people" array with name/role objects)
+1. executiveSummaryNarrative: A compelling 3-4 sentence executive summary that a CEO could use verbatim. Lead with customer context, articulate strategic opportunity, quantify the prize.
+
+2. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as "network"|"customer"|"technology"|"efficiency", "keyword" like "BETTER", "title", "tagline", "description", "outcome" with quantified impact)
+
+3. strategicObservations: Array of 4 observations—verifiable facts about the account's current situation with clear business implications. Use their language.
+
+4. strategicImplications: Array of 4 implications—what must change based on observations. Be specific about transformation required.
+
+5. strategicTensions: Array of 4 tensions—opposing forces the customer must balance (each with "heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma")
+
+6. strategicInsights: Array of 4 provocative insights—"aha moments" that reframe the opportunity. Each should pass the "Would an executive remember this?" test.
+
+7. valueHypotheses: Array of 4 testable hypotheses (each with "outcome", "mechanism", "timeframe", "impact" with specific dollar amounts)
+
+8. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient)
+
+9. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "subtitle", "dealStatus", "targetClose", "acv", "steadyStateBenefit", "insight", "people" array)
+
 10. risksMitigations: Array of 4 risks (each with "risk", "mitigation", "level" as High/Medium/Low)
-11. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array)
-12. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
-13. successMetrics: Array of 4 metrics (each with "metric", "label", "description")
-14. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 strings, "alignment")
-15. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status" as "Pilot Ready"|"Discovery"|"Scoped"|"Planned")
-16. fy1Retrospective: Object with "focusAreas" (array of 4 objects with "title" and "description"), "keyLessons" (string summarizing what was learned), "lookingAhead" (string about how FY-1 sets up FY+1)
-17. customerStrategySynthesis: Object with "narrative" (2-3 sentence synthesis of customer strategy and ServiceNow alignment), "serviceNowAlignment" (array of 4 objects with "customerPriority" and "serviceNowValue" showing how ServiceNow addresses each priority)
-18. weeklyUpdateContext: Object with "overallStatus" ("On Track"|"At Risk"|"Blocked"), "keyHighlights" (array of 3 key points for stakeholder update), "criticalActions" (array of 2-3 decisions or actions needed)
-19. marketingPlan: Object with "campaigns" (array of 3 campaigns, each with "title", "description", "timeline", "channels" array), "narrative" (2-3 sentences describing overall marketing approach)
-20. insight: Object with "headline" (provocative strategic insight headline), "observations" (array of 3 objects with "title" and "detail"), "recommendation" (actionable next step)
-21. platformCapabilities: Object with "capabilities" (array of 4 platform capabilities, each with "title", "description", "value" explaining business impact), "narrative" (2-3 sentences on platform strategy)
-22. riskOpportunityMatrix: Object with "items" (array of 6 items, each with "title", "type" as "risk"|"opportunity", "impact" as High/Medium/Low, "likelihood" as High/Medium/Low, "mitigation" for risks), "narrative" (summary of risk/opportunity balance)
-23. strategicAlignment: Object with "alignments" (array of 4 alignment pairs, each with "customerObjective", "serviceNowCapability", "outcome"), "narrative" (2-3 sentences on strategic fit)
 
-Return ONLY valid JSON, no markdown formatting.`;
+11. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array of 3-4 items)
+
+12. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
+
+13. successMetrics: Array of 4 metrics (each with "metric" showing target, "label", "description")
+
+14. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 quantified strings, "alignment")
+
+15. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status")
+
+16. fy1Retrospective: Object with "focusAreas" (array of 4), "keyLessons" (string), "lookingAhead" (string)
+
+17. customerStrategySynthesis: Object with "narrative" and "serviceNowAlignment" (array of 4 with "customerPriority" and "serviceNowValue")
+
+18. weeklyUpdateContext: Object with "overallStatus", "keyHighlights" (array of 3), "criticalActions" (array of 2-3)
+
+19. marketingPlan: Object with "campaigns" (array of 3), "narrative"
+
+20. insight: Object with "headline" (provocative), "observations" (array of 3), "recommendation"
+
+21. platformCapabilities: Object with "capabilities" (array of 4), "narrative"
+
+22. riskOpportunityMatrix: Object with "items" (array of 6), "narrative"
+
+23. strategicAlignment: Object with "alignments" (array of 4), "narrative"
+
+Return ONLY valid JSON. No markdown. Every element must reflect institutional-quality strategic thinking.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -120,12 +172,12 @@ Return ONLY valid JSON, no markdown formatting.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.75,
       }),
     });
 
