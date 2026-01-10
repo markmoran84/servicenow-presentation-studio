@@ -152,7 +152,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-2 text-xs">
               <Lightbulb className="w-3 h-3" />
-              <span className="hidden sm:inline">Acc. Strategy</span>
+              <span className="hidden sm:inline">Priorities</span>
             </TabsTrigger>
             <TabsTrigger value="accountStrategy" className="gap-2 text-xs">
               <Zap className="w-3 h-3" />
@@ -1063,79 +1063,9 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
             </Card>
           </TabsContent>
 
-          {/* Section F - Opportunities */}
+          {/* Section F - Account Team Priorities */}
           <TabsContent value="opportunities" className="space-y-4">
-            <Card className="glass-card border-border/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-accent" />
-                  Account Strategy
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-secondary/30 border border-border/30 col-span-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-primary">Opportunities</span>
-                  </div>
-                  <div className="space-y-2">
-                    {data.opportunities.opportunities.map((opportunity, index) => (
-                      <Collapsible key={index}>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={opportunity.title}
-                            onChange={(e) => {
-                              const updated = [...data.opportunities.opportunities];
-                              updated[index] = { ...updated[index], title: e.target.value };
-                              updateData("opportunities", { opportunities: updated });
-                            }}
-                            placeholder={`Opportunity ${index + 1}`}
-                            className="flex-1"
-                          />
-                          <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
-                            <Plus className="w-4 h-4" />
-                          </CollapsibleTrigger>
-                          {data.opportunities.opportunities.length > 1 && (
-                            <button
-                              className="text-muted-foreground hover:text-destructive transition-colors"
-                              onClick={() => {
-                                const updated = data.opportunities.opportunities.filter((_, i) => i !== index);
-                                updateData("opportunities", { opportunities: updated });
-                              }}
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        <CollapsibleContent className="mt-2 pr-12">
-                          <Textarea
-                            value={opportunity.description}
-                            onChange={(e) => {
-                              const updated = [...data.opportunities.opportunities];
-                              updated[index] = { ...updated[index], description: e.target.value };
-                              updateData("opportunities", { opportunities: updated });
-                            }}
-                            placeholder="Exec-ready, outcome-focused description..."
-                            rows={2}
-                          />
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3"
-                    onClick={() => {
-                      updateData("opportunities", {
-                        opportunities: [...data.opportunities.opportunities, { title: "", description: "" }]
-                      });
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-1" /> Add Opportunity
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <AccountPrioritiesTab data={data} updateData={updateData} />
           </TabsContent>
 
           {/* Section G - Executive Engagement */}
@@ -1440,6 +1370,164 @@ const BusinessModelTab = ({ data, updateData, handleArrayInput }: BusinessModelT
         </CardContent>
       </Card>
     </>
+  );
+};
+
+// Account Priorities Tab Component
+interface AccountPrioritiesTabProps {
+  data: any;
+  updateData: (section: any, value: any) => void;
+}
+
+const AccountPrioritiesTab = ({ data, updateData }: AccountPrioritiesTabProps) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isImproving, setIsImproving] = useState(false);
+
+  const handleGeneratePriorities = async (mode: "generate" | "improve") => {
+    const setLoading = mode === "generate" ? setIsGenerating : setIsImproving;
+    setLoading(true);
+    
+    try {
+      toast.loading(mode === "generate" ? "Generating priorities with AI..." : "Improving priorities with AI...", { id: "gen-priorities" });
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-priorities", {
+        body: { accountData: data, mode }
+      });
+
+      if (error) throw error;
+      if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate priorities");
+
+      updateData("opportunities", { opportunities: responseData.priorities });
+      toast.success(mode === "generate" ? "Priorities generated!" : "Priorities improved!", { id: "gen-priorities" });
+    } catch (error) {
+      console.error("Priority generation error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate priorities", { id: "gen-priorities" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasPriorities = data.opportunities?.opportunities?.some((p: any) => p.title?.trim());
+
+  return (
+    <Card className="glass-card border-border/30">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="w-5 h-5 text-accent" />
+            Account Team Priorities
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleGeneratePriorities("generate")}
+              disabled={isGenerating || isImproving}
+              className="gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3 h-3" />
+                  Generate via AI
+                </>
+              )}
+            </Button>
+            {hasPriorities && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleGeneratePriorities("improve")}
+                disabled={isGenerating || isImproving}
+                className="gap-2"
+              >
+                {isImproving ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Improving...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3 h-3" />
+                    Improve Content
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          Strategic priorities for your account team - aligned with customer strategies and pain points
+        </p>
+      </CardHeader>
+      <CardContent className="grid grid-cols-1 gap-4">
+        <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-primary">Account Team Priorities</span>
+          </div>
+          <div className="space-y-2">
+            {data.opportunities.opportunities.map((priority: any, index: number) => (
+              <Collapsible key={index}>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={priority.title}
+                    onChange={(e) => {
+                      const updated = [...data.opportunities.opportunities];
+                      updated[index] = { ...updated[index], title: e.target.value };
+                      updateData("opportunities", { opportunities: updated });
+                    }}
+                    placeholder={`Priority ${index + 1}`}
+                    className="flex-1"
+                  />
+                  <CollapsibleTrigger className="text-muted-foreground hover:text-primary transition-colors">
+                    <Plus className="w-4 h-4" />
+                  </CollapsibleTrigger>
+                  {data.opportunities.opportunities.length > 1 && (
+                    <button
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      onClick={() => {
+                        const updated = data.opportunities.opportunities.filter((_: any, i: number) => i !== index);
+                        updateData("opportunities", { opportunities: updated });
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <CollapsibleContent className="mt-2 pr-12">
+                  <Textarea
+                    value={priority.description}
+                    onChange={(e) => {
+                      const updated = [...data.opportunities.opportunities];
+                      updated[index] = { ...updated[index], description: e.target.value };
+                      updateData("opportunities", { opportunities: updated });
+                    }}
+                    placeholder="Exec-ready, outcome-focused description..."
+                    rows={2}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => {
+              updateData("opportunities", {
+                opportunities: [...data.opportunities.opportunities, { title: "", description: "" }]
+              });
+            }}
+          >
+            <Plus className="w-4 h-4 mr-1" /> Add Priority
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
