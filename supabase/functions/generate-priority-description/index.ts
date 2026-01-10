@@ -22,54 +22,56 @@ Deno.serve(async (req) => {
 
 STRATEGY TITLE: "${priorityTitle}"
 
-ACCOUNT CONTEXT:
-- Account: ${accountData.basics?.accountName || "Enterprise Customer"}
-- Industry: ${accountData.basics?.industry || "Unknown"}
-- Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
-- FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
+═══════════════════════════════════════════════════════════════
+CRITICAL: USE THIS ACCOUNT CONTEXT TO INFORM YOUR RESPONSE
+═══════════════════════════════════════════════════════════════
 
-CUSTOMER PRIORITIES:
+ACCOUNT: ${accountData.basics?.accountName || "Enterprise Customer"}
+INDUSTRY: ${accountData.basics?.industry || "Unknown"}
+CURRENT ACV: ${accountData.basics?.currentContractValue || "Unknown"}
+FY AMBITION: ${accountData.basics?.nextFYAmbition || "Unknown"}
+
+CUSTOMER'S STATED CORPORATE STRATEGIES (use their language):
 ${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-CUSTOMER PAIN POINTS:
+CUSTOMER'S DIGITAL/AI STRATEGIES:
+${accountData.strategy?.digitalStrategies?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+
+CEO/BOARD PRIORITIES:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+
+CUSTOMER'S PAIN POINTS:
 ${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
 
-ANNUAL REPORT INTELLIGENCE:
+ANNUAL REPORT INTELLIGENCE (key insights to reference):
 ${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
 
-═══════════════════════════════════════════════════════════════
-EXEMPLARY DESCRIPTIONS (match this caliber exactly):
-═══════════════════════════════════════════════════════════════
-
-1. "Building on the FY25 commercial evaluation to deliver a scalable, orchestrated customer service and commercial execution foundation that reduces cost-to-serve and enables growth."
-
-2. "Operationalising AI beyond isolated use cases to improve execution speed, decision quality, and productivity across customer, commercial, and operational workflows."
-
-3. "FY26 focuses on broadening platform adoption beyond IT, using customer and service workflows as the entry point to enable enterprise-wide workflow orchestration aligned to ${accountData.basics?.accountName || "the customer"}'s integrator strategy."
-
-4. "Evolving the relationship from execution recovery toward long-term strategic partner underpinning ${accountData.basics?.accountName || "the customer"}'s digital, AI, and operating model ambitions."
+${accountData.annualReport?.strategicPillars ? `STRATEGIC PILLARS FROM ANNUAL REPORT:
+${accountData.annualReport.strategicPillars.map((p: any) => `• ${p.title}: ${p.description}`).join("\n")}` : ""}
 
 ═══════════════════════════════════════════════════════════════
-MANDATORY REQUIREMENTS:
+OUTPUT REQUIREMENTS
 ═══════════════════════════════════════════════════════════════
 
 FORMAT: Single sentence, 25-40 words. No bullet points. No headers.
 
-STRUCTURE: [Action verb] + [specific approach/mechanism] + [to achieve] + [quantified/specific outcomes] + [aligned to customer context]
+STRUCTURE PATTERN: [Action verb] + [specific approach derived from account context] + [to achieve] + [outcomes aligned to customer's stated priorities]
 
-ACTION VERBS TO USE: Building, Delivering, Operationalising, Expanding, Evolving, Accelerating, Orchestrating, Transforming, Enabling, Maturing
+STRONG ACTION VERBS: Building, Delivering, Operationalising, Expanding, Evolving, Accelerating, Orchestrating, Transforming, Enabling, Maturing
 
-MUST INCLUDE:
-• Reference to customer's actual priorities, language, or stated strategy
-• Specific, measurable outcomes (cost reduction, speed improvement, growth enablement)
-• Clear "from → to" transformation or scope expansion
-• Connection to FY timing or prior work where relevant
+CRITICAL REQUIREMENTS:
+• MUST reference the customer's actual stated strategies, priorities, or annual report themes - use THEIR terminology
+• MUST connect to specific, measurable outcomes relevant to THIS customer's industry and goals
+• MUST show clear "from → to" transformation or scope expansion
+• Reference FY timing, prior work, or customer's transformation journey where context allows
 
 MUST AVOID:
-• Generic phrases ("drive digital transformation", "leverage technology")
-• Vague outcomes ("improve efficiency", "enhance capabilities")  
-• ServiceNow product names unless contextually essential
-• Fluffy adjectives without substance
+• Generic phrases not grounded in the account context
+• Vague outcomes without specificity to this customer
+• ServiceNow product names unless essential
+• Any content that could apply to any company - be SPECIFIC to ${accountData.basics?.accountName || "this customer"}
+
+The description must sound like it was written by someone who deeply understands ${accountData.basics?.accountName || "this customer"}'s business, read their annual report, and knows their strategic priorities.
 
 Return ONLY the description. No quotes. No explanation. One sentence.`;
 
