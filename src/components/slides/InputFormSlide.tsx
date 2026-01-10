@@ -1556,6 +1556,7 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
     const newBet = {
       title: "",
       subtitle: "",
+      sponsor: "",
       dealStatus: "Pipeline" as const,
       targetClose: "",
       netNewACV: "",
@@ -1782,6 +1783,14 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
                     value={bet.subtitle}
                     onChange={(e) => updateBigBet(betIndex, "subtitle", e.target.value)}
                     placeholder="e.g., CRM Modernisation & Service Cloud"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Executive Sponsor</label>
+                  <Input
+                    value={bet.sponsor || ""}
+                    onChange={(e) => updateBigBet(betIndex, "sponsor", e.target.value)}
+                    placeholder="e.g., John Smith, CIO"
                   />
                 </div>
                 <div>
