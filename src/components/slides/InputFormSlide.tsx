@@ -385,7 +385,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   <div className="flex items-center justify-between mb-4">
                     <label className="text-sm font-medium text-foreground flex items-center gap-2">
                       <Users className="w-4 h-4 text-primary" />
-                      Extended Account Team (Team Slide - supports 12+ members)
+                      Extended Account Team (Team Slide - supports up to 18 members)
                     </label>
                     <Button
                       variant="outline"
@@ -399,7 +399,8 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                           phone: "", 
                           responsibilities: [], 
                           subTeams: [],
-                          region: "Global" 
+                          region: "Global",
+                          roleType: "Building the PoV" as const
                         }];
                         updateData("basics", { extendedTeam: newMembers });
                       }}
@@ -427,7 +428,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                             Remove
                           </Button>
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-5 gap-2">
                           <Input
                             placeholder="First Name"
                             value={member.firstName}
@@ -455,6 +456,24 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                               updateData("basics", { extendedTeam: newMembers });
                             }}
                           />
+                          <Select
+                            value={member.roleType || "Building the PoV"}
+                            onValueChange={(value) => {
+                              const newMembers = [...data.basics.extendedTeam];
+                              newMembers[index] = { ...newMembers[index], roleType: value as any };
+                              updateData("basics", { extendedTeam: newMembers });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Role Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Guiding the Team">Guiding the Team</SelectItem>
+                              <SelectItem value="Building the PoV">Building the PoV</SelectItem>
+                              <SelectItem value="Supporting the Team">Supporting the Team</SelectItem>
+                              <SelectItem value="Mapping the Value">Mapping the Value</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Select
                             value={member.region || "Global"}
                             onValueChange={(value) => {

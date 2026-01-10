@@ -1,151 +1,158 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { SectionHeader } from "@/components/SectionHeader";
-import { Mail, Phone, Users, Globe, Building2 } from "lucide-react";
+import { Users } from "lucide-react";
+
+type RoleType = "Guiding the Team" | "Building the PoV" | "Supporting the Team" | "Mapping the Value";
+
+const ROLE_TYPE_ORDER: RoleType[] = [
+  "Guiding the Team",
+  "Building the PoV", 
+  "Supporting the Team",
+  "Mapping the Value"
+];
+
+const getRoleTypeColor = (roleType: RoleType) => {
+  const colors: Record<RoleType, { border: string; text: string; bg: string }> = {
+    "Guiding the Team": { border: "border-cyan-500/50", text: "text-cyan-400", bg: "bg-cyan-500/10" },
+    "Building the PoV": { border: "border-blue-500/50", text: "text-blue-400", bg: "bg-blue-500/10" },
+    "Supporting the Team": { border: "border-emerald-500/50", text: "text-emerald-400", bg: "bg-emerald-500/10" },
+    "Mapping the Value": { border: "border-amber-500/50", text: "text-amber-400", bg: "bg-amber-500/10" },
+  };
+  return colors[roleType] || colors["Building the PoV"];
+};
 
 export const AccountTeamSlide = () => {
   const { data } = useAccountData();
   const extendedTeam = data.basics.extendedTeam || [];
 
-  // Group team members by region
-  const teamByRegion = extendedTeam.reduce((acc, member) => {
-    const region = member.region || "Global";
-    if (!acc[region]) acc[region] = [];
-    acc[region].push(member);
+  // Group team members by role type
+  const teamByRoleType = extendedTeam.reduce((acc, member) => {
+    const roleType = (member.roleType || "Building the PoV") as RoleType;
+    if (!acc[roleType]) acc[roleType] = [];
+    acc[roleType].push(member);
     return acc;
-  }, {} as Record<string, typeof extendedTeam>);
+  }, {} as Record<RoleType, typeof extendedTeam>);
 
-  const regionOrder = ["Global", "EMEA", "NA", "APAC", "LATAM"];
-  const sortedRegions = Object.keys(teamByRegion).sort(
-    (a, b) => regionOrder.indexOf(a) - regionOrder.indexOf(b)
-  );
+  // Filter to only show role types that have members
+  const activeRoleTypes = ROLE_TYPE_ORDER.filter(rt => teamByRoleType[rt]?.length > 0);
 
-  const getRegionColor = (region: string) => {
-    const colors: Record<string, string> = {
-      Global: "from-primary/20 to-primary/5 border-primary/30",
-      EMEA: "from-blue-500/20 to-blue-500/5 border-blue-500/30",
-      NA: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/30",
-      APAC: "from-amber-500/20 to-amber-500/5 border-amber-500/30",
-      LATAM: "from-purple-500/20 to-purple-500/5 border-purple-500/30",
-    };
-    return colors[region] || colors.Global;
+  // Calculate grid layout based on number of members
+  const totalMembers = extendedTeam.length;
+  const getGridCols = () => {
+    if (totalMembers <= 6) return "grid-cols-3";
+    if (totalMembers <= 9) return "grid-cols-3";
+    if (totalMembers <= 12) return "grid-cols-4";
+    if (totalMembers <= 16) return "grid-cols-4";
+    return "grid-cols-5"; // Up to 18
   };
 
-  const getRegionBadgeColor = (region: string) => {
-    const colors: Record<string, string> = {
-      Global: "bg-primary/20 text-primary",
-      EMEA: "bg-blue-500/20 text-blue-400",
-      NA: "bg-emerald-500/20 text-emerald-400",
-      APAC: "bg-amber-500/20 text-amber-400",
-      LATAM: "bg-purple-500/20 text-purple-400",
-    };
-    return colors[region] || colors.Global;
-  };
+  // Determine if we should use a condensed layout
+  const isCondensed = totalMembers > 12;
 
   return (
-    <div className="px-8 pt-6 pb-40">
-      <div className="flex items-center gap-4 mb-6 opacity-0 animate-fade-in">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30">
-          <Users className="w-8 h-8 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-4xl font-bold text-foreground">
-            Global Extended Account Team
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Dedicated team of {extendedTeam.length} resources supporting {data.basics.accountName}
-          </p>
-        </div>
-      </div>
-
+    <div className="px-8 pt-6 pb-40 h-full">
       {extendedTeam.length === 0 ? (
-        <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Team Members Added</h3>
-          <p className="text-sm text-muted-foreground/70">
-            Add extended team members in the Input Form to populate this slide.
-          </p>
+        <div className="flex items-center justify-center h-full">
+          <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <Users className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Team Members Added</h3>
+            <p className="text-sm text-muted-foreground/70">
+              Add extended team members in the Input Form to populate this slide.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* All team members in a responsive grid */}
-          <div className="glass-card rounded-2xl p-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-              {extendedTeam.map((member, index) => (
-                <div
-                  key={member.email || index}
-                  className={`relative p-3 rounded-lg bg-gradient-to-br ${getRegionColor(member.region || "Global")} border backdrop-blur-sm opacity-0 animate-fade-in transition-all hover:scale-[1.02] hover:shadow-lg`}
-                  style={{ animationDelay: `${150 + index * 30}ms` }}
+        <div className="flex flex-col h-full">
+          {/* Main content area - grid with role type columns */}
+          <div className="flex-1 flex gap-4 min-h-0">
+            {activeRoleTypes.map((roleType, roleIndex) => {
+              const members = teamByRoleType[roleType] || [];
+              const colors = getRoleTypeColor(roleType);
+              
+              // For "Mapping the Value" - render as a horizontal bar at bottom
+              if (roleType === "Mapping the Value") return null;
+              
+              return (
+                <div 
+                  key={roleType}
+                  className="flex-1 flex flex-col opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${roleIndex * 100}ms` }}
                 >
-                  {/* Region Badge */}
-                  <div className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium ${getRegionBadgeColor(member.region || "Global")}`}>
-                    {member.region || "Global"}
+                  {/* Role Type Header */}
+                  <div className={`mb-4 px-4 py-2 rounded-lg ${colors.bg} ${colors.border} border text-center`}>
+                    <h3 className={`text-sm font-semibold ${colors.text}`}>{roleType}</h3>
                   </div>
-
-                  {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-primary/40 flex items-center justify-center mb-2">
-                    <span className="text-sm font-bold text-primary">
-                      {member.firstName.charAt(0)}{member.lastName.charAt(0)}
-                    </span>
+                  
+                  {/* Members Grid */}
+                  <div className={`flex-1 grid ${isCondensed ? 'grid-cols-2' : 'grid-cols-2'} gap-3 auto-rows-max content-start`}>
+                    {members.map((member, memberIndex) => (
+                      <div
+                        key={member.email || memberIndex}
+                        className="flex flex-col items-center text-center opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${(roleIndex * 100) + (memberIndex * 50)}ms` }}
+                      >
+                        {/* Avatar Circle */}
+                        <div className={`w-12 h-12 rounded-full ${colors.border} border-2 flex items-center justify-center mb-2 ${colors.bg}`}>
+                          <span className={`text-sm font-bold ${colors.text}`}>
+                            {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                          </span>
+                        </div>
+                        
+                        {/* Name */}
+                        <h4 className={`font-semibold text-xs ${colors.text} leading-tight`}>
+                          {member.firstName} {member.lastName}
+                        </h4>
+                        
+                        {/* Title */}
+                        <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2 max-w-[120px]">
+                          {member.title}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* Name & Title */}
-                  <h4 className="font-semibold text-foreground text-xs leading-tight">
-                    {member.firstName} {member.lastName}
-                  </h4>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
-                    {member.title}
-                  </p>
-
-                  {/* Contact Info */}
-                  <div className="mt-2 space-y-0.5">
-                    <a
-                      href={`mailto:${member.email}`}
-                      className="text-primary hover:text-primary/80 text-[9px] flex items-center gap-1 truncate transition-colors"
-                    >
-                      <Mail className="w-2.5 h-2.5 flex-shrink-0" />
-                      <span className="truncate">{member.email.split("@")[0]}</span>
-                    </a>
-                  </div>
-
-                  {/* Sub Teams - compact display */}
-                  {member.subTeams && member.subTeams.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-0.5">
-                      {member.subTeams.slice(0, 1).map((team, idx) => (
-                        <span
-                          key={idx}
-                          className="px-1 py-0.5 rounded bg-secondary/50 text-[7px] text-muted-foreground truncate max-w-full"
-                        >
-                          {team}
-                        </span>
-                      ))}
-                      {member.subTeams.length > 1 && (
-                        <span className="text-[7px] text-muted-foreground/60">+{member.subTeams.length - 1}</span>
-                      )}
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* Region Summary */}
-          <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in" style={{ animationDelay: `${200 + extendedTeam.length * 50}ms` }}>
-            {sortedRegions.map((region) => (
-              <div
-                key={region}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r ${getRegionColor(region)} border`}
-              >
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">{region}</span>
-                <span className="text-xs text-muted-foreground">({teamByRegion[region].length})</span>
+          {/* Mapping the Value - Bottom Section */}
+          {teamByRoleType["Mapping the Value"]?.length > 0 && (
+            <div className="mt-4 opacity-0 animate-fade-in" style={{ animationDelay: `${activeRoleTypes.length * 100}ms` }}>
+              <div className="relative">
+                {/* Header Bar */}
+                <div className={`mb-3 px-4 py-2 rounded-lg ${getRoleTypeColor("Mapping the Value").bg} ${getRoleTypeColor("Mapping the Value").border} border text-center inline-block`}>
+                  <h3 className={`text-sm font-semibold ${getRoleTypeColor("Mapping the Value").text}`}>Mapping the Value</h3>
+                </div>
+                
+                {/* Members in a horizontal row */}
+                <div className="flex flex-wrap gap-4 justify-start">
+                  {teamByRoleType["Mapping the Value"].map((member, memberIndex) => (
+                    <div
+                      key={member.email || memberIndex}
+                      className="flex flex-col items-center text-center opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${(activeRoleTypes.length * 100) + (memberIndex * 50)}ms` }}
+                    >
+                      {/* Avatar Circle */}
+                      <div className={`w-12 h-12 rounded-full ${getRoleTypeColor("Mapping the Value").border} border-2 flex items-center justify-center mb-2 ${getRoleTypeColor("Mapping the Value").bg}`}>
+                        <span className={`text-sm font-bold ${getRoleTypeColor("Mapping the Value").text}`}>
+                          {member.firstName.charAt(0)}{member.lastName.charAt(0)}
+                        </span>
+                      </div>
+                      
+                      {/* Name */}
+                      <h4 className={`font-semibold text-xs ${getRoleTypeColor("Mapping the Value").text} leading-tight`}>
+                        {member.firstName} {member.lastName}
+                      </h4>
+                      
+                      {/* Title */}
+                      <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2 max-w-[120px]">
+                        {member.title}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/30 border border-border/30">
-              <Building2 className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Total</span>
-              <span className="text-xs text-muted-foreground">({extendedTeam.length} members)</span>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
