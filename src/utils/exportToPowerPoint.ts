@@ -507,53 +507,154 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 6: FY-1 RETROSPECTIVE
+// SLIDE 6: FY-1 RETROSPECTIVE (matches web FY1RetrospectiveSlide exactly)
 // =============================================================================
 const createRetrospectiveSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
   setBackground(slide);
   addTitle(slide, "FY-1 Retrospective", "What Actually Happened — Honest Assessment");
 
-  const topY = 0.9;
-  const colW = (CONTENT_W - 0.15) / 2;
+  const { history, generatedPlan, basics } = data;
+  const focusAreas = generatedPlan?.fy1Retrospective?.focusAreas || [];
+  const keyLessons = generatedPlan?.fy1Retrospective?.keyLessons || history.lastPlanSummary || "";
+  const lookingAhead = generatedPlan?.fy1Retrospective?.lookingAhead || "";
 
-  addCard(pptx, slide, MX, topY, colW, 1.8);
-  slide.addText("Prior Plan Summary", {
-    x: MX + 0.15, y: topY + 0.1, w: colW - 0.3, h: 0.22,
-    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
-  });
-  slide.addText(`${data.history.lastPlanDate || "—"} • ${data.history.plannerName || "—"}`, {
-    x: MX + 0.15, y: topY + 0.35, w: colW - 0.3, h: 0.16,
-    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-  });
-  slide.addText(truncate(data.history.lastPlanSummary, 250) || "No prior plan summary available.", {
-    x: MX + 0.15, y: topY + 0.55, w: colW - 0.3, h: 1.15,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
-  });
+  const topY = 0.85;
+  const cardH = 0.45;
+  const halfW = (CONTENT_W - 0.12) / 2;
 
-  const rx = MX + colW + 0.15;
-  addCard(pptx, slide, rx, topY, colW, 1.8);
-  addLeftBorder(pptx, slide, rx, topY, 1.8, C.danger);
-  slide.addText("What Did Not Work", {
-    x: rx + 0.2, y: topY + 0.1, w: colW - 0.35, h: 0.22,
-    fontSize: HEADING_SIZE, bold: true, color: C.white, fontFace: FONT_HEADING,
+  // Top row - Date and Planner info cards
+  addCard(pptx, slide, MX, topY, halfW, cardH);
+  slide.addText("Previous Account Plan Date:", {
+    x: MX + 0.12, y: topY + 0.1, w: 2.2, h: 0.25,
+    fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
   });
-  slide.addText(truncate(data.history.whatDidNotWork, 200) || "No information available.", {
-    x: rx + 0.2, y: topY + 0.38, w: colW - 0.35, h: 1.3,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
+  slide.addText(history.lastPlanDate || "Not specified", {
+    x: MX + 2.4, y: topY + 0.1, w: halfW - 2.6, h: 0.25,
+    fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "right",
   });
 
-  const lessonY = topY + 2.0;
-  addCard(pptx, slide, MX, lessonY, CONTENT_W, 0.65, { accentBorder: C.primary });
-  slide.addText("Key Lessons Learned", {
-    x: MX + 0.12, y: lessonY + 0.08, w: CONTENT_W - 0.24, h: 0.18,
-    fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+  addCard(pptx, slide, MX + halfW + 0.12, topY, halfW, cardH);
+  slide.addText("Previous Account Planner:", {
+    x: MX + halfW + 0.24, y: topY + 0.1, w: 2.2, h: 0.25,
+    fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+  const plannerInfo = history.plannerName ? 
+    (history.plannerRole ? `${history.plannerName} (${history.plannerRole})` : history.plannerName) : 
+    "Not specified";
+  slide.addText(plannerInfo, {
+    x: MX + halfW + 2.6, y: topY + 0.1, w: halfW - 2.5, h: 0.25,
+    fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, align: "right",
+  });
+
+  // Main content row
+  const mainY = topY + cardH + 0.12;
+  const mainH = 1.65;
+
+  // Left column - What Happened
+  addCard(pptx, slide, MX, mainY, halfW, mainH);
+  slide.addText("What Happened", {
+    x: MX + 0.15, y: mainY + 0.1, w: halfW - 0.3, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
   });
   
-  const lessonsText = data.generatedPlan?.fy1Retrospective?.keyLessons || "";
-  slide.addText(lessonsText || "Understanding past challenges enables strategic positioning.", {
-    x: MX + 0.12, y: lessonY + 0.3, w: CONTENT_W - 0.24, h: 0.3,
-    fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY,
+  if (history.lastPlanSummary) {
+    slide.addText(truncate(history.lastPlanSummary, 200), {
+      x: MX + 0.15, y: mainY + 0.35, w: halfW - 0.3, h: 0.7,
+      fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
+    });
+  } else {
+    slide.addText("No summary provided", {
+      x: MX + 0.15, y: mainY + 0.35, w: halfW - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, italic: true,
+    });
+  }
+
+  // Challenges section within left card
+  if (history.whatDidNotWork) {
+    const chalY = mainY + 1.1;
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: MX + 0.12, y: chalY, w: halfW - 0.24, h: 0.48,
+      fill: { color: C.danger, transparency: 90 },
+      line: { color: C.danger, width: 0.5, transparency: 70 },
+      rectRadius: 0.05,
+    });
+    slide.addText("Challenges Encountered", {
+      x: MX + 0.18, y: chalY + 0.05, w: halfW - 0.36, h: 0.15,
+      fontSize: TINY_SIZE, bold: true, color: C.danger, fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(history.whatDidNotWork, 100), {
+      x: MX + 0.18, y: chalY + 0.22, w: halfW - 0.36, h: 0.22,
+      fontSize: TINY_SIZE, color: C.white, fontFace: FONT_BODY,
+    });
+  }
+
+  // Right column - What FY-1 Focused On
+  const rx = MX + halfW + 0.12;
+  addCard(pptx, slide, rx, mainY, halfW, mainH);
+  slide.addText("What FY-1 Focused On", {
+    x: rx + 0.15, y: mainY + 0.1, w: halfW - 0.6, h: 0.22,
+    fontSize: HEADING_SIZE - 2, bold: true, color: C.white, fontFace: FONT_HEADING,
+  });
+  addBadge(slide, rx + halfW - 1.6, mainY + 0.12, "Previous Strategy", C.primary);
+
+  if (focusAreas.length > 0) {
+    focusAreas.slice(0, 4).forEach((area, i) => {
+      const ay = mainY + 0.4 + i * 0.3;
+      slide.addText(area.title || "", {
+        x: rx + 0.15, y: ay, w: halfW - 0.3, h: 0.15,
+        fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_BODY,
+      });
+      slide.addText(truncate(area.description, 60) || "", {
+        x: rx + 0.15, y: ay + 0.14, w: halfW - 0.3, h: 0.14,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
+  } else {
+    slide.addText("Generate an AI plan to see focus area analysis", {
+      x: rx + 0.15, y: mainY + 0.4, w: halfW - 0.3, h: 0.3,
+      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY, italic: true,
+    });
+  }
+
+  // Bottom row - Key Lessons & Looking Ahead
+  const bottomY = mainY + mainH + 0.12;
+  const bottomH = 0.7;
+
+  if (keyLessons) {
+    addCard(pptx, slide, MX, bottomY, halfW, bottomH, { accentBorder: C.warning });
+    slide.addText("Key Lessons Learned", {
+      x: MX + 0.15, y: bottomY + 0.08, w: halfW - 0.3, h: 0.18,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(keyLessons, 150), {
+      x: MX + 0.15, y: bottomY + 0.28, w: halfW - 0.3, h: 0.35,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+    });
+  }
+
+  if (lookingAhead) {
+    addCard(pptx, slide, rx, bottomY, halfW, bottomH, { accentBorder: C.primary });
+    slide.addText(`Looking Ahead${basics.accountName ? ` to ${basics.accountName}` : ""}`, {
+      x: rx + 0.15, y: bottomY + 0.08, w: halfW - 0.3, h: 0.18,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(lookingAhead, 150), {
+      x: rx + 0.15, y: bottomY + 0.28, w: halfW - 0.3, h: 0.35,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY, valign: "top",
+    });
+  }
+
+  // Status bar
+  const statusY = bottomY + bottomH + 0.1;
+  addCard(pptx, slide, MX, statusY, CONTENT_W, 0.32);
+  slide.addText("Historical context for strategic planning", {
+    x: MX + 0.15, y: statusY + 0.06, w: CONTENT_W / 2, h: 0.2,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+  slide.addText("✓ Context Loaded", {
+    x: MX + CONTENT_W / 2, y: statusY + 0.06, w: CONTENT_W / 2 - 0.3, h: 0.2,
+    fontSize: TINY_SIZE, color: C.primary, fontFace: FONT_BODY, align: "right",
   });
 
   return slide;
