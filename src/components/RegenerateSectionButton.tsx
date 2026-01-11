@@ -115,8 +115,10 @@ const sectionMeta: Record<
 
 export function RegenerateSectionButton({
   section,
+  label,
 }: {
   section: RegeneratablePlanSection;
+  label?: string;
 }) {
   const { data, patchGeneratedPlan } = useAccountData();
   const [isLoading, setIsLoading] = useState(false);
@@ -129,6 +131,7 @@ export function RegenerateSectionButton({
   }, [data.generatedPlan, meta.planKeys]);
 
   const actionVerb = hasSection ? "Regenerate" : "Generate";
+  const buttonLabel = label || (hasSection ? `Regenerate` : `Generate`);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -177,7 +180,7 @@ export function RegenerateSectionButton({
       disabled={isLoading}
     >
       <RefreshCw className={isLoading ? "w-3 h-3 animate-spin" : "w-3 h-3"} />
-      {actionVerb}
+      {buttonLabel}
     </Button>
   );
 }
