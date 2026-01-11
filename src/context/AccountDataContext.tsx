@@ -196,7 +196,11 @@ export interface AIGeneratedPlan {
   // FY-1 Retrospective AI-generated content
   fy1Retrospective?: { focusAreas: { title: string; description: string }[]; keyLessons: string; lookingAhead: string };
   // Customer Strategy AI synthesis
-  customerStrategySynthesis?: { narrative: string; serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] };
+  customerStrategySynthesis?: { 
+    strategicPillars?: { headline: string; subtitle: string; description: string; icon: string }[];
+    narrative: string; 
+    serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] 
+  };
   // Weekly Update dynamic content
   weeklyUpdateContext?: { overallStatus: string; keyHighlights: string[]; criticalActions: string[] };
   // Marketing Plan AI-generated content
