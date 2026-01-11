@@ -1,9 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, createErrorResponse, validateContent, validateAccountContext, sanitizeForAI } from "../_shared/validation.ts";
 
 // Comprehensive web research for multiple data types
 async function searchCompanyInfo(companyName: string, searchType: string): Promise<string> {
@@ -14,17 +10,20 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
   }
 
   try {
+    // Sanitize company name for search
+    const sanitizedName = companyName.replace(/[^\w\s-]/g, '').substring(0, 100);
+    
     const queries: Record<string, string> = {
-      financial: `${companyName} annual report 2024 2025 revenue EBIT financial results earnings`,
-      strategy: `${companyName} strategic priorities 2024 2025 CEO vision transformation digital`,
-      leadership: `${companyName} CEO CIO CTO executive team leadership priorities investor day`,
-      competitors: `${companyName} competitors market share industry landscape competitive analysis`,
-      challenges: `${companyName} challenges risks pain points issues obstacles investor concerns`,
-      technology: `${companyName} technology stack digital transformation AI automation IT strategy`,
+      financial: `${sanitizedName} annual report 2024 2025 revenue EBIT financial results earnings`,
+      strategy: `${sanitizedName} strategic priorities 2024 2025 CEO vision transformation digital`,
+      leadership: `${sanitizedName} CEO CIO CTO executive team leadership priorities investor day`,
+      competitors: `${sanitizedName} competitors market share industry landscape competitive analysis`,
+      challenges: `${sanitizedName} challenges risks pain points issues obstacles investor concerns`,
+      technology: `${sanitizedName} technology stack digital transformation AI automation IT strategy`,
     };
 
-    const query = queries[searchType] || `${companyName} business overview`;
-    console.log(`Searching ${searchType}: ${query}`);
+    const query = queries[searchType] || `${sanitizedName} business overview`;
+    console.log(`Searching ${searchType}`);
 
     const response = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
@@ -40,7 +39,7 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
     });
 
     if (!response.ok) {
-      console.error("Firecrawl search failed:", response.status);
+      console.error("Search failed:", response.status);
       return "";
     }
 
@@ -51,10 +50,10 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
       .join("\n\n")
       .slice(0, 8000);
 
-    console.log(`Found ${results.length} results for ${searchType}, length: ${content.length}`);
+    console.log(`Found ${results.length} results for ${searchType}`);
     return content;
   } catch (error) {
-    console.error(`Error searching ${searchType}:`, error);
+    console.error(`Search error for ${searchType}`);
     return "";
   }
 }
@@ -86,49 +85,62 @@ serve(async (req) => {
   }
 
   try {
-    const { content, accountContext } = await req.json();
-
-    if (!content || content.trim().length < 100) {
-      return new Response(
-        JSON.stringify({ error: "Please provide sufficient annual report content (at least 100 characters)" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const requestData = await req.json();
+    
+    // Validate content input
+    let validatedContent: string;
+    try {
+      validatedContent = validateContent(requestData.content, 100, 500000);
+    } catch (validationError) {
+      return createErrorResponse(400, validationError instanceof Error ? validationError.message : 'Invalid content');
+    }
+    
+    // Validate account context
+    let accountContext: Record<string, unknown> | null;
+    try {
+      accountContext = validateAccountContext(requestData.accountContext);
+    } catch {
+      accountContext = null;
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY not configured");
+      return createErrorResponse(503, "Service temporarily unavailable");
     }
 
     // Build context from account data if provided
     let accountContextStr = "";
     if (accountContext) {
-      const { basics, history, financial, engagement } = accountContext;
+      const basics = (accountContext as any).basics || {};
+      const history = (accountContext as any).history || {};
+      const engagement = (accountContext as any).engagement || {};
+      
       accountContextStr = `
 ═══════════════════════════════════════════════════════════════
 ACCOUNT INTELLIGENCE (Pre-populated by Account Executive)
 ═══════════════════════════════════════════════════════════════
 ACCOUNT PROFILE:
-• Customer: ${basics?.accountName || "Unknown"} 
-• Industry: ${basics?.industry || "Unknown"} | Region: ${basics?.region || "Unknown"}
-• Strategic Tier: ${basics?.tier || "Unknown"} | Employees: ${basics?.numberOfEmployees || "Unknown"}
+• Customer: ${basics.accountName || "Unknown"} 
+• Industry: ${basics.industry || "Unknown"} | Region: ${basics.region || "Unknown"}
+• Strategic Tier: ${basics.tier || "Unknown"} | Employees: ${basics.numberOfEmployees || "Unknown"}
 
 COMMERCIAL POSITION:
-• Current ACV: ${basics?.currentContractValue || "Unknown"}
-• Next FY Target: ${basics?.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics?.threeYearAmbition || "Unknown"}
-• Renewal Window: ${basics?.renewalDates || "Unknown"}
-• Incumbent Competitors: ${basics?.keyIncumbents || "Unknown"}
+• Current ACV: ${basics.currentContractValue || "Unknown"}
+• Next FY Target: ${basics.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics.threeYearAmbition || "Unknown"}
+• Renewal Window: ${basics.renewalDates || "Unknown"}
+• Incumbent Competitors: ${basics.keyIncumbents || "Unknown"}
 
 RELATIONSHIP HISTORY:
-• Last Account Plan: ${history?.lastPlanDate || "Unknown"} by ${history?.plannerName || "Unknown"} (${history?.plannerRole || ""})
-• Previous Failures: ${history?.whatDidNotWork || "Not specified"}
-• Prior Transformation Attempts: ${history?.priorTransformationAttempts || "Not specified"}
-• Current ServiceNow Perception: ${history?.currentPerception || "Unknown"}
+• Last Account Plan: ${history.lastPlanDate || "Unknown"} by ${history.plannerName || "Unknown"} (${history.plannerRole || ""})
+• Previous Failures: ${history.whatDidNotWork || "Not specified"}
+• Prior Transformation Attempts: ${history.priorTransformationAttempts || "Not specified"}
+• Current ServiceNow Perception: ${history.currentPerception || "Unknown"}
 
 EXECUTIVE ACCESS:
-• Known Sponsors: ${engagement?.knownExecutiveSponsors?.join(", ") || "Unknown"}
-• Decision Deadlines: ${engagement?.decisionDeadlines || "Unknown"}
-• RFP/Renewal Timing: ${engagement?.renewalRFPTiming || "Unknown"}
+• Known Sponsors: ${Array.isArray(engagement.knownExecutiveSponsors) ? engagement.knownExecutiveSponsors.join(", ") : "Unknown"}
+• Decision Deadlines: ${engagement.decisionDeadlines || "Unknown"}
+• RFP/Renewal Timing: ${engagement.renewalRFPTiming || "Unknown"}
 ═══════════════════════════════════════════════════════════════
 `;
     }
@@ -338,7 +350,7 @@ EXTRACTION CHECKLIST:
 7. Find risk factors and challenges as written
 8. Identify executives mentioned and their stated priorities
 
-Now extract from this annual report:\n\n${content}` }
+Now extract from this annual report:\n\n${validatedContent}` }
         ],
         tools: [
           {
@@ -763,10 +775,6 @@ QUALITY STANDARD:
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error analyzing annual report:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to analyze report" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createErrorResponse(500, "Failed to analyze report. Please try again.", error);
   }
 });
