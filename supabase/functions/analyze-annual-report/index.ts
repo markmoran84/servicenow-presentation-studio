@@ -146,187 +146,99 @@ EXECUTIVE ACCESS:
     }
 
     // Premium strategic analysis prompt with enhanced customer strategy extraction
-    const initialPrompt = `You are a McKinsey-caliber strategic advisor with 25 years of experience analyzing Fortune 500 companies. Your analysis will be presented directly to C-level executives.
+    const initialPrompt = `You are a precision data extraction system. Your SOLE purpose is to extract FACTUAL information from the document provided.
 
-MISSION-CRITICAL: ACCURACY IS NON-NEGOTIABLE
-- Extract ONLY information that is EXPLICITLY stated in the document
-- Use the EXACT terminology, phrases, and language from the source document
-- QUOTE directly when possible - especially CEO/executive statements
-- If information is not present, leave the field empty - DO NOT fabricate
-- Verify financial figures are EXACT as written (revenue, margins, growth rates)
-- Cross-reference numbers if they appear multiple times
+═══════════════════════════════════════════════════════════════
+ABSOLUTE RULE #1: ACCURACY IS NON-NEGOTIABLE
+═══════════════════════════════════════════════════════════════
+
+BEFORE YOU EXTRACT ANYTHING:
+1. Read the ENTIRE document first
+2. Identify the EXACT company name as it appears in the document header, title page, or legal name
+3. The company name MUST be copied EXACTLY as written - no modifications, no guessing
+4. If the document is from "XYZ Corporation", output "XYZ Corporation" - not "XYZ" or "XYZ Corp" or anything else
+
+CRITICAL EXTRACTION RULES:
+- ONLY extract information that is EXPLICITLY stated in the provided document
+- Use the EXACT words, phrases, and figures from the document
+- If a piece of information is not in the document, return an EMPTY STRING - never fabricate
+- Financial figures must be copied EXACTLY as written (e.g., "$55.5 billion" not "$55B")
+- Executive names must be spelled EXACTLY as they appear
+- If you are unsure about ANY fact, DO NOT include it
+
+WHAT YOU MUST NEVER DO:
+❌ Never make up a company name
+❌ Never guess financial figures
+❌ Never fabricate executive names
+❌ Never create information that isn't in the document
+❌ Never use generic placeholder content
+❌ Never hallucinate strategies or initiatives
 
 ${accountContextStr}
 
 ═══════════════════════════════════════════════════════════════
-ANALYSIS FRAMEWORK: PRECISION EXTRACTION
+EXTRACTION INSTRUCTIONS
 ═══════════════════════════════════════════════════════════════
 
-CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP EXTRACTION (VERBATIM)
-Your PRIMARY mission is to extract VERBATIM the customer's own strategic vision, priorities, and transformation agenda. Use their EXACT words and phrases.
+STEP 1: COMPANY IDENTIFICATION (MANDATORY FIRST STEP)
+- Find the official company name on the cover page, header, or legal disclaimers
+- Look for patterns like "[Company Name] Annual Report" or "Report of [Company Name]"
+- The accountName field MUST match the exact company name from the document
+- If you cannot determine the company name with certainty, leave it empty
 
-ACCURACY MANDATE:
-- Read the ENTIRE document before extracting anything
-- Cross-reference information that appears in multiple sections
-- Financial figures must match EXACTLY what's written (check CEO letter, financial summary, tables)
-- When quoting strategy, use the EXACT terminology from the document
-- If unsure about a fact, DO NOT include it
+STEP 2: FINANCIAL DATA EXTRACTION
+- Revenue: Copy EXACTLY as stated (e.g., "Revenue of €47.2 billion")
+- Growth rates: Copy EXACTLY (e.g., "5.3% increase year-over-year")
+- EBIT/Margins: Copy EXACTLY as written
+- Only extract figures you can find explicitly stated
 
-PHASE 0: CUSTOMER VISION & STRATEGY IMMERSION (MOST IMPORTANT)
-Carefully extract strategic content using the customer's EXACT language:
+STEP 3: EXECUTIVE SUMMARY
+- Write 2-3 sentences summarizing the company using ONLY facts from the document
+- Include: company name (as extracted), industry/what they do, and key facts
+- DO NOT describe "the document" - describe the COMPANY
 
-A) CORPORATE STRATEGY (The "North Star") - VERBATIM EXTRACTION
-   - SEARCH FOR: "Our strategy is...", "Strategic priorities include...", "Our vision is..."
-   - SEARCH FOR: Named programs, initiatives, or transformation agendas
-   - SEARCH FOR: CEO/Chairman letter statements about company direction
-   - EXTRACT: 3-5 corporate strategy items with DIRECT QUOTES or close paraphrasing
-   - INCLUDE: The exact name if it's a branded strategy (e.g., "Better Everyday Strategy", "Flywheel Growth Model")
+STEP 4: STRATEGY EXTRACTION
+- Look for sections titled "Strategy", "Our Priorities", "CEO Letter", etc.
+- Extract strategy names VERBATIM (e.g., "Transform to Grow" not "Growth Strategy")
+- Include the exact language used by executives
 
-B) CEO & BOARD PRIORITIES (The "Must-Wins") - DIRECT QUOTES REQUIRED
-   - SEARCH FOR: CEO's letter to shareholders - extract key sentences VERBATIM
-   - SEARCH FOR: "Our priorities are...", "We are focused on...", "This year we will..."
-   - SEARCH FOR: Quantified commitments with specific numbers
-   - EXTRACT: Exact executive quotes where possible with attribution
-   - INCLUDE: Any 3-year or 5-year goals mentioned
+STEP 5: PAIN POINTS & OPPORTUNITIES
+- Derive from explicitly stated challenges, risks, or strategic gaps
+- Use the customer's exact terminology
+- Connect to stated business priorities
 
-C) DIGITAL & AI STRATEGIES (The "How We Transform") - SPECIFIC INITIATIVES
-   - SEARCH FOR: Technology investment sections, Digital transformation mentions
-   - SEARCH FOR: AI, automation, cloud, data platform initiatives BY NAME
-   - SEARCH FOR: Technology spending figures or headcount
-   - EXTRACT: Named technology programs with their stated objectives
-   - INCLUDE: Timeline or maturity statements if present
+STEP 6: SWOT ANALYSIS
+- Base on facts from the document
+- Strengths/Weaknesses: What the company says about itself
+- Opportunities/Threats: Market factors mentioned in the report
 
-D) TRANSFORMATION THEMES (The "What Must Change") - OPERATIONAL DETAILS
-   - SEARCH FOR: Operating model changes, efficiency programs, restructuring
-   - SEARCH FOR: Cost reduction targets, synergy goals, simplification efforts
-   - SEARCH FOR: Cultural transformation or employee experience initiatives
-   - EXTRACT: Specific programs with their objectives and metrics
+STEP 7: EXECUTIVE EXTRACTION
+- Only include executives explicitly named in the document
+- Copy names and titles EXACTLY as written
+- Only attribute priorities that are explicitly stated
 
-QUALITY STANDARD - WHAT "GOOD" LOOKS LIKE:
-{
-  "title": "Better Everyday: Winning Model for Retail",
-  "description": "Walmart's stated strategy focusing on 'saving people money and helping them live better lives.' As CEO Doug McMillon stated in the annual letter: 'We're a technology company that happens to be in retail.' The strategy targets seamless omnichannel experiences with specific focus on 'store remodels, eCommerce growth, and supply chain automation.'"
-}
+QUALITY CHECK BEFORE RESPONDING:
+□ Is accountName the EXACT company name from the document?
+□ Are all financial figures copied EXACTLY as written?
+□ Are all executive names spelled correctly as they appear?
+□ Is every piece of information traceable to the document?
+□ Have I left empty any fields where data wasn't found?`;
 
-WHAT TO AVOID (GENERIC, FABRICATED):
-{
-  "title": "Growth Strategy",
-  "description": "The company wants to grow through digital transformation."
-}
+    const userPrompt = `DOCUMENT FOR EXTRACTION:
 
-PHASE 1: DEEP DOCUMENT ANALYSIS
-Read the ENTIRE document with the precision of a financial analyst and the strategic lens of a management consultant:
-• Extract exact financial figures - revenue, margins, EBIT, growth rates (check tables, footnotes, charts)
-• Identify the CEO's voice - their exact language, priorities, and transformation vision
-• Map the strategic narrative - what story is leadership telling investors?
-• Detect tension points - where does ambition exceed current capability?
+${validatedContent}
 
-PHASE 2: EXECUTIVE SUMMARY NARRATIVE
-Write a 2-3 sentence executive brief that a C-suite sponsor could use verbatim in a board presentation:
-• Lead with market position and scale (revenue, geography, employee count)
-• Articulate strategic direction using THEIR language
-• Connect to transformation imperatives that ServiceNow can address
-• NEVER describe the document - describe the COMPANY and its trajectory
+═══════════════════════════════════════════════════════════════
+YOUR TASK:
+═══════════════════════════════════════════════════════════════
 
-EXCELLENT EXAMPLE:
-"A.P. Møller-Maersk is the world's leading integrated logistics company, operating across 130+ countries with $55.5B in revenue and 100,000+ employees. Under CEO Vincent Clerc's 'Gemini Strategy,' Maersk is pivoting from container shipping to end-to-end supply chain orchestration, targeting 8% EBIT margins through operational AI and customer experience transformation."
+1. FIRST: Find and note the exact company name from this document
+2. Extract ONLY factual information that appears in this document
+3. Use EXACT wording - do not paraphrase or generalize
+4. Leave fields EMPTY if the information is not in the document
+5. For accountName: Use the EXACT legal/official company name as it appears
 
-POOR EXAMPLE (NEVER DO THIS):
-"This annual report discusses Maersk's financial performance and strategic initiatives."
-
-PHASE 3: STRATEGIC PAIN POINTS (The "Why Act Now" Story)
-Extract 3-5 pain points that create URGENCY for executive action:
-• Derive DIRECTLY from stated challenges, risks, or gaps in the annual report
-• Use the customer's OWN LANGUAGE (if they say "fragmented systems," use that exact phrase)
-• Connect each pain to a strategic priority they've publicly committed to
-• Quantify impact where possible (e.g., "$2.3B cost overrun," "18-month delay in AI deployment")
-• Frame as obstacles to achieving stated board-level goals
-
-PAIN POINT FORMAT:
-{
-  "title": "Punchy 5-7 word headline using their terminology",
-  "description": "1-2 sentences: [Specific pain] is blocking [their stated priority], resulting in [quantified impact or strategic risk]"
-}
-
-EXCELLENT PAIN POINT:
-{
-  "title": "Fragmented Tech Stack Blocking AI-First Vision",
-  "description": "130+ disconnected systems across regions prevent the unified data layer CEO cited as prerequisite for AI operationalisation—directly threatening the 2026 'AI-first operations' commitment made to investors."
-}
-
-PHASE 4: STRATEGIC OPPORTUNITIES (The "How ServiceNow Wins" Story)
-Extract 3-5 opportunities that position ServiceNow as the strategic enabler:
-• Each opportunity MUST address a specific pain point
-• Each opportunity MUST accelerate a stated customer priority
-• Frame as business outcomes, not product features
-• Use action verbs: Accelerate, Consolidate, Transform, Enable, Reduce, Eliminate
-• Include proof points or benchmarks where credible
-
-OPPORTUNITY FORMAT:
-{
-  "title": "Action-Oriented 5-8 word headline",
-  "description": "1-2 sentences: ServiceNow enables [their goal] by [specific capability], delivering [quantified outcome based on comparable deployments]"
-}
-
-EXCELLENT OPPORTUNITY:
-{
-  "title": "Unified AI Platform for Global Operations",
-  "description": "Consolidate 130+ regional systems onto ServiceNow's AI-native platform, enabling the CEO's 'single source of truth' vision and reducing AI deployment cycles from 18 months to 6 months—as achieved at comparable logistics enterprises."
-}
-
-PHASE 5: SWOT ANALYSIS (Four-Dimensional Strategic Assessment)
-Generate SWOT items that synthesize annual report insights WITH account context across FOUR PERSPECTIVES:
-
-A) ORGANIZATIONAL (Customer's Internal Capabilities)
-   STRENGTHS: Operational excellence, market position, talent, culture, scale advantages
-   WEAKNESSES: Legacy systems, skill gaps, silos, execution challenges, tech debt
-
-B) ACCOUNT RELATIONSHIP (ServiceNow's Position)
-   STRENGTHS: Existing deployments, exec relationships, proven value, expansion momentum
-   WEAKNESSES: Limited footprint, past failures, competitive threats, perception gaps
-
-C) COMMERCIAL (Financial & Business Dynamics)
-   OPPORTUNITIES: Renewal timing, budget cycles, M&A activity, transformation funding
-   THREATS: Cost-cutting mandates, procurement pressure, economic headwinds, competitive pricing
-
-D) SERVICENOW PLATFORM (Technology & Market Position)
-   OPPORTUNITIES: White space products, AI/workflow differentiation, consolidation plays, partner ecosystem
-   THREATS: Incumbent entrenchment, build-vs-buy decisions, point solution alternatives, platform fatigue
-
-SWOT QUALITY STANDARDS:
-• Each item should be specific, actionable, and defensible with evidence
-• Reference annual report data AND account context where relevant
-• Prioritize insights that inform deal strategy and executive engagement
-• Avoid generic statements that could apply to any company
-
-PHASE 6: KEY EXECUTIVE EXTRACTION (For Executive Engagement Strategy)
-Extract the key executives mentioned in the annual report for strategic engagement planning:
-
-A) C-SUITE & BOARD EXECUTIVES
-   - CEO, CFO, COO, CIO, CTO, CDO, CHRO and other C-level executives
-   - Board members with strategic influence
-   - Regional/divisional presidents if significant
-
-B) FOR EACH EXECUTIVE CAPTURE:
-   - Full name and exact title
-   - Their stated priorities or focus areas (from their quotes, letters, or presentations)
-   - Any transformation or technology initiatives they champion
-   - Relevance to ServiceNow engagement (e.g., "Owns digital transformation", "Drives operational excellence")
-
-C) EXECUTIVE QUALITY STANDARDS:
-   - Only include executives who appear prominently in the document
-   - Priorities must be derived from their actual statements or documented responsibilities
-   - Focus on executives relevant to enterprise platform decisions
-
-EXCELLENT EXECUTIVE EXAMPLE:
-{
-  "name": "Vincent Clerc",
-  "title": "Chief Executive Officer",
-  "priorities": "Driving the Gemini Strategy transformation from container shipping to integrated logistics. Focused on operational AI, customer experience excellence, and achieving 8% EBIT margins.",
-  "relevance": "Primary sponsor for enterprise-wide transformation initiatives including digital platforms and AI adoption."
-}
-
-═══════════════════════════════════════════════════════════════`;
+CRITICAL: Your accountName output MUST match exactly what is written in this document. If the document says "Acme Corporation" then output "Acme Corporation" - not "Acme" or "ACME Corporation" or anything else.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -338,30 +250,18 @@ EXCELLENT EXECUTIVE EXAMPLE:
         model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: initialPrompt },
-          { role: "user", content: `CRITICAL: Read this ENTIRE document carefully before extracting ANY data. Your extraction must be ACCURATE and use the EXACT language from the source.
-
-EXTRACTION CHECKLIST:
-1. First, identify the company name exactly as written
-2. Find the CEO's letter and extract key quotes VERBATIM
-3. Locate financial summary tables and extract EXACT figures
-4. Search for "strategy", "priorities", "vision", "objectives" sections
-5. Identify any named strategic programs or initiatives
-6. Extract technology/digital transformation initiatives with their names
-7. Find risk factors and challenges as written
-8. Identify executives mentioned and their stated priorities
-
-Now extract from this annual report:\n\n${validatedContent}` }
+          { role: "user", content: userPrompt }
         ],
         tools: [
           {
             type: "function",
             function: {
               name: "extract_annual_report_data",
-              description: "Extract comprehensive structured data from an annual report for strategic account planning",
+              description: "Extract ONLY factual data that appears explicitly in the provided document. Never fabricate information.",
               parameters: {
                 type: "object",
                 properties: {
-                  accountName: { type: "string", description: "Full company name as it appears officially" },
+                  accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character. If document says 'ABC Ltd' output 'ABC Ltd' exactly." },
                   industry: { type: "string", description: "Primary industry/sector with specificity (e.g., 'Integrated Logistics & Container Shipping' not just 'Transportation')" },
                   revenue: { type: "string", description: "Total revenue with currency and period (e.g., '$55.5B FY2024')" },
                   revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
