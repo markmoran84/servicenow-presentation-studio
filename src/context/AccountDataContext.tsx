@@ -92,23 +92,12 @@ export interface StrategicOpportunities {
   opportunities: OpportunityItem[];
 }
 
-// Stakeholder for org chart
-export interface Stakeholder {
-  name: string;
-  title: string;
-  role: "Decision maker" | "Champion" | "Influencer" | "Procurement" | "No role";
-  crmStatus: "synced" | "update" | "none";
-  highlight?: string; // e.g. "Recently posted on LinkedIn", "New executive teamlink connections"
-  avatarUrl?: string;
-}
-
 // Section G — Executive Engagement
 export interface ExecutiveEngagement {
   knownExecutiveSponsors: string[];
   plannedExecutiveEvents: string[];
   decisionDeadlines: string;
   renewalRFPTiming: string;
-  stakeholders: Stakeholder[];
 }
 
 // Big Bet / Key Workstream
@@ -286,7 +275,6 @@ const defaultData: AccountData = {
     plannedExecutiveEvents: [],
     decisionDeadlines: "",
     renewalRFPTiming: "",
-    stakeholders: [],
   },
   accountStrategy: {
     strategyNarrative: "",
