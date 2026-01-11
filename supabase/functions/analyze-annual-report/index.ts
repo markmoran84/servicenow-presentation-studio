@@ -200,6 +200,8 @@ STEP 3: EXECUTIVE SUMMARY
 STEP 4: STRATEGY EXTRACTION
 - Look for sections titled "Strategy", "Our Priorities", "CEO Letter", etc.
 - Extract strategy names VERBATIM (e.g., "Transform to Grow" not "Growth Strategy")
+- IMPORTANT: Keep CORPORATE strategy and DIGITAL/AI strategy distinct. DO NOT copy the same items into both lists.
+- DIGITAL/AI strategy must be explicitly about technology/digital/AI/data/automation. If none are explicitly stated, return an empty list.
 - Include the exact language used by executives
 
 STEP 5: PAIN POINTS & OPPORTUNITIES
@@ -276,24 +278,24 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Strategic pillar name using their exact terminology" },
-                        description: { type: "string", description: "1-2 sentences explaining the strategic initiative" }
+                        title: { type: "string", description: "Corporate strategy pillar name using their exact terminology (business/growth/operations)." },
+                        description: { type: "string", description: "1-2 sentences explaining the corporate strategy pillar (use only what is explicitly stated)." }
                       },
                       required: ["title", "description"]
                     }, 
-                    description: "3-5 core corporate strategy pillars with descriptions" 
+                    description: "3-5 core CORPORATE strategy pillars with descriptions. Must not overlap with digitalStrategies." 
                   },
                   digitalStrategies: { 
                     type: "array", 
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Digital/AI strategy initiative name" },
-                        description: { type: "string", description: "1-2 sentences explaining the digital ambition" }
+                        title: { type: "string", description: "Digital/AI strategy initiative name (must explicitly reference technology, digital, AI, data, automation, platform, cybersecurity, cloud, etc.)." },
+                        description: { type: "string", description: "1-2 sentences explaining the digital/technology initiative (use only what is explicitly stated)." }
                       },
                       required: ["title", "description"]
                     }, 
-                    description: "2-4 digital/AI strategy initiatives with descriptions" 
+                    description: "0-4 DIGITAL/AI strategy initiatives with descriptions. If none are explicitly stated, return an empty array. Must not duplicate corporateStrategy." 
                   },
                   ceoBoardPriorities: { 
                     type: "array", 

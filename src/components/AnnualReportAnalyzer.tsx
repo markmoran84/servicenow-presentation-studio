@@ -23,6 +23,32 @@ interface AnnualReportAnalyzerProps {
   onGeneratePlan?: () => Promise<void>;
 }
 
+type StrategyLike = { title?: string; description?: string };
+
+const normalizeStrategyKey = (s: StrategyLike) =>
+  `${(s.title ?? "").trim().toLowerCase().replace(/\s+/g, " ")}||${(s.description ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")}`;
+
+const dedupeStrategyItems = (items: StrategyLike[]) => {
+  const seen = new Set<string>();
+  return items.filter((it) => {
+    const key = normalizeStrategyKey(it);
+    if (key === "||") return false;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const dedupeCorporateDigital = (corporate: StrategyLike[], digital: StrategyLike[]) => {
+  const corporateClean = dedupeStrategyItems(corporate);
+  const corporateKeys = new Set(corporateClean.map(normalizeStrategyKey));
+  const digitalClean = dedupeStrategyItems(digital).filter((d) => !corporateKeys.has(normalizeStrategyKey(d)));
+  return { corporate: corporateClean, digital: digitalClean };
+};
+
 export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerProps) => {
   const { data, updateData, setGeneratedPlan } = useAccountData();
   const [content, setContent] = useState("");
@@ -45,77 +71,86 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
     try {
       // Build account data from extracted data + existing context
       // This ensures we use fresh data, not stale React state
-      const accountData = extractedData ? {
-        ...data,
-        basics: {
-          ...data.basics,
-          ...(extractedData.accountName && { accountName: extractedData.accountName }),
-          ...(extractedData.industry && { industry: extractedData.industry }),
-        },
-        financial: {
-          ...data.financial,
-          ...(extractedData.revenue && { customerRevenue: extractedData.revenue }),
-          ...(extractedData.growthRate && { growthRate: extractedData.growthRate }),
-          ...(extractedData.marginEBIT && { marginEBIT: extractedData.marginEBIT }),
-          ...(extractedData.costPressureAreas && { costPressureAreas: extractedData.costPressureAreas }),
-          ...(extractedData.strategicInvestmentAreas && { strategicInvestmentAreas: extractedData.strategicInvestmentAreas }),
-        },
-        strategy: {
-          ...data.strategy,
-          ...(extractedData.corporateStrategy?.length && { 
-            corporateStrategy: extractedData.corporateStrategy.map((item: any) => ({
-              title: item.title || "",
-              description: item.description || ""
-            }))
-          }),
-          ...(extractedData.digitalStrategies?.length && { 
-            digitalStrategies: extractedData.digitalStrategies.map((item: any) => ({
-              title: item.title || "",
-              description: item.description || ""
-            }))
-          }),
-          ...(extractedData.ceoBoardPriorities?.length && { 
-            ceoBoardPriorities: extractedData.ceoBoardPriorities.map((item: any) => ({
-              title: item.title || "",
-              description: item.description || ""
-            }))
-          }),
-          ...(extractedData.transformationThemes?.length && { 
-            transformationThemes: extractedData.transformationThemes.map((item: any) => ({
-              title: item.title || "",
-              description: item.description || ""
-            }))
-          }),
-        },
-        painPoints: {
-          painPoints: extractedData.painPoints?.map((pp: any) => ({
-            title: pp.title || "",
-            description: pp.description || ""
-          })) || data.painPoints.painPoints
-        },
-        opportunities: {
-          opportunities: extractedData.opportunities?.map((op: any) => ({
-            title: op.title || "",
-            description: op.description || ""
-          })) || data.opportunities.opportunities
-        },
-        swot: {
-          strengths: extractedData.strengths || data.swot.strengths,
-          weaknesses: extractedData.weaknesses || data.swot.weaknesses,
-          opportunities: extractedData.swotOpportunities || data.swot.opportunities,
-          threats: extractedData.threats || data.swot.threats,
-        },
-        annualReport: {
-          ...data.annualReport,
-          ...(extractedData.revenue && { revenue: extractedData.revenue }),
-          ...(extractedData.revenueComparison && { revenueComparison: extractedData.revenueComparison }),
-          ...(extractedData.ebitImprovement && { ebitImprovement: extractedData.ebitImprovement }),
-          ...(extractedData.netZeroTarget && { netZeroTarget: extractedData.netZeroTarget }),
-          ...(extractedData.keyMilestones?.length && { keyMilestones: extractedData.keyMilestones }),
-          ...(extractedData.strategicAchievements?.length && { strategicAchievements: extractedData.strategicAchievements }),
-          ...(extractedData.executiveSummaryNarrative && { executiveSummaryNarrative: extractedData.executiveSummaryNarrative }),
-        }
-      } : data;
+      const extractedCorporate = Array.isArray(extractedData?.corporateStrategy) ? extractedData.corporateStrategy : [];
+      const extractedDigital = Array.isArray(extractedData?.digitalStrategies) ? extractedData.digitalStrategies : [];
+      const { corporate: corporateClean, digital: digitalClean } = dedupeCorporateDigital(extractedCorporate, extractedDigital);
+
+      const accountData = extractedData
+        ? {
+            ...data,
+            basics: {
+              ...data.basics,
+              ...(extractedData.accountName && { accountName: extractedData.accountName }),
+              ...(extractedData.industry && { industry: extractedData.industry }),
+            },
+            financial: {
+              ...data.financial,
+              ...(extractedData.revenue && { customerRevenue: extractedData.revenue }),
+              ...(extractedData.growthRate && { growthRate: extractedData.growthRate }),
+              ...(extractedData.marginEBIT && { marginEBIT: extractedData.marginEBIT }),
+              ...(extractedData.costPressureAreas && { costPressureAreas: extractedData.costPressureAreas }),
+              ...(extractedData.strategicInvestmentAreas && { strategicInvestmentAreas: extractedData.strategicInvestmentAreas }),
+            },
+            strategy: {
+              ...data.strategy,
+              // Only overwrite when we actually got useful extracted values.
+              ...(corporateClean.length > 0 && {
+                corporateStrategy: corporateClean.map((item: any) => ({
+                  title: item.title || "",
+                  description: item.description || "",
+                })),
+              }),
+              ...(digitalClean.length > 0 && {
+                digitalStrategies: digitalClean.map((item: any) => ({
+                  title: item.title || "",
+                  description: item.description || "",
+                })),
+              }),
+              ...(extractedData.ceoBoardPriorities?.length && {
+                ceoBoardPriorities: extractedData.ceoBoardPriorities.map((item: any) => ({
+                  title: item.title || "",
+                  description: item.description || "",
+                })),
+              }),
+              ...(extractedData.transformationThemes?.length && {
+                transformationThemes: extractedData.transformationThemes.map((item: any) => ({
+                  title: item.title || "",
+                  description: item.description || "",
+                })),
+              }),
+            },
+            painPoints: {
+              painPoints:
+                extractedData.painPoints?.map((pp: any) => ({
+                  title: pp.title || "",
+                  description: pp.description || "",
+                })) || data.painPoints.painPoints,
+            },
+            opportunities: {
+              opportunities:
+                extractedData.opportunities?.map((op: any) => ({
+                  title: op.title || "",
+                  description: op.description || "",
+                })) || data.opportunities.opportunities,
+            },
+            swot: {
+              strengths: extractedData.strengths || data.swot.strengths,
+              weaknesses: extractedData.weaknesses || data.swot.weaknesses,
+              opportunities: extractedData.swotOpportunities || data.swot.opportunities,
+              threats: extractedData.threats || data.swot.threats,
+            },
+            annualReport: {
+              ...data.annualReport,
+              ...(extractedData.revenue && { revenue: extractedData.revenue }),
+              ...(extractedData.revenueComparison && { revenueComparison: extractedData.revenueComparison }),
+              ...(extractedData.ebitImprovement && { ebitImprovement: extractedData.ebitImprovement }),
+              ...(extractedData.netZeroTarget && { netZeroTarget: extractedData.netZeroTarget }),
+              ...(extractedData.keyMilestones?.length && { keyMilestones: extractedData.keyMilestones }),
+              ...(extractedData.strategicAchievements?.length && { strategicAchievements: extractedData.strategicAchievements }),
+              ...(extractedData.executiveSummaryNarrative && { executiveSummaryNarrative: extractedData.executiveSummaryNarrative }),
+            },
+          }
+        : data;
       
       const { data: responseData, error } = await supabase.functions.invoke("generate-account-plan", {
         body: { accountData }
@@ -210,31 +245,42 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
       }
 
       // Update Strategy tab - convert to StrategyItem format
-      if (extracted.corporateStrategy?.length || extracted.digitalStrategies?.length || extracted.ceoBoardPriorities?.length || extracted.transformationThemes?.length) {
+      if (
+        extracted.corporateStrategy?.length ||
+        extracted.digitalStrategies?.length ||
+        extracted.ceoBoardPriorities?.length ||
+        extracted.transformationThemes?.length
+      ) {
+        const extractedCorporate = Array.isArray(extracted.corporateStrategy) ? extracted.corporateStrategy : [];
+        const extractedDigital = Array.isArray(extracted.digitalStrategies) ? extracted.digitalStrategies : [];
+        const { corporate: corporateClean, digital: digitalClean } = dedupeCorporateDigital(extractedCorporate, extractedDigital);
+
         updateData("strategy", {
-          ...(extracted.corporateStrategy?.length && { 
-            corporateStrategy: extracted.corporateStrategy.map((item: { title: string; description: string }) => ({
+          ...(corporateClean.length > 0 && {
+            corporateStrategy: corporateClean.map((item: { title: string; description: string }) => ({
               title: item.title || "",
-              description: item.description || ""
-            }))
+              description: item.description || "",
+            })),
           }),
-          ...(extracted.digitalStrategies?.length && { 
-            digitalStrategies: extracted.digitalStrategies.map((item: { title: string; description: string }) => ({
+          // Only overwrite digital strategies if we actually extracted distinct digital items,
+          // or if the user has none yet (prevents wiping manually-entered digital strategies).
+          ...((digitalClean.length > 0 || (data.strategy.digitalStrategies?.length ?? 0) === 0) && {
+            digitalStrategies: digitalClean.map((item: { title: string; description: string }) => ({
               title: item.title || "",
-              description: item.description || ""
-            }))
+              description: item.description || "",
+            })),
           }),
-          ...(extracted.ceoBoardPriorities?.length && { 
+          ...(extracted.ceoBoardPriorities?.length && {
             ceoBoardPriorities: extracted.ceoBoardPriorities.map((item: { title: string; description: string }) => ({
               title: item.title || "",
-              description: item.description || ""
-            }))
+              description: item.description || "",
+            })),
           }),
-          ...(extracted.transformationThemes?.length && { 
+          ...(extracted.transformationThemes?.length && {
             transformationThemes: extracted.transformationThemes.map((item: { title: string; description: string }) => ({
               title: item.title || "",
-              description: item.description || ""
-            }))
+              description: item.description || "",
+            })),
           }),
         });
       }
