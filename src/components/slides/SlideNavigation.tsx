@@ -112,8 +112,15 @@ export const SlideNavigation = ({
     try {
       onExportStart?.();
       
-      const images: string[] = [];
-      const exportableSlides = slideLabels.slice(1);
+      // Create PDF in landscape 16:9 format (use mm for better precision)
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: [254, 142.875], // 10" x 5.625" in mm (16:9 aspect ratio)
+      });
+
+      const pageWidth = 254;
+      const pageHeight = 142.875;
       
       for (let i = 1; i < totalSlides; i++) {
         toast.loading(`Capturing slide ${i} of ${totalSlides - 1}…`, { id: toastId });
@@ -123,33 +130,35 @@ export const SlideNavigation = ({
         const element = getSlideElement?.();
         if (element) {
           try {
-            const imageData = await captureElementAsImage(element);
-            images.push(imageData);
+            // Use html2canvas directly with lower scale for smaller file size
+            const html2canvas = (await import("html2canvas")).default;
+            const canvas = await html2canvas(element, {
+              scale: 1.5, // Lower scale = smaller file
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: "#0a1628",
+              width: 1920,
+              height: 1080,
+              windowWidth: 1920,
+              windowHeight: 1080,
+            });
+            
+            // Convert to JPEG for much smaller file size
+            const imgData = canvas.toDataURL("image/jpeg", 0.85);
+            
+            if (i > 1) pdf.addPage([pageWidth, pageHeight], "landscape");
+            pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, pageHeight);
           } catch (err) {
             console.error(`Failed to capture slide ${i}:`, err);
-            images.push("");
+            if (i > 1) pdf.addPage([pageWidth, pageHeight], "landscape");
           }
         } else {
-          images.push("");
+          if (i > 1) pdf.addPage([pageWidth, pageHeight], "landscape");
         }
       }
 
       toast.loading("Generating PDF…", { id: toastId });
       
-      // Create PDF in landscape 16:9 format
-      const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "in",
-        format: [10, 5.625], // 16:9 aspect ratio
-      });
-
-      images.forEach((imgData, index) => {
-        if (index > 0) pdf.addPage([10, 5.625], "landscape");
-        if (imgData) {
-          pdf.addImage(imgData, "PNG", 0, 0, 10, 5.625);
-        }
-      });
-
       const accountName = data.basics.accountName || "Account";
       pdf.save(`${accountName}_Account_Plan.pdf`);
       
