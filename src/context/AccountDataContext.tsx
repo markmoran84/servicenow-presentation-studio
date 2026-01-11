@@ -320,7 +320,8 @@ interface AccountDataContextType {
   reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
 }
 
-const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
+// Create context with a stable reference to prevent HMR issues
+const AccountDataContext = createContext<AccountDataContextType | null>(null);
 
 export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<AccountData>(defaultData);
@@ -373,9 +374,9 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAccountData = () => {
+export const useAccountData = (): AccountDataContextType => {
   const context = useContext(AccountDataContext);
-  if (!context) {
+  if (context === null) {
     throw new Error("useAccountData must be used within an AccountDataProvider");
   }
   return context;
