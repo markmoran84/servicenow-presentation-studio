@@ -132,13 +132,25 @@ export function validateFilePath(filePath: unknown): string {
   }
   
   // Prevent path traversal
-  if (trimmed.includes('..') || trimmed.includes('//') || trimmed.startsWith('/')) {
+  if (trimmed.includes('..') || trimmed.includes('//')) {
     throw new Error('Invalid file path');
   }
   
-  // Only allow safe characters
-  if (!/^[\w\-./]+$/.test(trimmed)) {
+  // Don't allow paths starting with / (absolute paths)
+  if (trimmed.startsWith('/')) {
+    throw new Error('Invalid file path');
+  }
+  
+  // Allow alphanumeric, common filename characters, spaces, and international chars
+  // Block dangerous characters: null bytes, control chars, shell metacharacters
+  const dangerousChars = /[\x00-\x1f\x7f`$|><;&*?]/;
+  if (dangerousChars.test(trimmed)) {
     throw new Error('Invalid characters in file path');
+  }
+  
+  // Limit path length
+  if (trimmed.length > 500) {
+    throw new Error('File path too long');
   }
   
   return trimmed;
