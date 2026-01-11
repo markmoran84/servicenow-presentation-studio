@@ -279,6 +279,33 @@ SWOT QUALITY STANDARDS:
 • Prioritize insights that inform deal strategy and executive engagement
 • Avoid generic statements that could apply to any company
 
+PHASE 6: KEY EXECUTIVE EXTRACTION (For Executive Engagement Strategy)
+Extract the key executives mentioned in the annual report for strategic engagement planning:
+
+A) C-SUITE & BOARD EXECUTIVES
+   - CEO, CFO, COO, CIO, CTO, CDO, CHRO and other C-level executives
+   - Board members with strategic influence
+   - Regional/divisional presidents if significant
+
+B) FOR EACH EXECUTIVE CAPTURE:
+   - Full name and exact title
+   - Their stated priorities or focus areas (from their quotes, letters, or presentations)
+   - Any transformation or technology initiatives they champion
+   - Relevance to ServiceNow engagement (e.g., "Owns digital transformation", "Drives operational excellence")
+
+C) EXECUTIVE QUALITY STANDARDS:
+   - Only include executives who appear prominently in the document
+   - Priorities must be derived from their actual statements or documented responsibilities
+   - Focus on executives relevant to enterprise platform decisions
+
+EXCELLENT EXECUTIVE EXAMPLE:
+{
+  "name": "Vincent Clerc",
+  "title": "Chief Executive Officer",
+  "priorities": "Driving the Gemini Strategy transformation from container shipping to integrated logistics. Focused on operational AI, customer experience excellence, and achieving 8% EBIT margins.",
+  "relevance": "Primary sponsor for enterprise-wide transformation initiatives including digital platforms and AI adoption."
+}
+
 ═══════════════════════════════════════════════════════════════`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -390,9 +417,23 @@ SWOT QUALITY STANDARDS:
                   netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment with year" },
                   keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones or achievements from the year" },
                   strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements that demonstrate execution capability" },
-                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" }
+                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" },
+                  keyExecutives: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string", description: "Full name of the executive" },
+                        title: { type: "string", description: "Official title (e.g., 'Chief Executive Officer', 'Chief Digital Officer')" },
+                        priorities: { type: "string", description: "2-3 sentences describing their stated priorities, focus areas, or initiatives they champion" },
+                        relevance: { type: "string", description: "Why this executive is relevant for ServiceNow engagement (e.g., 'Owns digital transformation', 'Drives operational excellence')" }
+                      },
+                      required: ["name", "title", "priorities", "relevance"]
+                    },
+                    description: "5-8 key executives with their priorities for executive engagement strategy"
+                  }
                 },
-                required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats"],
+                required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats", "keyExecutives"],
                 additionalProperties: false
               }
             }
@@ -510,12 +551,19 @@ ENRICHMENT INSTRUCTIONS:
    - Add operational and business model changes underway
    - Include any named transformation programs
    
-5. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data
-6. COMPETITION: Incorporate competitive context into SWOT threats
-7. PAIN POINTS: Refine with real-world challenges from news/analyst reports - use customer's language
-8. NARRATIVE: Make executiveSummaryNarrative compelling with specific figures and strategic direction
-9. SWOT: Enrich all quadrants with evidence from both document AND web research
-10. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing content
+5. KEY EXECUTIVES (CRITICAL FOR ENGAGEMENT STRATEGY):
+   - Identify CEO, CFO, CIO, CTO, CDO, COO and other C-level executives
+   - For each executive, capture their stated priorities from investor calls, interviews, presentations
+   - Note any transformation/technology initiatives they personally champion
+   - Assess relevance to ServiceNow engagement (who owns digital, operations, employee experience?)
+   - Include recent quotes or statements that reveal their agenda
+   
+6. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data
+7. COMPETITION: Incorporate competitive context into SWOT threats
+8. PAIN POINTS: Refine with real-world challenges from news/analyst reports - use customer's language
+9. NARRATIVE: Make executiveSummaryNarrative compelling with specific figures and strategic direction
+10. SWOT: Enrich all quadrants with evidence from both document AND web research
+11. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing content
 
 QUALITY STANDARD:
 - Every strategy item needs title + substantive description (not just a title)
@@ -631,7 +679,21 @@ QUALITY STANDARD:
                       netZeroTarget: { type: "string" },
                       keyMilestones: { type: "array", items: { type: "string" } },
                       strategicAchievements: { type: "array", items: { type: "string" } },
-                      executiveSummaryNarrative: { type: "string" }
+                      executiveSummaryNarrative: { type: "string" },
+                      keyExecutives: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string", description: "Full name of the executive" },
+                            title: { type: "string", description: "Official title" },
+                            priorities: { type: "string", description: "Their stated priorities and focus areas" },
+                            relevance: { type: "string", description: "Why relevant for ServiceNow engagement" }
+                          },
+                          required: ["name", "title", "priorities", "relevance"]
+                        },
+                        description: "5-8 key executives with their priorities"
+                      }
                     },
                     additionalProperties: false
                   }
