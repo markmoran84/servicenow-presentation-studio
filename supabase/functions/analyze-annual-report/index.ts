@@ -134,64 +134,72 @@ EXECUTIVE ACCESS:
     }
 
     // Premium strategic analysis prompt with enhanced customer strategy extraction
-    const initialPrompt = `You are a McKinsey-caliber strategic advisor embedded in ServiceNow's most elite account team. You analyze Fortune 500 annual reports to craft board-ready account strategies that win transformational deals.
+    const initialPrompt = `You are a McKinsey-caliber strategic advisor with 25 years of experience analyzing Fortune 500 companies. Your analysis will be presented directly to C-level executives.
+
+MISSION-CRITICAL: ACCURACY IS NON-NEGOTIABLE
+- Extract ONLY information that is EXPLICITLY stated in the document
+- Use the EXACT terminology, phrases, and language from the source document
+- QUOTE directly when possible - especially CEO/executive statements
+- If information is not present, leave the field empty - DO NOT fabricate
+- Verify financial figures are EXACT as written (revenue, margins, growth rates)
+- Cross-reference numbers if they appear multiple times
 
 ${accountContextStr}
 
 ═══════════════════════════════════════════════════════════════
-ANALYSIS FRAMEWORK: STRATEGIC EXCELLENCE
+ANALYSIS FRAMEWORK: PRECISION EXTRACTION
 ═══════════════════════════════════════════════════════════════
 
-CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP EXTRACTION
-Your PRIMARY mission is to deeply understand and articulate the customer's own strategic vision, priorities, and transformation agenda. This is NOT about ServiceNow — it's about truly understanding the customer's world.
+CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP EXTRACTION (VERBATIM)
+Your PRIMARY mission is to extract VERBATIM the customer's own strategic vision, priorities, and transformation agenda. Use their EXACT words and phrases.
+
+ACCURACY MANDATE:
+- Read the ENTIRE document before extracting anything
+- Cross-reference information that appears in multiple sections
+- Financial figures must match EXACTLY what's written (check CEO letter, financial summary, tables)
+- When quoting strategy, use the EXACT terminology from the document
+- If unsure about a fact, DO NOT include it
 
 PHASE 0: CUSTOMER VISION & STRATEGY IMMERSION (MOST IMPORTANT)
-Before any other analysis, immerse yourself in the customer's strategic narrative:
+Carefully extract strategic content using the customer's EXACT language:
 
-A) CORPORATE STRATEGY (The "North Star")
-   - What is the company's overarching strategic direction for the next 3-5 years?
-   - What transformation is the CEO/Board driving? Use THEIR exact terminology.
-   - What are the named strategic pillars, programs, or initiatives?
-   - EXAMPLES: "Gemini Strategy", "One Microsoft", "Customer 360", "Digital-First Operating Model"
-   - Extract 3-5 corporate strategy items with RICH descriptions (2-3 sentences each)
+A) CORPORATE STRATEGY (The "North Star") - VERBATIM EXTRACTION
+   - SEARCH FOR: "Our strategy is...", "Strategic priorities include...", "Our vision is..."
+   - SEARCH FOR: Named programs, initiatives, or transformation agendas
+   - SEARCH FOR: CEO/Chairman letter statements about company direction
+   - EXTRACT: 3-5 corporate strategy items with DIRECT QUOTES or close paraphrasing
+   - INCLUDE: The exact name if it's a branded strategy (e.g., "Better Everyday Strategy", "Flywheel Growth Model")
 
-B) CEO & BOARD PRIORITIES (The "Must-Wins")
-   - What specific outcomes has the CEO committed to publicly?
-   - What did the CEO emphasize in their letter to shareholders?
-   - What topics dominate board discussions based on the annual report?
-   - Extract exact language: "Our priority is to..." "We must deliver..." "This year we commit to..."
-   - Include quantified targets where stated (e.g., "15% margin improvement", "30% reduction in cycle time")
+B) CEO & BOARD PRIORITIES (The "Must-Wins") - DIRECT QUOTES REQUIRED
+   - SEARCH FOR: CEO's letter to shareholders - extract key sentences VERBATIM
+   - SEARCH FOR: "Our priorities are...", "We are focused on...", "This year we will..."
+   - SEARCH FOR: Quantified commitments with specific numbers
+   - EXTRACT: Exact executive quotes where possible with attribution
+   - INCLUDE: Any 3-year or 5-year goals mentioned
 
-C) DIGITAL & AI STRATEGIES (The "How We Transform")
-   - What is the company's stated digital/technology vision?
-   - What specific AI, automation, or digitalization initiatives are named?
-   - How does technology enable their strategic agenda?
-   - EXAMPLES: "AI-first operations", "Unified data platform", "Customer experience transformation"
-   - Include maturity indicators: are they exploring, piloting, or scaling?
+C) DIGITAL & AI STRATEGIES (The "How We Transform") - SPECIFIC INITIATIVES
+   - SEARCH FOR: Technology investment sections, Digital transformation mentions
+   - SEARCH FOR: AI, automation, cloud, data platform initiatives BY NAME
+   - SEARCH FOR: Technology spending figures or headcount
+   - EXTRACT: Named technology programs with their stated objectives
+   - INCLUDE: Timeline or maturity statements if present
 
-D) TRANSFORMATION THEMES (The "What Must Change")
-   - What operational or business model transformations are underway?
-   - What legacy challenges are they addressing?
-   - What cultural or organizational changes are mentioned?
-   - EXAMPLES: "End-to-end supply chain visibility", "Employee experience modernization", "Process standardization"
+D) TRANSFORMATION THEMES (The "What Must Change") - OPERATIONAL DETAILS
+   - SEARCH FOR: Operating model changes, efficiency programs, restructuring
+   - SEARCH FOR: Cost reduction targets, synergy goals, simplification efforts
+   - SEARCH FOR: Cultural transformation or employee experience initiatives
+   - EXTRACT: Specific programs with their objectives and metrics
 
-QUALITY STANDARD FOR STRATEGY EXTRACTION:
-- Use the CUSTOMER'S OWN WORDS - quote their exact terminology from the document
-- Each item MUST have a descriptive title AND a substantive 2-3 sentence description
-- Descriptions must explain the WHY and HOW, not just the WHAT
-- Connect strategies to business outcomes where possible
-- If a named program exists (e.g., "Project Phoenix"), use that exact name
-
-EXCELLENT CORPORATE STRATEGY EXAMPLE:
+QUALITY STANDARD - WHAT "GOOD" LOOKS LIKE:
 {
-  "title": "Gemini Strategy: Integrated Logistics Leadership",
-  "description": "Maersk's multi-year transformation from container shipping company to end-to-end logistics provider. The strategy focuses on connecting Ocean, Landside, and Terminal operations into a seamless customer experience, targeting 8% EBIT margins through operational efficiency and premium customer value creation."
+  "title": "Better Everyday: Winning Model for Retail",
+  "description": "Walmart's stated strategy focusing on 'saving people money and helping them live better lives.' As CEO Doug McMillon stated in the annual letter: 'We're a technology company that happens to be in retail.' The strategy targets seamless omnichannel experiences with specific focus on 'store remodels, eCommerce growth, and supply chain automation.'"
 }
 
-POOR EXAMPLE (NEVER DO THIS):
+WHAT TO AVOID (GENERIC, FABRICATED):
 {
   "title": "Growth Strategy",
-  "description": "The company wants to grow."
+  "description": "The company wants to grow through digital transformation."
 }
 
 PHASE 1: DEEP DOCUMENT ANALYSIS
@@ -318,7 +326,19 @@ EXCELLENT EXECUTIVE EXAMPLE:
         model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: initialPrompt },
-          { role: "user", content: `Conduct a comprehensive strategic analysis of this annual report. Extract all financial data, strategic priorities, pain points, opportunities, and SWOT insights. Produce board-ready outputs:\n\n${content}` }
+          { role: "user", content: `CRITICAL: Read this ENTIRE document carefully before extracting ANY data. Your extraction must be ACCURATE and use the EXACT language from the source.
+
+EXTRACTION CHECKLIST:
+1. First, identify the company name exactly as written
+2. Find the CEO's letter and extract key quotes VERBATIM
+3. Locate financial summary tables and extract EXACT figures
+4. Search for "strategy", "priorities", "vision", "objectives" sections
+5. Identify any named strategic programs or initiatives
+6. Extract technology/digital transformation initiatives with their names
+7. Find risk factors and challenges as written
+8. Identify executives mentioned and their stated priorities
+
+Now extract from this annual report:\n\n${content}` }
         ],
         tools: [
           {
