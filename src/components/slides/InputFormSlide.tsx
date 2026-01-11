@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
+import { ExtractedDataReview } from "@/components/ExtractedDataReview";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
   Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2
@@ -98,7 +99,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
     <div className="min-h-screen p-8 pb-32 overflow-y-auto">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Account Plan Input</h1>
             <p className="text-muted-foreground">Configure your strategic account data to generate the 20-slide plan</p>
@@ -122,6 +123,11 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
               )}
             </Button>
           </div>
+        </div>
+
+        {/* Extracted Data Review - Always visible when data exists */}
+        <div className="mb-6">
+          <ExtractedDataReview />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
