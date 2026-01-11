@@ -764,6 +764,150 @@ const createAccountTeamSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
+// SLIDE 9: TASK-BASED AGILE AM MODEL
+// =============================================================================
+const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  setBackground(slide);
+
+  const accountName = data.basics.accountName || "Account";
+
+  addTitle(
+    slide,
+    "The Task-Based Agile AM Model",
+    `${accountName} Account Team — Dynamic Resource Activation`
+  );
+
+  const topY = 0.95;
+  const gap = 0.15;
+  const leftW = 4.15;
+  const rightW = CONTENT_W - leftW - gap;
+
+  // Left: Wheel placeholder + roles
+  addCard(pptx, slide, MX, topY, leftW, 3.9, { accentBorder: C.primary });
+  slide.addText("The GTM Wheel of Fire", {
+    x: MX + 0.15,
+    y: topY + 0.12,
+    w: leftW - 0.3,
+    h: 0.3,
+    fontSize: HEADING_SIZE,
+    bold: true,
+    color: C.primary,
+    fontFace: FONT_HEADING,
+  });
+  slide.addText("Core team pulls in resources as needed:", {
+    x: MX + 0.15,
+    y: topY + 0.48,
+    w: leftW - 0.3,
+    h: 0.25,
+    fontSize: SMALL_SIZE,
+    color: C.white,
+    fontFace: FONT_BODY,
+  });
+
+  const roles = [
+    "BU Sale",
+    "Inspire Value",
+    "Impact",
+    "Sales Mgmt.",
+    "Elevate",
+    "Prod. Mgmt.",
+    "Marketing",
+    "Exec Sponsor",
+  ];
+
+  // Two-column role list
+  const colW = (leftW - 0.4) / 2;
+  roles.forEach((r, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    slide.addText(`• ${r}`, {
+      x: MX + 0.15 + col * colW,
+      y: topY + 0.8 + row * 0.28,
+      w: colW - 0.05,
+      h: 0.22,
+      fontSize: SMALL_SIZE,
+      color: C.muted,
+      fontFace: FONT_BODY,
+    });
+  });
+
+  // Right: Supporting bullets
+  addCard(pptx, slide, MX + leftW + gap, topY, rightW, 2.85, { accentBorder: C.accent });
+  slide.addText("Agile Operating Model", {
+    x: MX + leftW + gap + 0.15,
+    y: topY + 0.12,
+    w: rightW - 0.3,
+    h: 0.3,
+    fontSize: HEADING_SIZE,
+    bold: true,
+    color: C.accent,
+    fontFace: FONT_HEADING,
+  });
+
+  const bullets = [
+    {
+      t: "Dynamic Resource Activation",
+      d: "Core team activates specific resources based on current pursuit phase and customer needs",
+    },
+    {
+      t: "Scenario-Based Engagement",
+      d: "Different workstreams engage different combinations of expertise",
+    },
+    {
+      t: "Flexible Scale",
+      d: "Resources scale up or down based on deal complexity and strategic importance",
+    },
+    {
+      t: "Rapid Mobilization",
+      d: "Quick activation of specialized expertise when opportunities arise",
+    },
+  ];
+
+  bullets.forEach((b, i) => {
+    const y = topY + 0.55 + i * 0.55;
+    slide.addText(`${i + 1}. ${b.t}`, {
+      x: MX + leftW + gap + 0.15,
+      y,
+      w: rightW - 0.3,
+      h: 0.22,
+      fontSize: SMALL_SIZE,
+      bold: true,
+      color: C.white,
+      fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(b.d, 72), {
+      x: MX + leftW + gap + 0.3,
+      y: y + 0.22,
+      w: rightW - 0.45,
+      h: 0.28,
+      fontSize: TINY_SIZE,
+      color: C.muted,
+      fontFace: FONT_BODY,
+    });
+  });
+
+  // Quote bar
+  addCard(pptx, slide, MX + leftW + gap, topY + 2.95, rightW, 0.95, { accentBorder: C.primary });
+  slide.addText(
+    "\"We operate in an agile fashion — the core team dynamically activates specialized resources as opportunities emerge and evolve.\"",
+    {
+      x: MX + leftW + gap + 0.15,
+      y: topY + 3.1,
+      w: rightW - 0.3,
+      h: 0.7,
+      fontSize: SMALL_SIZE,
+      italic: true,
+      color: C.white,
+      fontFace: FONT_BODY,
+      valign: "top",
+    }
+  );
+
+  return slide;
+};
+
+// =============================================================================
 // SLIDE 9: SWOT ANALYSIS
 // =============================================================================
 const createSWOTSlide = (pptx: pptxgen, data: AccountData) => {
@@ -1479,20 +1623,21 @@ export const exportToPowerPoint = async (data: AccountData) => {
   // 6. FY-1 Retrospective
   // 7. Strategic Alignment
   // 8. Account Team
-  // 9. SWOT Analysis
-  // 10. Value Drivers
-  // 11. Key Workstreams (Big Bets)
-  // 12. Workstream Detail
-  // 13. AI Portfolio
-  // 14. Platform Vision
-  // 15. Roadmap
-  // 16. Risk & Mitigation
-  // 17. Governance
-  // 18. Weekly Update
-  // 19. Engagement
-  // 20. Pursuit Plan
-  // 21. Success Metrics
-  // 22. Thank You
+  // 9. Task-Based Agile AM Model
+  // 10. SWOT Analysis
+  // 11. Value Drivers
+  // 12. Key Workstreams (Big Bets)
+  // 13. Workstream Detail
+  // 14. AI Portfolio
+  // 15. Platform Vision
+  // 16. Roadmap
+  // 17. Risk & Mitigation
+  // 18. Governance
+  // 19. Weekly Update
+  // 20. Engagement
+  // 21. Pursuit Plan
+  // 22. Success Metrics
+  // 23. Thank You
 
   slides.push(createCoverSlide(pptx, data));                    // 1
   slides.push(createExecutiveSummarySlide(pptx, data));         // 2
@@ -1502,20 +1647,21 @@ export const exportToPowerPoint = async (data: AccountData) => {
   slides.push(createRetrospectiveSlide(pptx, data));            // 6
   slides.push(createStrategicAlignmentSlide(pptx, data));       // 7
   slides.push(createAccountTeamSlide(pptx, data));              // 8
-  slides.push(createSWOTSlide(pptx, data));                     // 9
-  slides.push(createValueDriversSlide(pptx, data));             // 10
-  slides.push(createBigBetsSlide(pptx, data));                  // 11
-  slides.push(createWorkstreamDetailSlide(pptx, data));         // 12
-  slides.push(createAIUseCasesSlide(pptx, data));               // 13
-  slides.push(createPlatformSlide(pptx, data));                 // 14
-  slides.push(createRoadmapSlide(pptx, data));                  // 15
-  slides.push(createRiskMitigationSlide(pptx, data));           // 16
-  slides.push(createGovernanceSlide(pptx, data));               // 17
-  slides.push(createWeeklyUpdateSlide(pptx, data));             // 18
-  slides.push(createEngagementSlide(pptx, data));               // 19
-  slides.push(createPursuitPlanSlide(pptx, data));              // 20
-  slides.push(createSuccessMetricsSlide(pptx, data));           // 21
-  slides.push(createClosingSlide(pptx, data));                  // 22
+  slides.push(createAgileTeamModelSlide(pptx, data));           // 9
+  slides.push(createSWOTSlide(pptx, data));                     // 10
+  slides.push(createValueDriversSlide(pptx, data));             // 11
+  slides.push(createBigBetsSlide(pptx, data));                  // 12
+  slides.push(createWorkstreamDetailSlide(pptx, data));         // 13
+  slides.push(createAIUseCasesSlide(pptx, data));               // 14
+  slides.push(createPlatformSlide(pptx, data));                 // 15
+  slides.push(createRoadmapSlide(pptx, data));                  // 16
+  slides.push(createRiskMitigationSlide(pptx, data));           // 17
+  slides.push(createGovernanceSlide(pptx, data));               // 18
+  slides.push(createWeeklyUpdateSlide(pptx, data));             // 19
+  slides.push(createEngagementSlide(pptx, data));               // 20
+  slides.push(createPursuitPlanSlide(pptx, data));              // 21
+  slides.push(createSuccessMetricsSlide(pptx, data));           // 22
+  slides.push(createClosingSlide(pptx, data));                  // 23
 
   const exportId = new Date()
     .toISOString()
