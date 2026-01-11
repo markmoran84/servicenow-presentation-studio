@@ -317,6 +317,7 @@ interface AccountDataContextType {
   resetToDefaults: () => void;
   setGeneratedPlan: (plan: AIGeneratedPlan) => void;
   patchGeneratedPlan: (patch: Partial<AIGeneratedPlan>) => void;
+  reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
 }
 
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
@@ -350,8 +351,23 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
 
   const resetToDefaults = () => setData(defaultData);
 
+  const reorderExtendedTeam = (oldIndex: number, newIndex: number) => {
+    setData((prev) => {
+      const newExtendedTeam = [...prev.basics.extendedTeam];
+      const [removed] = newExtendedTeam.splice(oldIndex, 1);
+      newExtendedTeam.splice(newIndex, 0, removed);
+      return {
+        ...prev,
+        basics: {
+          ...prev.basics,
+          extendedTeam: newExtendedTeam,
+        },
+      };
+    });
+  };
+
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam }}>
       {children}
     </AccountDataContext.Provider>
   );
