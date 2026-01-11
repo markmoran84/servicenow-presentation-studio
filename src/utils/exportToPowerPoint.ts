@@ -783,7 +783,7 @@ const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
   const leftW = 4.15;
   const rightW = CONTENT_W - leftW - gap;
 
-  // Left: Wheel placeholder + roles
+  // Left: Wheel graphic card
   addCard(pptx, slide, MX, topY, leftW, 3.9, { accentBorder: C.primary });
   slide.addText("The GTM Wheel of Fire", {
     x: MX + 0.15,
@@ -795,40 +795,98 @@ const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
     color: C.primary,
     fontFace: FONT_HEADING,
   });
-  slide.addText("Core team pulls in resources as needed:", {
-    x: MX + 0.15,
-    y: topY + 0.48,
-    w: leftW - 0.3,
-    h: 0.25,
-    fontSize: SMALL_SIZE,
-    color: C.white,
-    fontFace: FONT_BODY,
-  });
 
-  const roles = [
-    "BU Sale",
-    "Inspire Value",
-    "Impact",
-    "Sales Mgmt.",
-    "Elevate",
-    "Prod. Mgmt.",
-    "Marketing",
-    "Exec Sponsor",
+  // Draw the wheel graphic
+  const wheelCenterX = MX + leftW / 2;
+  const wheelCenterY = topY + 2.2;
+  const outerR = 1.35;
+  const innerR = 0.55;
+
+  const outerRoles = [
+    { name: "BU Sales", color: C.accent },
+    { name: "Inspire Value", color: C.primary },
+    { name: "Impact", color: C.purple },
+    { name: "Sales Mgmt.", color: C.warning },
+    { name: "Elevate", color: C.accent },
+    { name: "Prod. Mgmt.", color: C.primary },
+    { name: "Marketing", color: C.purple },
+    { name: "Exec Sponsor", color: C.warning },
   ];
 
-  // Two-column role list
-  const colW = (leftW - 0.4) / 2;
-  roles.forEach((r, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    slide.addText(`• ${r}`, {
-      x: MX + 0.15 + col * colW,
-      y: topY + 0.8 + row * 0.28,
-      w: colW - 0.05,
+  // Draw outer ring segments as pie-like shapes
+  outerRoles.forEach((role, i) => {
+    const segmentAngle = 360 / outerRoles.length;
+    const startAngle = i * segmentAngle - 90;
+    const midAngle = startAngle + segmentAngle / 2;
+    const midRad = (midAngle * Math.PI) / 180;
+
+    // Position label around the wheel
+    const labelR = outerR + 0.25;
+    const labelX = wheelCenterX + Math.cos(midRad) * labelR - 0.5;
+    const labelY = wheelCenterY + Math.sin(midRad) * labelR - 0.1;
+
+    slide.addText(role.name, {
+      x: labelX,
+      y: labelY,
+      w: 1,
       h: 0.22,
-      fontSize: SMALL_SIZE,
-      color: C.muted,
+      fontSize: TINY_SIZE,
+      color: role.color,
       fontFace: FONT_BODY,
+      align: "center",
+    });
+  });
+
+  // Draw outer circle ring
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: wheelCenterX - outerR,
+    y: wheelCenterY - outerR,
+    w: outerR * 2,
+    h: outerR * 2,
+    fill: { color: C.card, transparency: 50 },
+    line: { color: C.primary, width: 1.5, transparency: 30 },
+  });
+
+  // Draw inner circle (Core Team)
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: wheelCenterX - innerR,
+    y: wheelCenterY - innerR,
+    w: innerR * 2,
+    h: innerR * 2,
+    fill: { color: C.primary, transparency: 20 },
+    line: { color: C.primary, width: 2 },
+  });
+
+  slide.addText("Core\nTeam", {
+    x: wheelCenterX - innerR,
+    y: wheelCenterY - 0.2,
+    w: innerR * 2,
+    h: 0.4,
+    fontSize: SMALL_SIZE,
+    bold: true,
+    color: C.primary,
+    fontFace: FONT_HEADING,
+    align: "center",
+    valign: "middle",
+  });
+
+  // Draw connecting lines from center to segments
+  outerRoles.forEach((role, i) => {
+    const segmentAngle = 360 / outerRoles.length;
+    const midAngle = i * segmentAngle - 90 + segmentAngle / 2;
+    const midRad = (midAngle * Math.PI) / 180;
+    
+    const startX = wheelCenterX + Math.cos(midRad) * innerR;
+    const startY = wheelCenterY + Math.sin(midRad) * innerR;
+    const endX = wheelCenterX + Math.cos(midRad) * (outerR - 0.15);
+    const endY = wheelCenterY + Math.sin(midRad) * (outerR - 0.15);
+
+    slide.addShape(pptx.ShapeType.line, {
+      x: startX,
+      y: startY,
+      w: endX - startX,
+      h: endY - startY,
+      line: { color: role.color, width: 1, transparency: 50 },
     });
   });
 
