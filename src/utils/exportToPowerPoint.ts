@@ -796,11 +796,12 @@ const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
     fontFace: FONT_HEADING,
   });
 
-  // Draw the wheel graphic
+  // Draw the wheel graphic - matching the UI exactly
   const wheelCenterX = MX + leftW / 2;
-  const wheelCenterY = topY + 2.2;
-  const outerR = 1.35;
-  const innerR = 0.55;
+  const wheelCenterY = topY + 2.15;
+  const outerR = 1.25;    // Outer ring edge
+  const middleR = 0.9;    // Middle ring (dark gap)
+  const innerR = 0.52;    // Core team circle
 
   const outerRoles = [
     { name: "BU Sales", color: C.accent },
@@ -813,80 +814,116 @@ const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
     { name: "Exec Sponsor", color: C.warning },
   ];
 
-  // Draw outer ring segments as pie-like shapes
-  outerRoles.forEach((role, i) => {
-    const segmentAngle = 360 / outerRoles.length;
-    const startAngle = i * segmentAngle - 90;
-    const midAngle = startAngle + segmentAngle / 2;
-    const midRad = (midAngle * Math.PI) / 180;
+  // Active segments (static snapshot for export - showing a typical scenario)
+  const activeSegments = [0, 2, 5, 7];
 
-    // Position label around the wheel
-    const labelR = outerR + 0.25;
-    const labelX = wheelCenterX + Math.cos(midRad) * labelR - 0.5;
-    const labelY = wheelCenterY + Math.sin(midRad) * labelR - 0.1;
-
-    slide.addText(role.name, {
-      x: labelX,
-      y: labelY,
-      w: 1,
-      h: 0.22,
-      fontSize: TINY_SIZE,
-      color: role.color,
-      fontFace: FONT_BODY,
-      align: "center",
-    });
-  });
-
-  // Draw outer circle ring
+  // Draw outer ring (dark background)
   slide.addShape(pptx.ShapeType.ellipse, {
     x: wheelCenterX - outerR,
     y: wheelCenterY - outerR,
     w: outerR * 2,
     h: outerR * 2,
-    fill: { color: C.card, transparency: 50 },
-    line: { color: C.primary, width: 1.5, transparency: 30 },
+    fill: { color: "0A1525" },
+    line: { color: C.border, width: 1 },
   });
 
-  // Draw inner circle (Core Team)
+  // Draw middle dark ring
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: wheelCenterX - middleR,
+    y: wheelCenterY - middleR,
+    w: middleR * 2,
+    h: middleR * 2,
+    fill: { color: "0A1525" },
+    line: { color: "1E3A5F", width: 2 },
+  });
+
+  // Draw segment indicator lines (from middle ring outward)
+  outerRoles.forEach((role, i) => {
+    const segmentAngle = 360 / outerRoles.length;
+    const midAngle = i * segmentAngle - 90;
+    const midRad = (midAngle * Math.PI) / 180;
+    const isActive = activeSegments.includes(i);
+    
+    // Line from middle ring to outer ring
+    const startX = wheelCenterX + Math.cos(midRad) * middleR;
+    const startY = wheelCenterY + Math.sin(midRad) * middleR;
+    const endX = wheelCenterX + Math.cos(midRad) * outerR;
+    const endY = wheelCenterY + Math.sin(midRad) * outerR;
+
+    slide.addShape(pptx.ShapeType.line, {
+      x: startX,
+      y: startY,
+      w: endX - startX === 0 ? 0.001 : endX - startX,
+      h: endY - startY === 0 ? 0.001 : endY - startY,
+      line: { color: isActive ? C.primary : "1E3A5F", width: isActive ? 2 : 1 },
+    });
+  });
+
+  // Draw arrows from core to middle ring
+  outerRoles.forEach((role, i) => {
+    const segmentAngle = 360 / outerRoles.length;
+    const midAngle = i * segmentAngle - 90;
+    const midRad = (midAngle * Math.PI) / 180;
+    const isActive = activeSegments.includes(i);
+    
+    const startX = wheelCenterX + Math.cos(midRad) * (innerR + 0.08);
+    const startY = wheelCenterY + Math.sin(midRad) * (innerR + 0.08);
+    const endX = wheelCenterX + Math.cos(midRad) * (middleR - 0.08);
+    const endY = wheelCenterY + Math.sin(midRad) * (middleR - 0.08);
+
+    slide.addShape(pptx.ShapeType.line, {
+      x: startX,
+      y: startY,
+      w: endX - startX === 0 ? 0.001 : endX - startX,
+      h: endY - startY === 0 ? 0.001 : endY - startY,
+      line: { color: isActive ? C.primary : "374151", width: isActive ? 2 : 1 },
+    });
+  });
+
+  // Draw Core Team circle (solid green)
   slide.addShape(pptx.ShapeType.ellipse, {
     x: wheelCenterX - innerR,
     y: wheelCenterY - innerR,
     w: innerR * 2,
     h: innerR * 2,
-    fill: { color: C.primary, transparency: 20 },
-    line: { color: C.primary, width: 2 },
+    fill: { color: "34D399" },
+    line: { color: "6EE7B7", width: 2 },
   });
 
+  // Core Team text
   slide.addText("Core\nTeam", {
     x: wheelCenterX - innerR,
-    y: wheelCenterY - 0.2,
+    y: wheelCenterY - 0.18,
     w: innerR * 2,
-    h: 0.4,
-    fontSize: SMALL_SIZE,
+    h: 0.38,
+    fontSize: 10,
     bold: true,
-    color: C.primary,
+    color: "065F46", // Dark green text
     fontFace: FONT_HEADING,
     align: "center",
     valign: "middle",
   });
 
-  // Draw connecting lines from center to segments
+  // Role labels positioned around the wheel
   outerRoles.forEach((role, i) => {
     const segmentAngle = 360 / outerRoles.length;
-    const midAngle = i * segmentAngle - 90 + segmentAngle / 2;
+    const midAngle = i * segmentAngle - 90;
     const midRad = (midAngle * Math.PI) / 180;
+    const isActive = activeSegments.includes(i);
     
-    const startX = wheelCenterX + Math.cos(midRad) * innerR;
-    const startY = wheelCenterY + Math.sin(midRad) * innerR;
-    const endX = wheelCenterX + Math.cos(midRad) * (outerR - 0.15);
-    const endY = wheelCenterY + Math.sin(midRad) * (outerR - 0.15);
+    const labelR = outerR + 0.18;
+    const labelX = wheelCenterX + Math.cos(midRad) * labelR - 0.45;
+    const labelY = wheelCenterY + Math.sin(midRad) * labelR - 0.08;
 
-    slide.addShape(pptx.ShapeType.line, {
-      x: startX,
-      y: startY,
-      w: endX - startX,
-      h: endY - startY,
-      line: { color: role.color, width: 1, transparency: 50 },
+    slide.addText(role.name, {
+      x: labelX,
+      y: labelY,
+      w: 0.9,
+      h: 0.2,
+      fontSize: TINY_SIZE,
+      color: isActive ? C.white : C.muted,
+      fontFace: FONT_BODY,
+      align: "center",
     });
   });
 
