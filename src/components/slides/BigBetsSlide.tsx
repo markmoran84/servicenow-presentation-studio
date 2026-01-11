@@ -118,14 +118,14 @@ export const BigBetsSlide = () => {
                 <div className="absolute top-5 left-8 right-8 h-0.5 bg-gradient-to-r from-primary via-primary to-primary/50" />
                 <div className="flex items-center justify-between relative">
                   {executives.map((exec) => (
-                    <div key={exec.name} className="flex flex-col items-center text-center">
+                    <div key={exec.name || 'exec'} className="flex flex-col items-center text-center">
                       <div className="w-10 h-10 rounded-full bg-background border-2 border-primary flex items-center justify-center mb-1 z-10">
                         <span className="text-xs font-bold text-foreground">
-                          {exec.name.split(' ').map(n => n[0]).join('')}
+                          {(exec.name || '').split(' ').filter(Boolean).map(n => n[0] || '').join('')}
                         </span>
                       </div>
-                      <span className="text-[10px] font-semibold text-foreground">{exec.name}</span>
-                      <span className="text-[9px] text-muted-foreground">{exec.role}</span>
+                      <span className="text-[10px] font-semibold text-foreground">{exec.name || 'TBD'}</span>
+                      <span className="text-[9px] text-muted-foreground">{exec.role || 'Executive'}</span>
                     </div>
                   ))}
                 </div>
@@ -211,16 +211,16 @@ export const BigBetsSlide = () => {
                       <span className="text-[10px] font-bold text-primary uppercase tracking-wider">People</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {stream.people.slice(0, 4).map((person) => (
-                        <div key={person.name} className="flex items-center gap-2">
+                      {stream.people.slice(0, 4).map((person, pIdx) => (
+                        <div key={person?.name || `person-${pIdx}`} className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-background border border-primary/50 flex items-center justify-center flex-shrink-0">
                             <span className="text-[8px] font-bold text-foreground">
-                              {person.name.split(' ').map(n => n[0]).join('')}
+                              {(person?.name || '').split(' ').filter(Boolean).map(n => n[0] || '').join('')}
                             </span>
                           </div>
                           <div className="min-w-0">
-                            <span className="text-[10px] font-medium text-foreground block truncate">{person.name}</span>
-                            <span className="text-[9px] text-muted-foreground block truncate">{person.role}</span>
+                            <span className="text-[10px] font-medium text-foreground block truncate">{person?.name || 'TBD'}</span>
+                            <span className="text-[9px] text-muted-foreground block truncate">{person?.role || 'Team Member'}</span>
                           </div>
                         </div>
                       ))}
