@@ -197,12 +197,15 @@ STEP 3: EXECUTIVE SUMMARY
 - Include: company name (as extracted), industry/what they do, and key facts
 - DO NOT describe "the document" - describe the COMPANY
 
-STEP 4: STRATEGY EXTRACTION
-- Look for sections titled "Strategy", "Our Priorities", "CEO Letter", etc.
-- Extract strategy names VERBATIM (e.g., "Transform to Grow" not "Growth Strategy")
-- IMPORTANT: Keep CORPORATE strategy and DIGITAL/AI strategy distinct. DO NOT copy the same items into both lists.
-- DIGITAL/AI strategy must be explicitly about technology/digital/AI/data/automation. If none are explicitly stated, return an empty list.
-- Include the exact language used by executives
+STEP 4: STRATEGY EXTRACTION (THIS IS THE PART YOU KEEP GETTING WRONG)
+- Ignore business units/segments, service lines, and org structure. Examples of what is NOT a strategy: "Ocean", "Logistics & Services", "Terminals", "Air", "Supply Chain".
+- Find ENTERPRISE-WIDE strategic priorities/pillars/initiatives (often phrased as action statements).
+- Prefer headings/bullets that start with an action verb: Strengthen / Drive / Accelerate / Transform / Improve / Expand / Enable / Modernize.
+- CORPORATE strategy: customer/growth/efficiency/sustainability/network excellence themes (enterprise-level, not segments).
+- DIGITAL/AI strategy: ONLY items explicitly about technology, digital, data, AI, automation, platform, cloud, cybersecurity, IT.
+- CEO/Board priorities: ONLY priorities explicitly attributed to CEO/Chair/Board communication (CEO letter, chairman statement, investor day).
+- If you cannot find clear items in the text for a category, return an empty array for that category.
+- Use the report’s language, but you may convert noun phrases into action statements if that better matches how the report describes intent.
 
 STEP 5: PAIN POINTS & OPPORTUNITIES
 - Derive from explicitly stated challenges, risks, or strategic gaps
@@ -278,24 +281,40 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Corporate strategy pillar name using their exact terminology (business/growth/operations)." },
-                        description: { type: "string", description: "1-2 sentences explaining the corporate strategy pillar (use only what is explicitly stated)." }
+                        title: {
+                          type: "string",
+                          description:
+                            "ENTERPRISE corporate strategy theme written as an action statement (start with a verb). Must not be a business unit/segment name. Example: 'Strengthen customer focus'.",
+                        },
+                        description: {
+                          type: "string",
+                          description:
+                            "2-3 sentences explaining what the report says about this theme and why it matters (can include completing phrase like 'and profitable growth').",
+                        },
                       },
-                      required: ["title", "description"]
+                      required: ["title", "description"],
                     }, 
-                    description: "3-5 core CORPORATE strategy pillars with descriptions. Must not overlap with digitalStrategies." 
+                    description: "0-6 CORPORATE strategy themes (enterprise-level). Do NOT list segments/business units. Must not overlap with digitalStrategies." 
                   },
                   digitalStrategies: { 
                     type: "array", 
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "Digital/AI strategy initiative name (must explicitly reference technology, digital, AI, data, automation, platform, cybersecurity, cloud, etc.)." },
-                        description: { type: "string", description: "1-2 sentences explaining the digital/technology initiative (use only what is explicitly stated)." }
+                        title: {
+                          type: "string",
+                          description:
+                            "DIGITAL/TECH strategy theme as an action statement. MUST explicitly reference technology/digital/data/AI/automation/platform/cloud/cyber/IT.",
+                        },
+                        description: { 
+                          type: "string",
+                          description:
+                            "1-2 sentences describing the digital initiative as stated in the report. If not explicitly stated, do not invent.",
+                        },
                       },
-                      required: ["title", "description"]
+                      required: ["title", "description"],
                     }, 
-                    description: "0-4 DIGITAL/AI strategy initiatives with descriptions. If none are explicitly stated, return an empty array. Must not duplicate corporateStrategy." 
+                    description: "0-6 DIGITAL/AI strategy themes. If none are explicitly stated, return an empty array. Must not duplicate corporateStrategy." 
                   },
                   ceoBoardPriorities: { 
                     type: "array", 
@@ -454,6 +473,57 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
       console.error("Failed to parse tool arguments:", toolCall.function.arguments?.substring(0, 500));
       throw new Error("Failed to parse AI response data");
     }
+
+    // Post-process strategy lists to avoid the common failure mode where the model
+    // confuses business units/segments for strategies (e.g., "Ocean", "Logistics & Services").
+    type StrategyItem = { title: string; description: string };
+
+    const normalizeKey = (s: { title?: string; description?: string }) =>
+      `${(s.title ?? "").trim().toLowerCase().replace(/\s+/g, " ")}||${(s.description ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ")}`;
+
+    const toStrategyArray = (val: unknown): StrategyItem[] =>
+      Array.isArray(val)
+        ? (val as any[])
+            .map((it) => ({ title: String(it?.title ?? ""), description: String(it?.description ?? "") }))
+            .map((it) => ({ title: it.title.trim(), description: it.description.trim() }))
+            .filter((it) => it.title.length > 0 || it.description.length > 0)
+        : [];
+
+    const dedupe = (items: StrategyItem[]) => {
+      const seen = new Set<string>();
+      return items.filter((it) => {
+        const key = normalizeKey(it);
+        if (key === "||") return false;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+
+    const verbStart = /^(strengthen|drive|accelerate|transform|improve|expand|enable|moderni[sz]e|optimi[sz]e|increase|reduce|build|grow|scale|deliver|advance|reinvent|simplif(y|y)|unif(y|y)|protect|sustain|decarboni[sz]e)\b/i;
+    const digitalSignals = /(digital|technology|tech|ai|artificial intelligence|data|analytics|automation|platform|cloud|cyber|cybersecurity|it\b|systems|moderni[sz]ation)/i;
+
+    const corporateRaw = dedupe(toStrategyArray((extractedData as any).corporateStrategy));
+    const digitalRaw = dedupe(toStrategyArray((extractedData as any).digitalStrategies));
+
+    // Filter digital list to items that actually read like digital/tech initiatives.
+    const digitalFiltered = digitalRaw.filter((it) => digitalSignals.test(`${it.title} ${it.description}`));
+
+    // Prefer corporate themes that are action statements; segment-like noun labels tend to fail this.
+    // (We do not force-empty if none match; we keep the raw list as fallback so the user can edit.)
+    const corporatePreferred = corporateRaw.filter((it) => verbStart.test(it.title));
+    const corporateFinal = corporatePreferred.length > 0 ? corporatePreferred : corporateRaw;
+
+    // Prevent corporate items from being duplicated into digital.
+    const corporateKeys = new Set(corporateFinal.map(normalizeKey));
+    const digitalFinal = digitalFiltered.filter((it) => !corporateKeys.has(normalizeKey(it)));
+
+    (extractedData as any).corporateStrategy = corporateFinal;
+    (extractedData as any).digitalStrategies = digitalFinal;
+
     const companyName = extractedData.accountName || "";
 
     // Track data sources
