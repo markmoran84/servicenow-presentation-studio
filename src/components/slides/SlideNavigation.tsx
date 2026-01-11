@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Loader2, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Camera, FileText } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
 import { captureElementAsImage, createPowerPointFromImages } from "@/utils/captureSlides";
 import { useAccountData } from "@/context/AccountDataContext";
 import { toast } from "sonner";
+import { jsPDF } from "jspdf";
 
 interface SlideNavigationProps {
   currentSlide: number;
@@ -31,7 +32,7 @@ export const SlideNavigation = ({
 }: SlideNavigationProps) => {
   const { data } = useAccountData();
   const [isExporting, setIsExporting] = useState(false);
-  const [exportMode, setExportMode] = useState<"shapes" | "images">("images");
+  const [exportMode, setExportMode] = useState<"shapes" | "images" | "pdf">("images");
 
   const handleExportImages = async () => {
     if (isExporting || !onExportSlide) return;
@@ -102,8 +103,70 @@ export const SlideNavigation = ({
     }
   };
 
+  const handleExportPDF = async () => {
+    if (isExporting || !onExportSlide) return;
+
+    setIsExporting(true);
+    const toastId = toast.loading("Capturing slides for PDF…");
+
+    try {
+      onExportStart?.();
+      
+      const images: string[] = [];
+      const exportableSlides = slideLabels.slice(1);
+      
+      for (let i = 1; i < totalSlides; i++) {
+        toast.loading(`Capturing slide ${i} of ${totalSlides - 1}…`, { id: toastId });
+        await onExportSlide(i);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const element = getSlideElement?.();
+        if (element) {
+          try {
+            const imageData = await captureElementAsImage(element);
+            images.push(imageData);
+          } catch (err) {
+            console.error(`Failed to capture slide ${i}:`, err);
+            images.push("");
+          }
+        } else {
+          images.push("");
+        }
+      }
+
+      toast.loading("Generating PDF…", { id: toastId });
+      
+      // Create PDF in landscape 16:9 format
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "in",
+        format: [10, 5.625], // 16:9 aspect ratio
+      });
+
+      images.forEach((imgData, index) => {
+        if (index > 0) pdf.addPage([10, 5.625], "landscape");
+        if (imgData) {
+          pdf.addImage(imgData, "PNG", 0, 0, 10, 5.625);
+        }
+      });
+
+      const accountName = data.basics.accountName || "Account";
+      pdf.save(`${accountName}_Account_Plan.pdf`);
+      
+      toast.success("PDF downloaded!", { id: toastId });
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      toast.error("Export failed — check console for details.", { id: toastId });
+    } finally {
+      setIsExporting(false);
+      onExportEnd?.();
+    }
+  };
+
   const handleExport = () => {
-    if (exportMode === "images" && onExportSlide) {
+    if (exportMode === "pdf" && onExportSlide) {
+      handleExportPDF();
+    } else if (exportMode === "images" && onExportSlide) {
       handleExportImages();
     } else {
       handleExportShapes();
@@ -162,7 +225,7 @@ export const SlideNavigation = ({
               ? "bg-primary text-white"
               : "text-white/60 hover:text-white"
           }`}
-          title="Pixel-perfect export (as images)"
+          title="Pixel-perfect PowerPoint (as images)"
         >
           <Camera className="w-3 h-3" />
         </button>
@@ -174,9 +237,21 @@ export const SlideNavigation = ({
               ? "bg-primary text-white"
               : "text-white/60 hover:text-white"
           }`}
-          title="Editable export (shapes/text)"
+          title="Editable PowerPoint (shapes/text)"
         >
           Edit
+        </button>
+        <button
+          onClick={() => setExportMode("pdf")}
+          disabled={isExporting}
+          className={`px-2 py-1 rounded-full text-xs transition-all ${
+            exportMode === "pdf"
+              ? "bg-primary text-white"
+              : "text-white/60 hover:text-white"
+          }`}
+          title="Export as PDF"
+        >
+          <FileText className="w-3 h-3" />
         </button>
       </div>
 
