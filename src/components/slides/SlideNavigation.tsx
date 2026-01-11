@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Loader2, Camera, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Camera, FileText, Shapes } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
 import { captureElementAsImage, createPowerPointFromImages } from "@/utils/captureSlides";
+import { exportToVectorPDF } from "@/utils/exportToPDF";
 import { useAccountData } from "@/context/AccountDataContext";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
@@ -32,7 +33,7 @@ export const SlideNavigation = ({
 }: SlideNavigationProps) => {
   const { data } = useAccountData();
   const [isExporting, setIsExporting] = useState(false);
-  const [exportMode, setExportMode] = useState<"shapes" | "images" | "pdf">("images");
+  const [exportMode, setExportMode] = useState<"shapes" | "images" | "pdf" | "vectorPdf">("images");
 
   const handleExportImages = async () => {
     if (isExporting || !onExportSlide) return;
@@ -172,8 +173,27 @@ export const SlideNavigation = ({
     }
   };
 
+  const handleExportVectorPDF = async () => {
+    if (isExporting) return;
+
+    setIsExporting(true);
+    const toastId = toast.loading("Generating vector PDF…");
+
+    try {
+      await exportToVectorPDF(data);
+      toast.success("Vector PDF downloaded.", { id: toastId });
+    } catch (err) {
+      console.error("Vector PDF export failed:", err);
+      toast.error("Export failed — check console for details.", { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleExport = () => {
-    if (exportMode === "pdf" && onExportSlide) {
+    if (exportMode === "vectorPdf") {
+      handleExportVectorPDF();
+    } else if (exportMode === "pdf" && onExportSlide) {
       handleExportPDF();
     } else if (exportMode === "images" && onExportSlide) {
       handleExportImages();
@@ -258,9 +278,21 @@ export const SlideNavigation = ({
               ? "bg-primary text-white"
               : "text-white/60 hover:text-white"
           }`}
-          title="Export as PDF"
+          title="PDF (Screenshots)"
         >
           <FileText className="w-3 h-3" />
+        </button>
+        <button
+          onClick={() => setExportMode("vectorPdf")}
+          disabled={isExporting}
+          className={`px-2 py-1 rounded-full text-xs transition-all ${
+            exportMode === "vectorPdf"
+              ? "bg-primary text-white"
+              : "text-white/60 hover:text-white"
+          }`}
+          title="Editable PDF (Vector shapes & text)"
+        >
+          <Shapes className="w-3 h-3" />
         </button>
       </div>
 
