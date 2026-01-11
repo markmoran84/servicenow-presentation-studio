@@ -10,6 +10,7 @@ import { AccountStrategySlide } from "@/components/slides/AccountStrategySlide";
 import { FY1RetrospectiveSlide } from "@/components/slides/FY1RetrospectiveSlide";
 import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
+import AgileTeamModelSlide from "@/components/slides/AgileTeamModelSlide";
 import { SWOTSlide } from "@/components/slides/SWOTSlide";
 import { CoreValueDriversSlide } from "@/components/slides/CoreValueDriversSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
@@ -34,7 +35,8 @@ const slides = [
   { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
   { component: StrategicAlignmentSlide, label: "6. Strategic Alignment" },
   { component: AccountTeamSlide, label: "7. Account Team" },
-  { component: SWOTSlide, label: "8. SWOT Analysis" },
+  { component: AgileTeamModelSlide, label: "8. Agile Team Model" },
+  { component: SWOTSlide, label: "9. SWOT Analysis" },
   { component: CoreValueDriversSlide, label: "9. Value Drivers" },
   { component: BigBetsSlide, label: "10. Key Workstreams" },
   { component: WorkstreamDetailSlide, label: "11. Workstream Detail" },
