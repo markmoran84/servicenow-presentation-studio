@@ -121,9 +121,6 @@ export function RegenerateSectionButton({
   const { data, patchGeneratedPlan } = useAccountData();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Only show the button once an AI plan exists (so "regenerate" is meaningful)
-  if (!data.generatedPlan) return null;
-
   const meta = sectionMeta[section];
 
   const hasSection = useMemo(() => {
