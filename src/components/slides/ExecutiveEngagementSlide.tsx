@@ -151,46 +151,122 @@ export const ExecutiveEngagementSlide = () => {
         </div>
 
         {/* Org Chart Layout */}
-        <div className="space-y-6">
+        <div className="relative">
           {/* Top Level - CEO */}
           {topExecutive && (
-            <div className="flex justify-center mb-2">
-              <div className="w-64">
+            <div className="flex justify-center mb-0">
+              <div className="w-64 relative z-10">
                 <StakeholderCard stakeholder={topExecutive} isTopLevel />
               </div>
             </div>
           )}
 
-          {/* Connecting Lines Container */}
-          <div className="relative">
-            {/* Vertical line from CEO */}
-            <div className="absolute top-0 left-1/2 w-px h-6 bg-border/50 -translate-x-1/2 -translate-y-6" />
+          {/* SVG Connector Lines */}
+          <svg 
+            className="absolute inset-0 w-full h-full pointer-events-none" 
+            style={{ zIndex: 0 }}
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <pattern id="dashed" patternUnits="userSpaceOnUse" width="8" height="1">
+                <line x1="0" y1="0" x2="4" y2="0" stroke="currentColor" strokeWidth="1" className="text-border/60" />
+              </pattern>
+            </defs>
             
-            {/* Horizontal connector */}
-            <div className="absolute top-0 left-[10%] right-[10%] h-px bg-border/40 border-dashed border-t" />
+            {/* Vertical line from CEO down */}
+            <line 
+              x1="50%" y1="140" x2="50%" y2="180" 
+              stroke="currentColor" 
+              strokeWidth="1" 
+              strokeDasharray="4 4"
+              className="text-border/60"
+            />
             
-            {/* Grid of stakeholder cards */}
-            <div className="space-y-4 pt-2">
-              {rows.map((row, rowIndex) => (
-                <div 
-                  key={rowIndex} 
-                  className="grid gap-4"
-                  style={{ 
-                    gridTemplateColumns: `repeat(${Math.min(row.length, 6)}, minmax(0, 1fr))`,
-                  }}
-                >
-                  {row.map((stakeholder, idx) => (
-                    <div key={idx} className="relative">
-                      {/* Vertical connector line */}
-                      {rowIndex === 0 && (
-                        <div className="absolute -top-2 left-1/2 w-px h-2 bg-border/40 -translate-x-1/2" />
-                      )}
-                      <StakeholderCard stakeholder={stakeholder} />
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+            {/* Main horizontal connector line */}
+            <line 
+              x1="8%" y1="180" x2="92%" y2="180" 
+              stroke="currentColor" 
+              strokeWidth="1" 
+              strokeDasharray="4 4"
+              className="text-border/60"
+            />
+            
+            {/* Vertical drops to first row - 6 columns */}
+            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+              <line 
+                key={`row1-${i}`}
+                x1={`${x}%`} y1="180" x2={`${x}%`} y2="200" 
+                stroke="currentColor" 
+                strokeWidth="1" 
+                strokeDasharray="4 4"
+                className="text-border/60"
+              />
+            ))}
+
+            {/* Connector between row 1 and row 2 */}
+            <line 
+              x1="8%" y1="355" x2="92%" y2="355" 
+              stroke="currentColor" 
+              strokeWidth="1" 
+              strokeDasharray="4 4"
+              className="text-border/40"
+            />
+            
+            {/* Vertical drops to second row */}
+            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+              <line 
+                key={`row2-${i}`}
+                x1={`${x}%`} y1="355" x2={`${x}%`} y2="375" 
+                stroke="currentColor" 
+                strokeWidth="1" 
+                strokeDasharray="4 4"
+                className="text-border/40"
+              />
+            ))}
+
+            {/* Connector between row 2 and row 3 */}
+            <line 
+              x1="8%" y1="530" x2="92%" y2="530" 
+              stroke="currentColor" 
+              strokeWidth="1" 
+              strokeDasharray="4 4"
+              className="text-border/30"
+            />
+            
+            {/* Vertical drops to third row */}
+            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+              <line 
+                key={`row3-${i}`}
+                x1={`${x}%`} y1="530" x2={`${x}%`} y2="550" 
+                stroke="currentColor" 
+                strokeWidth="1" 
+                strokeDasharray="4 4"
+                className="text-border/30"
+              />
+            ))}
+          </svg>
+
+          {/* Grid of stakeholder cards */}
+          <div className="relative z-10 space-y-4 pt-10">
+            {rows.map((row, rowIndex) => (
+              <div 
+                key={rowIndex} 
+                className="grid gap-4"
+                style={{ 
+                  gridTemplateColumns: `repeat(6, minmax(0, 1fr))`,
+                }}
+              >
+                {row.map((stakeholder, idx) => (
+                  <div key={idx} className="relative">
+                    <StakeholderCard stakeholder={stakeholder} />
+                  </div>
+                ))}
+                {/* Fill empty cells to maintain 6-column grid */}
+                {Array.from({ length: 6 - row.length }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+              </div>
+            ))}
           </div>
         </div>
 
