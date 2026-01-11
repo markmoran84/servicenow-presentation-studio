@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useAccountData } from "@/context/AccountDataContext";
+import { useAccountData, AccountData } from "@/context/AccountDataContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { MessageSquare, Send, Loader2, Copy, Check, Sparkles, X } from "lucide-react";
+import { MessageSquare, Send, Loader2, Copy, Check, Sparkles, X, Zap, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -12,15 +12,23 @@ interface Message {
   content: string;
 }
 
+interface FieldUpdateCommand {
+  section: keyof AccountData;
+  field: string;
+  value: unknown;
+  action: "set" | "append" | "replace";
+}
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/account-chat`;
 
 export const AIChatAssistant = () => {
-  const { data } = useAccountData();
+  const { data, updateData } = useAccountData();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [appliedCommands, setAppliedCommands] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -137,8 +145,130 @@ export const AIChatAssistant = () => {
     return match ? match[1].trim() : null;
   };
 
+  // Extract field update commands from AI response
+  const extractFieldUpdates = (content: string): FieldUpdateCommand[] => {
+    const commands: FieldUpdateCommand[] = [];
+    const regex = /```fieldupdate\s*([\s\S]*?)```/gi;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      try {
+        const parsed = JSON.parse(match[1].trim());
+        if (parsed.section && parsed.field && parsed.value !== undefined) {
+          commands.push({
+            section: parsed.section as keyof AccountData,
+            field: parsed.field,
+            value: parsed.value,
+            action: parsed.action || "set"
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse field update command:", e);
+      }
+    }
+    return commands;
+  };
+
+  // Apply field update to account data
+  const applyFieldUpdate = (command: FieldUpdateCommand, messageIndex: number) => {
+    const commandKey = `${messageIndex}-${command.section}-${command.field}`;
+    
+    try {
+      const currentSection = data[command.section];
+      if (!currentSection) {
+        toast.error(`Section "${command.section}" not found`);
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const currentValue = (currentSection as any)[command.field];
+      let newValue: unknown;
+
+      if (command.action === "append" && Array.isArray(currentValue)) {
+        // Append to existing array
+        const appendValue = Array.isArray(command.value) ? command.value : [command.value];
+        newValue = [...currentValue, ...appendValue];
+      } else {
+        // Set/replace the value
+        newValue = command.value;
+      }
+
+      updateData(command.section, { [command.field]: newValue });
+      setAppliedCommands(prev => new Set([...prev, commandKey]));
+      toast.success(`Updated ${command.section}.${command.field}`);
+    } catch (e) {
+      console.error("Failed to apply field update:", e);
+      toast.error("Failed to apply update");
+    }
+  };
+
+  // Render message content with field update buttons
+  const renderMessageContent = (content: string, messageIndex: number) => {
+    const commands = extractFieldUpdates(content);
+    
+    // Remove the fieldupdate code blocks from display
+    const cleanContent = content.replace(/```fieldupdate[\s\S]*?```/gi, '').trim();
+    
+    return (
+      <>
+        <div className="text-sm whitespace-pre-wrap">{cleanContent}</div>
+        {commands.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {commands.map((cmd, cmdIndex) => {
+              const commandKey = `${messageIndex}-${cmd.section}-${cmd.field}`;
+              const isApplied = appliedCommands.has(commandKey);
+              const valuePreview = typeof cmd.value === 'string' 
+                ? cmd.value.slice(0, 50) + (cmd.value.length > 50 ? '...' : '')
+                : Array.isArray(cmd.value) 
+                  ? `${cmd.value.length} item(s)`
+                  : JSON.stringify(cmd.value).slice(0, 50);
+              
+              return (
+                <div 
+                  key={cmdIndex}
+                  className="bg-background/60 rounded-lg p-3 border border-border/50"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-medium text-primary flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        {cmd.action === "append" ? "Add to" : "Set"} {cmd.section}.{cmd.field}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate mt-0.5">
+                        {valuePreview}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={isApplied ? "secondary" : "default"}
+                      className="h-7 text-xs shrink-0"
+                      onClick={() => applyFieldUpdate(cmd, messageIndex)}
+                      disabled={isApplied}
+                    >
+                      {isApplied ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Applied
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-3 w-3 mr-1" />
+                          Apply
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </>
+    );
+  };
+
   const clearChat = () => {
     setMessages([]);
+    setAppliedCommands(new Set());
     toast.success("Chat cleared");
   };
 
@@ -209,7 +339,11 @@ export const AIChatAssistant = () => {
                       : "bg-secondary/70 text-foreground"
                   }`}
                 >
-                  <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+                  {message.role === "assistant" ? (
+                    renderMessageContent(message.content, index)
+                  ) : (
+                    <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+                  )}
                   {message.role === "assistant" && (
                     <div className="flex gap-2 mt-2 pt-2 border-t border-border/30">
                       <Button
@@ -285,7 +419,7 @@ export const AIChatAssistant = () => {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            Copy suggestions and paste them into any form field
+            Ask to populate fields directly — click "Apply" to update forms
           </p>
         </div>
       </SheetContent>

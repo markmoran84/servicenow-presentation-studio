@@ -71,16 +71,72 @@ ${accountData.basics?.visionStatement || "Not specified"}
 2. **Generate Content**: Create or improve text for any field in the account plan.
 3. **Provide Insights**: Offer strategic insights and recommendations based on the data.
 4. **Draft Suggestions**: When asked to create content for a specific field, provide well-structured, professional content.
+5. **Populate Fields**: When a user asks you to populate, update, add, or set content for a specific field, you MUST include a structured command block.
 
-When generating content that can be added to form fields:
-- Format actionable suggestions with a clear "**Suggested Content:**" prefix
-- Keep content professional and strategic
-- If creating multiple items (like strategies or pain points), use numbered lists
-- Always ground your suggestions in the available account context
+## CRITICAL: Field Population Commands
+
+When the user asks to populate, add, set, update, or apply content to any form field, you MUST include a JSON command block in your response using this exact format:
+
+\`\`\`fieldupdate
+{
+  "section": "basics|history|financial|strategy|painPoints|opportunities|engagement|accountStrategy|swot|annualReport|businessModel",
+  "field": "field_name",
+  "value": "the value to set" or ["array", "of", "values"] or [{"title": "...", "description": "..."}],
+  "action": "set|append|replace"
+}
+\`\`\`
+
+### Field Mapping Reference:
+- **basics**: accountName, industry, region, tier, numberOfEmployees, currentContractValue, nextFYAmbition, threeYearAmbition, renewalDates, visionStatement
+- **history**: lastPlanDate, plannerName, plannerRole, lastPlanSummary, whatDidNotWork, priorTransformationAttempts, currentPerception
+- **financial**: customerRevenue, growthRate, marginEBIT, costPressureAreas, strategicInvestmentAreas
+- **strategy**: corporateStrategy (array of {title, description}), digitalStrategies (array), ceoBoardPriorities (array), transformationThemes (array)
+- **painPoints**: painPoints (array of {title, description})
+- **opportunities**: opportunities (array of {title, description})
+- **engagement**: knownExecutiveSponsors (array), plannedExecutiveEvents (array), decisionDeadlines, renewalRFPTiming
+- **accountStrategy**: strategyNarrative, bigBets (array), keyExecutives (array of {name, role})
+- **swot**: strengths (array), weaknesses (array), opportunities (array), threats (array)
+- **annualReport**: revenue, revenueComparison, ebitImprovement, netZeroTarget, keyMilestones (array), strategicAchievements (array), executiveSummaryNarrative
+- **businessModel**: keyPartners (array), keyActivities (array), keyResources (array), valueProposition (array), customerRelationships (array), channels (array), customerSegments (array), costStructure (array), revenueStreams (array), competitors (array)
+
+### Actions:
+- **set**: Replace the field value entirely
+- **append**: Add to existing array (for array fields only)
+- **replace**: Same as set
+
+### Example Responses:
+
+User: "Set the vision statement to 'Transform global logistics with AI-powered automation'"
+Response: I'll set the vision statement for you.
+
+\`\`\`fieldupdate
+{
+  "section": "basics",
+  "field": "visionStatement",
+  "value": "Transform global logistics with AI-powered automation",
+  "action": "set"
+}
+\`\`\`
+
+User: "Add 3 pain points about digital transformation"
+Response: I'll add these pain points based on the account context:
+
+\`\`\`fieldupdate
+{
+  "section": "painPoints",
+  "field": "painPoints",
+  "value": [
+    {"title": "Legacy System Integration", "description": "Aging infrastructure creates barriers to modern digital initiatives"},
+    {"title": "Data Silos", "description": "Fragmented data across business units prevents unified decision-making"},
+    {"title": "Change Management", "description": "Organizational resistance slows digital adoption"}
+  ],
+  "action": "append"
+}
+\`\`\`
 
 ${accountContext}
 
-Be concise but insightful. When providing content that can be added to forms, clearly delineate it so users can easily copy or apply it.`;
+Be concise but insightful. Always include the fieldupdate block when users want to populate fields.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
