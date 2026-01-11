@@ -21,12 +21,34 @@ export const CustomerStrategySlide = () => {
   const isAIGenerated = strategicPillars.length > 0;
 
   // Fallback to raw input data if no AI synthesis
-  const corporate = (strategy.corporateStrategy ?? []).filter(
+  const normalizeKey = (s: { title?: string; description?: string }) =>
+    `${(s.title ?? "").trim().toLowerCase().replace(/\s+/g, " ")}||${(s.description ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ")}`;
+
+  const dedupeItems = (items: { title?: string; description?: string }[]) => {
+    const seen = new Set<string>();
+    return items.filter((it) => {
+      const key = normalizeKey(it);
+      if (key === "||") return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const corporate = dedupeItems((strategy.corporateStrategy ?? []).filter(
     (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
-  );
-  const digital = (strategy.digitalStrategies ?? []).filter(
+  ));
+
+  const digitalRaw = dedupeItems((strategy.digitalStrategies ?? []).filter(
     (s) => (s.title || "").trim().length > 0 || (s.description || "").trim().length > 0,
-  );
+  ));
+
+  // If the extractor duplicated corporate strategy into digital strategy, hide duplicates.
+  const corporateKeys = new Set(corporate.map(normalizeKey));
+  const digital = digitalRaw.filter((s) => !corporateKeys.has(normalizeKey(s)));
 
   const hasData = strategicPillars.length > 0 || corporate.length > 0 || digital.length > 0;
 
@@ -67,7 +89,9 @@ export const CustomerStrategySlide = () => {
               </div>
               <div className="glass-card p-5 flex items-center justify-between">
                 <span className="text-muted-foreground text-sm">Strategic Pillars:</span>
-                <span className="text-foreground font-semibold">{strategicPillars.length || corporate.length + digital.length}</span>
+                <span className="text-foreground font-semibold">
+                  {strategicPillars.length > 0 ? strategicPillars.length : corporate.length + digital.length}
+                </span>
               </div>
             </div>
 
