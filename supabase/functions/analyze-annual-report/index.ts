@@ -133,7 +133,7 @@ EXECUTIVE ACCESS:
 `;
     }
 
-    // Premium strategic analysis prompt
+    // Premium strategic analysis prompt with enhanced customer strategy extraction
     const initialPrompt = `You are a McKinsey-caliber strategic advisor embedded in ServiceNow's most elite account team. You analyze Fortune 500 annual reports to craft board-ready account strategies that win transformational deals.
 
 ${accountContextStr}
@@ -141,6 +141,58 @@ ${accountContextStr}
 ═══════════════════════════════════════════════════════════════
 ANALYSIS FRAMEWORK: STRATEGIC EXCELLENCE
 ═══════════════════════════════════════════════════════════════
+
+CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP EXTRACTION
+Your PRIMARY mission is to deeply understand and articulate the customer's own strategic vision, priorities, and transformation agenda. This is NOT about ServiceNow — it's about truly understanding the customer's world.
+
+PHASE 0: CUSTOMER VISION & STRATEGY IMMERSION (MOST IMPORTANT)
+Before any other analysis, immerse yourself in the customer's strategic narrative:
+
+A) CORPORATE STRATEGY (The "North Star")
+   - What is the company's overarching strategic direction for the next 3-5 years?
+   - What transformation is the CEO/Board driving? Use THEIR exact terminology.
+   - What are the named strategic pillars, programs, or initiatives?
+   - EXAMPLES: "Gemini Strategy", "One Microsoft", "Customer 360", "Digital-First Operating Model"
+   - Extract 3-5 corporate strategy items with RICH descriptions (2-3 sentences each)
+
+B) CEO & BOARD PRIORITIES (The "Must-Wins")
+   - What specific outcomes has the CEO committed to publicly?
+   - What did the CEO emphasize in their letter to shareholders?
+   - What topics dominate board discussions based on the annual report?
+   - Extract exact language: "Our priority is to..." "We must deliver..." "This year we commit to..."
+   - Include quantified targets where stated (e.g., "15% margin improvement", "30% reduction in cycle time")
+
+C) DIGITAL & AI STRATEGIES (The "How We Transform")
+   - What is the company's stated digital/technology vision?
+   - What specific AI, automation, or digitalization initiatives are named?
+   - How does technology enable their strategic agenda?
+   - EXAMPLES: "AI-first operations", "Unified data platform", "Customer experience transformation"
+   - Include maturity indicators: are they exploring, piloting, or scaling?
+
+D) TRANSFORMATION THEMES (The "What Must Change")
+   - What operational or business model transformations are underway?
+   - What legacy challenges are they addressing?
+   - What cultural or organizational changes are mentioned?
+   - EXAMPLES: "End-to-end supply chain visibility", "Employee experience modernization", "Process standardization"
+
+QUALITY STANDARD FOR STRATEGY EXTRACTION:
+- Use the CUSTOMER'S OWN WORDS - quote their exact terminology from the document
+- Each item MUST have a descriptive title AND a substantive 2-3 sentence description
+- Descriptions must explain the WHY and HOW, not just the WHAT
+- Connect strategies to business outcomes where possible
+- If a named program exists (e.g., "Project Phoenix"), use that exact name
+
+EXCELLENT CORPORATE STRATEGY EXAMPLE:
+{
+  "title": "Gemini Strategy: Integrated Logistics Leadership",
+  "description": "Maersk's multi-year transformation from container shipping company to end-to-end logistics provider. The strategy focuses on connecting Ocean, Landside, and Terminal operations into a seamless customer experience, targeting 8% EBIT margins through operational efficiency and premium customer value creation."
+}
+
+POOR EXAMPLE (NEVER DO THIS):
+{
+  "title": "Growth Strategy",
+  "description": "The company wants to grow."
+}
 
 PHASE 1: DEEP DOCUMENT ANALYSIS
 Read the ENTIRE document with the precision of a financial analyst and the strategic lens of a management consultant:
@@ -428,21 +480,47 @@ ${webData.technology || "No technology data found"}
         // Second pass with comprehensive web data - use pro model for best quality
         const enrichPrompt = `You are a McKinsey-caliber strategic analyst enriching an account analysis with comprehensive web intelligence.
 
+CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP UNDERSTANDING
+Your PRIMARY mission is to deeply understand the customer's OWN strategic vision. This is about THEIR world, not ours.
+
 ORIGINAL EXTRACTION (from annual report):
 ${JSON.stringify(extractedData, null, 2)}
 
 ${webIntelligence}
 
 ENRICHMENT INSTRUCTIONS:
-1. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data from web research
-2. STRATEGY: Enhance strategic pillars, CEO priorities, transformation themes with latest insights
-3. LEADERSHIP: Add any key executive information discovered
-4. COMPETITION: Incorporate competitive context into SWOT threats and market positioning
-5. CHALLENGES: Refine pain points with real-world challenges from news/analyst reports
-6. TECHNOLOGY: Enhance digital/AI ambitions with concrete technology initiatives discovered
-7. NARRATIVE: Make executiveSummaryNarrative more compelling using all available intelligence
-8. SWOT: Enrich all quadrants with evidence from both document AND web research
-9. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing high-quality content`;
+
+1. CUSTOMER STRATEGY (HIGHEST PRIORITY):
+   - ENHANCE corporateStrategy with named programs, strategic pillars, and transformation initiatives
+   - Each strategy item MUST have a rich 2-3 sentence description explaining WHY and HOW
+   - Use the CUSTOMER'S OWN TERMINOLOGY from their public communications
+   - Include quantified targets and timelines where available
+   
+2. CEO & BOARD PRIORITIES:
+   - Extract EXACT language from CEO statements, investor calls, annual letters
+   - Connect priorities to measurable outcomes and commitments
+   - Include any publicly stated timelines or milestones
+   
+3. DIGITAL & AI STRATEGIES:
+   - Enhance with specific AI/digital initiatives discovered in web research
+   - Include maturity indicators: exploring, piloting, scaling
+   - Connect to broader strategic agenda
+   
+4. TRANSFORMATION THEMES:
+   - Add operational and business model changes underway
+   - Include any named transformation programs
+   
+5. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data
+6. COMPETITION: Incorporate competitive context into SWOT threats
+7. PAIN POINTS: Refine with real-world challenges from news/analyst reports - use customer's language
+8. NARRATIVE: Make executiveSummaryNarrative compelling with specific figures and strategic direction
+9. SWOT: Enrich all quadrants with evidence from both document AND web research
+10. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing content
+
+QUALITY STANDARD:
+- Every strategy item needs title + substantive description (not just a title)
+- Use customer's exact terminology for named programs
+- Quantify where possible`;
 
         const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -461,7 +539,7 @@ ENRICHMENT INSTRUCTIONS:
                 type: "function",
                 function: {
                   name: "extract_annual_report_data",
-                  description: "Extract enriched data",
+                  description: "Extract enriched data with deep customer strategy understanding",
                   parameters: {
                     type: "object",
                     properties: {
@@ -474,9 +552,54 @@ ENRICHMENT INSTRUCTIONS:
                       marginEBIT: { type: "string" },
                       costPressureAreas: { type: "string" },
                       strategicInvestmentAreas: { type: "string" },
-                      corporateStrategyPillars: { type: "array", items: { type: "string" } },
-                      ceoBoardPriorities: { type: "array", items: { type: "string" } },
-                      transformationThemes: { type: "array", items: { type: "string" } },
+                      corporateStrategy: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Strategic pillar name using customer's exact terminology" },
+                            description: { type: "string", description: "2-3 sentence explanation of the strategic initiative, the WHY and HOW" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 core corporate strategy pillars with rich descriptions" 
+                      },
+                      digitalStrategies: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Digital/AI strategy initiative name" },
+                            description: { type: "string", description: "2-3 sentence explanation of the digital ambition and approach" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "2-4 digital/AI strategy initiatives with rich descriptions" 
+                      },
+                      ceoBoardPriorities: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "CEO/Board priority name" },
+                            description: { type: "string", description: "2-3 sentence explanation of the priority and its importance" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 CEO's stated priorities with rich descriptions" 
+                      },
+                      transformationThemes: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Transformation theme name" },
+                            description: { type: "string", description: "2-3 sentence explanation of the transformation" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 digital/operational transformation themes with rich descriptions" 
+                      },
                       aiDigitalAmbition: { type: "string" },
                       costDisciplineTargets: { type: "string" },
                       painPoints: { 
@@ -486,7 +609,8 @@ ENRICHMENT INSTRUCTIONS:
                           properties: {
                             title: { type: "string" },
                             description: { type: "string" }
-                          }
+                          },
+                          required: ["title", "description"]
                         }
                       },
                       opportunities: { 
@@ -496,7 +620,8 @@ ENRICHMENT INSTRUCTIONS:
                           properties: {
                             title: { type: "string" },
                             description: { type: "string" }
-                          }
+                          },
+                          required: ["title", "description"]
                         }
                       },
                       strengths: { type: "array", items: { type: "string" } },
