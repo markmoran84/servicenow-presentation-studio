@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type InputMode = "paste" | "pdf" | "url";
@@ -34,6 +34,7 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
   const [isResyncing, setIsResyncing] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [autoGenerate, setAutoGenerate] = useState(false); // Default OFF - let user review first
+  const [isEnrichingWithWeb, setIsEnrichingWithWeb] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Generate the full plan using AI with provided extracted data
@@ -358,6 +359,127 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
     }
   };
 
+  const handleEnrichWithWebData = async () => {
+    const companyName = data.basics.accountName;
+    if (!companyName || companyName.trim().length < 2) {
+      toast.error("Please enter a company name first in the Basics tab");
+      return;
+    }
+
+    setIsEnrichingWithWeb(true);
+    try {
+      // Identify missing fields to prioritize search
+      const missingFields: string[] = [];
+      if (!data.financial.customerRevenue) missingFields.push('financial');
+      if (!data.strategy.corporateStrategy?.length) missingFields.push('strategy');
+      if (!data.engagement.knownExecutiveSponsors?.length) missingFields.push('leadership');
+      if (!data.businessModel.competitors?.length) missingFields.push('competitors');
+      if (!data.strategy.digitalStrategies?.length) missingFields.push('technology');
+      if (!data.annualReport.netZeroTarget) missingFields.push('sustainability');
+
+      const existingData = {
+        missingFields,
+        financial: data.financial,
+        strategy: data.strategy,
+        engagement: data.engagement,
+        businessModel: data.businessModel,
+        annualReport: data.annualReport
+      };
+
+      const { data: responseData, error } = await supabase.functions.invoke("enrich-with-web-data", {
+        body: { 
+          companyName, 
+          existingData,
+          fieldsToEnrich: missingFields
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Enrichment failed");
+
+      const enriched = responseData.data;
+      let updatedCount = 0;
+
+      // Update Financial data
+      if (enriched.revenue || enriched.growthRate || enriched.marginEBIT) {
+        updateData("financial", {
+          ...(enriched.revenue && !data.financial.customerRevenue && { customerRevenue: enriched.revenue }),
+          ...(enriched.growthRate && !data.financial.growthRate && { growthRate: enriched.growthRate }),
+          ...(enriched.marginEBIT && !data.financial.marginEBIT && { marginEBIT: enriched.marginEBIT }),
+        });
+        updatedCount++;
+      }
+
+      // Update Annual Report data
+      if (enriched.netZeroTarget && !data.annualReport.netZeroTarget) {
+        updateData("annualReport", {
+          netZeroTarget: enriched.netZeroTarget
+        });
+        updatedCount++;
+      }
+
+      // Update Strategy with strategic priorities
+      if (enriched.strategicPriorities?.length && !data.strategy.corporateStrategy?.length) {
+        updateData("strategy", {
+          corporateStrategy: enriched.strategicPriorities.map((p: { title: string; description: string }) => ({
+            title: p.title || "",
+            description: p.description || ""
+          }))
+        });
+        updatedCount++;
+      }
+
+      // Update Strategy with digital initiatives
+      if (enriched.digitalInitiatives?.length && !data.strategy.digitalStrategies?.length) {
+        updateData("strategy", {
+          digitalStrategies: enriched.digitalInitiatives.map((d: { title: string; description: string }) => ({
+            title: d.title || "",
+            description: d.description || ""
+          }))
+        });
+        updatedCount++;
+      }
+
+      // Update Executive Sponsors
+      if (enriched.executives?.length && !data.engagement.knownExecutiveSponsors?.length) {
+        updateData("engagement", {
+          knownExecutiveSponsors: enriched.executives.map((e: { name: string; title: string }) => 
+            `${e.name} (${e.title})`
+          )
+        });
+        updatedCount++;
+      }
+
+      // Update Business Model with competitors
+      if (enriched.competitors?.length && !data.businessModel.competitors?.length) {
+        updateData("businessModel", {
+          competitors: enriched.competitors
+        });
+        updatedCount++;
+      }
+
+      // Update data source info
+      if (responseData.enrichedFields?.length) {
+        setDataSourceInfo(prev => ({
+          documentFields: prev?.documentFields || [],
+          webFields: [...(prev?.webFields || []), ...responseData.enrichedFields],
+          usedWebSearch: true
+        }));
+      }
+
+      if (updatedCount > 0 || responseData.enrichedFields?.length) {
+        toast.success(`Web enrichment complete! Updated ${responseData.enrichedFields?.length || updatedCount} data areas.`);
+      } else {
+        toast.info(responseData.message || "No new data found from web search. Your data appears complete!");
+      }
+    } catch (error) {
+      console.error("Web enrichment error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to enrich with web data");
+    } finally {
+      setIsEnrichingWithWeb(false);
+    }
+  };
+
   const handlePasteAnalyze = () => analyzeContent(content);
 
   const handleUrlFetch = async () => {
@@ -432,7 +554,7 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
     }
   };
 
-  const isLoading = isAnalyzing || isFetching || isGeneratingPlan;
+  const isLoading = isAnalyzing || isFetching || isGeneratingPlan || isEnrichingWithWeb;
 
   return (
     <Card className="glass-card border-primary/30">
@@ -637,6 +759,40 @@ Example: Copy text from sections like:
                     <>
                       <Sparkles className="w-4 h-4" />
                       Generate Full Plan
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Enrich with Web Data Button */}
+            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-blue-500" />
+                    Enrich with Web Data
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Search the web for missing financial, strategy, and competitor intel
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEnrichWithWebData}
+                  disabled={isEnrichingWithWeb || !data.basics.accountName}
+                  className="gap-2 border-blue-500/50 hover:bg-blue-500/10"
+                >
+                  {isEnrichingWithWeb ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Searching Web...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4" />
+                      Enrich Data
                     </>
                   )}
                 </Button>
