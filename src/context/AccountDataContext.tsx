@@ -56,10 +56,12 @@ export interface FinancialSnapshot {
   strategicInvestmentAreas: string;
 }
 
-// Strategy item with title and optional description
+// Strategy item with title, description, and confidence/source metadata
 export interface StrategyItem {
   title: string;
   description: string;
+  confidence?: "explicit" | "contextually_derived";
+  sourceReference?: string;
 }
 
 // Section D — Customer Strategy Inputs

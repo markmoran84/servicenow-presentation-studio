@@ -137,7 +137,7 @@ export const CustomerStrategySlide = () => {
                 })}
               </div>
             ) : (
-              /* Fallback: Raw Input Data Display */
+              /* Fallback: Raw Input Data Display with Confidence Indicators */
               <div className="grid grid-cols-2 gap-6 mb-8">
                 {corporate.map((item, index) => (
                   <div 
@@ -150,12 +150,28 @@ export const CustomerStrategySlide = () => {
                         <Target className="w-6 h-6 text-blue-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-foreground leading-tight mb-2">
-                          {item.title}
-                        </h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-xl font-bold text-foreground leading-tight">
+                            {item.title}
+                          </h3>
+                          {(item as any).confidence && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full uppercase font-medium ${
+                              (item as any).confidence === 'explicit' 
+                                ? 'bg-emerald-500/20 text-emerald-400' 
+                                : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                              {(item as any).confidence === 'explicit' ? 'Explicit' : 'Derived'}
+                            </span>
+                          )}
+                        </div>
                         {item.description && (
-                          <p className="text-muted-foreground text-sm leading-relaxed">
+                          <p className="text-muted-foreground text-sm leading-relaxed mb-2">
                             {item.description}
+                          </p>
+                        )}
+                        {(item as any).sourceReference && (
+                          <p className="text-[11px] text-muted-foreground/60 italic">
+                            Source: {(item as any).sourceReference}
                           </p>
                         )}
                       </div>
@@ -173,12 +189,28 @@ export const CustomerStrategySlide = () => {
                         <Zap className="w-6 h-6 text-emerald-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-foreground leading-tight mb-2">
-                          {item.title}
-                        </h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-xl font-bold text-foreground leading-tight">
+                            {item.title}
+                          </h3>
+                          {(item as any).confidence && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full uppercase font-medium ${
+                              (item as any).confidence === 'explicit' 
+                                ? 'bg-emerald-500/20 text-emerald-400' 
+                                : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                              {(item as any).confidence === 'explicit' ? 'Explicit' : 'Derived'}
+                            </span>
+                          )}
+                        </div>
                         {item.description && (
-                          <p className="text-muted-foreground text-sm leading-relaxed">
+                          <p className="text-muted-foreground text-sm leading-relaxed mb-2">
                             {item.description}
+                          </p>
+                        )}
+                        {(item as any).sourceReference && (
+                          <p className="text-[11px] text-muted-foreground/60 italic">
+                            Source: {(item as any).sourceReference}
                           </p>
                         )}
                       </div>

@@ -347,105 +347,163 @@ EXECUTIVE ACCESS:
 `;
     }
 
-    // Premium strategic analysis prompt with enhanced customer strategy extraction
-    const initialPrompt = `You are a precision data extraction system. Your SOLE purpose is to extract FACTUAL information from the document provided.
+    // Senior Corporate Strategist Analysis Prompt
+    const initialPrompt = `═══════════════════════════════════════════════════════════════
+ROLE & SENIORITY
+═══════════════════════════════════════════════════════════════
+You are acting as a senior corporate strategy leader (Group Strategy / Board Office level) with responsibility for deep strategic analysis of published company materials.
+
+Your role is to UNDERSTAND, CONNECT, and FRAME the organisation's strategy as it is INTENDED, even when:
+- Terminology varies across sections or documents
+- Strategy is implicit rather than explicitly labelled
+- Language differs between CEO statements, investor sections, and operational commentary
 
 ═══════════════════════════════════════════════════════════════
-ABSOLUTE RULE #1: ACCURACY IS NON-NEGOTIABLE
+PRIMARY OBJECTIVE
 ═══════════════════════════════════════════════════════════════
+Read the provided document and identify the organisation's CORPORATE STRATEGY, DIGITAL STRATEGY, and CEO/BOARD PRIORITIES based on CONTEXTUAL UNDERSTANDING — not keyword matching.
 
-BEFORE YOU EXTRACT ANYTHING:
-1. Read the ENTIRE document first
-2. Identify the EXACT company name as it appears in the document header, title page, or legal name
-3. The company name MUST be copied EXACTLY as written - no modifications, no guessing
-4. If the document is from "XYZ Corporation", output "XYZ Corporation" - not "XYZ" or "XYZ Corp" or anything else
+You MUST:
+1. PRESERVE the original intent and meaning
+2. Use language AS CLOSE AS POSSIBLE to the company's own phrasing
+3. AVOID inventing new strategy constructs or consultant-style labels
+4. DO NOT convert strategy into action-verb themes
+5. DO NOT introduce external frameworks or renamed pillars
+6. DO NOT modernise language or add strategic ambition that is not stated
 
-CRITICAL EXTRACTION RULES:
-- ONLY extract information that is EXPLICITLY stated in the provided document
-- Use the EXACT words, phrases, and figures from the document
-- If a piece of information is not in the document, return an EMPTY STRING - never fabricate
-- Financial figures must be copied EXACTLY as written (e.g., "$55.5 billion" not "$55B")
-- Executive names must be spelled EXACTLY as they appear
-- If you are unsure about ANY fact, DO NOT include it
-
-WHAT YOU MUST NEVER DO:
-❌ Never make up a company name
-❌ Never guess financial figures
-❌ Never fabricate executive names
-❌ Never create information that isn't in the document
-❌ Never use generic placeholder content
-❌ Never hallucinate strategies or initiatives
+Your task is to FRAME the strategy so it is understandable, NOT to rewrite it.
 
 ${accountContextStr}
 
 ═══════════════════════════════════════════════════════════════
-EXTRACTION INSTRUCTIONS
+HOW TO HANDLE TERMINOLOGY VARIATIONS (CRITICAL)
+═══════════════════════════════════════════════════════════════
+The same strategic intent may be expressed using different words (e.g., "integration," "end-to-end solutions," "connected supply chains").
+
+In these cases:
+- Treat them as the SAME strategic intent ONLY if the context clearly supports it
+- Frame the strategy using the MOST REPRESENTATIVE or DOMINANT wording used by the company
+- Acknowledge terminology variation where relevant, without redefining it
+- Do not force exact wording if it obscures meaning — clarity of intent takes precedence over literal repetition
+
+═══════════════════════════════════════════════════════════════
+HOW TO IDENTIFY STRATEGY WHEN IT IS IMPLICIT
+═══════════════════════════════════════════════════════════════
+Strategy may NOT appear under a "Strategy" heading. You should INFER strategic intent by analysing:
+- Repetition across CEO messages, board commentary, and outlook sections
+- Long-term commitments, investment priorities, and structural changes
+- Statements describing what the company IS BECOMING, not just what it is doing this quarter
+
+HOWEVER:
+- Inference must be DIRECTLY grounded in the text
+- If intent is implied rather than explicit, clearly label it as "contextually derived"
+
+═══════════════════════════════════════════════════════════════
+EXTRACTION & FRAMING RULES
 ═══════════════════════════════════════════════════════════════
 
-STEP 1: COMPANY IDENTIFICATION (MANDATORY FIRST STEP)
+STEP 1: COMPANY IDENTIFICATION
 - Find the official company name on the cover page, header, or legal disclaimers
-- Look for patterns like "[Company Name] Annual Report" or "Report of [Company Name]"
-- The accountName field MUST match the exact company name from the document
-- If you cannot determine the company name with certainty, leave it empty
+- The accountName field MUST match the EXACT company name from the document
 
-STEP 2: FINANCIAL DATA EXTRACTION
-- Revenue: Copy EXACTLY as stated (e.g., "Revenue of €47.2 billion")
-- Growth rates: Copy EXACTLY (e.g., "5.3% increase year-over-year")
-- EBIT/Margins: Copy EXACTLY as written
+STEP 2: FINANCIAL DATA
+- Copy revenue, growth rates, EBIT/margins EXACTLY as stated
 - Only extract figures you can find explicitly stated
 
 STEP 3: EXECUTIVE SUMMARY
 - Write 2-3 sentences summarizing the company using ONLY facts from the document
-- Include: company name (as extracted), industry/what they do, and key facts
-- DO NOT describe "the document" - describe the COMPANY
+- Describe the COMPANY (market position, scale, strategic direction), not "the document"
 
-STEP 4: STRATEGY EXTRACTION (THIS IS THE PART YOU KEEP GETTING WRONG)
-- Ignore business units/segments, service lines, and org structure. Examples of what is NOT a strategy: "Ocean", "Logistics & Services", "Terminals", "Air", "Supply Chain".
-- Find ENTERPRISE-WIDE strategic priorities/pillars/initiatives (often phrased as action statements).
-- Prefer headings/bullets that start with an action verb: Strengthen / Drive / Accelerate / Transform / Improve / Expand / Enable / Modernize.
-- CORPORATE strategy: customer/growth/efficiency/sustainability/network excellence themes (enterprise-level, not segments).
-- DIGITAL/AI strategy: ONLY items explicitly about technology, digital, data, AI, automation, platform, cloud, cybersecurity, IT.
-- CEO/Board priorities: ONLY priorities explicitly attributed to CEO/Chair/Board communication (CEO letter, chairman statement, investor day).
-- If you cannot find clear items in the text for a category, return an empty array for that category.
-- Use the report’s language, but you may convert noun phrases into action statements if that better matches how the report describes intent.
+STEP 4: CORPORATE STRATEGY (Contextually Framed)
+For each strategy element, provide:
+- Strategy statement: NEAR-VERBATIM or contextually framed from the company's language
+- Confidence: "explicit" (clearly stated) OR "contextually_derived" (not directly stated but clearly supported)
+- Source reference: Where it appears (section/context, e.g., "CEO Letter", "Strategic Priorities section")
+- Terminology notes: Any variation in how this is expressed across the document
 
-STEP 5: PAIN POINTS & OPPORTUNITIES
+WHAT CORPORATE STRATEGY IS:
+- Enterprise-wide strategic direction and themes
+- Enduring commitments that define what the company is becoming
+- Priorities that appear consistently across CEO/Chair/outlook sections
+
+WHAT CORPORATE STRATEGY IS NOT:
+- Business units or segments (e.g., "Ocean", "Logistics", "Terminals" are NOT strategies)
+- Operational performance metrics
+- Short-term tactical activities
+
+STEP 5: DIGITAL & TECHNOLOGY STRATEGY (Explicit or Implied)
+- ONLY include items that explicitly reference technology, digital, data, AI, automation, platform, cloud, IT
+- Use the company's own language — do not translate into tech buzzwords
+- Mark confidence as "explicit" or "contextually_derived"
+- If NO digital strategy is clearly stated or implied, return an EMPTY array
+
+STEP 6: CEO / BOARD PRIORITIES
+- Evidenced priorities from CEO Letter, Chairman Statement, or Investor Communications
+- Note how frequently or strongly they appear
+- Include source reference
+- These should reflect LEADERSHIP emphasis, not operational detail
+
+STEP 7: PAIN POINTS & OPPORTUNITIES
 - Derive from explicitly stated challenges, risks, or strategic gaps
 - Use the customer's exact terminology
-- Connect to stated business priorities
 
-STEP 6: SWOT ANALYSIS
-- Base on facts from the document
+STEP 8: SWOT ANALYSIS
 - Strengths/Weaknesses: What the company says about itself
 - Opportunities/Threats: Market factors mentioned in the report
 
-STEP 7: EXECUTIVE EXTRACTION
+STEP 9: EXECUTIVE EXTRACTION
 - Only include executives explicitly named in the document
 - Copy names and titles EXACTLY as written
-- Only attribute priorities that are explicitly stated
 
-QUALITY CHECK BEFORE RESPONDING:
-□ Is accountName the EXACT company name from the document?
-□ Are all financial figures copied EXACTLY as written?
-□ Are all executive names spelled correctly as they appear?
-□ Is every piece of information traceable to the document?
-□ Have I left empty any fields where data wasn't found?`;
+═══════════════════════════════════════════════════════════════
+ANALYTICAL LENS (How to Think)
+═══════════════════════════════════════════════════════════════
+Apply senior-strategist judgement to:
+- DISTINGUISH corporate strategy from operational performance
+- SEPARATE enduring strategic direction from short-term commentary
+- IDENTIFY what the CEO and Board consistently emphasise versus supporting detail
 
-    const userPrompt = `DOCUMENT FOR EXTRACTION:
+This judgement influences SELECTION and GROUPING, not wording.
+
+═══════════════════════════════════════════════════════════════
+CONFIDENCE & INTEGRITY CHECK
+═══════════════════════════════════════════════════════════════
+For each strategy element, assign one of:
+- "explicit" — clearly stated in the text
+- "contextually_derived" — not directly stated but clearly supported
+
+If intent is unclear or weakly supported, DO NOT include it.
+
+═══════════════════════════════════════════════════════════════
+FINAL VALIDATION
+═══════════════════════════════════════════════════════════════
+Before responding, verify that:
+□ A company executive would recognise this as their strategy
+□ Nothing has been introduced that could not be defended with a source reference
+□ The framing reflects strategic intent, not consultant interpretation
+□ Corporate Strategy, Digital Strategy, and CEO Priorities are DISTINCT (no duplication)`;
+
+    const userPrompt = `DOCUMENT FOR STRATEGIC ANALYSIS:
 
 ${validatedContent}
 
 ═══════════════════════════════════════════════════════════════
-YOUR TASK:
+YOUR TASK AS SENIOR STRATEGIST:
 ═══════════════════════════════════════════════════════════════
 
-1. FIRST: Find and note the exact company name from this document
-2. Extract ONLY factual information that appears in this document
-3. Use EXACT wording - do not paraphrase or generalize
-4. Leave fields EMPTY if the information is not in the document
-5. For accountName: Use the EXACT legal/official company name as it appears
+1. Read the ENTIRE document comprehensively
+2. Identify the EXACT company name as it appears officially
+3. Apply senior-strategist judgement to distinguish:
+   - Corporate strategy from operational performance
+   - Enduring strategic direction from short-term commentary
+   - What leadership consistently emphasises vs supporting detail
+4. PRESERVE the company's own language — do not rewrite into consultant frameworks
+5. For each strategy element, note:
+   - Whether it is EXPLICIT or CONTEXTUALLY DERIVED
+   - Where in the document it appears (CEO Letter, Strategy section, etc.)
+6. If intent is unclear or weakly supported, state: "This cannot be reliably concluded from the published material"
 
-CRITICAL: Your accountName output MUST match exactly what is written in this document. If the document says "Acme Corporation" then output "Acme Corporation" - not "Acme" or "ACME Corporation" or anything else.`;
+CRITICAL: A company executive must be able to recognise this as THEIR strategy, not a consultant's interpretation.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -465,15 +523,15 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
             type: "function",
             function: {
               name: "extract_annual_report_data",
-              description: "Extract ONLY factual data that appears explicitly in the provided document. Never fabricate information.",
+              description: "Extract strategic intelligence as a senior corporate strategist would frame it. Preserve company language, note confidence levels, include source references.",
               parameters: {
                 type: "object",
                 properties: {
-                  accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character. If document says 'ABC Ltd' output 'ABC Ltd' exactly." },
-                  industry: { type: "string", description: "Primary industry/sector with specificity (e.g., 'Integrated Logistics & Container Shipping' not just 'Transportation')" },
-                  revenue: { type: "string", description: "Total revenue with currency and period (e.g., '$55.5B FY2024')" },
+                  accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character." },
+                  industry: { type: "string", description: "Primary industry/sector with specificity using company's own terminology" },
+                  revenue: { type: "string", description: "Total revenue with currency and period, EXACTLY as stated" },
                   revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
-                  growthRate: { type: "string", description: "YoY growth rate with context (e.g., '+12% YoY' or '-8% due to market normalization')" },
+                  growthRate: { type: "string", description: "YoY growth rate with context, EXACTLY as stated" },
                   ebitImprovement: { type: "string", description: "EBIT improvement or margin change" },
                   marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
                   costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
@@ -485,18 +543,25 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                       properties: {
                         title: {
                           type: "string",
-                          description:
-                            "ENTERPRISE corporate strategy theme written as an action statement (start with a verb). Must not be a business unit/segment name. Example: 'Strengthen customer focus'.",
+                          description: "Strategy statement using the company's OWN language (near-verbatim or contextually framed). NOT action-verb rewrites. NOT business units."
                         },
                         description: {
                           type: "string",
-                          description:
-                            "2-3 sentences explaining what the report says about this theme and why it matters (can include completing phrase like 'and profitable growth').",
+                          description: "2-3 sentences explaining what the report says, using company's terminology. Include any terminology variations noted."
                         },
+                        confidence: {
+                          type: "string",
+                          enum: ["explicit", "contextually_derived"],
+                          description: "'explicit' if clearly stated, 'contextually_derived' if inferred from context"
+                        },
+                        sourceReference: {
+                          type: "string",
+                          description: "Where this appears (e.g., 'CEO Letter', 'Strategic Priorities p.12', 'Chairman Statement')"
+                        }
                       },
-                      required: ["title", "description"],
+                      required: ["title", "description", "confidence", "sourceReference"]
                     }, 
-                    description: "0-6 CORPORATE strategy themes (enterprise-level). Do NOT list segments/business units. Must not overlap with digitalStrategies." 
+                    description: "Corporate strategy elements framed in company's own language. NOT segments/units. Include confidence & source for each."
                   },
                   digitalStrategies: { 
                     type: "array", 
@@ -505,30 +570,46 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                       properties: {
                         title: {
                           type: "string",
-                          description:
-                            "DIGITAL/TECH strategy theme as an action statement. MUST explicitly reference technology/digital/data/AI/automation/platform/cloud/cyber/IT.",
+                          description: "Digital/tech strategy using company's OWN terminology. Must explicitly relate to technology/digital/data/AI/IT."
                         },
                         description: { 
                           type: "string",
-                          description:
-                            "1-2 sentences describing the digital initiative as stated in the report. If not explicitly stated, do not invent.",
+                          description: "Explanation using company's language. If not explicitly stated in document, do not include."
                         },
+                        confidence: {
+                          type: "string",
+                          enum: ["explicit", "contextually_derived"],
+                          description: "'explicit' if clearly stated, 'contextually_derived' if inferred"
+                        },
+                        sourceReference: {
+                          type: "string",
+                          description: "Where this appears in the document"
+                        }
                       },
-                      required: ["title", "description"],
+                      required: ["title", "description", "confidence", "sourceReference"]
                     }, 
-                    description: "0-6 DIGITAL/AI strategy themes. If none are explicitly stated, return an empty array. Must not duplicate corporateStrategy." 
+                    description: "ONLY digital/technology strategies. If none explicitly stated, return empty array. Do NOT duplicate corporate strategies."
                   },
                   ceoBoardPriorities: { 
                     type: "array", 
                     items: { 
                       type: "object",
                       properties: {
-                        title: { type: "string", description: "CEO/Board priority name" },
-                        description: { type: "string", description: "1-2 sentences explaining the priority" }
+                        title: { type: "string", description: "CEO/Board priority in their own words" },
+                        description: { type: "string", description: "Explanation with emphasis on how frequently/strongly it appears" },
+                        confidence: {
+                          type: "string",
+                          enum: ["explicit", "contextually_derived"],
+                          description: "'explicit' if directly stated by CEO/Board"
+                        },
+                        sourceReference: {
+                          type: "string",
+                          description: "Source (e.g., 'CEO Letter', 'Chairman Statement', 'Investor Day')"
+                        }
                       },
-                      required: ["title", "description"]
+                      required: ["title", "description", "confidence", "sourceReference"]
                     }, 
-                    description: "3-5 CEO's stated priorities from letters/presentations" 
+                    description: "Priorities explicitly attributed to CEO/Chair/Board. Include source reference."
                   },
                   transformationThemes: { 
                     type: "array", 
@@ -676,9 +757,13 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
       throw new Error("Failed to parse AI response data");
     }
 
-    // Post-process strategy lists to avoid the common failure mode where the model
-    // confuses business units/segments for strategies (e.g., "Ocean", "Logistics & Services").
-    type StrategyItem = { title: string; description: string };
+    // Post-process strategy lists - preserve company language but ensure distinctness
+    type StrategyItem = { 
+      title: string; 
+      description: string; 
+      confidence?: string; 
+      sourceReference?: string;
+    };
 
     const normalizeKey = (s: { title?: string; description?: string }) =>
       `${(s.title ?? "").trim().toLowerCase().replace(/\s+/g, " ")}||${(s.description ?? "")
@@ -689,8 +774,12 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
     const toStrategyArray = (val: unknown): StrategyItem[] =>
       Array.isArray(val)
         ? (val as any[])
-            .map((it) => ({ title: String(it?.title ?? ""), description: String(it?.description ?? "") }))
-            .map((it) => ({ title: it.title.trim(), description: it.description.trim() }))
+            .map((it) => ({ 
+              title: String(it?.title ?? "").trim(), 
+              description: String(it?.description ?? "").trim(),
+              confidence: String(it?.confidence ?? "explicit"),
+              sourceReference: String(it?.sourceReference ?? "")
+            }))
             .filter((it) => it.title.length > 0 || it.description.length > 0)
         : [];
 
@@ -705,21 +794,20 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
       });
     };
 
-    const verbStart = /^(strengthen|drive|accelerate|transform|improve|expand|enable|moderni[sz]e|optimi[sz]e|increase|reduce|build|grow|scale|deliver|advance|reinvent|simplif(y|y)|unif(y|y)|protect|sustain|decarboni[sz]e)\b/i;
+    // Business unit/segment names to filter out (these are NOT strategies)
+    const businessUnitPatterns = /^(ocean|logistics|terminals|air|supply chain|freight|shipping|services|ports|warehousing|trucking|rail|intermodal)$/i;
     const digitalSignals = /(digital|technology|tech|ai|artificial intelligence|data|analytics|automation|platform|cloud|cyber|cybersecurity|it\b|systems|moderni[sz]ation)/i;
 
     const corporateRaw = dedupe(toStrategyArray((extractedData as any).corporateStrategy));
     const digitalRaw = dedupe(toStrategyArray((extractedData as any).digitalStrategies));
 
-    // Filter digital list to items that actually read like digital/tech initiatives.
+    // Filter out pure business unit names from corporate strategy
+    const corporateFinal = corporateRaw.filter((it) => !businessUnitPatterns.test(it.title.trim()));
+
+    // Filter digital list to items that actually reference digital/tech
     const digitalFiltered = digitalRaw.filter((it) => digitalSignals.test(`${it.title} ${it.description}`));
 
-    // Prefer corporate themes that are action statements; segment-like noun labels tend to fail this.
-    // (We do not force-empty if none match; we keep the raw list as fallback so the user can edit.)
-    const corporatePreferred = corporateRaw.filter((it) => verbStart.test(it.title));
-    const corporateFinal = corporatePreferred.length > 0 ? corporatePreferred : corporateRaw;
-
-    // Prevent corporate items from being duplicated into digital.
+    // Prevent corporate items from being duplicated into digital
     const corporateKeys = new Set(corporateFinal.map(normalizeKey));
     const digitalFinal = digitalFiltered.filter((it) => !corporateKeys.has(normalizeKey(it)));
 
