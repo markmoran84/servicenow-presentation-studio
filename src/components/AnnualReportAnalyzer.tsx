@@ -7,8 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccountData } from "@/context/AccountDataContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket, Search } from "lucide-react";
+import { Sparkles, Loader2, FileText, CheckCircle2, Upload, Link, Type, Globe, FileCheck, RefreshCw, Rocket, Search, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ExtractedDataReview } from "./ExtractedDataReview";
 
 type InputMode = "paste" | "pdf" | "url";
 
@@ -33,8 +34,9 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
   const [dataSourceInfo, setDataSourceInfo] = useState<DataSourceInfo | null>(null);
   const [isResyncing, setIsResyncing] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-  const [autoGenerate, setAutoGenerate] = useState(false); // Default OFF - let user review first
+  const [autoGenerate, setAutoGenerate] = useState(false);
   const [isEnrichingWithWeb, setIsEnrichingWithWeb] = useState(false);
+  const [lastAnalyzedContent, setLastAnalyzedContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Generate the full plan using AI with provided extracted data
@@ -145,11 +147,14 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
     }
   };
 
-  const analyzeContent = async (textContent: string) => {
+  const analyzeContent = async (textContent: string, isReanalyze = false) => {
     if (textContent.trim().length < 100) {
       toast.error("Content too short. Please provide at least 100 characters.");
       return;
     }
+
+    // Store content for potential re-analysis
+    setLastAnalyzedContent(textContent);
 
     setIsAnalyzing(true);
     setAnalysisComplete(false);
@@ -480,6 +485,13 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
     }
   };
 
+  const handleReanalyze = () => {
+    if (lastAnalyzedContent) {
+      toast.info("Re-analyzing content...");
+      analyzeContent(lastAnalyzedContent, true);
+    }
+  };
+
   const handlePasteAnalyze = () => analyzeContent(content);
 
   const handleUrlFetch = async () => {
@@ -728,9 +740,28 @@ Example: Copy text from sections like:
             <div className="flex items-center justify-between gap-2 text-sm text-sn-green bg-sn-green/10 p-3 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5" />
-                Data extracted! Review all tabs, add your insights, then generate your plan.
+                Data extracted! Review and edit below, then generate your plan.
               </div>
+              {lastAnalyzedContent && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReanalyze}
+                  disabled={isAnalyzing}
+                  className="gap-2"
+                >
+                  {isAnalyzing ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <RotateCcw className="w-3 h-3" />
+                  )}
+                  Re-analyze
+                </Button>
+              )}
             </div>
+
+            {/* Inline Editable Data Review */}
+            <ExtractedDataReview />
 
             {/* Generate Plan CTA - The main action after extraction */}
             <div className="p-4 rounded-lg bg-gradient-to-r from-sn-green/20 to-primary/20 border border-sn-green/30">
