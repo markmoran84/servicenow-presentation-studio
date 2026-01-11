@@ -243,15 +243,16 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: initialPrompt },
-          { role: "user", content: userPrompt }
-        ],
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          temperature: 0,
+          messages: [
+            { role: "system", content: initialPrompt },
+            { role: "user", content: userPrompt }
+          ],
         tools: [
           {
             type: "function",
