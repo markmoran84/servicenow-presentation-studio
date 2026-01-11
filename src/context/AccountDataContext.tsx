@@ -149,6 +149,9 @@ export interface AnnualReportHighlights {
   strategicAchievements: string[];
   executiveSummaryNarrative: string;
   strategicPillars: StrategicPillar[];
+  // Web-enriched fields
+  companyVision?: string;
+  companyMission?: string;
 }
 
 // Business Model Canvas (9 building blocks)

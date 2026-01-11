@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, createErrorResponse, validateContent, validateAccountContext, sanitizeForAI } from "../_shared/validation.ts";
 
-// Comprehensive web research for multiple data types
+// Comprehensive web research for multiple data types using Firecrawl
 async function searchCompanyInfo(companyName: string, searchType: string): Promise<string> {
   const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
   if (!apiKey) {
@@ -14,16 +14,16 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
     const sanitizedName = companyName.replace(/[^\w\s-]/g, '').substring(0, 100);
     
     const queries: Record<string, string> = {
-      financial: `${sanitizedName} annual report 2024 2025 revenue EBIT financial results earnings`,
-      strategy: `${sanitizedName} strategic priorities 2024 2025 CEO vision transformation digital`,
-      leadership: `${sanitizedName} CEO CIO CTO executive team leadership priorities investor day`,
-      competitors: `${sanitizedName} competitors market share industry landscape competitive analysis`,
-      challenges: `${sanitizedName} challenges risks pain points issues obstacles investor concerns`,
-      technology: `${sanitizedName} technology stack digital transformation AI automation IT strategy`,
+      vision: `"${sanitizedName}" company vision purpose mission statement values 2024 2025`,
+      strategy: `"${sanitizedName}" strategic priorities strategy pillars CEO priorities transformation 2024 2025`,
+      goals: `"${sanitizedName}" corporate goals targets objectives KPIs 2024 2025 investor day`,
+      digital: `"${sanitizedName}" digital transformation technology AI automation cloud strategy`,
+      leadership: `"${sanitizedName}" CEO CIO CTO executive leadership priorities initiatives`,
+      sustainability: `"${sanitizedName}" sustainability ESG net zero carbon emissions targets`,
     };
 
-    const query = queries[searchType] || `${sanitizedName} business overview`;
-    console.log(`Searching ${searchType}`);
+    const query = queries[searchType] || `${sanitizedName} business overview strategy`;
+    console.log(`Searching web for ${searchType}: "${query.substring(0, 80)}..."`);
 
     const response = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
@@ -33,7 +33,7 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
       },
       body: JSON.stringify({
         query,
-        limit: 4,
+        limit: 5,
         scrapeOptions: { formats: ["markdown"] },
       }),
     });
@@ -46,37 +46,239 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
     const data = await response.json();
     const results = data.data || [];
     const content = results
-      .map((r: any) => r.markdown || r.description || "")
-      .join("\n\n")
-      .slice(0, 8000);
+      .map((r: any) => {
+        const text = r.markdown || r.description || "";
+        const source = r.url || "";
+        return source ? `[Source: ${source}]\n${text}` : text;
+      })
+      .join("\n\n---\n\n")
+      .slice(0, 12000);
 
-    console.log(`Found ${results.length} results for ${searchType}`);
+    console.log(`Found ${results.length} web results for ${searchType}`);
     return content;
   } catch (error) {
-    console.error(`Search error for ${searchType}`);
+    console.error(`Search error for ${searchType}:`, error);
     return "";
   }
 }
 
 // Fetch comprehensive web intelligence in parallel
 async function fetchComprehensiveWebData(companyName: string): Promise<{
-  financial: string;
+  vision: string;
   strategy: string;
+  goals: string;
+  digital: string;
   leadership: string;
-  competitors: string;
-  challenges: string;
-  technology: string;
+  sustainability: string;
+  hasData: boolean;
 }> {
-  const [financial, strategy, leadership, competitors, challenges, technology] = await Promise.all([
-    searchCompanyInfo(companyName, "financial"),
+  console.log(`Starting web research for: ${companyName}`);
+  
+  const [vision, strategy, goals, digital, leadership, sustainability] = await Promise.all([
+    searchCompanyInfo(companyName, "vision"),
     searchCompanyInfo(companyName, "strategy"),
+    searchCompanyInfo(companyName, "goals"),
+    searchCompanyInfo(companyName, "digital"),
     searchCompanyInfo(companyName, "leadership"),
-    searchCompanyInfo(companyName, "competitors"),
-    searchCompanyInfo(companyName, "challenges"),
-    searchCompanyInfo(companyName, "technology"),
+    searchCompanyInfo(companyName, "sustainability"),
   ]);
 
-  return { financial, strategy, leadership, competitors, challenges, technology };
+  const hasData = !!(vision || strategy || goals || digital || leadership || sustainability);
+  console.log(`Web research complete. Has data: ${hasData}`);
+
+  return { vision, strategy, goals, digital, leadership, sustainability, hasData };
+}
+
+// Synthesize document + web data into comprehensive customer profile
+async function synthesizeCustomerProfile(
+  documentData: Record<string, unknown>,
+  webData: { vision: string; strategy: string; goals: string; digital: string; leadership: string; sustainability: string },
+  apiKey: string
+): Promise<Record<string, unknown>> {
+  console.log("Synthesizing document + web data into comprehensive profile...");
+
+  const companyName = documentData.accountName || "Unknown Company";
+
+  const synthesisPrompt = `You are a strategic account intelligence analyst. Synthesize document-extracted data with web research to create a comprehensive customer profile.
+
+DOCUMENT-EXTRACTED DATA (PRIMARY SOURCE - trust this for facts):
+${JSON.stringify(documentData, null, 2)}
+
+WEB RESEARCH DATA (SECONDARY SOURCE - use to fill gaps and add context):
+═══════════════════════════════════════════════════════════════
+VISION & PURPOSE:
+${webData.vision || "No web data available"}
+
+STRATEGIC PRIORITIES:
+${webData.strategy || "No web data available"}
+
+CORPORATE GOALS:
+${webData.goals || "No web data available"}
+
+DIGITAL/TECHNOLOGY STRATEGY:
+${webData.digital || "No web data available"}
+
+LEADERSHIP PRIORITIES:
+${webData.leadership || "No web data available"}
+
+SUSTAINABILITY:
+${webData.sustainability || "No web data available"}
+═══════════════════════════════════════════════════════════════
+
+YOUR TASK:
+1. PRESERVE all document-extracted data as the authoritative source
+2. ENHANCE with web research where document data is missing or sparse
+3. For STRATEGY fields specifically:
+   - corporateStrategy: Enterprise-wide strategic themes (NOT business units)
+   - digitalStrategies: Technology/digital/AI initiatives ONLY
+   - ceoBoardPriorities: Priorities explicitly attributed to CEO/Board
+   - DO NOT duplicate items across categories
+   - Use action-oriented language (Strengthen, Drive, Accelerate, Transform, etc.)
+4. Add company vision/purpose if found in web research but missing from document
+5. Ensure all strategy items follow the headline + subtitle + description format`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-3-flash-preview",
+      temperature: 0.1,
+      messages: [
+        { role: "system", content: synthesisPrompt },
+        { role: "user", content: `Synthesize the comprehensive customer profile for ${companyName}. Return the enhanced data structure with web-enriched fields clearly marked.` }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "return_enriched_profile",
+            description: "Return the synthesized customer profile with document + web data merged",
+            parameters: {
+              type: "object",
+              properties: {
+                companyVision: { type: "string", description: "Company's stated vision/purpose (from web if not in document)" },
+                companyMission: { type: "string", description: "Company's mission statement (from web if not in document)" },
+                corporateStrategy: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string", description: "Action-oriented strategy theme (e.g., 'Strengthen customer focus')" },
+                      description: { type: "string", description: "Completing phrase + explanation (e.g., 'and profitable growth - Focus on...')" },
+                      source: { type: "string", enum: ["document", "web", "both"], description: "Where this came from" }
+                    },
+                    required: ["title", "description", "source"]
+                  }
+                },
+                digitalStrategies: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string", description: "Digital/tech initiative name" },
+                      description: { type: "string", description: "Initiative explanation" },
+                      source: { type: "string", enum: ["document", "web", "both"] }
+                    },
+                    required: ["title", "description", "source"]
+                  }
+                },
+                ceoBoardPriorities: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      title: { type: "string", description: "CEO/Board priority" },
+                      description: { type: "string", description: "Priority explanation" },
+                      source: { type: "string", enum: ["document", "web", "both"] }
+                    },
+                    required: ["title", "description", "source"]
+                  }
+                },
+                sustainabilityGoals: { type: "string", description: "Net zero / ESG targets" },
+                keyExecutivesEnriched: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      title: { type: "string" },
+                      priorities: { type: "string" },
+                      relevance: { type: "string" }
+                    }
+                  }
+                }
+              },
+              required: ["corporateStrategy"]
+            }
+          }
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "return_enriched_profile" } }
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("Synthesis API error:", response.status);
+    return documentData; // Fall back to document-only data
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+  
+  if (!toolCall) {
+    console.log("No synthesis tool call, returning document data");
+    return documentData;
+  }
+
+  try {
+    const enrichedProfile = JSON.parse(toolCall.function.arguments);
+    console.log("Successfully synthesized enriched profile");
+
+    // Merge enriched data back into document data
+    const merged = { ...documentData };
+    
+    if (enrichedProfile.companyVision) {
+      (merged as any).companyVision = enrichedProfile.companyVision;
+    }
+    if (enrichedProfile.companyMission) {
+      (merged as any).companyMission = enrichedProfile.companyMission;
+    }
+    if (enrichedProfile.corporateStrategy?.length > 0) {
+      (merged as any).corporateStrategy = enrichedProfile.corporateStrategy.map((s: any) => ({
+        title: s.title,
+        description: s.description,
+        source: s.source
+      }));
+    }
+    if (enrichedProfile.digitalStrategies?.length > 0) {
+      (merged as any).digitalStrategies = enrichedProfile.digitalStrategies.map((s: any) => ({
+        title: s.title,
+        description: s.description,
+        source: s.source
+      }));
+    }
+    if (enrichedProfile.ceoBoardPriorities?.length > 0) {
+      (merged as any).ceoBoardPriorities = enrichedProfile.ceoBoardPriorities.map((s: any) => ({
+        title: s.title,
+        description: s.description,
+        source: s.source
+      }));
+    }
+    if (enrichedProfile.sustainabilityGoals && !(merged as any).netZeroTarget) {
+      (merged as any).netZeroTarget = enrichedProfile.sustainabilityGoals;
+    }
+    if (enrichedProfile.keyExecutivesEnriched?.length > 0 && !((merged as any).keyExecutives?.length > 0)) {
+      (merged as any).keyExecutives = enrichedProfile.keyExecutivesEnriched;
+    }
+
+    return merged;
+  } catch (parseErr) {
+    console.error("Failed to parse synthesis response:", parseErr);
+    return documentData;
+  }
 }
 
 serve(async (req) => {
@@ -524,10 +726,10 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
     (extractedData as any).corporateStrategy = corporateFinal;
     (extractedData as any).digitalStrategies = digitalFinal;
 
-    const companyName = extractedData.accountName || "";
+    const companyName = String(extractedData.accountName || "").trim();
 
     // Track data sources
-    const dataSources: Record<string, "document" | "web"> = {};
+    const dataSources: Record<string, "document" | "web" | "both"> = {};
     const documentFields = Object.keys(extractedData).filter(k => {
       const val = extractedData[k];
       return val && val !== "N/A" && val !== "Not specified" && 
@@ -535,13 +737,56 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
     });
     documentFields.forEach(f => dataSources[f] = "document");
 
-    // Skip web research to prevent timeouts - the document extraction is comprehensive enough
-    const usedWebSearch = false;
+    // PHASE 2: Web research enrichment (if company name was extracted and Firecrawl is configured)
+    let finalData = extractedData;
+    let usedWebSearch = false;
+
+    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
+    if (companyName && companyName.length > 2 && firecrawlKey) {
+      console.log(`Starting web research enrichment for: ${companyName}`);
+      
+      try {
+        const webData = await fetchComprehensiveWebData(companyName);
+        
+        if (webData.hasData) {
+          usedWebSearch = true;
+          console.log("Web data found, synthesizing comprehensive profile...");
+          
+          // Synthesize document + web data
+          finalData = await synthesizeCustomerProfile(extractedData, webData, LOVABLE_API_KEY!);
+          
+          // Update data sources for web-enriched fields
+          const finalDataAny = finalData as any;
+          ["corporateStrategy", "digitalStrategies", "ceoBoardPriorities"].forEach(field => {
+            const items = finalDataAny[field];
+            if (Array.isArray(items)) {
+              items.forEach((item: any) => {
+                if (item.source === "web") {
+                  dataSources[field] = "web";
+                } else if (item.source === "both") {
+                  dataSources[field] = "both";
+                }
+              });
+            }
+          });
+          
+          if (finalDataAny.companyVision) dataSources["companyVision"] = "web";
+          if (finalDataAny.companyMission) dataSources["companyMission"] = "web";
+        }
+      } catch (webError) {
+        console.error("Web enrichment failed, continuing with document data:", webError);
+        // Continue with document-only data
+      }
+    } else if (!firecrawlKey) {
+      console.log("Firecrawl not configured, skipping web enrichment");
+    } else {
+      console.log("No company name extracted, skipping web enrichment");
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        data: extractedData,
+        data: finalData,
         dataSources,
         usedWebSearch 
       }),

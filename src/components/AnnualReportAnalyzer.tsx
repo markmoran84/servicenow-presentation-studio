@@ -324,10 +324,23 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
         ...(extracted.keyMilestones?.length && { keyMilestones: extracted.keyMilestones }),
         ...(extracted.strategicAchievements?.length && { strategicAchievements: extracted.strategicAchievements }),
         ...(extracted.executiveSummaryNarrative && { executiveSummaryNarrative: extracted.executiveSummaryNarrative }),
+        // Web-enriched vision/mission
+        ...(extracted.companyVision && { companyVision: extracted.companyVision }),
+        ...(extracted.companyMission && { companyMission: extracted.companyMission }),
       });
 
+      // Log web enrichment status
+      if (usedWebSearch) {
+        console.log("Analysis included web research enrichment");
+      }
+
       setAnalysisComplete(true);
-      toast.success("Analysis complete! Data populated across all relevant tabs.");
+      
+      if (usedWebSearch) {
+        toast.success("Analysis complete! Document + web research data populated.", { duration: 4000 });
+      } else {
+        toast.success("Analysis complete! Data populated across all relevant tabs.");
+      }
 
       // Auto-generate the full plan if enabled - pass extracted data directly
       if (autoGenerate) {
@@ -632,9 +645,13 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
             <div className="flex-1">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
                 AI-Powered Account Planning
+                <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                  <Globe className="w-3 h-3 mr-1" />
+                  Web Enriched
+                </Badge>
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                <strong>Step 1:</strong> Upload/paste content → AI extracts all data it can find<br/>
+                <strong>Step 1:</strong> Upload/paste content → AI extracts document data <strong>+ searches web for vision, goals & strategies</strong><br/>
                 <strong>Step 2:</strong> Review tabs, add your own insights or amend as needed<br/>
                 <strong>Step 3:</strong> Click <span className="text-primary font-medium">Generate Plan</span> → AI fills any gaps and creates a cohesive 23-slide account plan
               </p>
