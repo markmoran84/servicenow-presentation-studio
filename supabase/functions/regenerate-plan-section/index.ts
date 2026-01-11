@@ -125,9 +125,28 @@ const sectionSpecs: Record<
   customerStrategySynthesis: {
     keys: ["customerStrategySynthesis"],
     instruction:
-      "Create a synthesis of the customer's strategy and how ServiceNow aligns. Include a 2-3 sentence narrative and exactly 4 alignment pairs showing customer priority matched to ServiceNow value.",
+      `Create a comprehensive synthesis of the customer's strategy with fresh visual presentation.
+      
+Include:
+1. strategicPillars: Exactly 4 pillars, each with:
+   - headline: A bold 2-4 word strategic theme
+   - subtitle: A supporting phrase (5-8 words)
+   - description: 2-3 sentences explaining the pillar
+   - icon: One of {target|users|trending-up|shield|globe|zap}
+
+2. narrative: A 2-3 sentence executive summary of the customer's strategic direction
+
+3. serviceNowAlignment: Exactly 4 pairs showing:
+   - customerPriority: What the customer is trying to achieve
+   - serviceNowValue: How ServiceNow uniquely addresses this
+
+4. layoutVariant: Choose one of {grid-2x2|stacked-cards|horizontal-flow|spotlight} to suggest a fresh visual layout
+
+5. accentColor: Choose a fresh accent palette from {blue|emerald|amber|purple|rose|cyan|indigo}
+
+Be creative with the pillars - use different framing, metaphors, or perspectives than previous iterations.`,
     outputShapeHint:
-      '{"customerStrategySynthesis":{"narrative":"The customer is pursuing an integrated logistics strategy...","serviceNowAlignment":[{"customerPriority":"AI-First Operations","serviceNowValue":"Workflow orchestration layer for AI operationalisation"}]}}',
+      `{"customerStrategySynthesis":{"strategicPillars":[{"headline":"Connected Enterprise","subtitle":"Unifying operations across boundaries","description":"Building seamless integration between logistics, technology, and customer experience.","icon":"globe"}],"narrative":"The customer is pursuing a transformative integration strategy...","serviceNowAlignment":[{"customerPriority":"AI-First Operations","serviceNowValue":"Workflow orchestration layer for AI operationalisation"}],"layoutVariant":"grid-2x2","accentColor":"emerald"}}`,
   },
   weeklyUpdateContext: {
     keys: ["weeklyUpdateContext"],

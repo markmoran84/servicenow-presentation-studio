@@ -204,7 +204,9 @@ export interface AIGeneratedPlan {
   customerStrategySynthesis?: { 
     strategicPillars?: { headline: string; subtitle: string; description: string; icon: string }[];
     narrative: string; 
-    serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] 
+    serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[];
+    layoutVariant?: "grid-2x2" | "stacked-cards" | "horizontal-flow" | "spotlight";
+    accentColor?: "blue" | "emerald" | "amber" | "purple" | "rose" | "cyan" | "indigo";
   };
   // Weekly Update dynamic content
   weeklyUpdateContext?: { overallStatus: string; keyHighlights: string[]; criticalActions: string[] };
