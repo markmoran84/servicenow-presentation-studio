@@ -106,7 +106,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col px-12 py-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
+    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
@@ -118,10 +118,10 @@ const AgileTeamModelSlide = () => {
       </div>
 
       {/* Main Content - 16:9 proportioned layout */}
-      <div className="flex-1 flex gap-12 items-center justify-center">
+      <div className="flex-1 grid grid-cols-[620px_1fr] gap-16 items-center max-lg:grid-cols-1 max-lg:items-start">
         {/* Left Side - GTM Wheel Graphic */}
-        <div className="flex flex-col items-center justify-center flex-shrink-0">
-          <svg width="440" height="440" viewBox="0 0 440 440" className="drop-shadow-2xl">
+        <div className="w-[620px] max-lg:w-full flex flex-col items-center justify-center">
+          <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
               <radialGradient id="activeGradient" cx="50%" cy="50%" r="50%">
@@ -284,8 +284,8 @@ const AgileTeamModelSlide = () => {
         </div>
 
         {/* Right Side - Supporting Bullets */}
-        <div className="flex-1 flex flex-col justify-center space-y-6 max-w-lg">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+        <div className="flex-1 flex flex-col gap-8 max-w-[900px] max-lg:max-w-none">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-10 border border-white/10">
             <h3 className="text-emerald-400 font-bold text-xl mb-6 flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
               Agile Operating Model
@@ -309,7 +309,7 @@ const AgileTeamModelSlide = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-6">
+          <div className="mt-auto bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-7">
             <p className="text-emerald-300 text-base italic leading-relaxed">
               "We operate in an agile fashion — the core team dynamically activates specialized resources as opportunities emerge and evolve."
             </p>
