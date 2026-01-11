@@ -55,18 +55,18 @@ const AgileTeamModelSlide = () => {
     }
   ];
 
-  const centerX = 200;
-  const centerY = 200;
-  const outerRadius = 180;
-  const middleRadius = 130;
-  const innerRadius = 70;
+  const centerX = 220;
+  const centerY = 220;
+  const outerRadius = 200;
+  const middleRadius = 145;
+  const innerRadius = 80;
 
   // Generate segment paths for the outer ring
   const generateSegmentPath = (index: number, startR: number, endR: number) => {
     const segmentAngle = (2 * Math.PI) / 8;
     const startAngle = index * segmentAngle - Math.PI / 2 - segmentAngle / 2;
     const endAngle = startAngle + segmentAngle;
-    const gap = 0.02; // Small gap between segments
+    const gap = 0.02;
     
     const x1 = centerX + startR * Math.cos(startAngle + gap);
     const y1 = centerY + startR * Math.sin(startAngle + gap);
@@ -87,8 +87,8 @@ const AgileTeamModelSlide = () => {
     
     const startX = centerX + (innerRadius + 15) * Math.cos(angle);
     const startY = centerY + (innerRadius + 15) * Math.sin(angle);
-    const endX = centerX + (middleRadius - 10) * Math.cos(angle);
-    const endY = centerY + (middleRadius - 10) * Math.sin(angle);
+    const endX = centerX + (middleRadius - 12) * Math.cos(angle);
+    const endY = centerY + (middleRadius - 12) * Math.sin(angle);
     
     return { startX, startY, endX, endY, angle };
   };
@@ -106,22 +106,22 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="h-full flex flex-col p-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
+    <div className="w-full min-h-screen flex flex-col px-12 py-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-white mb-1">
+      <div className="mb-6">
+        <h1 className="text-4xl font-bold text-white mb-2">
           The Task-Based Agile AM Model
         </h1>
-        <p className="text-emerald-400 text-lg">
+        <p className="text-emerald-400 text-xl">
           {companyName} Account Team — Dynamic Resource Activation
         </p>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex gap-10 items-center">
+      {/* Main Content - 16:9 proportioned layout */}
+      <div className="flex-1 flex gap-12 items-center justify-center">
         {/* Left Side - GTM Wheel Graphic */}
-        <div className="flex flex-col items-center justify-center">
-          <svg width="400" height="400" viewBox="0 0 400 400" className="drop-shadow-2xl">
+        <div className="flex flex-col items-center justify-center flex-shrink-0">
+          <svg width="440" height="440" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
               <radialGradient id="activeGradient" cx="50%" cy="50%" r="50%">
@@ -144,7 +144,7 @@ const AgileTeamModelSlide = () => {
                   <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
-              {/* Arrow marker */}
+              {/* Arrow markers */}
               <marker
                 id="arrowMarker"
                 markerWidth="10"
@@ -227,17 +227,19 @@ const AgileTeamModelSlide = () => {
             />
             <text
               x={centerX}
-              y={centerY - 8}
+              y={centerY - 10}
               textAnchor="middle"
-              className="fill-emerald-900 font-bold text-lg"
+              className="fill-emerald-900 font-bold"
+              style={{ fontSize: '22px' }}
             >
               Core
             </text>
             <text
               x={centerX}
-              y={centerY + 14}
+              y={centerY + 16}
               textAnchor="middle"
-              className="fill-emerald-900 font-bold text-lg"
+              className="fill-emerald-900 font-bold"
+              style={{ fontSize: '22px' }}
             >
               Team
             </text>
@@ -254,12 +256,13 @@ const AgileTeamModelSlide = () => {
                     <text
                       key={lineIndex}
                       x={pos.x}
-                      y={pos.y + (lineIndex - (lines.length - 1) / 2) * 14}
+                      y={pos.y + (lineIndex - (lines.length - 1) / 2) * 16}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className={`text-xs font-semibold transition-all duration-700 ${
+                      className={`font-semibold transition-all duration-700 ${
                         isActive ? 'fill-white' : 'fill-gray-400'
                       }`}
+                      style={{ fontSize: '13px' }}
                     >
                       {line}
                     </text>
@@ -270,8 +273,8 @@ const AgileTeamModelSlide = () => {
           </svg>
 
           {/* Label below graphic */}
-          <div className="text-center mt-4">
-            <p className="text-emerald-400 font-bold text-lg">
+          <div className="text-center mt-5">
+            <p className="text-emerald-400 font-bold text-xl">
               The GTM Wheel of Fire
             </p>
             <p className="text-gray-400 text-sm mt-1">
@@ -281,20 +284,20 @@ const AgileTeamModelSlide = () => {
         </div>
 
         {/* Right Side - Supporting Bullets */}
-        <div className="flex-1 flex flex-col justify-center space-y-5 max-w-md">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-            <h3 className="text-emerald-400 font-bold text-lg mb-5 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex-1 flex flex-col justify-center space-y-6 max-w-lg">
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+            <h3 className="text-emerald-400 font-bold text-xl mb-6 flex items-center gap-3">
+              <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
               Agile Operating Model
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {supportingBullets.map((bullet, index) => (
-                <div key={index} className="flex gap-3 group">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mt-0.5">
-                    <span className="text-emerald-400 text-xs font-bold">{index + 1}</span>
+                <div key={index} className="flex gap-4 group">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                    <span className="text-emerald-400 text-sm font-bold">{index + 1}</span>
                   </div>
                   <div>
-                    <h4 className="text-white font-semibold text-sm">
+                    <h4 className="text-white font-semibold text-base">
                       {bullet.title}
                     </h4>
                     <p className="text-gray-400 text-sm mt-1 leading-relaxed">
@@ -306,20 +309,20 @@ const AgileTeamModelSlide = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-5">
-            <p className="text-emerald-300 text-sm italic leading-relaxed">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-6">
+            <p className="text-emerald-300 text-base italic leading-relaxed">
               "We operate in an agile fashion — the core team dynamically activates specialized resources as opportunities emerge and evolve."
             </p>
           </div>
 
           {/* Legend */}
-          <div className="flex gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
+          <div className="flex gap-8 text-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50" />
               <span className="text-gray-300">Active Resource</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-600" />
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-full bg-gray-600" />
               <span className="text-gray-400">Available Resource</span>
             </div>
           </div>
