@@ -324,8 +324,9 @@ interface AccountDataContextType {
   reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
 }
 
-// Create context with a stable reference to prevent HMR issues
+// Create context with stable reference - using displayName helps with HMR
 const AccountDataContext = createContext<AccountDataContextType | null>(null);
+AccountDataContext.displayName = "AccountDataContext";
 
 export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<AccountData>(defaultData);
