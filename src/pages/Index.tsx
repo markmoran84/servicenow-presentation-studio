@@ -24,6 +24,7 @@ import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
 import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
+import { AIChatAssistant } from "@/components/AIChatAssistant";
 
 const slides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
@@ -163,6 +164,9 @@ const Index = () => {
       />
 
       <SlideFooter />
+      
+      {/* AI Chat Assistant - floating button */}
+      <AIChatAssistant />
     </div>
   );
 };
