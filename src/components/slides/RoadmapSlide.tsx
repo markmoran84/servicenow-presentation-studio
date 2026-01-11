@@ -1,43 +1,83 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Calendar, ArrowRight, Sparkles, Info, Target, Flag, Users, TrendingUp, CheckCircle } from "lucide-react";
+import { Sparkles, Info, ArrowRight } from "lucide-react";
 
 export const RoadmapSlide = () => {
   const { data } = useAccountData();
   const plan = data.generatedPlan;
   const companyName = data.basics.accountName || "the customer";
 
-  // Get big bets as initiatives
+  // Get big bets as initiatives/strategy items
   const bigBets = data.accountStrategy?.bigBets?.filter(b => b.title) || [];
-  const hasInitiatives = bigBets.length > 0;
+  const hasData = bigBets.length > 0 || (plan?.executiveSummaryPillars?.length ?? 0) > 0;
   
   // Roadmap phases from AI generation
   const phases = plan?.roadmapPhases?.slice(0, 3) || [];
   const hasPhases = phases.length > 0;
-  
-  // Success metrics as target outcomes
-  const successMetrics = plan?.successMetrics?.slice(0, 4) || [];
 
-  // Default phases if not generated
-  const defaultPhases = [
-    { quarter: "Now", title: "Foundation", activities: ["Current initiatives", "Quick wins", "Foundation setup"] },
-    { quarter: "Next", title: "Expansion", activities: ["Scale successful pilots", "New workstreams", "Integration focus"] },
-    { quarter: "Later", title: "Transformation", activities: ["Full platform adoption", "Advanced capabilities", "Business outcomes"] },
+  // Purpose/Vision
+  const purpose = data.basics.visionStatement || 
+    plan?.executiveSummaryNarrative?.substring(0, 200) ||
+    `Enable ${companyName}'s digital transformation through strategic platform adoption`;
+
+  // Strategic Objectives from priorities or generated plan
+  const objectives = plan?.strategicPriorities?.slice(0, 4).map(p => p.title) ||
+    data.strategy?.transformationThemes?.slice(0, 4).map(t => t.title) ||
+    ["Digital Transformation", "Operational Excellence", "Customer Experience", "Innovation"];
+
+  // Value Drivers from plan or defaults
+  const valueDrivers = plan?.executiveSummaryPillars?.slice(0, 4).map(p => ({
+    title: p.title,
+    description: p.tagline || p.description?.substring(0, 60)
+  })) || plan?.coreValueDrivers?.slice(0, 4).map(d => ({
+    title: d.title,
+    description: d.description?.substring(0, 60)
+  })) || [
+    { title: "Platform Consolidation", description: "Unified technology landscape" },
+    { title: "Process Automation", description: "Streamlined workflows" },
+    { title: "Data Intelligence", description: "Actionable insights" },
+    { title: "Employee Experience", description: "Enhanced productivity" }
   ];
 
-  const displayPhases = hasPhases ? phases : defaultPhases;
+  // Strategy/Initiatives from Big Bets
+  const initiatives = bigBets.slice(0, 6).map(b => ({
+    title: b.title,
+    phase: b.dealStatus === "Active Pursuit" ? "now" : 
+           b.dealStatus === "Strategic Initiative" ? "next" : "later",
+    value: b.netNewACV || ""
+  }));
+
+  // Fallback initiatives if no big bets
+  const displayInitiatives = initiatives.length > 0 ? initiatives : [
+    { title: "Platform Foundation", phase: "now", value: "" },
+    { title: "ITSM Modernization", phase: "now", value: "" },
+    { title: "HRSD Expansion", phase: "next", value: "" },
+    { title: "CSM Implementation", phase: "next", value: "" },
+    { title: "AI/ML Adoption", phase: "later", value: "" },
+    { title: "Enterprise Scale", phase: "later", value: "" }
+  ];
+
+  // Measurable Impact from success metrics or defaults
+  const impacts = plan?.successMetrics?.slice(0, 4) || [
+    { metric: "TBD", label: "Cost Reduction", description: "" },
+    { metric: "TBD", label: "Productivity Gain", description: "" },
+    { metric: "TBD", label: "Customer Satisfaction", description: "" },
+    { metric: "TBD", label: "Time to Value", description: "" }
+  ];
+
+  // Group initiatives by phase
+  const nowItems = displayInitiatives.filter(i => i.phase === "now");
+  const nextItems = displayInitiatives.filter(i => i.phase === "next");
+  const laterItems = displayInitiatives.filter(i => i.phase === "later");
 
   return (
-    <div className="min-h-screen p-6 md:p-8 pb-32 bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="max-w-[1600px] mx-auto">
+    <div className="min-h-screen p-4 md:p-6 pb-32 bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="max-w-[1800px] mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-foreground">Strategic Roadmap for {companyName}</h1>
-            <p className="text-muted-foreground">Transformation journey connecting initiatives to outcomes</p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Strategic Roadmap</h1>
+            <p className="text-sm text-muted-foreground">{companyName} • Transformation Journey</p>
           </div>
           <div className="flex items-center gap-2">
             <RegenerateSectionButton section="roadmapPhases" />
@@ -50,153 +90,173 @@ export const RoadmapSlide = () => {
           </div>
         </div>
 
-        {hasInitiatives ? (
-          <div className="grid grid-cols-12 gap-4">
-            {/* Column 1: Initiatives (Big Bets) */}
-            <div className="col-span-3 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Initiatives</span>
-              </div>
-              <div className="flex-1 space-y-2">
-                {bigBets.slice(0, 6).map((bet, i) => (
-                  <div 
-                    key={i} 
-                    className="glass-card p-3 border-l-3 border-l-primary opacity-0 animate-fade-in"
-                    style={{ animationDelay: `${i * 80}ms`, borderLeftWidth: '3px' }}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="text-sm font-bold text-foreground line-clamp-1">{bet.title}</div>
-                        {bet.subtitle && (
-                          <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{bet.subtitle}</div>
-                        )}
-                      </div>
-                      <span className={`shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                        bet.dealStatus === "Active Pursuit" ? "bg-accent/20 text-accent" :
-                        bet.dealStatus === "Strategic Initiative" ? "bg-primary/20 text-primary" :
-                        bet.dealStatus === "Foundation Growth" ? "bg-amber-500/20 text-amber-400" :
-                        "bg-muted text-muted-foreground"
-                      }`}>
-                        {bet.dealStatus?.split(" ")[0] || "Pipeline"}
-                      </span>
-                    </div>
-                    {bet.sponsor && (
-                      <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/30">
-                        <Users className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground">Sponsor: {bet.sponsor}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        {/* 5-Column Layout */}
+        <div className="grid grid-cols-12 gap-3 h-[calc(100vh-180px)]">
+          {/* Column 1: Purpose */}
+          <div className="col-span-2 flex flex-col">
+            <div className="bg-primary text-primary-foreground rounded-t-lg py-2 px-3 text-center">
+              <span className="text-sm font-bold uppercase tracking-wider">Purpose</span>
             </div>
+            <div className="flex-1 bg-primary/10 border border-primary/20 rounded-b-lg p-4 flex items-center">
+              <p className="text-sm text-foreground leading-relaxed text-center">
+                {purpose}
+              </p>
+            </div>
+          </div>
 
-            {/* Column 2: Strategic Roadmap Timeline */}
-            <div className="col-span-6 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <Flag className="w-4 h-4 text-accent" />
-                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Strategic Roadmap</span>
-              </div>
-              
+          {/* Column 2: Objectives */}
+          <div className="col-span-2 flex flex-col">
+            <div className="bg-primary text-primary-foreground rounded-t-lg py-2 px-3 text-center">
+              <span className="text-sm font-bold uppercase tracking-wider">Objectives</span>
+            </div>
+            <div className="flex-1 bg-primary/10 border border-primary/20 rounded-b-lg p-3 flex flex-col justify-center gap-2">
+              {objectives.map((obj, i) => (
+                <div 
+                  key={i} 
+                  className="bg-background/80 rounded-md p-2.5 border border-border/50 text-center opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  <span className="text-sm font-medium text-foreground">{obj}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 3: Value Drivers */}
+          <div className="col-span-2 flex flex-col">
+            <div className="bg-primary text-primary-foreground rounded-t-lg py-2 px-3 text-center">
+              <span className="text-sm font-bold uppercase tracking-wider">Value Drivers</span>
+            </div>
+            <div className="flex-1 bg-primary/10 border border-primary/20 rounded-b-lg p-3 flex flex-col justify-center gap-2">
+              {valueDrivers.map((driver, i) => (
+                <div 
+                  key={i} 
+                  className="bg-background/80 rounded-md p-2.5 border border-border/50 opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${(i + 4) * 80}ms` }}
+                >
+                  <div className="text-sm font-semibold text-foreground text-center">{driver.title}</div>
+                  {driver.description && (
+                    <div className="text-[10px] text-muted-foreground text-center mt-0.5 line-clamp-1">{driver.description}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Column 4: Strategy / Initiatives (Timeline) */}
+          <div className="col-span-4 flex flex-col">
+            <div className="bg-primary text-primary-foreground rounded-t-lg py-2 px-3 text-center">
+              <span className="text-sm font-bold uppercase tracking-wider">Strategy / Initiatives</span>
+            </div>
+            <div className="flex-1 bg-primary/10 border border-primary/20 rounded-b-lg p-3">
               {/* Timeline Header */}
-              <div className="flex items-center justify-between px-4 mb-3 py-2 bg-secondary/30 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-accent" />
-                  <span className="text-sm font-bold text-accent">Now</span>
+              <div className="flex items-center mb-3">
+                <div className="flex-1 flex items-center justify-center gap-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                  <span className="text-xs font-bold text-accent uppercase">Now</span>
                 </div>
-                <div className="flex-1 mx-4 border-t-2 border-dashed border-muted-foreground/30 relative">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 absolute right-0 -top-2" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground/50 mx-1" />
+                <div className="flex-1 flex items-center justify-center gap-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                  <span className="text-xs font-bold text-primary uppercase">Next</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary/60" />
-                  <span className="text-sm font-medium text-muted-foreground">Next</span>
-                </div>
-                <div className="flex-1 mx-4 border-t-2 border-dashed border-muted-foreground/30 relative">
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/50 absolute right-0 -top-2" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-muted-foreground/40" />
-                  <span className="text-sm font-medium text-muted-foreground/60">Later</span>
+                <ArrowRight className="w-4 h-4 text-muted-foreground/50 mx-1" />
+                <div className="flex-1 flex items-center justify-center gap-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/60" />
+                  <span className="text-xs font-bold text-muted-foreground uppercase">Later</span>
                 </div>
               </div>
 
-              {/* Roadmap Phases */}
-              <div className="flex-1 grid grid-cols-3 gap-3">
-                {displayPhases.map((phase, i) => (
-                  <div 
-                    key={i} 
-                    className={`glass-card p-4 opacity-0 animate-fade-in ${
-                      i === 0 ? 'border-accent/50 bg-accent/5 ring-1 ring-accent/20' : ''
-                    }`}
-                    style={{ animationDelay: `${(i + 6) * 80}ms` }}
-                  >
-                    <div className={`text-lg font-bold mb-1 ${i === 0 ? 'text-accent' : i === 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                      {phase.quarter}
+              {/* Timeline Grid */}
+              <div className="grid grid-cols-3 gap-2 flex-1">
+                {/* Now Column */}
+                <div className="space-y-2">
+                  {(nowItems.length > 0 ? nowItems : displayInitiatives.slice(0, 2)).map((item, i) => (
+                    <div 
+                      key={i} 
+                      className="bg-accent/20 border border-accent/40 rounded-md p-2.5 opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${(i + 8) * 80}ms` }}
+                    >
+                      <div className="text-xs font-semibold text-accent line-clamp-2">{item.title}</div>
+                      {item.value && (
+                        <div className="text-[10px] text-accent/70 mt-1">{item.value}</div>
+                      )}
                     </div>
-                    <div className="text-sm font-semibold text-foreground mb-3">{phase.title}</div>
-                    <ul className="space-y-2">
-                      {(phase.activities || []).slice(0, 4).map((item, j) => (
-                        <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <CheckCircle className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                            i === 0 ? 'text-accent' : 'text-primary/60'
-                          }`} />
-                          <span className="line-clamp-2">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </div>
 
-            {/* Column 3: Target Outcomes */}
-            <div className="col-span-3 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-foreground uppercase tracking-wider">Target Outcomes</span>
-              </div>
-              <div className="flex-1 space-y-2">
-                {(successMetrics.length > 0 ? successMetrics : [
-                  { metric: "TBD", label: "Customer Satisfaction" },
-                  { metric: "TBD", label: "Cost Reduction" },
-                  { metric: "TBD", label: "Revenue Impact" },
-                  { metric: "TBD", label: "Time to Value" }
-                ]).map((outcome, i) => (
-                  <div 
-                    key={i} 
-                    className="relative opacity-0 animate-fade-in" 
-                    style={{ animationDelay: `${(i + 9) * 80}ms` }}
-                  >
-                    <div className="bg-gradient-to-r from-accent/10 to-primary/10 rounded-lg p-3 border border-accent/20">
-                      <div className="text-xl font-bold text-accent">{outcome.metric}</div>
-                      <div className="text-xs text-muted-foreground">{outcome.label}</div>
+                {/* Next Column */}
+                <div className="space-y-2">
+                  {(nextItems.length > 0 ? nextItems : displayInitiatives.slice(2, 4)).map((item, i) => (
+                    <div 
+                      key={i} 
+                      className="bg-primary/20 border border-primary/40 rounded-md p-2.5 opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${(i + 10) * 80}ms` }}
+                    >
+                      <div className="text-xs font-semibold text-primary line-clamp-2">{item.title}</div>
+                      {item.value && (
+                        <div className="text-[10px] text-primary/70 mt-1">{item.value}</div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                {/* Later Column */}
+                <div className="space-y-2">
+                  {(laterItems.length > 0 ? laterItems : displayInitiatives.slice(4, 6)).map((item, i) => (
+                    <div 
+                      key={i} 
+                      className="bg-muted/50 border border-muted-foreground/30 rounded-md p-2.5 opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${(i + 12) * 80}ms` }}
+                    >
+                      <div className="text-xs font-semibold text-muted-foreground line-clamp-2">{item.title}</div>
+                      {item.value && (
+                        <div className="text-[10px] text-muted-foreground/70 mt-1">{item.value}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Summary Box */}
-              <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                <div className="text-xs font-medium text-primary mb-1">FY26 Platform Vision</div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  {data.basics.visionStatement 
-                    ? data.basics.visionStatement.substring(0, 120) + (data.basics.visionStatement.length > 120 ? "..." : "")
-                    : `Enabling ${companyName}'s transformation through strategic ServiceNow adoption.`}
-                </p>
+              {/* Arrow connector at bottom */}
+              <div className="flex items-center justify-center mt-3 pt-2 border-t border-border/30">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-[10px] uppercase tracking-wider">Continuous Improvement</span>
+                  <ArrowRight className="w-3 h-3" />
+                </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="glass-card rounded-2xl p-12 text-center opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <Info className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No Initiatives Defined</h3>
-            <p className="text-muted-foreground max-w-lg mx-auto mb-4">
-              Add Big Bets in the Input Form (Big Bets tab) to populate the initiatives on this roadmap. Each Big Bet title will appear as an initiative with its sponsor.
-            </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-primary">
-              <ArrowRight className="w-4 h-4" />
-              Go to Input Form → Big Bets tab → Add your initiatives
+
+          {/* Column 5: Measurable Impact */}
+          <div className="col-span-2 flex flex-col">
+            <div className="bg-primary text-primary-foreground rounded-t-lg py-2 px-3 text-center">
+              <span className="text-sm font-bold uppercase tracking-wider">Measurable Impact</span>
+            </div>
+            <div className="flex-1 bg-primary/10 border border-primary/20 rounded-b-lg p-3 flex flex-col justify-center gap-2">
+              {impacts.map((impact, i) => (
+                <div 
+                  key={i} 
+                  className="bg-gradient-to-r from-accent/20 to-primary/20 rounded-md p-3 border border-accent/30 opacity-0 animate-fade-in"
+                  style={{ animationDelay: `${(i + 14) * 80}ms` }}
+                >
+                  <div className="text-lg font-bold text-accent text-center">{impact.metric}</div>
+                  <div className="text-[10px] text-muted-foreground text-center mt-0.5">{impact.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* No Data State */}
+        {!hasData && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
+            <div className="text-center p-8">
+              <Info className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Add Data to Populate Roadmap</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Add strategic priorities and Big Bets in the Input Form to see your customized roadmap.
+              </p>
             </div>
           </div>
         )}
