@@ -396,12 +396,61 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
     const data = await response.json();
     console.log("Initial AI response received");
 
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || toolCall.function.name !== "extract_annual_report_data") {
-      throw new Error("Unexpected AI response format");
+    // Debug: Log the full response structure
+    const message = data.choices?.[0]?.message;
+    console.log("Message structure:", JSON.stringify({
+      hasToolCalls: !!message?.tool_calls,
+      toolCallsLength: message?.tool_calls?.length,
+      hasContent: !!message?.content,
+      contentPreview: message?.content?.substring(0, 200)
+    }));
+
+    const toolCall = message?.tool_calls?.[0];
+    
+    // Handle case where AI responds with content instead of tool call
+    if (!toolCall) {
+      console.error("No tool call in response. Message content:", message?.content?.substring(0, 500));
+      
+      // Try to parse JSON from content as fallback
+      if (message?.content) {
+        try {
+          // Look for JSON in the response
+          const jsonMatch = message.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.accountName) {
+              console.log("Recovered data from content fallback");
+              return new Response(
+                JSON.stringify({ 
+                  success: true, 
+                  data: parsed,
+                  dataSources: {},
+                  usedWebSearch: false,
+                  warning: "Data extracted from fallback parsing"
+                }),
+                { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+          }
+        } catch (parseErr) {
+          console.error("Fallback parsing failed:", parseErr);
+        }
+      }
+      throw new Error("AI did not return structured data. Please try again.");
+    }
+    
+    if (toolCall.function.name !== "extract_annual_report_data") {
+      console.error("Wrong function called:", toolCall.function.name);
+      throw new Error("AI used wrong extraction function");
     }
 
-    let extractedData = JSON.parse(toolCall.function.arguments);
+    let extractedData: Record<string, unknown>;
+    try {
+      extractedData = JSON.parse(toolCall.function.arguments);
+    } catch (parseErr) {
+      console.error("Failed to parse tool arguments:", toolCall.function.arguments?.substring(0, 500));
+      throw new Error("Failed to parse AI response data");
+    }
     const companyName = extractedData.accountName || "";
 
     // Track data sources
