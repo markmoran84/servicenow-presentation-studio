@@ -162,88 +162,113 @@ export const ExecutiveEngagementSlide = () => {
           )}
 
           {/* SVG Connector Lines */}
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none" 
-            style={{ zIndex: 0 }}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ zIndex: 5 }}
             preserveAspectRatio="none"
           >
-            <defs>
-              <pattern id="dashed" patternUnits="userSpaceOnUse" width="8" height="1">
-                <line x1="0" y1="0" x2="4" y2="0" stroke="currentColor" strokeWidth="1" className="text-border/60" />
-              </pattern>
-            </defs>
-            
-            {/* Vertical line from CEO down */}
-            <line 
-              x1="50%" y1="140" x2="50%" y2="180" 
-              stroke="currentColor" 
-              strokeWidth="1" 
-              strokeDasharray="4 4"
-              className="text-border/60"
-            />
-            
-            {/* Main horizontal connector line */}
-            <line 
-              x1="8%" y1="180" x2="92%" y2="180" 
-              stroke="currentColor" 
-              strokeWidth="1" 
-              strokeDasharray="4 4"
-              className="text-border/60"
-            />
-            
-            {/* Vertical drops to first row - 6 columns */}
-            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
-              <line 
-                key={`row1-${i}`}
-                x1={`${x}%`} y1="180" x2={`${x}%`} y2="200" 
-                stroke="currentColor" 
-                strokeWidth="1" 
-                strokeDasharray="4 4"
-                className="text-border/60"
-              />
-            ))}
+            {(() => {
+              const stroke = "hsl(var(--accent) / 0.55)";
+              const strokeSoft = "hsl(var(--accent) / 0.35)";
+              const dash = "6 6";
 
-            {/* Connector between row 1 and row 2 */}
-            <line 
-              x1="8%" y1="355" x2="92%" y2="355" 
-              stroke="currentColor" 
-              strokeWidth="1" 
-              strokeDasharray="4 4"
-              className="text-border/40"
-            />
-            
-            {/* Vertical drops to second row */}
-            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
-              <line 
-                key={`row2-${i}`}
-                x1={`${x}%`} y1="355" x2={`${x}%`} y2="375" 
-                stroke="currentColor" 
-                strokeWidth="1" 
-                strokeDasharray="4 4"
-                className="text-border/40"
-              />
-            ))}
+              return (
+                <>
+                  {/* Vertical line from CEO down */}
+                  <line
+                    x1="50%"
+                    y1={140}
+                    x2="50%"
+                    y2={190}
+                    stroke={stroke}
+                    strokeWidth={2}
+                    strokeDasharray={dash}
+                    strokeLinecap="round"
+                  />
 
-            {/* Connector between row 2 and row 3 */}
-            <line 
-              x1="8%" y1="530" x2="92%" y2="530" 
-              stroke="currentColor" 
-              strokeWidth="1" 
-              strokeDasharray="4 4"
-              className="text-border/30"
-            />
-            
-            {/* Vertical drops to third row */}
-            {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
-              <line 
-                key={`row3-${i}`}
-                x1={`${x}%`} y1="530" x2={`${x}%`} y2="550" 
-                stroke="currentColor" 
-                strokeWidth="1" 
-                strokeDasharray="4 4"
-                className="text-border/30"
-              />
-            ))}
+                  {/* Main horizontal connector line */}
+                  <line
+                    x1="8%"
+                    y1={190}
+                    x2="92%"
+                    y2={190}
+                    stroke={stroke}
+                    strokeWidth={2}
+                    strokeDasharray={dash}
+                    strokeLinecap="round"
+                  />
+
+                  {/* Vertical drops to first row - 6 columns */}
+                  {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+                    <line
+                      key={`row1-${i}`}
+                      x1={`${x}%`}
+                      y1={190}
+                      x2={`${x}%`}
+                      y2={220}
+                      stroke={stroke}
+                      strokeWidth={2}
+                      strokeDasharray={dash}
+                      strokeLinecap="round"
+                    />
+                  ))}
+
+                  {/* Connector between row 1 and row 2 (softer) */}
+                  <line
+                    x1="8%"
+                    y1={410}
+                    x2="92%"
+                    y2={410}
+                    stroke={strokeSoft}
+                    strokeWidth={2}
+                    strokeDasharray={dash}
+                    strokeLinecap="round"
+                  />
+
+                  {/* Vertical drops to second row */}
+                  {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+                    <line
+                      key={`row2-${i}`}
+                      x1={`${x}%`}
+                      y1={410}
+                      x2={`${x}%`}
+                      y2={440}
+                      stroke={strokeSoft}
+                      strokeWidth={2}
+                      strokeDasharray={dash}
+                      strokeLinecap="round"
+                    />
+                  ))}
+
+                  {/* Connector between row 2 and row 3 (softer) */}
+                  <line
+                    x1="8%"
+                    y1={630}
+                    x2="92%"
+                    y2={630}
+                    stroke={"hsl(var(--accent) / 0.25)"}
+                    strokeWidth={2}
+                    strokeDasharray={dash}
+                    strokeLinecap="round"
+                  />
+
+                  {/* Vertical drops to third row */}
+                  {[8, 24.6, 41.2, 58.8, 75.4, 92].map((x, i) => (
+                    <line
+                      key={`row3-${i}`}
+                      x1={`${x}%`}
+                      y1={630}
+                      x2={`${x}%`}
+                      y2={660}
+                      stroke={"hsl(var(--accent) / 0.25)"}
+                      strokeWidth={2}
+                      strokeDasharray={dash}
+                      strokeLinecap="round"
+                    />
+                  ))}
+                </>
+              );
+            })()}
           </svg>
 
           {/* Grid of stakeholder cards */}

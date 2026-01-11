@@ -74,6 +74,13 @@ export default {
             mid: "hsl(var(--sn-navy-mid))",
           },
         },
+        role: {
+          decision: "hsl(var(--role-decision))",
+          champion: "hsl(var(--role-champion))",
+          influencer: "hsl(var(--role-influencer))",
+          procurement: "hsl(var(--role-procurement))",
+          norole: "hsl(var(--role-norole))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
