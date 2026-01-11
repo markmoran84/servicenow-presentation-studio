@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getDocument } from "https://esm.sh/pdfjs-serverless";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 serve(async (req) => {
@@ -9,24 +10,27 @@ serve(async (req) => {
 
   try {
     const requestData = await req.json();
-    
+
     // Validate file path input
     let validatedPath: string;
     try {
       validatedPath = validateFilePath(requestData.filePath);
     } catch (validationError) {
-      return createErrorResponse(400, validationError instanceof Error ? validationError.message : 'Invalid file path');
+      return createErrorResponse(
+        400,
+        validationError instanceof Error ? validationError.message : "Invalid file path",
+      );
     }
 
-    // Create Supabase client
+    // Create backend client
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
+
     if (!supabaseUrl || !supabaseKey) {
-      console.error("Supabase configuration missing");
+      console.error("Backend configuration missing");
       return createErrorResponse(503, "Service temporarily unavailable");
     }
-    
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Download the file from storage
@@ -53,21 +57,14 @@ serve(async (req) => {
 
     console.log("PDF size:", uint8Array.length, "bytes");
 
-    // Extract text using improved methods
-    let textContent = extractTextFromPDF(uint8Array);
+    // Extract text via PDF.js (serverless build)
+    const rawText = await extractTextFromPDF(uint8Array);
+    const textContent = cleanExtractedText(rawText);
 
-    // Clean up extracted text
-    textContent = textContent
-      .replace(/\r\n/g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .replace(/\s{2,}/g, ' ')
-      .replace(/\n /g, '\n')
-      .trim();
-
-    if (textContent.length < 100) {
+    if (!looksLikeExtractedText(textContent)) {
       return createErrorResponse(
-        400, 
-        "Could not extract sufficient text from PDF. The file may be image-based or protected. Please copy and paste the text content instead."
+        400,
+        "Could not extract readable text from this PDF. It may be image-based or protected. Please copy/paste the text content instead.",
       );
     }
 
@@ -76,98 +73,59 @@ serve(async (req) => {
     // Clean up the uploaded file
     await supabase.storage.from("annual-reports").remove([validatedPath]);
 
-    return new Response(
-      JSON.stringify({ success: true, content: textContent }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true, content: textContent }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     return createErrorResponse(500, "Failed to process PDF. Please try again.", error);
   }
 });
 
-// Improved PDF text extraction
-function extractTextFromPDF(uint8Array: Uint8Array): string {
-  const pdfString = new TextDecoder("latin1").decode(uint8Array);
-  const extractedParts: string[] = [];
-  const seenTexts = new Set<string>();
-  
-  // Method 1: Extract from BT...ET text blocks
-  const btEtMatches = pdfString.matchAll(/BT\s*([\s\S]*?)\s*ET/g);
-  for (const match of btEtMatches) {
-    const textBlock = match[1];
-    
-    // Extract Tj operator text
-    const tjMatches = textBlock.matchAll(/\(((?:[^()\\]|\\[()\\])*)\)\s*Tj/gi);
-    for (const tjMatch of tjMatches) {
-      const text = decodePDFText(tjMatch[1]);
-      if (isValidText(text) && !seenTexts.has(text)) {
-        seenTexts.add(text);
-        extractedParts.push(text);
-      }
-    }
-    
-    // Extract TJ array text
-    const tjArrayMatches = textBlock.matchAll(/\[((?:[^\[\]]|\[(?:[^\[\]])*\])*)\]\s*TJ/gi);
-    for (const tjArrayMatch of tjArrayMatches) {
-      const content = tjArrayMatch[1];
-      const textParts = content.matchAll(/\(((?:[^()\\]|\\[()\\])*)\)/g);
-      for (const textMatch of textParts) {
-        const text = decodePDFText(textMatch[1]);
-        if (isValidText(text) && !seenTexts.has(text)) {
-          seenTexts.add(text);
-          extractedParts.push(text);
-        }
-      }
+async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
+  // NOTE: annual reports can be long; we cap by extracted character count to avoid timeouts.
+  const maxChars = 480_000;
+
+  const doc = await getDocument({ data: uint8Array, useSystemFonts: true }).promise;
+  const parts: string[] = [];
+  let total = 0;
+
+  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+    const page = await doc.getPage(pageNum);
+    const content = await page.getTextContent();
+
+    const pageText = (content.items as any[])
+      .map((it) => (typeof it?.str === "string" ? it.str : ""))
+      .filter(Boolean)
+      .join(" ");
+
+    if (pageText) {
+      parts.push(pageText);
+      total += pageText.length;
+      if (total >= maxChars) break;
     }
   }
 
-  // Method 2: Extract from stream objects (for compressed content)
-  if (extractedParts.length < 100) {
-    const streamMatches = pdfString.matchAll(/stream\s*([\s\S]*?)\s*endstream/g);
-    for (const match of streamMatches) {
-      const streamContent = match[1];
-      const textMatches = streamContent.matchAll(/\(((?:[^()\\]|\\[()\\])*)\)/g);
-      for (const textMatch of textMatches) {
-        const text = decodePDFText(textMatch[1]);
-        if (isValidText(text) && text.length > 2 && text.length < 500 && !seenTexts.has(text)) {
-          seenTexts.add(text);
-          extractedParts.push(text);
-        }
-      }
-    }
-  }
-
-  // Method 3: Simple parentheses extraction as last resort
-  if (extractedParts.length < 50) {
-    const simpleMatches = pdfString.matchAll(/\(((?:[^()\\]|\\[()\\])*)\)/g);
-    for (const match of simpleMatches) {
-      const text = decodePDFText(match[1]);
-      if (isValidText(text) && text.length > 3 && text.length < 300 && !seenTexts.has(text)) {
-        seenTexts.add(text);
-        extractedParts.push(text);
-      }
-    }
-  }
-
-  return extractedParts.join(" ");
+  return parts.join("\n\n");
 }
 
-// Decode PDF text escape sequences
-function decodePDFText(text: string): string {
+function cleanExtractedText(text: string): string {
   return text
-    .replace(/\\n/g, '\n')
-    .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t')
-    .replace(/\\\(/g, '(')
-    .replace(/\\\)/g, ')')
-    .replace(/\\\\/g, '\\')
-    .replace(/\\(\d{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\t/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\n /g, "\n")
+    .trim();
 }
 
-// Check if text is valid printable content
-function isValidText(text: string): boolean {
-  if (!text || text.length === 0) return false;
-  const printableCount = (text.match(/[\x20-\x7E\xA0-\xFF\n\r\t]/g) || []).length;
-  const ratio = printableCount / text.length;
-  return ratio > 0.8 && text.length > 0;
+function looksLikeExtractedText(text: string): boolean {
+  if (text.length < 200) return false;
+
+  // If there are too many control characters, it's almost certainly binary/garbage.
+  const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
+  if (controlChars / Math.max(1, text.length) > 0.01) return false;
+
+  // Require a minimal word count so we don't pass through short metadata-only results.
+  const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
+  return words >= 80;
 }
