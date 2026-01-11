@@ -100,7 +100,7 @@ export const WeeklyUpdateSlide = () => {
 
   // Derive next priorities from engagement data
   const nextWeekPriorities = (engagement?.plannedExecutiveEvents || []).slice(0, 3).map((event) => ({
-    action: event,
+    action: typeof event === 'object' && event !== null ? (event as { action?: string }).action || String(event) : String(event),
     date: `Week ${weekNumber + 1}`,
     owner: "Account Team",
   }));
