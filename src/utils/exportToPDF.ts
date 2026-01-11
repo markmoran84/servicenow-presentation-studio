@@ -126,106 +126,227 @@ const createAgileTeamModelSlide = (pdf: jsPDF, data: AccountData) => {
   // Header
   addTitle(pdf, "The Task-Based Agile AM Model", `${companyName} Account Team — Dynamic Resource Activation`);
   
-  // Left side - GTM Wheel visualization
+  // === GTM Wheel Configuration (matching SVG exactly) ===
+  // Original SVG: viewBox 440x440, center at 220,220
+  // PDF scale: we want the wheel to fit in ~65mm width, so scale = 65/440 ≈ 0.148
+  const scale = 0.148;
   const wheelCenterX = 75;
-  const wheelCenterY = 80;
-  const outerRadius = 40;
-  const middleRadius = 29;
-  const innerRadius = 16;
+  const wheelCenterY = 78;
   
-  // Outer ring roles
+  // Original SVG radii
+  const outerRadius = 200 * scale;    // ~29.6mm
+  const middleRadius = 145 * scale;   // ~21.5mm
+  const innerRadius = 80 * scale;     // ~11.8mm
+  
+  const activeSegments = [0, 2, 5]; // Highlight some segments
+  
+  // 8 outer ring roles (matching original)
   const outerRoles = [
-    "BU Sale", "Inspire Value", "Impact", "Sales Mgmt.",
-    "Elevate", "Prod. Mgmt.", "Marketing", "Exec Sponsor"
+    { name: "BU Sale", lines: ["BU", "Sale"] },
+    { name: "Inspire Value", lines: ["Inspire", "Value"] },
+    { name: "Impact", lines: ["Impact"] },
+    { name: "Sales Mgmt.", lines: ["Sales", "Mgmt."] },
+    { name: "Elevate", lines: ["Elevate"] },
+    { name: "Prod. Mgmt.", lines: ["Prod.", "Mgmt."] },
+    { name: "Marketing", lines: ["Marketing"] },
+    { name: "Exec Sponsor", lines: ["Exec", "Sponsor"] },
   ];
+  
+  const segmentAngle = (2 * Math.PI) / 8;
+  const gap = 0.02; // Small gap between segments
   
   // Draw outer ring background
   setFillColor(pdf, [10, 21, 37]); // #0a1525
   pdf.circle(wheelCenterX, wheelCenterY, outerRadius, "F");
   
-  // Draw segments (8 pie segments)
-  const segmentAngle = (2 * Math.PI) / 8;
-  const activeSegments = [0, 2, 5]; // Highlight some segments
-  
+  // Draw each segment as an arc (pie slice)
   outerRoles.forEach((role, index) => {
     const startAngle = index * segmentAngle - Math.PI / 2 - segmentAngle / 2;
     const endAngle = startAngle + segmentAngle;
     const isActive = activeSegments.includes(index);
     
-    // Draw segment arc
-    const midAngle = (startAngle + endAngle) / 2;
-    const segmentMidRadius = (middleRadius + outerRadius) / 2;
+    // Calculate segment points (arc from middleRadius to outerRadius)
+    const innerR = middleRadius + 1;
+    const outerR = outerRadius - 1;
     
-    // Segment fill
+    // Four corners of the arc segment
+    const x1 = wheelCenterX + innerR * Math.cos(startAngle + gap);
+    const y1 = wheelCenterY + innerR * Math.sin(startAngle + gap);
+    const x2 = wheelCenterX + outerR * Math.cos(startAngle + gap);
+    const y2 = wheelCenterY + outerR * Math.sin(startAngle + gap);
+    const x3 = wheelCenterX + outerR * Math.cos(endAngle - gap);
+    const y3 = wheelCenterY + outerR * Math.sin(endAngle - gap);
+    const x4 = wheelCenterX + innerR * Math.cos(endAngle - gap);
+    const y4 = wheelCenterY + innerR * Math.sin(endAngle - gap);
+    
+    // Set colors based on active state
     if (isActive) {
-      setFillColor(pdf, C.emerald);
-      pdf.setGState(pdf.GState({ opacity: 0.8 }));
+      setFillColor(pdf, [52, 211, 153]); // #34d399 emerald
+      setDrawColor(pdf, [110, 231, 183]); // #6ee7b7 lighter emerald border
     } else {
       setFillColor(pdf, [30, 58, 95]); // #1e3a5f
-      pdf.setGState(pdf.GState({ opacity: 0.6 }));
+      setDrawColor(pdf, [30, 58, 95]);
     }
     
-    // Draw segment as arc
-    const innerX1 = wheelCenterX + middleRadius * Math.cos(startAngle + 0.05);
-    const innerY1 = wheelCenterY + middleRadius * Math.sin(startAngle + 0.05);
-    const outerX1 = wheelCenterX + (outerRadius - 2) * Math.cos(startAngle + 0.05);
-    const outerY1 = wheelCenterY + (outerRadius - 2) * Math.sin(startAngle + 0.05);
-    const outerX2 = wheelCenterX + (outerRadius - 2) * Math.cos(endAngle - 0.05);
-    const outerY2 = wheelCenterY + (outerRadius - 2) * Math.sin(endAngle - 0.05);
-    const innerX2 = wheelCenterX + middleRadius * Math.cos(endAngle - 0.05);
-    const innerY2 = wheelCenterY + middleRadius * Math.sin(endAngle - 0.05);
+    pdf.setGState(pdf.GState({ opacity: isActive ? 1 : 0.6 }));
     
-    // Simplified segment drawing
+    // Draw segment as a filled polygon (approximation of arc)
+    // For better accuracy, we'll draw multiple points along the arc
+    const numPoints = 8;
+    const outerPoints: [number, number][] = [];
+    const innerPoints: [number, number][] = [];
+    
+    for (let i = 0; i <= numPoints; i++) {
+      const t = i / numPoints;
+      const angle = startAngle + gap + t * (segmentAngle - 2 * gap);
+      outerPoints.push([
+        wheelCenterX + outerR * Math.cos(angle),
+        wheelCenterY + outerR * Math.sin(angle)
+      ]);
+      innerPoints.push([
+        wheelCenterX + innerR * Math.cos(angle),
+        wheelCenterY + innerR * Math.sin(angle)
+      ]);
+    }
+    
+    // Build path: outer arc forward, then inner arc backward
+    const allPoints = [...outerPoints, ...innerPoints.reverse()];
+    
+    // Draw filled polygon
+    pdf.setLineWidth(0.3);
+    const firstPoint = allPoints[0];
+    pdf.moveTo(firstPoint[0], firstPoint[1]);
+    for (let i = 1; i < allPoints.length; i++) {
+      pdf.lineTo(allPoints[i][0], allPoints[i][1]);
+    }
+    pdf.lineTo(firstPoint[0], firstPoint[1]);
+    pdf.fillStroke();
+    
     pdf.setGState(pdf.GState({ opacity: 1 }));
-    
-    // Role labels
-    const labelRadius = (middleRadius + outerRadius) / 2 + 2;
-    const labelX = wheelCenterX + labelRadius * Math.cos(midAngle);
-    const labelY = wheelCenterY + labelRadius * Math.sin(midAngle);
-    
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(6);
-    setColor(pdf, isActive ? C.white : C.gray400);
-    pdf.text(role, labelX, labelY, { align: "center" });
   });
   
-  // Middle ring
+  // Draw middle ring (dark circle)
   setFillColor(pdf, [10, 21, 37]); // #0a1525
   pdf.circle(wheelCenterX, wheelCenterY, middleRadius, "F");
-  setDrawColor(pdf, [30, 58, 95]);
-  pdf.setLineWidth(0.5);
+  setDrawColor(pdf, [30, 58, 95]); // #1e3a5f
+  pdf.setLineWidth(0.4);
   pdf.circle(wheelCenterX, wheelCenterY, middleRadius, "S");
   
-  // Core team circle (center)
-  // Gradient effect with multiple circles
-  setFillColor(pdf, C.emerald);
+  // Draw arrows from core to each segment
+  outerRoles.forEach((_, index) => {
+    const angle = index * segmentAngle - Math.PI / 2;
+    const isActive = activeSegments.includes(index);
+    
+    const startR = innerRadius + 2;
+    const endR = middleRadius - 2;
+    
+    const startX = wheelCenterX + startR * Math.cos(angle);
+    const startY = wheelCenterY + startR * Math.sin(angle);
+    const endX = wheelCenterX + endR * Math.cos(angle);
+    const endY = wheelCenterY + endR * Math.sin(angle);
+    
+    // Arrow line
+    if (isActive) {
+      setDrawColor(pdf, [52, 211, 153]); // emerald
+      pdf.setLineWidth(0.6);
+    } else {
+      setDrawColor(pdf, [55, 65, 81]); // gray-700
+      pdf.setLineWidth(0.4);
+    }
+    
+    pdf.setGState(pdf.GState({ opacity: isActive ? 1 : 0.4 }));
+    pdf.line(startX, startY, endX, endY);
+    
+    // Arrow head
+    const arrowSize = 1.5;
+    const headX = endX;
+    const headY = endY;
+    const backAngle = angle + Math.PI;
+    
+    const tip1X = headX + arrowSize * Math.cos(backAngle + 0.4);
+    const tip1Y = headY + arrowSize * Math.sin(backAngle + 0.4);
+    const tip2X = headX + arrowSize * Math.cos(backAngle - 0.4);
+    const tip2Y = headY + arrowSize * Math.sin(backAngle - 0.4);
+    
+    if (isActive) {
+      setFillColor(pdf, [52, 211, 153]);
+    } else {
+      setFillColor(pdf, [15, 38, 68]); // #0f1628 dark
+    }
+    
+    pdf.moveTo(headX, headY);
+    pdf.lineTo(tip1X, tip1Y);
+    pdf.lineTo(tip2X, tip2Y);
+    pdf.fill();
+    
+    pdf.setGState(pdf.GState({ opacity: 1 }));
+  });
+  
+  // Draw Core Team circle (with gradient-like effect)
+  // Light emerald outer glow
+  setFillColor(pdf, [110, 231, 183]); // #6ee7b7
   pdf.circle(wheelCenterX, wheelCenterY, innerRadius, "F");
+  // Slightly darker inner
+  setFillColor(pdf, [52, 211, 153]); // #34d399
+  pdf.circle(wheelCenterX, wheelCenterY, innerRadius * 0.85, "F");
   
   // Core team text
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(11);
-  setColor(pdf, [6, 95, 70]); // dark emerald
-  pdf.text("Core", wheelCenterX, wheelCenterY - 2, { align: "center" });
-  pdf.text("Team", wheelCenterX, wheelCenterY + 5, { align: "center" });
+  pdf.setFontSize(8);
+  setColor(pdf, [6, 78, 59]); // emerald-900
+  pdf.text("Core", wheelCenterX, wheelCenterY - 1.5, { align: "center" });
+  pdf.text("Team", wheelCenterX, wheelCenterY + 4, { align: "center" });
+  
+  // Draw role labels
+  outerRoles.forEach((role, index) => {
+    const angle = index * segmentAngle - Math.PI / 2;
+    const isActive = activeSegments.includes(index);
+    const labelRadius = (middleRadius + outerRadius) / 2 + 1;
+    
+    const labelX = wheelCenterX + labelRadius * Math.cos(angle);
+    const labelY = wheelCenterY + labelRadius * Math.sin(angle);
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(4.5);
+    setColor(pdf, isActive ? C.white : C.gray400);
+    
+    // Multi-line labels
+    const lineHeight = 2;
+    const offsetY = -((role.lines.length - 1) * lineHeight) / 2;
+    
+    role.lines.forEach((line, lineIndex) => {
+      pdf.text(line, labelX, labelY + offsetY + lineIndex * lineHeight, { align: "center" });
+    });
+  });
   
   // GTM Wheel label below
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(10);
+  pdf.setFontSize(9);
   setColor(pdf, C.emerald);
-  pdf.text("The GTM Wheel of Fire", wheelCenterX, wheelCenterY + outerRadius + 10, { align: "center" });
+  pdf.text("The GTM Wheel of Fire", wheelCenterX, wheelCenterY + outerRadius + 8, { align: "center" });
   
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(7);
+  pdf.setFontSize(6);
   setColor(pdf, C.gray400);
-  pdf.text("Active resources illuminate based on current pursuit", wheelCenterX, wheelCenterY + outerRadius + 16, { align: "center" });
+  pdf.text("Active resources illuminate based on current pursuit", wheelCenterX, wheelCenterY + outerRadius + 13, { align: "center" });
   
-  // Right side - Supporting content
+  // === Right side - Supporting content ===
   const rightX = 135;
-  const rightY = 35;
-  const cardWidth = 105;
+  const rightY = 32;
+  const cardWidth = 108;
   
-  // Agile Operating Model card
-  drawCard(pdf, rightX, rightY, cardWidth, 70, { borderColor: C.border, fillOpacity: 0.05 });
+  // Agile Operating Model card background
+  pdf.setGState(pdf.GState({ opacity: 0.05 }));
+  setFillColor(pdf, C.white);
+  pdf.roundedRect(rightX, rightY, cardWidth, 75, 3, 3, "F");
+  pdf.setGState(pdf.GState({ opacity: 1 }));
+  
+  // Card border
+  pdf.setGState(pdf.GState({ opacity: 0.1 }));
+  setDrawColor(pdf, C.white);
+  pdf.setLineWidth(0.3);
+  pdf.roundedRect(rightX, rightY, cardWidth, 75, 3, 3, "S");
+  pdf.setGState(pdf.GState({ opacity: 1 }));
   
   // Card header
   pdf.setFont("helvetica", "bold");
@@ -234,9 +355,9 @@ const createAgileTeamModelSlide = (pdf: jsPDF, data: AccountData) => {
   
   // Pulsing dot (static in PDF)
   setFillColor(pdf, C.emerald);
-  pdf.circle(rightX + 5, rightY + 8, 1.5, "F");
+  pdf.circle(rightX + 6, rightY + 8, 1.2, "F");
   
-  pdf.text("Agile Operating Model", rightX + 10, rightY + 10);
+  pdf.text("Agile Operating Model", rightX + 11, rightY + 10);
   
   // Bullet points
   const bullets = [
@@ -246,73 +367,78 @@ const createAgileTeamModelSlide = (pdf: jsPDF, data: AccountData) => {
     { title: "Rapid Mobilization", desc: "Quick activation of specialized expertise when opportunities arise" },
   ];
   
-  let bulletY = rightY + 20;
+  let bulletY = rightY + 18;
   bullets.forEach((bullet, index) => {
-    // Numbered circle
-    setFillColor(pdf, [52, 211, 153]); // emerald with transparency
+    // Numbered circle background
+    setFillColor(pdf, [52, 211, 153]);
     pdf.setGState(pdf.GState({ opacity: 0.2 }));
-    pdf.circle(rightX + 8, bulletY + 3, 4, "F");
+    pdf.circle(rightX + 8, bulletY + 3, 3.5, "F");
     pdf.setGState(pdf.GState({ opacity: 1 }));
     
+    // Numbered circle border
     setDrawColor(pdf, C.emerald);
     pdf.setGState(pdf.GState({ opacity: 0.3 }));
-    pdf.circle(rightX + 8, bulletY + 3, 4, "S");
+    pdf.setLineWidth(0.2);
+    pdf.circle(rightX + 8, bulletY + 3, 3.5, "S");
     pdf.setGState(pdf.GState({ opacity: 1 }));
     
+    // Number
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(7);
+    pdf.setFontSize(6);
     setColor(pdf, C.emerald);
     pdf.text(String(index + 1), rightX + 8, bulletY + 4.5, { align: "center" });
     
     // Title
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(8);
+    pdf.setFontSize(7);
     setColor(pdf, C.white);
-    pdf.text(bullet.title, rightX + 16, bulletY + 2);
+    pdf.text(bullet.title, rightX + 15, bulletY + 2);
     
     // Description
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(6);
+    pdf.setFontSize(5.5);
     setColor(pdf, C.gray400);
     const descLines = pdf.splitTextToSize(bullet.desc, cardWidth - 20);
-    pdf.text(descLines, rightX + 16, bulletY + 7);
+    pdf.text(descLines, rightX + 15, bulletY + 6.5);
     
     bulletY += 14;
   });
   
   // Quote card at bottom right
-  const quoteY = rightY + 75;
+  const quoteY = rightY + 78;
   
-  // Gradient background effect for quote
+  // Quote background
   pdf.setGState(pdf.GState({ opacity: 0.1 }));
   setFillColor(pdf, C.emerald);
-  pdf.roundedRect(rightX, quoteY, cardWidth, 18, 2, 2, "F");
+  pdf.roundedRect(rightX, quoteY, cardWidth, 20, 2, 2, "F");
   pdf.setGState(pdf.GState({ opacity: 1 }));
   
+  // Quote border
   setDrawColor(pdf, C.emerald);
   pdf.setGState(pdf.GState({ opacity: 0.2 }));
-  pdf.roundedRect(rightX, quoteY, cardWidth, 18, 2, 2, "S");
+  pdf.setLineWidth(0.3);
+  pdf.roundedRect(rightX, quoteY, cardWidth, 20, 2, 2, "S");
   pdf.setGState(pdf.GState({ opacity: 1 }));
   
   pdf.setFont("helvetica", "italic");
-  pdf.setFontSize(7);
+  pdf.setFontSize(6);
   setColor(pdf, [110, 231, 183]); // emerald-300
   const quoteText = '"We operate in an agile fashion — the core team dynamically activates specialized resources as opportunities emerge and evolve."';
   const quoteLines = pdf.splitTextToSize(quoteText, cardWidth - 10);
   pdf.text(quoteLines, rightX + 5, quoteY + 6);
   
   // Legend at bottom
-  const legendY = quoteY + 22;
+  const legendY = quoteY + 24;
   
-  // Active resource
+  // Active resource legend
   setFillColor(pdf, C.emerald);
   pdf.circle(rightX + 5, legendY, 2, "F");
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(7);
-  setColor(pdf, C.muted);
+  pdf.setFontSize(6);
+  setColor(pdf, [209, 213, 219]); // gray-300
   pdf.text("Active Resource", rightX + 10, legendY + 1.5);
   
-  // Available resource
+  // Available resource legend
   setFillColor(pdf, C.gray600);
   pdf.circle(rightX + 55, legendY, 2, "F");
   setColor(pdf, C.gray400);
