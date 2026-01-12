@@ -226,6 +226,17 @@ export interface AIGeneratedPlan {
   riskOpportunityMatrix?: { items: { title: string; type: "risk" | "opportunity"; impact: string; likelihood: string; mitigation?: string }[]; narrative: string };
   // Strategic Alignment AI-generated content
   strategicAlignment?: { alignments: { customerObjective: string; serviceNowCapability: string; outcome: string }[]; narrative: string };
+  // Risk Radar - categorized risks by quadrant
+  riskRadar?: { 
+    risks: { 
+      id: number; 
+      title: string; 
+      description: string; 
+      category: "strategic" | "operational" | "governance" | "commercial"; 
+      severity: "high" | "medium" | "low" 
+    }[]; 
+    narrative?: string 
+  };
 }
 
 export interface AccountData {

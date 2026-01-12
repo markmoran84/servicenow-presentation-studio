@@ -25,7 +25,8 @@ export type RegeneratablePlanSection =
   | "insight"
   | "platformCapabilities"
   | "riskOpportunityMatrix"
-  | "strategicAlignment";
+  | "strategicAlignment"
+  | "riskRadar";
 
 const sectionMeta: Record<
   RegeneratablePlanSection,
@@ -110,6 +111,10 @@ const sectionMeta: Record<
   strategicAlignment: {
     label: "Strategic Alignment",
     planKeys: ["strategicAlignment"],
+  },
+  riskRadar: {
+    label: "Risk Radar",
+    planKeys: ["riskRadar"],
   },
 };
 

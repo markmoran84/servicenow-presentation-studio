@@ -25,7 +25,8 @@ type Section =
   | "insight"
   | "platformCapabilities"
   | "riskOpportunityMatrix"
-  | "strategicAlignment";
+  | "strategicAlignment"
+  | "riskRadar";
 
 const sectionSpecs: Record<
   Section,
@@ -204,6 +205,33 @@ TONE: Senior strategist translating board-level strategy into an execution canva
       "Create exactly 4 strategic alignment pairs showing how ServiceNow capabilities map to customer objectives. Each pair should have customerObjective, serviceNowCapability, and expected outcome. Include a 2-3 sentence narrative on strategic fit.",
     outputShapeHint:
       '{"strategicAlignment":{"alignments":[{"customerObjective":"Reduce operational costs by 20%","serviceNowCapability":"IT Service Management automation","outcome":"Projected 25% reduction in IT support costs within 18 months"}],"narrative":"ServiceNow\'s capabilities directly address the customer\'s strategic imperatives..."}}',
+  },
+  riskRadar: {
+    keys: ["riskRadar"],
+    instruction:
+      `Create a Risk Radar with 10-13 categorized risks across four quadrants for a comprehensive account risk view.
+
+QUADRANT CATEGORIES:
+1. STRATEGIC (risks 1-4): Risks that could limit our ability to position ServiceNow as a strategic platform partner and scale the account
+2. OPERATIONAL (risks 5-7): Risks that impact execution velocity, adoption, and realised value from ServiceNow deployments  
+3. GOVERNANCE (risks 8-9): Risks associated with governance, compliance, and decision-making processes
+4. COMMERCIAL (risks 10-13): Risks that could affect account growth, renewal confidence, and long-term commercial expansion
+
+SEVERITY LEVELS:
+- high: Critical risks closest to center of radar (immediate attention required)
+- medium: Moderate risks in middle ring (monitor closely)
+- low: Lower priority risks in outer ring (track and review)
+
+For each risk provide:
+- id: Sequential number 1-13
+- title: Short, specific risk title (e.g., "Incumbent Vendor Lock-in", "Executive Sponsor Departure")
+- description: 1 sentence explaining the risk and potential impact
+- category: One of {strategic|operational|governance|commercial}
+- severity: One of {high|medium|low}
+
+Ensure risks are specific to the account context, not generic. Reference actual account dynamics.`,
+    outputShapeHint:
+      `{"riskRadar":{"risks":[{"id":1,"title":"Platform Consolidation Competitor","description":"Customer actively evaluating alternative platforms that could displace ServiceNow footprint","category":"strategic","severity":"high"},{"id":2,"title":"Executive Sponsor Transition","description":"Key CIO sponsor retiring in 6 months with unknown successor alignment","category":"strategic","severity":"high"},{"id":3,"title":"Budget Reallocation to AI","description":"Digital transformation budget being redirected to AI-first initiatives outside ServiceNow","category":"strategic","severity":"medium"},{"id":4,"title":"SI Partner Influence","description":"Preferred SI partner recommending competitive solutions for new initiatives","category":"strategic","severity":"medium"},{"id":5,"title":"Adoption Velocity Gap","description":"Current deployment timeline lagging behind committed value realization milestones","category":"operational","severity":"high"},{"id":6,"title":"Integration Complexity","description":"Legacy system integration requirements creating implementation delays","category":"operational","severity":"medium"},{"id":7,"title":"Change Management Resistance","description":"End-user adoption resistance due to insufficient training investment","category":"operational","severity":"medium"},{"id":8,"title":"Procurement Process Delays","description":"New vendor governance requirements extending decision timelines by 90+ days","category":"governance","severity":"high"},{"id":9,"title":"Security Review Bottleneck","description":"Expanded security assessment requirements for cloud platforms","category":"governance","severity":"medium"},{"id":10,"title":"Renewal Price Sensitivity","description":"CFO mandate to reduce SaaS spend by 15% impacting renewal negotiations","category":"commercial","severity":"high"},{"id":11,"title":"Competitive Displacement","description":"Incumbent Microsoft footprint creating bundling pressure on new deals","category":"commercial","severity":"medium"},{"id":12,"title":"Budget Cycle Misalignment","description":"Fiscal year planning process not aligned with ServiceNow renewal timing","category":"commercial","severity":"medium"},{"id":13,"title":"Value Realization Skepticism","description":"Stakeholders questioning ROI from previous ServiceNow investments","category":"commercial","severity":"low"}],"narrative":"The risk radar highlights concentration in strategic and commercial quadrants, requiring executive-level engagement to address platform positioning and renewal confidence."}}`,
   },
 };
 
