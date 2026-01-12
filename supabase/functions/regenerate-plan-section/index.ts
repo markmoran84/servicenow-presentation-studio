@@ -125,28 +125,42 @@ const sectionSpecs: Record<
   customerStrategySynthesis: {
     keys: ["customerStrategySynthesis"],
     instruction:
-      `Create a comprehensive synthesis of the customer's strategy with fresh visual presentation.
-      
-Include:
-1. strategicPillars: Exactly 4 pillars, each with:
-   - headline: A bold 2-4 word strategic theme
-   - subtitle: A supporting phrase (5-8 words)
-   - description: 2-3 sentences explaining the pillar
-   - icon: One of {target|users|trending-up|shield|globe|zap}
+      `Transform the customer's extracted strategy into a STRATEGIC IMPERATIVES format - a structured canvas that translates raw strategy into executable priorities.
 
-2. narrative: A 2-3 sentence executive summary of the customer's strategic direction
+CRITICAL INSTRUCTIONS:
+- Use the customer's EXACT language and phrasing from their annual report/strategy documents wherever possible
+- Do NOT invent generic business jargon or consulting-speak  
+- Preserve specificity: if they say "ROIC >7.5%" keep that exact figure
+- Mirror their terminology: if they call it "Gemini Network" use that name
+- This is a TRANSLATION exercise, not a rewriting exercise
 
-3. serviceNowAlignment: Exactly 4 pairs showing:
-   - customerPriority: What the customer is trying to achieve
-   - serviceNowValue: How ServiceNow uniquely addresses this
+OUTPUT STRUCTURE:
 
-4. layoutVariant: Choose one of {grid-2x2|stacked-cards|horizontal-flow|spotlight} to suggest a fresh visual layout
+1. purpose: The customer's stated purpose/mission (1 sentence, use their exact words if available)
 
-5. accentColor: Choose a fresh accent palette from {blue|emerald|amber|purple|rose|cyan|indigo}
+2. longerTermAims: Array of 4-6 ambitions/strategic aims (use customer's stated long-term goals verbatim where possible). Each has:
+   - title: Short bold label (3-6 words, customer's own framing)
+   - description: Supporting detail (customer's language)
 
-Be creative with the pillars - use different framing, metaphors, or perspectives than previous iterations.`,
+3. annualTasks: Array of 3-4 focus areas for the current/next fiscal year. Each has:
+   - title: Task theme (customer's own strategic pillars)
+   - color: One of {blue|emerald|amber|cyan} for visual variety
+   
+4. objectives: Array of 6-8 specific objectives/initiatives that ladder up to the tasks. Each has:
+   - title: Specific objective (numbered if customer uses numbering)
+   - detail: Brief elaboration
+   - taskIndex: Which annualTask this objective supports (0-based index)
+   - isAIEnabled: true if this objective involves AI/automation (mark with green indicator)
+
+5. serviceNowAlignment: Array of 3-4 showing platform enablement opportunities:
+   - customerPriority: Customer's stated objective
+   - serviceNowValue: How ServiceNow enables this (be specific to products/capabilities)
+
+6. accentColor: Choose from {blue|emerald|amber|cyan|indigo} based on customer's brand/industry
+
+TONE: Senior strategist translating board-level strategy into an execution canvas. Preserve customer voice.`,
     outputShapeHint:
-      `{"customerStrategySynthesis":{"strategicPillars":[{"headline":"Connected Enterprise","subtitle":"Unifying operations across boundaries","description":"Building seamless integration between logistics, technology, and customer experience.","icon":"globe"}],"narrative":"The customer is pursuing a transformative integration strategy...","serviceNowAlignment":[{"customerPriority":"AI-First Operations","serviceNowValue":"Workflow orchestration layer for AI operationalisation"}],"layoutVariant":"grid-2x2","accentColor":"emerald"}}`,
+      `{"customerStrategySynthesis":{"purpose":"Improving life for all by integrating the world","longerTermAims":[{"title":"Lead as the global integrator of logistics","description":"Ocean, L&S, Terminals working as one"},{"title":"Deliver reliable, connected customer experiences","description":"End-to-end experience excellence"},{"title":"Grow profitably with strong cost discipline","description":"ROIC >7.5%; Ocean EBIT >6%"},{"title":"Decarbonise at scale","description":"Green methanol fleet; net zero 2040"}],"annualTasks":[{"title":"Strengthen customer focus and profitable growth","color":"blue"},{"title":"Drive operational excellence across the network","color":"emerald"},{"title":"Accelerate technology and transformation","color":"amber"},{"title":"Scale AI and data to power intelligent operations","color":"cyan"}],"objectives":[{"title":"1. Win with customers through speed and reliability","detail":"Deliver faster, more predictable experiences across every touchpoint","taskIndex":0,"isAIEnabled":false},{"title":"10. Deploy agentic AI workflows","detail":"Reduce customer query turnaround time and improve service speed","taskIndex":3,"isAIEnabled":true}],"serviceNowAlignment":[{"customerPriority":"Deploy agentic AI workflows","serviceNowValue":"Now Assist for workflow automation and case deflection"}],"accentColor":"emerald"}}`,
   },
   weeklyUpdateContext: {
     keys: ["weeklyUpdateContext"],
