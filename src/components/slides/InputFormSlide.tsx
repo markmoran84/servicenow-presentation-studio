@@ -1381,61 +1381,85 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountStrategiesTabProps) =
   const hasStrategies = data.opportunities?.opportunities?.some((p: any) => p.title?.trim());
 
   return (
-    <Card className="glass-card border-border/30">
-      <CardHeader>
-        <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      {/* Account Team Vision Card */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-accent" />
-            Account Strategies
+            <Eye className="w-5 h-5 text-primary" />
+            Account Team Vision
           </CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleGeneratePriorities("generate")}
-              disabled={isGenerating || isImproving}
-              className="gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3 h-3" />
-                  Generate via AI
-                </>
-              )}
-            </Button>
-            {hasStrategies && (
+          <p className="text-sm text-muted-foreground mt-1">
+            The overarching vision statement for how ServiceNow will transform {data.basics.accountName || "this account"}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={data.accountStrategy?.visionStatement || ""}
+            onChange={(e) => updateData("accountStrategy", { visionStatement: e.target.value })}
+            placeholder={`e.g., To establish ServiceNow as the strategic platform partner that powers ${data.basics.accountName || "the account"}'s digital transformation...`}
+            rows={3}
+            className="resize-none"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Account Strategies Card */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-accent" />
+              Account Strategies
+            </CardTitle>
+            <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleGeneratePriorities("improve")}
+                onClick={() => handleGeneratePriorities("generate")}
                 disabled={isGenerating || isImproving}
                 className="gap-2"
               >
-                {isImproving ? (
+                {isGenerating ? (
                   <>
                     <Loader2 className="w-3 h-3 animate-spin" />
-                    Improving...
+                    Generating...
                   </>
                 ) : (
                   <>
-                    <RefreshCw className="w-3 h-3" />
-                    Improve Content
+                    <Sparkles className="w-3 h-3" />
+                    Generate via AI
                   </>
                 )}
               </Button>
-            )}
+              {hasStrategies && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleGeneratePriorities("improve")}
+                  disabled={isGenerating || isImproving}
+                  className="gap-2"
+                >
+                  {isImproving ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Improving...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-3 h-3" />
+                      Improve Content
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Strategic priorities for your account team - auto-populated from annual report or generate with AI
-        </p>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-4">
+          <p className="text-sm text-muted-foreground mt-1">
+            Strategic priorities for your account team - auto-populated from annual report or generate with AI
+          </p>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4">
         <div className="p-4 rounded-lg bg-secondary/30 border border-border/30">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-primary">Account Team Strategies</span>
@@ -1515,6 +1539,7 @@ const AccountPrioritiesTab = ({ data, updateData }: AccountStrategiesTabProps) =
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };
 

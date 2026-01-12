@@ -4,25 +4,19 @@ import { SlideFooter } from "@/components/SlideFooter";
 import { 
   Sparkles,
   AlertCircle,
-  Layers,
-  Cpu,
-  Users,
-  Handshake,
-  Building,
-  Zap,
   Target,
   TrendingUp,
-  ArrowRight,
-  Lightbulb,
-  Network,
-  Bot,
-  Workflow,
-  Eye
+  Compass,
+  ArrowUpRight,
+  Crosshair,
+  Rocket,
+  Eye,
+  CheckCircle2,
+  Zap
 } from "lucide-react";
 
-// Strategic pillar icons mapping
-const pillarIcons = [Users, Cpu, Layers, Handshake, Building, Zap, Target, TrendingUp];
-const platformIcons = [Layers, Bot, Network, Workflow];
+// Strategic focus icons
+const focusIcons = [Target, Compass, Crosshair, Rocket, TrendingUp, Zap];
 
 export const AccountStrategySlide = () => {
   const { data } = useAccountData();
@@ -31,69 +25,79 @@ export const AccountStrategySlide = () => {
   const fiscalYear = "FY26";
   const accountName = basics.accountName || "the Account";
 
-  // Get strategic priorities (4 focus areas)
+  // Get strategic priorities (up to 4 focus areas)
   const strategicPriorities = generatedPlan?.strategicPriorities?.slice(0, 4) || [];
   
-  // Platform capabilities for right column
-  const platformCapabilities = generatedPlan?.platformCapabilities?.capabilities?.slice(0, 4) || [];
+  // Account Team Strategies (from opportunities section)
+  const accountStrategies = data.opportunities?.opportunities?.slice(0, 3) || [];
   
   // Vision statement
   const visionStatement = data.accountStrategy.visionStatement || 
-    `To build the digital backbone that powers ${accountName}'s Integrator Strategy to deliver seamless, integrated logistics across a connected global network.`;
+    `To establish ServiceNow as the strategic platform partner that powers ${accountName}'s digital transformation across customer experience, operational excellence, and AI-driven innovation.`;
 
   // Default focus areas if none generated
   const defaultFocusAreas = [
     { 
-      title: "Customer & Commercial Transformation or CRM Modernisation",
-      description: "Building on the FY25 commercial evaluation to deliver a scalable, orchestrated customer service and commercial execution foundation that reduces cost-to-serve and enables growth."
+      title: "Strategic Platform Expansion",
+      description: "Evolve from point solutions to enterprise-wide platform adoption, enabling connected workflows across business functions.",
+      whyNow: "Digital transformation urgency and competitive pressure require unified platform approach."
     },
     { 
-      title: "Operationalising AI",
-      description: "Operationalising AI beyond isolated use cases to improve execution speed, decision quality, and productivity across customer, commercial, and operational workflows."
+      title: "AI-Powered Transformation",
+      description: "Deploy Now Assist and agentic AI capabilities to automate workflows, enhance decision-making, and improve productivity.",
+      whyNow: "AI readiness and board mandate to operationalize AI across the enterprise."
     },
     { 
-      title: "Expanding the Platform Beyond IT",
-      description: "FY26 focuses on broadening platform adoption beyond IT, using customer and service workflows as the entry point to enable enterprise-wide workflow orchestration."
+      title: "Customer Experience Excellence",
+      description: "Modernize customer-facing workflows to deliver seamless omnichannel experiences and reduce cost-to-serve.",
+      whyNow: "Rising customer expectations and competitive differentiation needs."
     },
     { 
-      title: "Maturing the Strategic Partnership",
-      description: "Evolving the relationship from execution recovery toward long-term strategic partner underpinning digital, AI, and operating model ambitions."
+      title: "Strategic Partnership Maturity",
+      description: "Transition from vendor relationship to trusted strategic partner aligned with long-term business objectives.",
+      whyNow: "Executive sponsorship opportunity and transformation alignment."
     },
   ];
 
   const focusAreas = strategicPriorities.length > 0 
-    ? strategicPriorities.map(p => ({ title: p.title, description: p.whyNow || p.winningLooks || "" }))
+    ? strategicPriorities.map(p => ({ 
+        title: p.title, 
+        description: p.winningLooks || p.whyNow || "",
+        whyNow: p.whyNow || ""
+      }))
     : defaultFocusAreas;
 
-  // Default platform enablement
-  const defaultPlatformEnablement = [
-    { title: "Unified Platform Foundation", description: "Single platform for IT, Customer, and Employee workflows enabling seamless orchestration" },
-    { title: "AI-Powered Automation", description: "Now Assist and agentic AI capabilities embedded across workflows" },
-    { title: "Enterprise Integration Hub", description: "Connect legacy systems, cloud applications, and data sources" },
-    { title: "Workflow Orchestration", description: "End-to-end process automation across business functions" },
+  // Default account strategies if none defined
+  const defaultAccountStrategies = [
+    { title: "Executive Alignment", description: "Build C-suite relationships and strategic alignment" },
+    { title: "Value Realization", description: "Demonstrate quantifiable business outcomes" },
+    { title: "Platform Adoption", description: "Expand footprint across business units" },
   ];
 
-  const platformEnablement = platformCapabilities.length > 0 
-    ? platformCapabilities.map(c => ({ title: c.title, description: c.description }))
-    : defaultPlatformEnablement;
+  const displayStrategies = accountStrategies.length > 0 && accountStrategies.some((s: any) => s.title?.trim())
+    ? accountStrategies.filter((s: any) => s.title?.trim())
+    : defaultAccountStrategies;
 
-  const isAIGenerated = strategicPriorities.length > 0 || platformCapabilities.length > 0;
+  const isAIGenerated = strategicPriorities.length > 0;
   const hasData = focusAreas.length > 0;
 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-28 relative overflow-hidden">
       {/* Background gradient accents */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[900px] h-[600px] bg-gradient-to-bl from-emerald-500/6 via-teal-500/4 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[700px] h-[500px] bg-gradient-to-tr from-primary/6 via-cyan-500/4 to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-[500px] h-[500px] bg-gradient-to-r from-cyan-500/4 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-[900px] h-[600px] bg-gradient-to-bl from-emerald-500/8 via-teal-500/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[700px] h-[500px] bg-gradient-to-tr from-primary/8 via-cyan-500/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-emerald-400/4 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Title - Large and Bold */}
+        {/* Title Header */}
         <div className="flex items-start justify-between mb-8 opacity-0 animate-fade-in">
           <div>
-            <p className="text-muted-foreground text-xs tracking-widest uppercase mb-2">Strategic Account Planning</p>
+            <p className="text-muted-foreground text-xs tracking-widest uppercase mb-2 flex items-center gap-2">
+              <Compass className="w-3.5 h-3.5" />
+              Strategic Account Planning
+            </p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
               <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
                 Account Strategy
@@ -130,48 +134,91 @@ export const AccountStrategySlide = () => {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Vision Statement - Hero Banner */}
+            <div 
+              className="glass-card p-6 border border-emerald-500/40 bg-gradient-to-r from-slate-800/95 via-emerald-900/20 to-slate-800/95 
+                         shadow-xl shadow-emerald-500/10 opacity-0 animate-fade-in relative overflow-hidden"
+              style={{ animationDelay: "100ms" }}
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-full blur-2xl" />
+              <div className="flex items-start gap-5 relative z-10">
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 flex items-center justify-center border border-emerald-500/40 shadow-lg shadow-emerald-500/20">
+                    <Eye className="w-7 h-7 text-emerald-400" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h2 className="text-emerald-400 font-bold text-lg">Account Team Vision</h2>
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
+                      {fiscalYear}
+                    </span>
+                  </div>
+                  <p className="text-foreground text-lg leading-relaxed font-medium">
+                    {visionStatement}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-12 gap-6">
-              {/* Left Column - What FY26 will focus on */}
+              {/* Left Column - Strategic Focus Areas */}
               <div 
-                className="col-span-7 opacity-0 animate-fade-in" 
-                style={{ animationDelay: "100ms" }}
+                className="col-span-8 opacity-0 animate-fade-in" 
+                style={{ animationDelay: "200ms" }}
               >
                 <div className="glass-card p-6 h-full border border-slate-600/40 bg-gradient-to-br from-slate-800/90 via-slate-850/80 to-slate-900/70 shadow-xl">
                   {/* Card Header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600" />
-                      <h2 className="text-xl font-bold text-foreground">What {fiscalYear} will focus on</h2>
+                      <div className="w-1.5 h-10 rounded-full bg-gradient-to-b from-cyan-400 to-cyan-600" />
+                      <div>
+                        <h2 className="text-xl font-bold text-foreground">What {fiscalYear} Will Focus On</h2>
+                        <p className="text-sm text-muted-foreground">Strategic priorities driving account growth</p>
+                      </div>
                     </div>
-                    <span className="px-4 py-1.5 rounded-full border border-emerald-500/50 text-emerald-400 text-xs font-semibold bg-emerald-500/10">
-                      {fiscalYear} account strategy
+                    <span className="px-4 py-1.5 rounded-full border border-cyan-500/50 text-cyan-400 text-xs font-semibold bg-cyan-500/10">
+                      Core Focus
                     </span>
                   </div>
 
-                  {/* Strategic Focus Areas */}
-                  <div className="space-y-4">
+                  {/* Strategic Focus Grid */}
+                  <div className="grid grid-cols-2 gap-4">
                     {focusAreas.map((area, index) => {
+                      const IconComponent = focusIcons[index % focusIcons.length];
                       return (
                         <div 
                           key={index}
-                          className="p-5 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/30 
-                                     border border-slate-600/40 hover:border-emerald-500/40 
-                                     transition-all duration-300 group hover:shadow-lg hover:shadow-emerald-500/5
-                                     opacity-0 animate-fade-in"
-                          style={{ animationDelay: `${180 + index * 80}ms` }}
+                          className="group p-5 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/40 
+                                     border border-slate-600/40 hover:border-cyan-500/50 
+                                     transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10
+                                     opacity-0 animate-fade-in relative overflow-hidden"
+                          style={{ animationDelay: `${280 + index * 80}ms` }}
                         >
-                          <div className="flex items-start gap-4">
-                            {/* Accent bar */}
-                            <div className="w-1.5 h-full min-h-[60px] rounded-full bg-gradient-to-b from-emerald-400 via-emerald-500 to-emerald-600 flex-shrink-0" />
-                            <div className="flex-1">
-                              <h3 className="text-emerald-400 font-bold text-base mb-2 leading-snug group-hover:text-emerald-300 transition-colors">
+                          {/* Accent Corner */}
+                          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-cyan-400 via-cyan-500 to-cyan-600 rounded-l-xl" />
+                          
+                          <div className="pl-3">
+                            <div className="flex items-start gap-3 mb-3">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 
+                                              flex items-center justify-center flex-shrink-0 border border-cyan-500/30
+                                              group-hover:from-cyan-500/30 group-hover:to-cyan-600/20 transition-all duration-300">
+                                <IconComponent className="w-5 h-5 text-cyan-400" />
+                              </div>
+                              <h3 className="text-cyan-300 font-bold text-base leading-snug group-hover:text-cyan-200 transition-colors flex-1">
                                 {area.title}
                               </h3>
-                              <p className="text-foreground/80 text-sm leading-relaxed">
-                                {area.description}
-                              </p>
                             </div>
+                            <p className="text-foreground/80 text-sm leading-relaxed">
+                              {area.description}
+                            </p>
+                            {area.whyNow && (
+                              <div className="mt-3 pt-3 border-t border-slate-600/30">
+                                <span className="text-xs text-cyan-400/80 font-medium">Why Now: </span>
+                                <span className="text-xs text-muted-foreground">{area.whyNow}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -180,91 +227,83 @@ export const AccountStrategySlide = () => {
                 </div>
               </div>
 
-              {/* Right Column - Platform Enablement */}
+              {/* Right Column - Account Team Strategies & Key Outcomes */}
               <div 
-                className="col-span-5 opacity-0 animate-fade-in" 
-                style={{ animationDelay: "200ms" }}
+                className="col-span-4 opacity-0 animate-fade-in space-y-5" 
+                style={{ animationDelay: "300ms" }}
               >
-                <div className="glass-card p-6 h-full border border-primary/30 bg-gradient-to-br from-slate-800/90 via-primary/5 to-slate-900/70 shadow-xl shadow-primary/5">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-primary to-primary/60" />
-                      <h2 className="text-xl font-bold text-foreground">Platform Enablement</h2>
+                {/* Account Team Strategies */}
+                <div className="glass-card p-5 border border-primary/30 bg-gradient-to-br from-slate-800/90 via-primary/5 to-slate-900/70 shadow-xl shadow-primary/5">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-primary to-primary/60" />
+                    <h2 className="text-lg font-bold text-foreground">How We'll Win</h2>
+                  </div>
+
+                  <div className="space-y-3">
+                    {displayStrategies.slice(0, 3).map((strategy: any, index: number) => (
+                      <div 
+                        key={index}
+                        className="group p-4 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/30 
+                                   border border-slate-600/30 hover:border-primary/50 
+                                   transition-all duration-300 hover:shadow-lg hover:shadow-primary/10
+                                   opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${450 + index * 70}ms` }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-primary/20 
+                                          flex items-center justify-center flex-shrink-0 border border-primary/30
+                                          group-hover:from-primary/40 group-hover:to-primary/30 transition-all duration-300">
+                            <CheckCircle2 className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-primary font-bold text-sm mb-1 group-hover:text-primary/90 transition-colors">
+                              {strategy.title}
+                            </h3>
+                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">
+                              {strategy.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Success Metrics Preview */}
+                <div 
+                  className="glass-card p-5 border border-amber-500/30 bg-gradient-to-br from-slate-800/90 via-amber-900/10 to-slate-900/70 shadow-xl shadow-amber-500/5
+                             opacity-0 animate-fade-in"
+                  style={{ animationDelay: "650ms" }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-amber-400 to-amber-600" />
+                    <h2 className="text-lg font-bold text-foreground">Key Outcomes</h2>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                      <span className="text-sm text-muted-foreground">Next FY Target</span>
+                      <span className="text-amber-400 font-bold text-base">{basics.nextFYAmbition || "TBD"}</span>
                     </div>
-                    <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 text-primary text-xs font-semibold border border-primary/40">
-                      ServiceNow
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                      <span className="text-sm text-muted-foreground">3-Year Ambition</span>
+                      <span className="text-amber-400 font-bold text-base">{basics.threeYearAmbition || "TBD"}</span>
+                    </div>
+                    {basics.renewalDates && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/30 border border-slate-600/30">
+                        <span className="text-sm text-muted-foreground">Key Renewal</span>
+                        <span className="text-amber-400 font-bold text-sm">{basics.renewalDates}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-slate-600/30 flex items-center gap-2 text-sm">
+                    <ArrowUpRight className="w-4 h-4 text-amber-400" />
+                    <span className="text-muted-foreground">
+                      Enabling <span className="text-amber-400 font-semibold">{accountName}</span> growth
                     </span>
                   </div>
-
-                  {/* Platform Capabilities */}
-                  <div className="space-y-4">
-                    {platformEnablement.map((capability, index) => {
-                      const IconComponent = platformIcons[index % platformIcons.length];
-                      return (
-                        <div 
-                          key={index}
-                          className="group p-4 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/30 
-                                     border border-slate-600/30 hover:border-primary/50 
-                                     transition-all duration-300 hover:shadow-lg hover:shadow-primary/10
-                                     opacity-0 animate-fade-in"
-                          style={{ animationDelay: `${350 + index * 80}ms` }}
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-primary/20 
-                                            flex items-center justify-center flex-shrink-0 border border-primary/30
-                                            group-hover:from-primary/40 group-hover:to-primary/30 transition-all duration-300">
-                              <IconComponent className="w-5 h-5 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-primary font-bold text-sm mb-1.5 group-hover:text-primary/90 transition-colors">
-                                {capability.title}
-                              </h3>
-                              <p className="text-muted-foreground text-xs leading-relaxed">
-                                {capability.description}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Connection indicator */}
-                  <div 
-                    className="mt-6 pt-5 border-t border-slate-600/40 opacity-0 animate-fade-in"
-                    style={{ animationDelay: "700ms" }}
-                  >
-                    <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
-                        <ArrowRight className="w-4 h-4 text-primary" />
-                      </div>
-                      <span className="text-muted-foreground">
-                        Enabling <span className="text-primary font-semibold">{accountName}</span> transformation
-                      </span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Vision Statement Bar */}
-            <div 
-              className="glass-card p-5 border border-cyan-500/40 bg-gradient-to-r from-slate-800/95 via-cyan-900/20 to-slate-800/95 
-                         shadow-xl shadow-cyan-500/5 opacity-0 animate-fade-in"
-              style={{ animationDelay: "750ms" }}
-            >
-              <div className="flex items-center gap-5">
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/30 to-cyan-600/20 flex items-center justify-center border border-cyan-500/40">
-                    <Eye className="w-5 h-5 text-cyan-400" />
-                  </div>
-                  <span className="text-cyan-400 font-bold text-lg">Vision</span>
-                </div>
-                <div className="w-px h-10 bg-cyan-500/30" />
-                <p className="text-foreground text-base leading-relaxed flex-1">
-                  {visionStatement}
-                </p>
               </div>
             </div>
           </div>
