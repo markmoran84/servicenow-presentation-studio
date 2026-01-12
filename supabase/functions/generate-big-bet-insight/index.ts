@@ -129,7 +129,7 @@ ${priorInsight ? `PRIOR INSIGHT (do NOT restate; write something materially diff
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 500,
         temperature: 0.8,
