@@ -22,7 +22,6 @@ interface InputFormSlideProps {
 export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults, setGeneratedPlan } = useAccountData();
   const [activeTab, setActiveTab] = useState("aiAnalyzer");
-  const [isGeneratingVision, setIsGeneratingVision] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
 
   const handleGenerate = async () => {
@@ -63,35 +62,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   ) => {
     const arrayValue = value.split("\n").filter((item) => item.trim() !== "");
     updateData(section, { [field]: arrayValue });
-  };
-
-  const handleGenerateVision = async () => {
-    setIsGeneratingVision(true);
-    try {
-      const accountContext = {
-        basics: data.basics,
-        strategy: data.strategy,
-        financial: data.financial,
-        painPoints: data.painPoints,
-        opportunities: data.opportunities,
-        annualReport: data.annualReport,
-      };
-
-      const { data: responseData, error } = await supabase.functions.invoke("generate-vision", {
-        body: { accountContext }
-      });
-
-      if (error) throw error;
-      if (!responseData.success) throw new Error(responseData.error || "Failed to generate vision");
-
-      updateData("basics", { visionStatement: responseData.visionStatement });
-      toast.success("Vision statement generated!");
-    } catch (error) {
-      console.error("Vision generation error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to generate vision");
-    } finally {
-      setIsGeneratingVision(false);
-    }
   };
 
   return (
@@ -271,44 +241,6 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                   />
                 </div>
 
-                {/* Vision Statement - Full Width with AI Generation */}
-                <div className="col-span-2 p-4 rounded-lg bg-primary/5 border border-primary/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-primary" />
-                      Account Team Vision for ServiceNow at {data.basics.accountName || "Customer"}
-                    </label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleGenerateVision}
-                      disabled={isGeneratingVision}
-                      className="gap-2"
-                    >
-                      {isGeneratingVision ? (
-                        <>
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCw className="w-3 h-3" />
-                          {data.basics.visionStatement ? "Regenerate Vision" : "Generate Vision"}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    AI-generated strategic vision statement based on all account context. Click to regenerate for alternatives.
-                  </p>
-                  <Textarea
-                    value={data.basics.visionStatement}
-                    onChange={(e) => updateData("basics", { visionStatement: e.target.value })}
-                    placeholder="Click 'Generate Vision' to create an AI-powered strategic vision statement, or type your own..."
-                    rows={4}
-                    className="bg-background"
-                  />
-                </div>
 
                 {/* Core Team Members for Cover Slide */}
                 <div className="col-span-2 p-4 rounded-lg bg-secondary/30 border border-border/30">
@@ -1818,6 +1750,51 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
             onChange={(e) => updateData("accountStrategy", { strategyNarrative: e.target.value })}
             rows={6}
             placeholder="Our strategy for [Account] focuses on..."
+            className="bg-background"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Account Team Vision Statement */}
+      <Card className="glass-card border-border/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-primary" />
+              Account Team Vision for ServiceNow at {data.basics?.accountName || "Customer"}
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  const { data: responseData, error } = await supabase.functions.invoke("generate-vision", {
+                    body: { accountData: data }
+                  });
+                  if (error) throw error;
+                  if (!responseData.success) throw new Error(responseData.error || "Failed to generate vision");
+                  updateData("accountStrategy", { visionStatement: responseData.visionStatement });
+                  toast.success("Vision statement generated!");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Failed to generate vision");
+                }
+              }}
+              className="gap-2"
+            >
+              <Sparkles className="w-3 h-3" />
+              {data.accountStrategy?.visionStatement ? "Regenerate Vision" : "Generate Vision"}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground mb-3">
+            AI-generated strategic vision statement based on all account context. Describes the aspirational outcome ServiceNow will enable for this customer.
+          </p>
+          <Textarea
+            value={data.accountStrategy?.visionStatement || ""}
+            onChange={(e) => updateData("accountStrategy", { visionStatement: e.target.value })}
+            rows={4}
+            placeholder="Click 'Generate Vision' to create an AI-powered strategic vision statement, or type your own..."
             className="bg-background"
           />
         </CardContent>

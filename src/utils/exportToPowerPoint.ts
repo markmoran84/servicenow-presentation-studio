@@ -330,7 +330,7 @@ const createCustomerSnapshotSlide = (pptx: pptxgen, data: AccountData) => {
     x: MX + 0.12, y: visY + 0.08, w: CONTENT_W - 0.24, h: 0.2,
     fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING,
   });
-  slide.addText(data.basics.visionStatement || "No vision statement defined.", {
+  slide.addText(data.accountStrategy.visionStatement || "No vision statement defined.", {
     x: MX + 0.12, y: visY + 0.3, w: CONTENT_W - 0.24, h: 0.4,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
@@ -680,7 +680,7 @@ const createStrategicAlignmentSlide = (pptx: pptxgen, data: AccountData) => {
     x: MX + 0.12, y: topY + 0.08, w: CONTENT_W - 0.24, h: 0.2,
     fontSize: BODY_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING,
   });
-  slide.addText(data.basics.visionStatement || "No vision statement defined.", {
+  slide.addText(data.accountStrategy.visionStatement || "No vision statement defined.", {
     x: MX + 0.12, y: topY + 0.3, w: CONTENT_W - 0.24, h: 0.4,
     fontSize: SMALL_SIZE, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
