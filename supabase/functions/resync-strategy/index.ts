@@ -113,7 +113,7 @@ Each item should be specific, actionable, and reference the actual account conte
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: "Re-align the strategic analysis based on the updated account context. Generate refined SWOT, pain points, and opportunities that directly reference the new information." }
