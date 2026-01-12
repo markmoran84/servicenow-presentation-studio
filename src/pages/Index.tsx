@@ -25,6 +25,7 @@ import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
 import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
+import { IntegratorStrategySlide } from "@/components/slides/IntegratorStrategySlide";
 import { AIChatAssistant } from "@/components/AIChatAssistant";
 
 const slides = [
@@ -32,8 +33,9 @@ const slides = [
   { component: CoverSlide, label: "Cover" },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
   { component: CustomerSnapshotSlide, label: "2. Customer Snapshot" },
-  { component: CustomerStrategySlide, label: "3. Customer Strategy" },
-  { component: AccountStrategySlide, label: "4. Account Strategy" },
+  { component: IntegratorStrategySlide, label: "3. Integrator Strategy" },
+  { component: CustomerStrategySlide, label: "4. Customer Strategy" },
+  { component: AccountStrategySlide, label: "5. Account Strategy" },
   { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
   { component: StrategicAlignmentSlide, label: "6. Strategic Alignment" },
   { component: AccountTeamSlide, label: "7. Account Team" },
