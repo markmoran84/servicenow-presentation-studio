@@ -21,59 +21,62 @@ Deno.serve(async (req) => {
     const existingPriorities = accountData.opportunities?.opportunities || [];
     const isImproveMode = mode === "improve" && existingPriorities.length > 0;
 
-    const prompt = `You are a strategic account planning expert for enterprise technology sales at ServiceNow. ${isImproveMode ? "Improve and enhance the existing account team priorities" : "Generate strategic account team priorities"} based on the account context.
+    const prompt = `You are a senior ServiceNow account strategist who writes like a McKinsey partner—sharp, bold, and commercially precise.
+
+YOUR VOICE:
+- Punchy. No fluff. Every word earns its place.
+- Action-oriented: "Accelerate", "Capture", "Displace", "Expand", "Operationalize"
+- Outcome-obsessed: Always tie to dollars, time saved, or competitive advantage
+- Customer-centric: Use THEIR language, not generic consulting-speak
+- Bold claims backed by specifics: "$2.5M ACV expansion" not "significant growth"
 
 ${isImproveMode ? `
-IMPROVE MODE: You have existing priorities to enhance. Make them:
-- More specific and actionable
-- Better aligned with the customer's stated priorities
-- More compelling with clearer business outcomes
-- Executive-ready with quantified impact where possible
+IMPROVE MODE: The current priorities are too generic. Make them:
+- SHARPER: Cut the filler. Lead with the commercial outcome.
+- SPECIFIC: Reference their actual strategy, not hypotheticals
+- URGENT: Why THIS quarter? What's the burning platform?
+- QUANTIFIED: Add dollar values, percentages, timeframes
 
-Existing Priorities to Improve:
+Current Priorities (rewrite these):
 ${existingPriorities.map((p: any, i: number) => `${i + 1}. ${p.title}: ${p.description}`).join("\n")}
 ` : `
-GENERATE MODE: Create 4-6 strategic priorities that:
-- Align ServiceNow solutions to customer pain points and strategies
-- Are specific, actionable, and outcome-focused
-- Represent the account team's focus areas for the fiscal year
-- Include clear business value propositions
+GENERATE MODE: Create 4-6 priorities that would survive a ServiceNow SVP review:
+- Each title: 4-6 punchy words that could be a slide header
+- Each description: 1-2 sentences max. Lead with the outcome, then the mechanism.
+- Format: "[Outcome] by [mechanism] targeting [specific result]"
 `}
 
-Account Context:
-- Account Name: ${accountData.basics?.accountName || "Unknown"}
-- Industry: ${accountData.basics?.industry || "Unknown"}
-- Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
-- Next FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
-- 3 Year Ambition: ${accountData.basics?.threeYearAmbition || "Unknown"}
+═══════════════════════════════════════════════════════════════
+ACCOUNT INTELLIGENCE
+═══════════════════════════════════════════════════════════════
+ACCOUNT: ${accountData.basics?.accountName || "Unknown"} | ${accountData.basics?.industry || "Unknown"}
+COMMERCIAL: ${accountData.basics?.currentContractValue || "Unknown"} → ${accountData.basics?.nextFYAmbition || "Unknown"} (FY) → ${accountData.basics?.threeYearAmbition || "Unknown"} (3Y)
 
-Customer Corporate Strategy:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+CUSTOMER'S STRATEGY (use their words):
+${accountData.strategy?.corporateStrategy?.map((s: any) => `• ${s.title}`).join("\n") || "Not specified"}
 
-Customer Digital Strategies:
-${accountData.strategy?.digitalStrategies?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+CEO/BOARD FOCUS:
+${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `• ${s.title}`).join("\n") || "Not specified"}
 
-CEO/Board Priorities:
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+PAIN POINTS (where we win):
+${accountData.painPoints?.painPoints?.map((p: any) => `• ${p.title}`).join("\n") || "Not specified"}
 
-Key Pain Points:
-${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+BIG BETS IN FLIGHT:
+${accountData.accountStrategy?.bigBets?.map((b: any) => `• ${b.title} (${b.dealStatus || "TBD"})`).join("\n") || "None defined"}
 
-Annual Report Highlights:
-${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
+═══════════════════════════════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+Return a JSON array. Each priority:
+{
+  "title": "Punchy 4-6 word header (e.g., 'Capture $3M ITSM Displacement')",
+  "description": "Outcome-first description. Max 2 sentences. Be specific to THIS customer."
+}
 
-Big Bets/Workstreams:
-${accountData.accountStrategy?.bigBets?.map((b: any) => `- ${b.title}: ${b.subtitle || ""}`).join("\n") || "Not defined"}
+BANNED PHRASES: "drive transformation", "leverage synergies", "enable digital", "strategic partnership", "holistic approach", "best-in-class"
 
-Return a JSON array of priorities with this exact structure:
-[
-  {
-    "title": "Short priority title (5-8 words)",
-    "description": "Detailed, exec-ready description with specific outcomes and value proposition (2-3 sentences)"
-  }
-]
+Return ONLY valid JSON. No markdown.`;
 
-Return ONLY the JSON array, no additional text or formatting.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
