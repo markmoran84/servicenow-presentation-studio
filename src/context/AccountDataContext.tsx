@@ -200,12 +200,18 @@ export interface AIGeneratedPlan {
   aiUseCases?: { title: string; description: string; priority: string; status: string }[];
   // FY-1 Retrospective AI-generated content
   fy1Retrospective?: { focusAreas: { title: string; description: string }[]; keyLessons: string; lookingAhead: string };
-  // Customer Strategy AI synthesis
+  // Customer Strategy AI synthesis - Strategic Imperatives format
   customerStrategySynthesis?: { 
+    // Legacy format (backward compatibility)
     strategicPillars?: { headline: string; subtitle: string; description: string; icon: string }[];
-    narrative: string; 
-    serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[];
+    narrative?: string; 
+    serviceNowAlignment?: { customerPriority: string; serviceNowValue: string }[];
     layoutVariant?: "grid-2x2" | "stacked-cards" | "horizontal-flow" | "spotlight";
+    // New Strategic Imperatives format
+    purpose?: string;
+    longerTermAims?: { title: string; description: string }[];
+    annualTasks?: { title: string; color: string }[];
+    objectives?: { title: string; detail: string; taskIndex: number; isAIEnabled?: boolean }[];
     accentColor?: "blue" | "emerald" | "amber" | "purple" | "rose" | "cyan" | "indigo";
   };
   // Weekly Update dynamic content
