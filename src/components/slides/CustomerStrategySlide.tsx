@@ -123,9 +123,12 @@ export const CustomerStrategySlide = () => {
               return (
                 <div 
                   key={idx} 
-                  className={`${colors.bg} ${colors.text} rounded-lg p-4 text-center font-medium text-sm leading-tight`}
+                  className={`${colors.bg} ${colors.text} rounded-lg p-4 text-left`}
                 >
-                  {task.title}
+                  <p className="font-semibold text-sm leading-tight mb-1">{task.title}</p>
+                  {task.description && (
+                    <p className="text-xs opacity-90 leading-snug">{task.description}</p>
+                  )}
                 </div>
               );
             })}
