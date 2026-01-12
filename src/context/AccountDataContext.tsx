@@ -183,6 +183,8 @@ export interface StrategicTension {
 
 // AI-Generated Strategic Plan Content
 export interface AIGeneratedPlan {
+  // Layout metadata for dynamic styling across slides
+  layoutMetadata?: { style: "bold" | "elegant" | "dynamic" | "structured" | "minimal"; colorScheme: string; generatedAt: string };
   executiveSummaryNarrative: string;
   executiveSummaryPillars?: { icon: "network" | "customer" | "technology" | "efficiency"; keyword: string; title: string; tagline: string; description: string; outcome: string }[];
   strategicObservations: { heading: string; detail: string }[];

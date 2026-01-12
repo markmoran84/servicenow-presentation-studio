@@ -29,8 +29,9 @@ export const CustomerStrategySlide = () => {
   const accountName = basics.accountName || "Customer";
   const fiscalYear = "FY26+";
 
-  // Get AI-generated synthesis
+  // Get AI-generated synthesis with layout variant
   const synthesis = generatedPlan?.customerStrategySynthesis;
+  const layoutVariant = synthesis?.layoutVariant || "grid-2x2";
   
   // Strategic direction / purpose
   const strategicDirection = synthesis?.purpose || 
