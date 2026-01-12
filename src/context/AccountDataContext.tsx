@@ -210,7 +210,7 @@ export interface AIGeneratedPlan {
     // New Strategic Imperatives format
     purpose?: string;
     longerTermAims?: { title: string; description: string }[];
-    annualTasks?: { title: string; color: string }[];
+    annualTasks?: { title: string; description?: string; color: string }[];
     objectives?: { title: string; detail: string; taskIndex: number; isAIEnabled?: boolean }[];
     accentColor?: "blue" | "emerald" | "amber" | "purple" | "rose" | "cyan" | "indigo";
   };
