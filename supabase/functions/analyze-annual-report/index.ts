@@ -537,10 +537,11 @@ CRITICAL: A company executive must be able to recognise this as THEIR strategy, 
     const models = ["google/gemini-3-flash-preview", "google/gemini-2.5-flash"];
     let response: Response | null = null;
     let lastError: Error | null = null;
+    let aiData: any | null = null;
 
     for (const model of models) {
       console.log(`Attempting analysis with model: ${model}`);
-      
+
       try {
         response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -554,111 +555,155 @@ CRITICAL: A company executive must be able to recognise this as THEIR strategy, 
             max_tokens: 16000,
             messages: [
               { role: "system", content: initialPrompt },
-              { role: "user", content: userPromptFinal }
+              { role: "user", content: userPromptFinal },
             ],
             tools: [
               {
                 type: "function",
                 function: {
                   name: "extract_annual_report_data",
-                  description: "Extract strategic intelligence as a senior corporate strategist would frame it. Preserve company language, note confidence levels, include source references.",
+                  description:
+                    "Extract strategic intelligence as a senior corporate strategist would frame it. Preserve company language, note confidence levels, include source references.",
                   parameters: {
                     type: "object",
                     properties: {
-                      accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character." },
-                      industry: { type: "string", description: "Primary industry/sector with specificity using company's own terminology" },
-                      revenue: { type: "string", description: "Total revenue with currency and period, EXACTLY as stated" },
+                      accountName: {
+                        type: "string",
+                        description:
+                          "EXACT company name as written in the document header/title. Copy character-for-character.",
+                      },
+                      industry: {
+                        type: "string",
+                        description:
+                          "Primary industry/sector with specificity using company's own terminology",
+                      },
+                      revenue: {
+                        type: "string",
+                        description: "Total revenue with currency and period, EXACTLY as stated",
+                      },
                       revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
-                      growthRate: { type: "string", description: "YoY growth rate with context, EXACTLY as stated" },
+                      growthRate: {
+                        type: "string",
+                        description: "YoY growth rate with context, EXACTLY as stated",
+                      },
                       ebitImprovement: { type: "string", description: "EBIT improvement or margin change" },
                       marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
-                      costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
-                      strategicInvestmentAreas: { type: "string", description: "Where the company is investing for growth" },
-                      corporateStrategy: { 
-                        type: "array", 
-                        items: { 
+                      costPressureAreas: {
+                        type: "string",
+                        description: "Key cost pressure areas mentioned by leadership",
+                      },
+                      strategicInvestmentAreas: {
+                        type: "string",
+                        description: "Where the company is investing for growth",
+                      },
+                      corporateStrategy: {
+                        type: "array",
+                        items: {
                           type: "object",
                           properties: {
-                            title: { type: "string", description: "Strategy statement using the company's OWN language" },
-                            description: { type: "string", description: "2-3 sentences explaining what the report says" },
+                            title: {
+                              type: "string",
+                              description: "Strategy statement using the company's OWN language",
+                            },
+                            description: {
+                              type: "string",
+                              description: "2-3 sentences explaining what the report says",
+                            },
                             confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
-                            sourceReference: { type: "string", description: "Where this appears" }
+                            sourceReference: { type: "string", description: "Where this appears" },
                           },
-                          required: ["title", "description", "confidence", "sourceReference"]
-                        }, 
-                        description: "Corporate strategy elements framed in company's own language"
+                          required: ["title", "description", "confidence", "sourceReference"],
+                        },
+                        description: "Corporate strategy elements framed in company's own language",
                       },
-                      digitalStrategies: { 
-                        type: "array", 
-                        items: { 
+                      digitalStrategies: {
+                        type: "array",
+                        items: {
                           type: "object",
                           properties: {
-                            title: { type: "string", description: "Digital/tech strategy using company's OWN terminology" },
-                            description: { type: "string", description: "Explanation using company's language" },
+                            title: {
+                              type: "string",
+                              description: "Digital/tech strategy using company's OWN terminology",
+                            },
+                            description: {
+                              type: "string",
+                              description: "Explanation using company's language",
+                            },
                             confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
-                            sourceReference: { type: "string", description: "Where this appears" }
+                            sourceReference: { type: "string", description: "Where this appears" },
                           },
-                          required: ["title", "description", "confidence", "sourceReference"]
-                        }, 
-                        description: "ONLY digital/technology strategies"
+                          required: ["title", "description", "confidence", "sourceReference"],
+                        },
+                        description: "ONLY digital/technology strategies",
                       },
-                      ceoBoardPriorities: { 
-                        type: "array", 
-                        items: { 
+                      ceoBoardPriorities: {
+                        type: "array",
+                        items: {
                           type: "object",
                           properties: {
                             title: { type: "string", description: "CEO/Board priority in their own words" },
-                            description: { type: "string", description: "Explanation with emphasis" },
+                            description: {
+                              type: "string",
+                              description: "Explanation with emphasis",
+                            },
                             confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
-                            sourceReference: { type: "string", description: "Source location" }
+                            sourceReference: { type: "string", description: "Source location" },
                           },
-                          required: ["title", "description", "confidence", "sourceReference"]
-                        }, 
-                        description: "Priorities explicitly attributed to CEO/Chair/Board"
+                          required: ["title", "description", "confidence", "sourceReference"],
+                        },
+                        description: "Priorities explicitly attributed to CEO/Chair/Board",
                       },
-                      transformationThemes: { 
-                        type: "array", 
-                        items: { 
+                      transformationThemes: {
+                        type: "array",
+                        items: {
                           type: "object",
-                          properties: {
-                            title: { type: "string" },
-                            description: { type: "string" }
-                          },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 digital/operational transformation themes" 
+                          properties: { title: { type: "string" }, description: { type: "string" } },
+                          required: ["title", "description"],
+                        },
+                        description: "3-5 digital/operational transformation themes",
                       },
-                      painPoints: { 
-                        type: "array", 
-                        items: { 
+                      painPoints: {
+                        type: "array",
+                        items: {
                           type: "object",
                           properties: {
                             title: { type: "string", description: "5-7 word punchy headline" },
-                            description: { type: "string", description: "1-2 sentences linking pain to priority" }
+                            description: {
+                              type: "string",
+                              description: "1-2 sentences linking pain to priority",
+                            },
                           },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 strategically-aligned pain points" 
+                          required: ["title", "description"],
+                        },
+                        description: "3-5 strategically-aligned pain points",
                       },
-                      opportunities: { 
-                        type: "array", 
-                        items: { 
+                      opportunities: {
+                        type: "array",
+                        items: {
                           type: "object",
                           properties: {
                             title: { type: "string", description: "Action-oriented 5-8 word headline" },
-                            description: { type: "string", description: "Exec-ready value proposition" }
+                            description: { type: "string", description: "Exec-ready value proposition" },
                           },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 ServiceNow opportunities" 
+                          required: ["title", "description"],
+                        },
+                        description: "3-5 ServiceNow opportunities",
                       },
                       strengths: { type: "array", items: { type: "string" }, description: "4-6 strengths" },
                       weaknesses: { type: "array", items: { type: "string" }, description: "4-6 weaknesses" },
-                      swotOpportunities: { type: "array", items: { type: "string" }, description: "4-6 opportunities" },
+                      swotOpportunities: {
+                        type: "array",
+                        items: { type: "string" },
+                        description: "4-6 opportunities",
+                      },
                       threats: { type: "array", items: { type: "string" }, description: "4-6 threats" },
                       netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment" },
                       keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones" },
-                      strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements" },
+                      strategicAchievements: {
+                        type: "array",
+                        items: { type: "string" },
+                        description: "3-5 strategic achievements",
+                      },
                       executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready summary" },
                       keyExecutives: {
                         type: "array",
@@ -668,65 +713,79 @@ CRITICAL: A company executive must be able to recognise this as THEIR strategy, 
                             name: { type: "string" },
                             title: { type: "string" },
                             priorities: { type: "string" },
-                            relevance: { type: "string" }
+                            relevance: { type: "string" },
                           },
-                          required: ["name", "title", "priorities", "relevance"]
+                          required: ["name", "title", "priorities", "relevance"],
                         },
-                        description: "5-8 key executives"
-                      }
+                        description: "5-8 key executives",
+                      },
                     },
-                    required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats", "keyExecutives"],
-                    additionalProperties: false
-                  }
-                }
-              }
+                    required: [
+                      "accountName",
+                      "executiveSummaryNarrative",
+                      "painPoints",
+                      "opportunities",
+                      "strengths",
+                      "weaknesses",
+                      "swotOpportunities",
+                      "threats",
+                      "keyExecutives",
+                    ],
+                    additionalProperties: false,
+                  },
+                },
+              },
             ],
-            tool_choice: { type: "function", function: { name: "extract_annual_report_data" } }
+            tool_choice: { type: "function", function: { name: "extract_annual_report_data" } },
           }),
         });
 
         if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
         if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
 
         if (response.ok) {
-          const data = await response.json();
-          const message = data.choices?.[0]?.message;
+          // IMPORTANT: Response bodies can only be read once. Parse + keep it.
+          const parsed = await response.json();
+          const message = parsed.choices?.[0]?.message;
           const toolCall = message?.tool_calls?.[0];
-          
+
           if (toolCall && toolCall.function.name === "extract_annual_report_data") {
             console.log(`Success with model: ${model}`);
-            // Return the data to be processed below
+            aiData = parsed;
             break;
-          } else {
-            console.log(`Model ${model} returned no tool call, trying next...`);
-            lastError = new Error("No tool call returned");
           }
+
+          console.log(`Model ${model} returned no tool call, trying next...`);
+          lastError = new Error("No tool call returned");
+          aiData = null;
         } else {
           const errorText = await response.text();
           console.error(`Model ${model} failed:`, response.status, errorText);
           lastError = new Error(`AI gateway error: ${response.status}`);
+          aiData = null;
         }
       } catch (err) {
         console.error(`Model ${model} threw error:`, err);
         lastError = err instanceof Error ? err : new Error(String(err));
+        aiData = null;
       }
     }
 
-    if (!response || !response.ok) {
+    if (!response || !response.ok || !aiData) {
       throw lastError || new Error("All models failed to analyze document");
     }
 
-    const data = await response.json();
+    const data = aiData;
     console.log("Initial AI response received");
 
     // Debug: Log the full response structure
