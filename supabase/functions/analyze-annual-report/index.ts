@@ -505,197 +505,225 @@ YOUR TASK AS SENIOR STRATEGIST:
 
 CRITICAL: A company executive must be able to recognise this as THEIR strategy, not a consultant's interpretation.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          temperature: 0,
-          messages: [
-            { role: "system", content: initialPrompt },
-            { role: "user", content: userPrompt }
-          ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "extract_annual_report_data",
-              description: "Extract strategic intelligence as a senior corporate strategist would frame it. Preserve company language, note confidence levels, include source references.",
-              parameters: {
-                type: "object",
-                properties: {
-                  accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character." },
-                  industry: { type: "string", description: "Primary industry/sector with specificity using company's own terminology" },
-                  revenue: { type: "string", description: "Total revenue with currency and period, EXACTLY as stated" },
-                  revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
-                  growthRate: { type: "string", description: "YoY growth rate with context, EXACTLY as stated" },
-                  ebitImprovement: { type: "string", description: "EBIT improvement or margin change" },
-                  marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
-                  costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
-                  strategicInvestmentAreas: { type: "string", description: "Where the company is investing for growth" },
-                  corporateStrategy: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: {
-                          type: "string",
-                          description: "Strategy statement using the company's OWN language (near-verbatim or contextually framed). NOT action-verb rewrites. NOT business units."
-                        },
-                        description: {
-                          type: "string",
-                          description: "2-3 sentences explaining what the report says, using company's terminology. Include any terminology variations noted."
-                        },
-                        confidence: {
-                          type: "string",
-                          enum: ["explicit", "contextually_derived"],
-                          description: "'explicit' if clearly stated, 'contextually_derived' if inferred from context"
-                        },
-                        sourceReference: {
-                          type: "string",
-                          description: "Where this appears (e.g., 'CEO Letter', 'Strategic Priorities p.12', 'Chairman Statement')"
-                        }
-                      },
-                      required: ["title", "description", "confidence", "sourceReference"]
-                    }, 
-                    description: "Corporate strategy elements framed in company's own language. NOT segments/units. Include confidence & source for each."
-                  },
-                  digitalStrategies: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: {
-                          type: "string",
-                          description: "Digital/tech strategy using company's OWN terminology. Must explicitly relate to technology/digital/data/AI/IT."
-                        },
-                        description: { 
-                          type: "string",
-                          description: "Explanation using company's language. If not explicitly stated in document, do not include."
-                        },
-                        confidence: {
-                          type: "string",
-                          enum: ["explicit", "contextually_derived"],
-                          description: "'explicit' if clearly stated, 'contextually_derived' if inferred"
-                        },
-                        sourceReference: {
-                          type: "string",
-                          description: "Where this appears in the document"
-                        }
-                      },
-                      required: ["title", "description", "confidence", "sourceReference"]
-                    }, 
-                    description: "ONLY digital/technology strategies. If none explicitly stated, return empty array. Do NOT duplicate corporate strategies."
-                  },
-                  ceoBoardPriorities: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: { type: "string", description: "CEO/Board priority in their own words" },
-                        description: { type: "string", description: "Explanation with emphasis on how frequently/strongly it appears" },
-                        confidence: {
-                          type: "string",
-                          enum: ["explicit", "contextually_derived"],
-                          description: "'explicit' if directly stated by CEO/Board"
-                        },
-                        sourceReference: {
-                          type: "string",
-                          description: "Source (e.g., 'CEO Letter', 'Chairman Statement', 'Investor Day')"
-                        }
-                      },
-                      required: ["title", "description", "confidence", "sourceReference"]
-                    }, 
-                    description: "Priorities explicitly attributed to CEO/Chair/Board. Include source reference."
-                  },
-                  transformationThemes: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: { type: "string", description: "Transformation theme name" },
-                        description: { type: "string", description: "1-2 sentences explaining the transformation" }
-                      },
-                      required: ["title", "description"]
-                    }, 
-                    description: "3-5 digital/operational transformation themes" 
-                  },
-                  painPoints: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: { type: "string", description: "5-7 word punchy headline using customer's language" },
-                        description: { type: "string", description: "1-2 sentences linking pain to strategic priority with quantification" }
-                      },
-                      required: ["title", "description"]
-                    }, 
-                    description: "3-5 strategically-aligned pain points derived from the document" 
-                  },
-                  opportunities: { 
-                    type: "array", 
-                    items: { 
-                      type: "object",
-                      properties: {
-                        title: { type: "string", description: "Action-oriented 5-8 word headline" },
-                        description: { type: "string", description: "Exec-ready value proposition with quantified outcomes" }
-                      },
-                      required: ["title", "description"]
-                    }, 
-                    description: "3-5 ServiceNow opportunities that address pain points" 
-                  },
-                  strengths: { type: "array", items: { type: "string" }, description: "4-6 strengths combining organizational and account relationship factors" },
-                  weaknesses: { type: "array", items: { type: "string" }, description: "4-6 weaknesses combining organizational gaps and ServiceNow position challenges" },
-                  swotOpportunities: { type: "array", items: { type: "string" }, description: "4-6 opportunities combining commercial timing and platform white space" },
-                  threats: { type: "array", items: { type: "string" }, description: "4-6 threats combining market risks and competitive dynamics" },
-                  netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment with year" },
-                  keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones or achievements from the year" },
-                  strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements that demonstrate execution capability" },
-                  executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" },
-                  keyExecutives: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string", description: "Full name of the executive" },
-                        title: { type: "string", description: "Official title (e.g., 'Chief Executive Officer', 'Chief Digital Officer')" },
-                        priorities: { type: "string", description: "2-3 sentences describing their stated priorities, focus areas, or initiatives they champion" },
-                        relevance: { type: "string", description: "Why this executive is relevant for ServiceNow engagement (e.g., 'Owns digital transformation', 'Drives operational excellence')" }
-                      },
-                      required: ["name", "title", "priorities", "relevance"]
-                    },
-                    description: "5-8 key executives with their priorities for executive engagement strategy"
-                  }
-                },
-                required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats", "keyExecutives"],
-                additionalProperties: false
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "extract_annual_report_data" } }
-      }),
-    });
+    // Truncate content if too large to prevent model failures
+    const maxContentLength = 200000; // ~200k chars max to leave room for prompt
+    const truncatedContent = validatedContent.length > maxContentLength 
+      ? validatedContent.substring(0, maxContentLength) + "\n\n[Document truncated for processing]"
+      : validatedContent;
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    const userPromptFinal = `DOCUMENT FOR STRATEGIC ANALYSIS:
+
+${truncatedContent}
+
+═══════════════════════════════════════════════════════════════
+YOUR TASK AS SENIOR STRATEGIST:
+═══════════════════════════════════════════════════════════════
+
+1. Read the ENTIRE document comprehensively
+2. Identify the EXACT company name as it appears officially
+3. Apply senior-strategist judgement to distinguish:
+   - Corporate strategy from operational performance
+   - Enduring strategic direction from short-term commentary
+   - What leadership consistently emphasises vs supporting detail
+4. PRESERVE the company's own language — do not rewrite into consultant frameworks
+5. For each strategy element, note:
+   - Whether it is EXPLICIT or CONTEXTUALLY DERIVED
+   - Where in the document it appears (CEO Letter, Strategy section, etc.)
+6. If intent is unclear or weakly supported, state: "This cannot be reliably concluded from the published material"
+
+CRITICAL: A company executive must be able to recognise this as THEIR strategy, not a consultant's interpretation.`;
+
+    // Make API request with retry logic
+    const models = ["google/gemini-3-flash-preview", "google/gemini-2.5-flash"];
+    let response: Response | null = null;
+    let lastError: Error | null = null;
+
+    for (const model of models) {
+      console.log(`Attempting analysis with model: ${model}`);
+      
+      try {
+        response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            temperature: 0,
+            max_tokens: 16000,
+            messages: [
+              { role: "system", content: initialPrompt },
+              { role: "user", content: userPromptFinal }
+            ],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "extract_annual_report_data",
+                  description: "Extract strategic intelligence as a senior corporate strategist would frame it. Preserve company language, note confidence levels, include source references.",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character." },
+                      industry: { type: "string", description: "Primary industry/sector with specificity using company's own terminology" },
+                      revenue: { type: "string", description: "Total revenue with currency and period, EXACTLY as stated" },
+                      revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
+                      growthRate: { type: "string", description: "YoY growth rate with context, EXACTLY as stated" },
+                      ebitImprovement: { type: "string", description: "EBIT improvement or margin change" },
+                      marginEBIT: { type: "string", description: "EBIT margin percentage or absolute figure" },
+                      costPressureAreas: { type: "string", description: "Key cost pressure areas mentioned by leadership" },
+                      strategicInvestmentAreas: { type: "string", description: "Where the company is investing for growth" },
+                      corporateStrategy: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Strategy statement using the company's OWN language" },
+                            description: { type: "string", description: "2-3 sentences explaining what the report says" },
+                            confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
+                            sourceReference: { type: "string", description: "Where this appears" }
+                          },
+                          required: ["title", "description", "confidence", "sourceReference"]
+                        }, 
+                        description: "Corporate strategy elements framed in company's own language"
+                      },
+                      digitalStrategies: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Digital/tech strategy using company's OWN terminology" },
+                            description: { type: "string", description: "Explanation using company's language" },
+                            confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
+                            sourceReference: { type: "string", description: "Where this appears" }
+                          },
+                          required: ["title", "description", "confidence", "sourceReference"]
+                        }, 
+                        description: "ONLY digital/technology strategies"
+                      },
+                      ceoBoardPriorities: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "CEO/Board priority in their own words" },
+                            description: { type: "string", description: "Explanation with emphasis" },
+                            confidence: { type: "string", enum: ["explicit", "contextually_derived"] },
+                            sourceReference: { type: "string", description: "Source location" }
+                          },
+                          required: ["title", "description", "confidence", "sourceReference"]
+                        }, 
+                        description: "Priorities explicitly attributed to CEO/Chair/Board"
+                      },
+                      transformationThemes: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            description: { type: "string" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 digital/operational transformation themes" 
+                      },
+                      painPoints: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "5-7 word punchy headline" },
+                            description: { type: "string", description: "1-2 sentences linking pain to priority" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 strategically-aligned pain points" 
+                      },
+                      opportunities: { 
+                        type: "array", 
+                        items: { 
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "Action-oriented 5-8 word headline" },
+                            description: { type: "string", description: "Exec-ready value proposition" }
+                          },
+                          required: ["title", "description"]
+                        }, 
+                        description: "3-5 ServiceNow opportunities" 
+                      },
+                      strengths: { type: "array", items: { type: "string" }, description: "4-6 strengths" },
+                      weaknesses: { type: "array", items: { type: "string" }, description: "4-6 weaknesses" },
+                      swotOpportunities: { type: "array", items: { type: "string" }, description: "4-6 opportunities" },
+                      threats: { type: "array", items: { type: "string" }, description: "4-6 threats" },
+                      netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment" },
+                      keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones" },
+                      strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements" },
+                      executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready summary" },
+                      keyExecutives: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            title: { type: "string" },
+                            priorities: { type: "string" },
+                            relevance: { type: "string" }
+                          },
+                          required: ["name", "title", "priorities", "relevance"]
+                        },
+                        description: "5-8 key executives"
+                      }
+                    },
+                    required: ["accountName", "executiveSummaryNarrative", "painPoints", "opportunities", "strengths", "weaknesses", "swotOpportunities", "threats", "keyExecutives"],
+                    additionalProperties: false
+                  }
+                }
+              }
+            ],
+            tool_choice: { type: "function", function: { name: "extract_annual_report_data" } }
+          }),
+        });
+
+        if (response.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (response.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        if (response.ok) {
+          const data = await response.json();
+          const message = data.choices?.[0]?.message;
+          const toolCall = message?.tool_calls?.[0];
+          
+          if (toolCall && toolCall.function.name === "extract_annual_report_data") {
+            console.log(`Success with model: ${model}`);
+            // Return the data to be processed below
+            break;
+          } else {
+            console.log(`Model ${model} returned no tool call, trying next...`);
+            lastError = new Error("No tool call returned");
+          }
+        } else {
+          const errorText = await response.text();
+          console.error(`Model ${model} failed:`, response.status, errorText);
+          lastError = new Error(`AI gateway error: ${response.status}`);
+        }
+      } catch (err) {
+        console.error(`Model ${model} threw error:`, err);
+        lastError = err instanceof Error ? err : new Error(String(err));
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits exhausted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    if (!response || !response.ok) {
+      throw lastError || new Error("All models failed to analyze document");
     }
 
     const data = await response.json();
