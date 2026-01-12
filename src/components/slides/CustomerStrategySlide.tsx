@@ -94,16 +94,16 @@ export const CustomerStrategySlide = () => {
       {/* Longer-term Aims Section */}
       {longerTermAims.length > 0 && (
         <div className="opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <p className="text-sm text-muted-foreground mb-3 font-medium">Our longer-term aims – Our ambition is...</p>
+          <p className="text-sm text-muted-foreground mb-3 font-medium">Our longer-term ambitions – From the Annual Report</p>
           <div className="glass-card p-5 bg-gradient-to-r from-cyan-900/30 to-teal-900/20 border border-cyan-500/20">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
               {longerTermAims.map((aim, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-1">•</span>
+                <div key={idx} className="flex items-start gap-3">
+                  <span className="text-cyan-400 mt-0.5 text-lg">•</span>
                   <div>
-                    <span className="text-foreground font-medium">{aim.title}</span>
+                    <p className="text-foreground font-semibold leading-snug">{aim.title}</p>
                     {aim.description && (
-                      <span className="text-muted-foreground"> ({aim.description})</span>
+                      <p className="text-muted-foreground text-sm mt-1 leading-relaxed">{aim.description}</p>
                     )}
                   </div>
                 </div>
