@@ -25,11 +25,25 @@ export const ExecutiveSummarySlide = () => {
     ? basics.accountName.split(" ").pop()?.toUpperCase() 
     : null;
   
+  // Get layout metadata for dynamic styling
+  const layoutMetadata = generatedPlan?.layoutMetadata as { style?: string; colorScheme?: string } | undefined;
+  const layoutStyle = layoutMetadata?.style || "bold";
+  
   const pillars = generatedPlan?.executiveSummaryPillars || annualReport.strategicPillars || [];
   const narrative = generatedPlan?.executiveSummaryNarrative || annualReport.executiveSummaryNarrative;
   const isAIGenerated = !!generatedPlan?.executiveSummaryPillars;
 
   const hasContent = pillars.length > 0 || narrative;
+  
+  // Dynamic styles based on layout style
+  const getHeaderStyle = () => {
+    switch (layoutStyle) {
+      case "elegant": return "text-3xl md:text-4xl lg:text-5xl";
+      case "minimal": return "text-3xl md:text-4xl";
+      case "bold": return "text-4xl md:text-5xl lg:text-6xl";
+      default: return "text-4xl md:text-5xl lg:text-6xl";
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 md:p-10 pb-28 relative overflow-hidden">
@@ -56,7 +70,7 @@ export const ExecutiveSummarySlide = () => {
                 </span>
               )}
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className={`${getHeaderStyle()} font-bold leading-tight`}>
               {companyName ? (
                 <>
                   <span className="text-foreground">Delivering </span>
