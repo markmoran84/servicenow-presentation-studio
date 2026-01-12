@@ -11,11 +11,16 @@ import {
   Layers,
   Target,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  Lightbulb,
+  Network,
+  Workflow,
+  Bot
 } from "lucide-react";
 
 // Foundational enabler icons
 const enablerIcons = [Users, Cog, Cpu, BarChart3];
+const digitalIcons = [Layers, Bot, Network, Workflow];
 
 export const CustomerStrategySlide = () => {
   const { data } = useAccountData();
@@ -72,26 +77,30 @@ export const CustomerStrategySlide = () => {
   const isAIGenerated = !!synthesis;
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32 relative overflow-hidden">
+    <div className="min-h-screen p-6 md:p-10 pb-28 relative overflow-hidden">
       {/* Background gradient accents */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-gradient-to-bl from-emerald-500/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[400px] bg-gradient-to-tr from-cyan-500/5 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-[900px] h-[600px] bg-gradient-to-bl from-emerald-500/6 via-cyan-500/4 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[700px] h-[500px] bg-gradient-to-tr from-cyan-500/6 via-teal-500/4 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-amber-500/4 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-            <span className="bg-gradient-to-r from-emerald-400 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
-              Customer {fiscalYear} Priorities
-            </span>
-          </h1>
-          <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-start justify-between mb-8 opacity-0 animate-fade-in">
+          <div>
+            <p className="text-muted-foreground text-xs tracking-widest uppercase mb-2">Customer Strategic Overview</p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-teal-300 bg-clip-text text-transparent">
+                Customer {fiscalYear} Priorities
+              </span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 mt-2">
             <RegenerateSectionButton section="customerStrategySynthesis" label="Generate" />
             {isAIGenerated && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
-                <Sparkles className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/30 text-xs text-accent font-semibold shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" />
                 AI Synthesized
               </span>
             )}
@@ -99,26 +108,37 @@ export const CustomerStrategySlide = () => {
         </div>
 
         {!hasData ? (
-          <div className="glass-card p-12 text-center opacity-0 animate-fade-in">
-            <AlertCircle className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Strategy Data</h3>
-            <p className="text-sm text-muted-foreground/70 max-w-md mx-auto">
-              Upload an annual report or click "Generate" to create customer strategy content.
+          <div 
+            className="glass-card p-16 text-center border border-slate-600/30 opacity-0 animate-fade-in"
+            style={{ animationDelay: "100ms" }}
+          >
+            <div className="w-20 h-20 rounded-2xl bg-muted/10 flex items-center justify-center mx-auto mb-6 border border-muted/20">
+              <AlertCircle className="w-10 h-10 text-muted-foreground/40" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-3">No Strategy Data</h3>
+            <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
+              Upload an annual report or click "Generate" to create customer strategy content based on your account data.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-12 gap-6">
             {/* Left Column - Customer Strategic Direction */}
-            <div className="col-span-7 space-y-6 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <div 
+              className="col-span-7 space-y-6 opacity-0 animate-fade-in" 
+              style={{ animationDelay: "100ms" }}
+            >
               {/* Strategic Direction Card */}
-              <div className="glass-card p-6 border border-cyan-500/20 bg-gradient-to-br from-slate-800/80 to-slate-900/50">
-                {/* Header */}
-                <h2 className="text-lg font-semibold text-cyan-400 mb-3">
-                  {accountName} Strategic Direction
-                </h2>
+              <div className="glass-card p-6 border border-cyan-500/30 bg-gradient-to-br from-slate-800/90 via-cyan-900/10 to-slate-900/70 shadow-xl shadow-cyan-500/5">
+                {/* Header with accent line */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-cyan-400 to-cyan-600" />
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent">
+                    {accountName} Strategic Direction
+                  </h2>
+                </div>
                 
                 {/* Strategic Direction Text */}
-                <p className="text-foreground/90 text-base leading-relaxed mb-6">
+                <p className="text-foreground/90 text-base leading-relaxed mb-8 pl-5">
                   {strategicDirection}
                 </p>
 
@@ -129,16 +149,21 @@ export const CustomerStrategySlide = () => {
                     return (
                       <div 
                         key={index}
-                        className="group p-4 rounded-xl bg-slate-700/40 border border-slate-600/40 hover:border-amber-400/40 transition-all duration-300 opacity-0 animate-fade-in"
-                        style={{ animationDelay: `${200 + index * 100}ms` }}
+                        className="group p-4 rounded-xl bg-gradient-to-br from-slate-700/50 to-slate-800/40 
+                                   border border-slate-600/40 hover:border-amber-400/50 
+                                   transition-all duration-300 hover:shadow-lg hover:shadow-amber-400/10
+                                   opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${200 + index * 80}ms` }}
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-4">
                           {/* Yellow/amber accent square */}
-                          <div className="w-10 h-10 rounded-lg bg-amber-400/90 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-400 transition-colors">
-                            <IconComponent className="w-5 h-5 text-slate-900" />
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 
+                                          flex items-center justify-center flex-shrink-0 
+                                          group-hover:shadow-lg group-hover:shadow-amber-400/30 transition-all duration-300">
+                            <IconComponent className="w-6 h-6 text-slate-900" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-foreground font-semibold text-sm leading-snug">
+                          <div className="flex-1 min-w-0 pt-1">
+                            <h3 className="text-foreground font-semibold text-sm leading-snug group-hover:text-amber-200 transition-colors">
                               {enabler.title}
                             </h3>
                           </div>
@@ -151,51 +176,71 @@ export const CustomerStrategySlide = () => {
             </div>
 
             {/* Right Column - Digital Strategies */}
-            <div className="col-span-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
-              <div className="glass-card p-6 h-full border border-emerald-500/20 bg-gradient-to-br from-slate-800/80 to-slate-900/50">
+            <div 
+              className="col-span-5 opacity-0 animate-fade-in" 
+              style={{ animationDelay: "200ms" }}
+            >
+              <div className="glass-card p-6 h-full border border-emerald-500/30 bg-gradient-to-br from-slate-800/90 via-emerald-900/10 to-slate-900/70 shadow-xl shadow-emerald-500/5">
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-6">
-                  <h2 className="text-lg font-semibold text-emerald-400">Digital Strategies</h2>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-8 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600" />
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
+                      Digital Strategies
+                    </h2>
+                  </div>
+                  <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border border-emerald-500/40 text-emerald-400 text-xs font-semibold">
                     ServiceNow
                   </span>
                 </div>
 
                 {/* Digital Strategy Items */}
                 <div className="space-y-4">
-                  {digitalStrategies.slice(0, 4).map((strategy, index) => (
-                    <div 
-                      key={index}
-                      className="group p-4 rounded-xl bg-slate-700/30 border border-slate-600/30 hover:border-emerald-500/40 transition-all duration-300 opacity-0 animate-fade-in"
-                      style={{ animationDelay: `${400 + index * 100}ms` }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-500/30 transition-colors">
-                          {index === 0 && <Layers className="w-4 h-4 text-emerald-400" />}
-                          {index === 1 && <Cpu className="w-4 h-4 text-emerald-400" />}
-                          {index === 2 && <Zap className="w-4 h-4 text-emerald-400" />}
-                          {index === 3 && <Target className="w-4 h-4 text-emerald-400" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-emerald-400 font-semibold text-sm mb-1">
-                            {strategy.title}
-                          </h3>
-                          {strategy.description && (
-                            <p className="text-muted-foreground text-xs leading-relaxed">
-                              {strategy.description}
-                            </p>
-                          )}
+                  {digitalStrategies.slice(0, 4).map((strategyItem, index) => {
+                    const IconComponent = digitalIcons[index % digitalIcons.length];
+                    return (
+                      <div 
+                        key={index}
+                        className="group p-4 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/30 
+                                   border border-slate-600/30 hover:border-emerald-500/50 
+                                   transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10
+                                   opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${350 + index * 80}ms` }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 
+                                          flex items-center justify-center flex-shrink-0 border border-emerald-500/30
+                                          group-hover:from-emerald-500/40 group-hover:to-emerald-600/30 transition-all duration-300">
+                            <IconComponent className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-emerald-400 font-bold text-sm mb-1.5 group-hover:text-emerald-300 transition-colors">
+                              {strategyItem.title}
+                            </h3>
+                            {strategyItem.description && (
+                              <p className="text-muted-foreground text-xs leading-relaxed">
+                                {strategyItem.description}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Connection indicator */}
-                <div className="mt-6 pt-4 border-t border-slate-600/30">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <ArrowRight className="w-3 h-3 text-emerald-400" />
-                    <span>Aligned to <span className="text-emerald-400 font-medium">{accountName}</span> priorities</span>
+                <div 
+                  className="mt-6 pt-5 border-t border-slate-600/40 opacity-0 animate-fade-in"
+                  style={{ animationDelay: "700ms" }}
+                >
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                      <ArrowRight className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <span className="text-muted-foreground">
+                      Aligned to <span className="text-emerald-400 font-semibold">{accountName}</span> priorities
+                    </span>
                   </div>
                 </div>
               </div>
