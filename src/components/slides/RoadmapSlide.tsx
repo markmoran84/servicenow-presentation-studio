@@ -16,7 +16,7 @@ export const RoadmapSlide = () => {
   const hasPhases = phases.length > 0;
 
   // Purpose/Vision
-  const purpose = data.basics.visionStatement || 
+  const purpose = data.accountStrategy.visionStatement || 
     plan?.executiveSummaryNarrative?.substring(0, 200) ||
     `Enable ${companyName}'s digital transformation through strategic platform adoption`;
 

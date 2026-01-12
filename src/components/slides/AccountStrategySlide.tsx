@@ -38,7 +38,7 @@ export const AccountStrategySlide = () => {
   const platformCapabilities = generatedPlan?.platformCapabilities?.capabilities?.slice(0, 4) || [];
   
   // Vision statement
-  const visionStatement = basics.visionStatement || 
+  const visionStatement = data.accountStrategy.visionStatement || 
     `To build the digital backbone that powers ${accountName}'s Integrator Strategy to deliver seamless, integrated logistics across a connected global network.`;
 
   // Default focus areas if none generated
