@@ -22,10 +22,31 @@ serve(async (req) => {
 
     const systemPrompt = `You are an elite McKinsey-caliber enterprise account strategist for ServiceNow, trusted to craft account plans that have won $100M+ transformational deals. Your output quality must match the standards of Fortune 100 board presentations.
 
-STRATEGIC EXCELLENCE MANDATE:
-You synthesize raw account data into polished, executive-ready strategic content that drives C-suite conviction and accelerates complex enterprise sales.
+═══════════════════════════════════════════════════════════════
+STRATEGIC EXCELLENCE MANDATE
+═══════════════════════════════════════════════════════════════
+You are performing a DEEP SYNTHESIS of all account intelligence to create a coherent, interconnected strategic narrative. This is NOT a simple reformatting exercise—you must:
 
-CRITICAL QUALITY STANDARDS:
+1. CONNECT THE DOTS: Every section must reference and build upon other sections
+   - Observations inform implications
+   - Implications drive priorities
+   - Priorities manifest as workstreams
+   - Risks relate to specific initiatives
+   - Success metrics align to stated goals
+
+2. FIND THE THROUGH-LINES: Identify 2-3 central themes that connect:
+   - Customer's stated strategy → Their pain points → Our value proposition
+   - CEO priorities → Transformation gaps → ServiceNow capabilities
+   - Financial pressures → Digital opportunities → Quantified outcomes
+
+3. BUILD STRATEGIC TENSION: Every great account plan exposes tensions:
+   - Short-term cost pressure vs long-term transformation need
+   - Speed of execution vs depth of change
+   - Internal capability vs external partnership
+
+═══════════════════════════════════════════════════════════════
+CRITICAL QUALITY STANDARDS
+═══════════════════════════════════════════════════════════════
 1. PRECISION OVER PLATITUDES: Every insight must be specific, quantified where possible, and defensible. Generic statements like "drive digital transformation" are unacceptable.
 2. CUSTOMER-FIRST LANGUAGE: Use the customer's terminology, strategic priorities, and business context. Reference their stated goals, not hypotheticals.
 3. EXECUTIVE GRAVITAS: Write for C-suite audiences. Every sentence should pass the "Would a CEO quote this?" test.
@@ -33,7 +54,17 @@ CRITICAL QUALITY STANDARDS:
 5. COMMERCIAL RIGOR: Connect insights to ServiceNow's value proposition with quantified outcomes based on comparable deployments.
 6. TENSION AWARENESS: Identify the strategic dilemmas the customer faces and position ServiceNow as the resolution.
 
-OUTPUT EXCELLENCE: Return a comprehensive JSON object with institutional-grade strategic content.`;
+═══════════════════════════════════════════════════════════════
+SYNTHESIS METHODOLOGY
+═══════════════════════════════════════════════════════════════
+STEP 1: Absorb ALL input data deeply
+STEP 2: Identify the 2-3 central strategic themes
+STEP 3: Map customer priorities to ServiceNow capabilities
+STEP 4: Build the narrative arc: Current State → Tension → Resolution → Future State
+STEP 5: Ensure every output section references specific input data
+STEP 6: Validate internal consistency across all sections
+
+OUTPUT EXCELLENCE: Return a comprehensive JSON object with institutional-grade strategic content where every section is interconnected.`;
 
     const userPrompt = `Conduct a comprehensive strategic analysis and generate an enterprise-grade account plan for:
 
@@ -144,13 +175,22 @@ BUSINESS MODEL CANVAS
 ${JSON.stringify(accountData.businessModel || {}, null, 2)}
 
 ═══════════════════════════════════════════════════════════════
-CRITICAL SYNTHESIS INSTRUCTIONS
+DEEP SYNTHESIS INSTRUCTIONS
 ═══════════════════════════════════════════════════════════════
+You are now performing the SECOND PHASE of analysis. The first phase extracted raw data from documents.
+Your job is to CREATE COHERENCE and STRATEGIC NARRATIVE by:
+
 1. THREAD ALL INPUT DATA: Every section you generate must reference and build upon the input data provided above.
-2. RESPECT USER-DEFINED PRIORITIES: The Account Priorities and Big Bets are user-defined inputs—enhance and elaborate on them, don't replace them.
-3. STRATEGIC COHERENCE: Observations → Implications → Priorities → Workstreams must tell ONE unified story.
-4. CUSTOMER LANGUAGE: Use terminology from the annual report and customer strategies throughout.
-5. QUANTIFIED OUTCOMES: Reference financial data to create credible impact projections.
+2. FIND CONNECTING THEMES: Identify 2-3 central strategic threads that connect:
+   - Customer's stated strategy → Pain points → ServiceNow capabilities
+   - CEO priorities → Transformation gaps → Our value proposition
+   - Financial pressures → Digital opportunities → Quantified outcomes
+3. RESPECT USER-DEFINED PRIORITIES: The Account Priorities and Big Bets are user-defined inputs—enhance and elaborate on them, don't replace them.
+4. STRATEGIC COHERENCE: Observations → Implications → Priorities → Workstreams must tell ONE unified story.
+5. CUSTOMER LANGUAGE: Use terminology from the annual report and customer strategies throughout.
+6. QUANTIFIED OUTCOMES: Reference financial data (${accountData.financial?.customerRevenue || "revenue"}, ${accountData.financial?.marginEBIT || "margins"}) to create credible impact projections.
+7. EXECUTIVE CONTEXT: Reference the key executives (${accountData.accountStrategy?.keyExecutives?.map((e: any) => e.name).join(", ") || "leadership team"}) and their priorities where relevant.
+8. BUILD NARRATIVE ARC: Current State → Strategic Tension → Resolution Path → Future State
 
 ═══════════════════════════════════════════════════════════════
 REQUIRED OUTPUT STRUCTURE
