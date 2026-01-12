@@ -321,6 +321,10 @@ ${spec.outputShapeHint}
 
 Return ONLY valid JSON.`;
 
+    // Determine max tokens based on section complexity
+    const largerSections = ["customerStrategySynthesis", "riskRadar", "strategicTensions"];
+    const maxTokens = largerSections.includes(section) ? 4096 : 2048;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -328,12 +332,13 @@ Return ONLY valid JSON.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.75,
+        temperature: 0.7,
+        max_tokens: maxTokens,
       }),
     });
 
