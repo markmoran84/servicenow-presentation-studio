@@ -508,7 +508,7 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
   const leftW = 5.5;
   const pillarsGap = 0.12;
   const pillarW = (leftW - pillarsGap) / 2;
-  const pillarH = 1.45;
+  const pillarH = 1.65;
 
   slide.addText("WHAT WE'LL FOCUS ON", {
     x: MX, y: pillarsY, w: 3, h: 0.2,
@@ -523,22 +523,26 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
   const pillars = [
     {
       title: customerPriorities[0]?.title || "Customer & Commercial Transformation",
-      desc: truncate(customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.", 90),
+      desc: truncate(customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.", 80),
+      whyNow: "Decision window is live. Time to expand from replacement to end-to-end orchestration.",
       accent: "3B82F6"
     },
     {
       title: customerPriorities[1]?.title || "Operationalising AI",
-      desc: truncate(customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.", 90),
+      desc: truncate(customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.", 80),
+      whyNow: "AI-first ambition is clear. This is the inflection point to embed AI in workflows.",
       accent: "8B5CF6"
     },
     {
       title: strategicOpportunities[0]?.title || "Platform Expansion Beyond IT",
-      desc: truncate(strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.", 90),
+      desc: truncate(strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.", 80),
+      whyNow: "Scaling integrated operations requires a common orchestration layer.",
       accent: "10B981"
     },
     {
       title: strategicOpportunities[1]?.title || "Strategic Partnership Maturity",
-      desc: truncate(strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.", 90),
+      desc: truncate(strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.", 80),
+      whyNow: "Relationship has renewed confidence. Window to shift to strategic partnership.",
       accent: "F59E0B"
     }
   ];
@@ -572,15 +576,32 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
     });
 
     // Title
-    slide.addText(truncate(p.title, 35), {
-      x: px + 0.1, y: py + 0.35, w: pillarW - 0.2, h: 0.35,
+    slide.addText(truncate(p.title, 32), {
+      x: px + 0.1, y: py + 0.32, w: pillarW - 0.2, h: 0.28,
       fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, valign: "top",
     });
 
     // Description
     slide.addText(p.desc, {
-      x: px + 0.1, y: py + 0.75, w: pillarW - 0.2, h: 0.6,
+      x: px + 0.1, y: py + 0.58, w: pillarW - 0.2, h: 0.45,
       fontSize: TINY_SIZE, color: "94A3B8", fontFace: FONT_BODY, valign: "top",
+    });
+
+    // Why Now section - separator line
+    slide.addShape(pptx.ShapeType.rect, {
+      x: px + 0.1, y: py + 1.05, w: pillarW - 0.2, h: 0.01,
+      fill: { color: "334155" },
+      line: { color: "334155", transparency: 100 },
+    });
+
+    // Why Now label and text
+    slide.addText("Why now:", {
+      x: px + 0.1, y: py + 1.12, w: 0.6, h: 0.15,
+      fontSize: 6, bold: true, color: p.accent, fontFace: FONT_BODY,
+    });
+    slide.addText(truncate(p.whyNow, 60), {
+      x: px + 0.65, y: py + 1.12, w: pillarW - 0.8, h: 0.45,
+      fontSize: 6, color: "64748B", fontFace: FONT_BODY, valign: "top",
     });
   });
 
