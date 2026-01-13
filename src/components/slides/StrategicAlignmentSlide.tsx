@@ -27,7 +27,7 @@ export const StrategicAlignmentSlide = () => {
   ];
 
   return (
-    <div className="min-h-screen p-6 md:p-10 pb-28 relative overflow-hidden">
+    <div className="h-full overflow-auto p-6 md:p-10 pb-28 relative">
       {/* Background gradient accents */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[900px] h-[600px] bg-gradient-to-bl from-primary/6 via-cyan-500/4 to-transparent rounded-full blur-3xl" />

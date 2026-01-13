@@ -83,7 +83,7 @@ export const RiskMitigationSlide = () => {
   const lowRisks = risks.filter(r => r.severity === "low").length;
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32">
+    <div className="h-full overflow-auto p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">

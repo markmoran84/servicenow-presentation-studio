@@ -55,7 +55,7 @@ export const IntegratorStrategySlide = () => {
   const divisionIcons = [Ship, Globe, Container];
 
   return (
-    <div className="min-h-screen p-6 md:p-10 pb-28 relative overflow-hidden">
+    <div className="h-full overflow-auto p-6 md:p-10 pb-28 relative">
       {/* Background gradient accents */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[900px] h-[500px] bg-gradient-to-br from-teal-500/8 to-transparent rounded-full blur-3xl" />

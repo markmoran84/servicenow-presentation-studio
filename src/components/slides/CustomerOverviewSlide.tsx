@@ -40,7 +40,7 @@ export const CustomerOverviewSlide = () => {
   };
 
   return (
-    <div className="px-8 pt-6 pb-32">
+    <div className="h-full overflow-auto px-8 pt-6 pb-32">
       <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
         Customer Overview & Strategy
       </h1>
