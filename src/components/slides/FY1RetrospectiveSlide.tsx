@@ -16,7 +16,7 @@ export const FY1RetrospectiveSlide = () => {
   const hasData = history.lastPlanDate || history.plannerName || history.lastPlanSummary || focusAreas.length > 0;
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32">
+    <div className="h-full overflow-auto p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
