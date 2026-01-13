@@ -65,7 +65,7 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
   };
 
   return (
-    <div className="min-h-screen p-8 pb-32 overflow-y-auto">
+    <div className="h-full overflow-auto p-8 pb-32">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

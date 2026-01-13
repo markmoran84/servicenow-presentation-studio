@@ -113,7 +113,7 @@ export const ClosePlanSlide = () => {
   ];
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32">
+    <div className="h-full overflow-auto p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">

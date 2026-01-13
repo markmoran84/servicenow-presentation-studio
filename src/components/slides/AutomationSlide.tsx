@@ -35,7 +35,7 @@ export const AutomationSlide = () => {
   const hasData = automationProcesses.length > 0;
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32">
+    <div className="h-full overflow-auto p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">

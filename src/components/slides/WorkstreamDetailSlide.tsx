@@ -88,7 +88,7 @@ export const WorkstreamDetailSlide = () => {
   }, 0);
 
   return (
-    <div className="px-8 pt-6 pb-32">
+    <div className="h-full overflow-auto px-8 pt-6 pb-32">
       {/* Header */}
       <div className="flex items-center justify-between mb-5 opacity-0 animate-fade-in">
         <div>

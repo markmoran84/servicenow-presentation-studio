@@ -71,7 +71,7 @@ export const RoadmapSlide = () => {
   const laterItems = displayInitiatives.filter(i => i.phase === "later");
 
   return (
-    <div className="min-h-screen p-4 md:p-6 pb-32 bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="h-full overflow-auto p-4 md:p-6 pb-32 bg-gradient-to-br from-background via-background to-primary/5">
       <div className="max-w-[1800px] mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
