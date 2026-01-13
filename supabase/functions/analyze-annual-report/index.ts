@@ -1,9 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, createErrorResponse, validateContent, validateAccountContext, sanitizeForAI } from "../_shared/validation.ts";
 
 // Comprehensive web research for multiple data types
 async function searchCompanyInfo(companyName: string, searchType: string): Promise<string> {
@@ -14,17 +10,20 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
   }
 
   try {
+    // Sanitize company name for search
+    const sanitizedName = companyName.replace(/[^\w\s-]/g, '').substring(0, 100);
+    
     const queries: Record<string, string> = {
-      financial: `${companyName} annual report 2024 2025 revenue EBIT financial results earnings`,
-      strategy: `${companyName} strategic priorities 2024 2025 CEO vision transformation digital`,
-      leadership: `${companyName} CEO CIO CTO executive team leadership priorities investor day`,
-      competitors: `${companyName} competitors market share industry landscape competitive analysis`,
-      challenges: `${companyName} challenges risks pain points issues obstacles investor concerns`,
-      technology: `${companyName} technology stack digital transformation AI automation IT strategy`,
+      financial: `${sanitizedName} annual report 2024 2025 revenue EBIT financial results earnings`,
+      strategy: `${sanitizedName} strategic priorities 2024 2025 CEO vision transformation digital`,
+      leadership: `${sanitizedName} CEO CIO CTO executive team leadership priorities investor day`,
+      competitors: `${sanitizedName} competitors market share industry landscape competitive analysis`,
+      challenges: `${sanitizedName} challenges risks pain points issues obstacles investor concerns`,
+      technology: `${sanitizedName} technology stack digital transformation AI automation IT strategy`,
     };
 
-    const query = queries[searchType] || `${companyName} business overview`;
-    console.log(`Searching ${searchType}: ${query}`);
+    const query = queries[searchType] || `${sanitizedName} business overview`;
+    console.log(`Searching ${searchType}`);
 
     const response = await fetch("https://api.firecrawl.dev/v1/search", {
       method: "POST",
@@ -40,7 +39,7 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
     });
 
     if (!response.ok) {
-      console.error("Firecrawl search failed:", response.status);
+      console.error("Search failed:", response.status);
       return "";
     }
 
@@ -51,10 +50,10 @@ async function searchCompanyInfo(companyName: string, searchType: string): Promi
       .join("\n\n")
       .slice(0, 8000);
 
-    console.log(`Found ${results.length} results for ${searchType}, length: ${content.length}`);
+    console.log(`Found ${results.length} results for ${searchType}`);
     return content;
   } catch (error) {
-    console.error(`Error searching ${searchType}:`, error);
+    console.error(`Search error for ${searchType}`);
     return "";
   }
 }
@@ -86,250 +85,184 @@ serve(async (req) => {
   }
 
   try {
-    const { content, accountContext } = await req.json();
-
-    if (!content || content.trim().length < 100) {
-      return new Response(
-        JSON.stringify({ error: "Please provide sufficient annual report content (at least 100 characters)" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const requestData = await req.json();
+    
+    // Validate content input
+    let validatedContent: string;
+    try {
+      validatedContent = validateContent(requestData.content, 100, 500000);
+    } catch (validationError) {
+      return createErrorResponse(400, validationError instanceof Error ? validationError.message : 'Invalid content');
+    }
+    
+    // Validate account context
+    let accountContext: Record<string, unknown> | null;
+    try {
+      accountContext = validateAccountContext(requestData.accountContext);
+    } catch {
+      accountContext = null;
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY not configured");
+      return createErrorResponse(503, "Service temporarily unavailable");
     }
 
     // Build context from account data if provided
     let accountContextStr = "";
     if (accountContext) {
-      const { basics, history, financial, engagement } = accountContext;
+      const basics = (accountContext as any).basics || {};
+      const history = (accountContext as any).history || {};
+      const engagement = (accountContext as any).engagement || {};
+      
       accountContextStr = `
 ═══════════════════════════════════════════════════════════════
 ACCOUNT INTELLIGENCE (Pre-populated by Account Executive)
 ═══════════════════════════════════════════════════════════════
 ACCOUNT PROFILE:
-• Customer: ${basics?.accountName || "Unknown"} 
-• Industry: ${basics?.industry || "Unknown"} | Region: ${basics?.region || "Unknown"}
-• Strategic Tier: ${basics?.tier || "Unknown"} | Employees: ${basics?.numberOfEmployees || "Unknown"}
+• Customer: ${basics.accountName || "Unknown"} 
+• Industry: ${basics.industry || "Unknown"} | Region: ${basics.region || "Unknown"}
+• Strategic Tier: ${basics.tier || "Unknown"} | Employees: ${basics.numberOfEmployees || "Unknown"}
 
 COMMERCIAL POSITION:
-• Current ACV: ${basics?.currentContractValue || "Unknown"}
-• Next FY Target: ${basics?.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics?.threeYearAmbition || "Unknown"}
-• Renewal Window: ${basics?.renewalDates || "Unknown"}
-• Incumbent Competitors: ${basics?.keyIncumbents || "Unknown"}
+• Current ACV: ${basics.currentContractValue || "Unknown"}
+• Next FY Target: ${basics.nextFYAmbition || "Unknown"} | 3-Year Target: ${basics.threeYearAmbition || "Unknown"}
+• Renewal Window: ${basics.renewalDates || "Unknown"}
+• Incumbent Competitors: ${basics.keyIncumbents || "Unknown"}
 
 RELATIONSHIP HISTORY:
-• Last Account Plan: ${history?.lastPlanDate || "Unknown"} by ${history?.plannerName || "Unknown"} (${history?.plannerRole || ""})
-• Previous Failures: ${history?.whatDidNotWork || "Not specified"}
-• Prior Transformation Attempts: ${history?.priorTransformationAttempts || "Not specified"}
-• Current ServiceNow Perception: ${history?.currentPerception || "Unknown"}
+• Last Account Plan: ${history.lastPlanDate || "Unknown"} by ${history.plannerName || "Unknown"} (${history.plannerRole || ""})
+• Previous Failures: ${history.whatDidNotWork || "Not specified"}
+• Prior Transformation Attempts: ${history.priorTransformationAttempts || "Not specified"}
+• Current ServiceNow Perception: ${history.currentPerception || "Unknown"}
 
 EXECUTIVE ACCESS:
-• Known Sponsors: ${engagement?.knownExecutiveSponsors?.join(", ") || "Unknown"}
-• Decision Deadlines: ${engagement?.decisionDeadlines || "Unknown"}
-• RFP/Renewal Timing: ${engagement?.renewalRFPTiming || "Unknown"}
+• Known Sponsors: ${Array.isArray(engagement.knownExecutiveSponsors) ? engagement.knownExecutiveSponsors.join(", ") : "Unknown"}
+• Decision Deadlines: ${engagement.decisionDeadlines || "Unknown"}
+• RFP/Renewal Timing: ${engagement.renewalRFPTiming || "Unknown"}
 ═══════════════════════════════════════════════════════════════
 `;
     }
 
     // Premium strategic analysis prompt with enhanced customer strategy extraction
-    const initialPrompt = `You are a McKinsey-caliber strategic advisor embedded in ServiceNow's most elite account team. You analyze Fortune 500 annual reports to craft board-ready account strategies that win transformational deals.
+    const initialPrompt = `You are a precision data extraction system. Your SOLE purpose is to extract FACTUAL information from the document provided.
+
+═══════════════════════════════════════════════════════════════
+ABSOLUTE RULE #1: ACCURACY IS NON-NEGOTIABLE
+═══════════════════════════════════════════════════════════════
+
+BEFORE YOU EXTRACT ANYTHING:
+1. Read the ENTIRE document first
+2. Identify the EXACT company name as it appears in the document header, title page, or legal name
+3. The company name MUST be copied EXACTLY as written - no modifications, no guessing
+4. If the document is from "XYZ Corporation", output "XYZ Corporation" - not "XYZ" or "XYZ Corp" or anything else
+
+CRITICAL EXTRACTION RULES:
+- ONLY extract information that is EXPLICITLY stated in the provided document
+- Use the EXACT words, phrases, and figures from the document
+- If a piece of information is not in the document, return an EMPTY STRING - never fabricate
+- Financial figures must be copied EXACTLY as written (e.g., "$55.5 billion" not "$55B")
+- Executive names must be spelled EXACTLY as they appear
+- If you are unsure about ANY fact, DO NOT include it
+
+WHAT YOU MUST NEVER DO:
+❌ Never make up a company name
+❌ Never guess financial figures
+❌ Never fabricate executive names
+❌ Never create information that isn't in the document
+❌ Never use generic placeholder content
+❌ Never hallucinate strategies or initiatives
 
 ${accountContextStr}
 
 ═══════════════════════════════════════════════════════════════
-ANALYSIS FRAMEWORK: STRATEGIC EXCELLENCE
+EXTRACTION INSTRUCTIONS
 ═══════════════════════════════════════════════════════════════
 
-CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP EXTRACTION
-Your PRIMARY mission is to deeply understand and articulate the customer's own strategic vision, priorities, and transformation agenda. This is NOT about ServiceNow — it's about truly understanding the customer's world.
+STEP 1: COMPANY IDENTIFICATION (MANDATORY FIRST STEP)
+- Find the official company name on the cover page, header, or legal disclaimers
+- Look for patterns like "[Company Name] Annual Report" or "Report of [Company Name]"
+- The accountName field MUST match the exact company name from the document
+- If you cannot determine the company name with certainty, leave it empty
 
-PHASE 0: CUSTOMER VISION & STRATEGY IMMERSION (MOST IMPORTANT)
-Before any other analysis, immerse yourself in the customer's strategic narrative:
+STEP 2: FINANCIAL DATA EXTRACTION
+- Revenue: Copy EXACTLY as stated (e.g., "Revenue of €47.2 billion")
+- Growth rates: Copy EXACTLY (e.g., "5.3% increase year-over-year")
+- EBIT/Margins: Copy EXACTLY as written
+- Only extract figures you can find explicitly stated
 
-A) CORPORATE STRATEGY (The "North Star")
-   - What is the company's overarching strategic direction for the next 3-5 years?
-   - What transformation is the CEO/Board driving? Use THEIR exact terminology.
-   - What are the named strategic pillars, programs, or initiatives?
-   - EXAMPLES: "Gemini Strategy", "One Microsoft", "Customer 360", "Digital-First Operating Model"
-   - Extract 3-5 corporate strategy items with RICH descriptions (2-3 sentences each)
+STEP 3: EXECUTIVE SUMMARY
+- Write 2-3 sentences summarizing the company using ONLY facts from the document
+- Include: company name (as extracted), industry/what they do, and key facts
+- DO NOT describe "the document" - describe the COMPANY
 
-B) CEO & BOARD PRIORITIES (The "Must-Wins")
-   - What specific outcomes has the CEO committed to publicly?
-   - What did the CEO emphasize in their letter to shareholders?
-   - What topics dominate board discussions based on the annual report?
-   - Extract exact language: "Our priority is to..." "We must deliver..." "This year we commit to..."
-   - Include quantified targets where stated (e.g., "15% margin improvement", "30% reduction in cycle time")
+STEP 4: STRATEGY EXTRACTION
+- Look for sections titled "Strategy", "Our Priorities", "CEO Letter", etc.
+- Extract strategy names VERBATIM (e.g., "Transform to Grow" not "Growth Strategy")
+- Include the exact language used by executives
 
-C) DIGITAL & AI STRATEGIES (The "How We Transform")
-   - What is the company's stated digital/technology vision?
-   - What specific AI, automation, or digitalization initiatives are named?
-   - How does technology enable their strategic agenda?
-   - EXAMPLES: "AI-first operations", "Unified data platform", "Customer experience transformation"
-   - Include maturity indicators: are they exploring, piloting, or scaling?
+STEP 5: PAIN POINTS & OPPORTUNITIES
+- Derive from explicitly stated challenges, risks, or strategic gaps
+- Use the customer's exact terminology
+- Connect to stated business priorities
 
-D) TRANSFORMATION THEMES (The "What Must Change")
-   - What operational or business model transformations are underway?
-   - What legacy challenges are they addressing?
-   - What cultural or organizational changes are mentioned?
-   - EXAMPLES: "End-to-end supply chain visibility", "Employee experience modernization", "Process standardization"
+STEP 6: SWOT ANALYSIS
+- Base on facts from the document
+- Strengths/Weaknesses: What the company says about itself
+- Opportunities/Threats: Market factors mentioned in the report
 
-QUALITY STANDARD FOR STRATEGY EXTRACTION:
-- Use the CUSTOMER'S OWN WORDS - quote their exact terminology from the document
-- Each item MUST have a descriptive title AND a substantive 2-3 sentence description
-- Descriptions must explain the WHY and HOW, not just the WHAT
-- Connect strategies to business outcomes where possible
-- If a named program exists (e.g., "Project Phoenix"), use that exact name
+STEP 7: EXECUTIVE EXTRACTION
+- Only include executives explicitly named in the document
+- Copy names and titles EXACTLY as written
+- Only attribute priorities that are explicitly stated
 
-EXCELLENT CORPORATE STRATEGY EXAMPLE:
-{
-  "title": "Gemini Strategy: Integrated Logistics Leadership",
-  "description": "Maersk's multi-year transformation from container shipping company to end-to-end logistics provider. The strategy focuses on connecting Ocean, Landside, and Terminal operations into a seamless customer experience, targeting 8% EBIT margins through operational efficiency and premium customer value creation."
-}
+QUALITY CHECK BEFORE RESPONDING:
+□ Is accountName the EXACT company name from the document?
+□ Are all financial figures copied EXACTLY as written?
+□ Are all executive names spelled correctly as they appear?
+□ Is every piece of information traceable to the document?
+□ Have I left empty any fields where data wasn't found?`;
 
-POOR EXAMPLE (NEVER DO THIS):
-{
-  "title": "Growth Strategy",
-  "description": "The company wants to grow."
-}
+    const userPrompt = `DOCUMENT FOR EXTRACTION:
 
-PHASE 1: DEEP DOCUMENT ANALYSIS
-Read the ENTIRE document with the precision of a financial analyst and the strategic lens of a management consultant:
-• Extract exact financial figures - revenue, margins, EBIT, growth rates (check tables, footnotes, charts)
-• Identify the CEO's voice - their exact language, priorities, and transformation vision
-• Map the strategic narrative - what story is leadership telling investors?
-• Detect tension points - where does ambition exceed current capability?
+${validatedContent}
 
-PHASE 2: EXECUTIVE SUMMARY NARRATIVE
-Write a 2-3 sentence executive brief that a C-suite sponsor could use verbatim in a board presentation:
-• Lead with market position and scale (revenue, geography, employee count)
-• Articulate strategic direction using THEIR language
-• Connect to transformation imperatives that ServiceNow can address
-• NEVER describe the document - describe the COMPANY and its trajectory
+═══════════════════════════════════════════════════════════════
+YOUR TASK:
+═══════════════════════════════════════════════════════════════
 
-EXCELLENT EXAMPLE:
-"A.P. Møller-Maersk is the world's leading integrated logistics company, operating across 130+ countries with $55.5B in revenue and 100,000+ employees. Under CEO Vincent Clerc's 'Gemini Strategy,' Maersk is pivoting from container shipping to end-to-end supply chain orchestration, targeting 8% EBIT margins through operational AI and customer experience transformation."
+1. FIRST: Find and note the exact company name from this document
+2. Extract ONLY factual information that appears in this document
+3. Use EXACT wording - do not paraphrase or generalize
+4. Leave fields EMPTY if the information is not in the document
+5. For accountName: Use the EXACT legal/official company name as it appears
 
-POOR EXAMPLE (NEVER DO THIS):
-"This annual report discusses Maersk's financial performance and strategic initiatives."
-
-PHASE 3: STRATEGIC PAIN POINTS (The "Why Act Now" Story)
-Extract 3-5 pain points that create URGENCY for executive action:
-• Derive DIRECTLY from stated challenges, risks, or gaps in the annual report
-• Use the customer's OWN LANGUAGE (if they say "fragmented systems," use that exact phrase)
-• Connect each pain to a strategic priority they've publicly committed to
-• Quantify impact where possible (e.g., "$2.3B cost overrun," "18-month delay in AI deployment")
-• Frame as obstacles to achieving stated board-level goals
-
-PAIN POINT FORMAT:
-{
-  "title": "Punchy 5-7 word headline using their terminology",
-  "description": "1-2 sentences: [Specific pain] is blocking [their stated priority], resulting in [quantified impact or strategic risk]"
-}
-
-EXCELLENT PAIN POINT:
-{
-  "title": "Fragmented Tech Stack Blocking AI-First Vision",
-  "description": "130+ disconnected systems across regions prevent the unified data layer CEO cited as prerequisite for AI operationalisation—directly threatening the 2026 'AI-first operations' commitment made to investors."
-}
-
-PHASE 4: STRATEGIC OPPORTUNITIES (The "How ServiceNow Wins" Story)
-Extract 3-5 opportunities that position ServiceNow as the strategic enabler:
-• Each opportunity MUST address a specific pain point
-• Each opportunity MUST accelerate a stated customer priority
-• Frame as business outcomes, not product features
-• Use action verbs: Accelerate, Consolidate, Transform, Enable, Reduce, Eliminate
-• Include proof points or benchmarks where credible
-
-OPPORTUNITY FORMAT:
-{
-  "title": "Action-Oriented 5-8 word headline",
-  "description": "1-2 sentences: ServiceNow enables [their goal] by [specific capability], delivering [quantified outcome based on comparable deployments]"
-}
-
-EXCELLENT OPPORTUNITY:
-{
-  "title": "Unified AI Platform for Global Operations",
-  "description": "Consolidate 130+ regional systems onto ServiceNow's AI-native platform, enabling the CEO's 'single source of truth' vision and reducing AI deployment cycles from 18 months to 6 months—as achieved at comparable logistics enterprises."
-}
-
-PHASE 5: SWOT ANALYSIS (Four-Dimensional Strategic Assessment)
-Generate SWOT items that synthesize annual report insights WITH account context across FOUR PERSPECTIVES:
-
-A) ORGANIZATIONAL (Customer's Internal Capabilities)
-   STRENGTHS: Operational excellence, market position, talent, culture, scale advantages
-   WEAKNESSES: Legacy systems, skill gaps, silos, execution challenges, tech debt
-
-B) ACCOUNT RELATIONSHIP (ServiceNow's Position)
-   STRENGTHS: Existing deployments, exec relationships, proven value, expansion momentum
-   WEAKNESSES: Limited footprint, past failures, competitive threats, perception gaps
-
-C) COMMERCIAL (Financial & Business Dynamics)
-   OPPORTUNITIES: Renewal timing, budget cycles, M&A activity, transformation funding
-   THREATS: Cost-cutting mandates, procurement pressure, economic headwinds, competitive pricing
-
-D) SERVICENOW PLATFORM (Technology & Market Position)
-   OPPORTUNITIES: White space products, AI/workflow differentiation, consolidation plays, partner ecosystem
-   THREATS: Incumbent entrenchment, build-vs-buy decisions, point solution alternatives, platform fatigue
-
-SWOT QUALITY STANDARDS:
-• Each item should be specific, actionable, and defensible with evidence
-• Reference annual report data AND account context where relevant
-• Prioritize insights that inform deal strategy and executive engagement
-• Avoid generic statements that could apply to any company
-
-PHASE 6: KEY EXECUTIVE EXTRACTION (For Executive Engagement Strategy)
-Extract the key executives mentioned in the annual report for strategic engagement planning:
-
-A) C-SUITE & BOARD EXECUTIVES
-   - CEO, CFO, COO, CIO, CTO, CDO, CHRO and other C-level executives
-   - Board members with strategic influence
-   - Regional/divisional presidents if significant
-
-B) FOR EACH EXECUTIVE CAPTURE:
-   - Full name and exact title
-   - Their stated priorities or focus areas (from their quotes, letters, or presentations)
-   - Any transformation or technology initiatives they champion
-   - Relevance to ServiceNow engagement (e.g., "Owns digital transformation", "Drives operational excellence")
-
-C) EXECUTIVE QUALITY STANDARDS:
-   - Only include executives who appear prominently in the document
-   - Priorities must be derived from their actual statements or documented responsibilities
-   - Focus on executives relevant to enterprise platform decisions
-
-EXCELLENT EXECUTIVE EXAMPLE:
-{
-  "name": "Vincent Clerc",
-  "title": "Chief Executive Officer",
-  "priorities": "Driving the Gemini Strategy transformation from container shipping to integrated logistics. Focused on operational AI, customer experience excellence, and achieving 8% EBIT margins.",
-  "relevance": "Primary sponsor for enterprise-wide transformation initiatives including digital platforms and AI adoption."
-}
-
-═══════════════════════════════════════════════════════════════`;
+CRITICAL: Your accountName output MUST match exactly what is written in this document. If the document says "Acme Corporation" then output "Acme Corporation" - not "Acme" or "ACME Corporation" or anything else.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: initialPrompt },
-          { role: "user", content: `Conduct a comprehensive strategic analysis of this annual report. Extract all financial data, strategic priorities, pain points, opportunities, and SWOT insights. Produce board-ready outputs:\n\n${content}` }
-        ],
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          temperature: 0,
+          messages: [
+            { role: "system", content: initialPrompt },
+            { role: "user", content: userPrompt }
+          ],
         tools: [
           {
             type: "function",
             function: {
               name: "extract_annual_report_data",
-              description: "Extract comprehensive structured data from an annual report for strategic account planning",
+              description: "Extract ONLY factual data that appears explicitly in the provided document. Never fabricate information.",
               parameters: {
                 type: "object",
                 properties: {
-                  accountName: { type: "string", description: "Full company name as it appears officially" },
+                  accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character. If document says 'ABC Ltd' output 'ABC Ltd' exactly." },
                   industry: { type: "string", description: "Primary industry/sector with specificity (e.g., 'Integrated Logistics & Container Shipping' not just 'Transportation')" },
                   revenue: { type: "string", description: "Total revenue with currency and period (e.g., '$55.5B FY2024')" },
                   revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
@@ -464,12 +397,61 @@ EXCELLENT EXECUTIVE EXAMPLE:
     const data = await response.json();
     console.log("Initial AI response received");
 
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || toolCall.function.name !== "extract_annual_report_data") {
-      throw new Error("Unexpected AI response format");
+    // Debug: Log the full response structure
+    const message = data.choices?.[0]?.message;
+    console.log("Message structure:", JSON.stringify({
+      hasToolCalls: !!message?.tool_calls,
+      toolCallsLength: message?.tool_calls?.length,
+      hasContent: !!message?.content,
+      contentPreview: message?.content?.substring(0, 200)
+    }));
+
+    const toolCall = message?.tool_calls?.[0];
+    
+    // Handle case where AI responds with content instead of tool call
+    if (!toolCall) {
+      console.error("No tool call in response. Message content:", message?.content?.substring(0, 500));
+      
+      // Try to parse JSON from content as fallback
+      if (message?.content) {
+        try {
+          // Look for JSON in the response
+          const jsonMatch = message.content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (parsed.accountName) {
+              console.log("Recovered data from content fallback");
+              return new Response(
+                JSON.stringify({ 
+                  success: true, 
+                  data: parsed,
+                  dataSources: {},
+                  usedWebSearch: false,
+                  warning: "Data extracted from fallback parsing"
+                }),
+                { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+          }
+        } catch (parseErr) {
+          console.error("Fallback parsing failed:", parseErr);
+        }
+      }
+      throw new Error("AI did not return structured data. Please try again.");
+    }
+    
+    if (toolCall.function.name !== "extract_annual_report_data") {
+      console.error("Wrong function called:", toolCall.function.name);
+      throw new Error("AI used wrong extraction function");
     }
 
-    let extractedData = JSON.parse(toolCall.function.arguments);
+    let extractedData: Record<string, unknown>;
+    try {
+      extractedData = JSON.parse(toolCall.function.arguments);
+    } catch (parseErr) {
+      console.error("Failed to parse tool arguments:", toolCall.function.arguments?.substring(0, 500));
+      throw new Error("Failed to parse AI response data");
+    }
     const companyName = extractedData.accountName || "";
 
     // Track data sources
@@ -481,257 +463,8 @@ EXCELLENT EXECUTIVE EXAMPLE:
     });
     documentFields.forEach(f => dataSources[f] = "document");
 
-    // Always do comprehensive web research if company name is available
-    let usedWebSearch = false;
-
-    if (companyName) {
-      console.log("Fetching comprehensive web intelligence for:", companyName);
-      const webData = await fetchComprehensiveWebData(companyName);
-      
-      const hasWebData = Object.values(webData).some(v => v.length > 0);
-      
-      if (hasWebData) {
-        usedWebSearch = true;
-        
-        // Build comprehensive web intelligence context
-        const webIntelligence = `
-═══════════════════════════════════════════════════════════════
-SUPPLEMENTARY WEB INTELLIGENCE (Live Research)
-═══════════════════════════════════════════════════════════════
-
-FINANCIAL DATA & EARNINGS:
-${webData.financial || "No additional financial data found"}
-
-STRATEGIC PRIORITIES & CEO VISION:
-${webData.strategy || "No additional strategy data found"}
-
-EXECUTIVE LEADERSHIP TEAM:
-${webData.leadership || "No leadership data found"}
-
-COMPETITIVE LANDSCAPE:
-${webData.competitors || "No competitor data found"}
-
-CHALLENGES & RISKS:
-${webData.challenges || "No challenges/risks data found"}
-
-TECHNOLOGY & DIGITAL TRANSFORMATION:
-${webData.technology || "No technology data found"}
-═══════════════════════════════════════════════════════════════`;
-
-        // Second pass with comprehensive web data - use pro model for best quality
-        const enrichPrompt = `You are a McKinsey-caliber strategic analyst enriching an account analysis with comprehensive web intelligence.
-
-CRITICAL PRIORITY: CUSTOMER STRATEGY DEEP UNDERSTANDING
-Your PRIMARY mission is to deeply understand the customer's OWN strategic vision. This is about THEIR world, not ours.
-
-ORIGINAL EXTRACTION (from annual report):
-${JSON.stringify(extractedData, null, 2)}
-
-${webIntelligence}
-
-ENRICHMENT INSTRUCTIONS:
-
-1. CUSTOMER STRATEGY (HIGHEST PRIORITY):
-   - ENHANCE corporateStrategy with named programs, strategic pillars, and transformation initiatives
-   - Each strategy item MUST have a rich 2-3 sentence description explaining WHY and HOW
-   - Use the CUSTOMER'S OWN TERMINOLOGY from their public communications
-   - Include quantified targets and timelines where available
-   
-2. CEO & BOARD PRIORITIES:
-   - Extract EXACT language from CEO statements, investor calls, annual letters
-   - Connect priorities to measurable outcomes and commitments
-   - Include any publicly stated timelines or milestones
-   
-3. DIGITAL & AI STRATEGIES:
-   - Enhance with specific AI/digital initiatives discovered in web research
-   - Include maturity indicators: exploring, piloting, scaling
-   - Connect to broader strategic agenda
-   
-4. TRANSFORMATION THEMES:
-   - Add operational and business model changes underway
-   - Include any named transformation programs
-   
-5. KEY EXECUTIVES (CRITICAL FOR ENGAGEMENT STRATEGY):
-   - Identify CEO, CFO, CIO, CTO, CDO, COO and other C-level executives
-   - For each executive, capture their stated priorities from investor calls, interviews, presentations
-   - Note any transformation/technology initiatives they personally champion
-   - Assess relevance to ServiceNow engagement (who owns digital, operations, employee experience?)
-   - Include recent quotes or statements that reveal their agenda
-   
-6. FINANCIAL: Update revenue, EBIT, margins, growth with most accurate/recent data
-7. COMPETITION: Incorporate competitive context into SWOT threats
-8. PAIN POINTS: Refine with real-world challenges from news/analyst reports - use customer's language
-9. NARRATIVE: Make executiveSummaryNarrative compelling with specific figures and strategic direction
-10. SWOT: Enrich all quadrants with evidence from both document AND web research
-11. PRESERVE: Maintain executive-grade quality - enhance, don't diminish existing content
-
-QUALITY STANDARD:
-- Every strategy item needs title + substantive description (not just a title)
-- Use customer's exact terminology for named programs
-- Quantify where possible`;
-
-        const enrichResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-pro",
-            messages: [
-              { role: "system", content: "You are a McKinsey-caliber analyst enriching strategic account data. Merge new intelligence while maintaining board-ready quality. Prioritize accuracy and strategic insight." },
-              { role: "user", content: enrichPrompt }
-            ],
-            tools: [
-              {
-                type: "function",
-                function: {
-                  name: "extract_annual_report_data",
-                  description: "Extract enriched data with deep customer strategy understanding",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      accountName: { type: "string" },
-                      industry: { type: "string" },
-                      revenue: { type: "string" },
-                      revenueComparison: { type: "string" },
-                      growthRate: { type: "string" },
-                      ebitImprovement: { type: "string" },
-                      marginEBIT: { type: "string" },
-                      costPressureAreas: { type: "string" },
-                      strategicInvestmentAreas: { type: "string" },
-                      corporateStrategy: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string", description: "Strategic pillar name using customer's exact terminology" },
-                            description: { type: "string", description: "2-3 sentence explanation of the strategic initiative, the WHY and HOW" }
-                          },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 core corporate strategy pillars with rich descriptions" 
-                      },
-                      digitalStrategies: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string", description: "Digital/AI strategy initiative name" },
-                            description: { type: "string", description: "2-3 sentence explanation of the digital ambition and approach" }
-                          },
-                          required: ["title", "description"]
-                        }, 
-                        description: "2-4 digital/AI strategy initiatives with rich descriptions" 
-                      },
-                      ceoBoardPriorities: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string", description: "CEO/Board priority name" },
-                            description: { type: "string", description: "2-3 sentence explanation of the priority and its importance" }
-                          },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 CEO's stated priorities with rich descriptions" 
-                      },
-                      transformationThemes: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string", description: "Transformation theme name" },
-                            description: { type: "string", description: "2-3 sentence explanation of the transformation" }
-                          },
-                          required: ["title", "description"]
-                        }, 
-                        description: "3-5 digital/operational transformation themes with rich descriptions" 
-                      },
-                      aiDigitalAmbition: { type: "string" },
-                      costDisciplineTargets: { type: "string" },
-                      painPoints: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string" },
-                            description: { type: "string" }
-                          },
-                          required: ["title", "description"]
-                        }
-                      },
-                      opportunities: { 
-                        type: "array", 
-                        items: { 
-                          type: "object",
-                          properties: {
-                            title: { type: "string" },
-                            description: { type: "string" }
-                          },
-                          required: ["title", "description"]
-                        }
-                      },
-                      strengths: { type: "array", items: { type: "string" } },
-                      weaknesses: { type: "array", items: { type: "string" } },
-                      swotOpportunities: { type: "array", items: { type: "string" } },
-                      threats: { type: "array", items: { type: "string" } },
-                      netZeroTarget: { type: "string" },
-                      keyMilestones: { type: "array", items: { type: "string" } },
-                      strategicAchievements: { type: "array", items: { type: "string" } },
-                      executiveSummaryNarrative: { type: "string" },
-                      keyExecutives: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string", description: "Full name of the executive" },
-                            title: { type: "string", description: "Official title" },
-                            priorities: { type: "string", description: "Their stated priorities and focus areas" },
-                            relevance: { type: "string", description: "Why relevant for ServiceNow engagement" }
-                          },
-                          required: ["name", "title", "priorities", "relevance"]
-                        },
-                        description: "5-8 key executives with their priorities"
-                      }
-                    },
-                    additionalProperties: false
-                  }
-                }
-              }
-            ],
-            tool_choice: { type: "function", function: { name: "extract_annual_report_data" } }
-          }),
-        });
-
-        if (enrichResponse.ok) {
-          const enrichData = await enrichResponse.json();
-          const enrichToolCall = enrichData.choices?.[0]?.message?.tool_calls?.[0];
-          if (enrichToolCall) {
-            const enrichedExtraction = JSON.parse(enrichToolCall.function.arguments);
-            // Merge enriched data (prefer non-empty values)
-            for (const key of Object.keys(enrichedExtraction)) {
-              const newValue = enrichedExtraction[key];
-              const oldValue = extractedData[key];
-              if (newValue && newValue !== "N/A" && newValue !== "Not specified") {
-                if (Array.isArray(newValue) && newValue.length > 0) {
-                  if (!oldValue || oldValue.length === 0) {
-                    extractedData[key] = newValue;
-                    dataSources[key] = "web";
-                  }
-                } else if (!Array.isArray(newValue) && newValue) {
-                  if (!oldValue || oldValue === "N/A" || oldValue === "Not specified") {
-                    extractedData[key] = newValue;
-                    dataSources[key] = "web";
-                  }
-                }
-              }
-            }
-            console.log("Data enriched with web search results");
-          }
-        }
-      }
-    }
+    // Skip web research to prevent timeouts - the document extraction is comprehensive enough
+    const usedWebSearch = false;
 
     return new Response(
       JSON.stringify({ 
@@ -743,10 +476,6 @@ QUALITY STANDARD:
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error analyzing annual report:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Failed to analyze report" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createErrorResponse(500, "Failed to analyze report. Please try again.", error);
   }
 });

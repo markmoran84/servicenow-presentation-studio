@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getDocument } from "https://esm.sh/pdfjs-serverless";
+import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,103 +9,123 @@ serve(async (req) => {
   }
 
   try {
-    const { filePath } = await req.json();
+    const requestData = await req.json();
 
-    if (!filePath) {
-      return new Response(
-        JSON.stringify({ success: false, error: "File path is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    // Validate file path input
+    let validatedPath: string;
+    try {
+      validatedPath = validateFilePath(requestData.filePath);
+    } catch (validationError) {
+      return createErrorResponse(
+        400,
+        validationError instanceof Error ? validationError.message : "Invalid file path",
       );
     }
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Create backend client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Backend configuration missing");
+      return createErrorResponse(503, "Service temporarily unavailable");
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Download the file from storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("annual-reports")
-      .download(filePath);
+      .download(validatedPath);
 
     if (downloadError || !fileData) {
-      console.error("Download error:", downloadError);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to download file" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error("Download error:", downloadError?.message);
+      return createErrorResponse(400, "Failed to download file. Please try uploading again.");
     }
 
-    // Convert blob to array buffer
+    console.log("PDF downloaded, processing...");
+
+    // Convert blob to buffer
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Simple PDF text extraction - extract readable text content
-    // This is a basic implementation that works for most text-based PDFs
-    let textContent = "";
-    
-    // Convert to string and try to extract text between stream markers
-    const pdfString = new TextDecoder("latin1").decode(uint8Array);
-    
-    // Extract text objects from PDF (simplified approach)
-    const textMatches = pdfString.matchAll(/\((.*?)\)/g);
-    const extractedParts: string[] = [];
-    
-    for (const match of textMatches) {
-      const text = match[1];
-      // Filter out binary garbage - only keep printable ASCII
-      if (text && /^[\x20-\x7E\s]+$/.test(text) && text.length > 1) {
-        extractedParts.push(text);
-      }
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024;
+    if (uint8Array.length > maxSize) {
+      return createErrorResponse(400, "File too large. Maximum size is 50MB.");
     }
-    
-    // Also try to extract text from content streams with Tj/TJ operators
-    const tjMatches = pdfString.matchAll(/\[(.*?)\]\s*TJ/g);
-    for (const match of tjMatches) {
-      const content = match[1];
-      const textParts = content.matchAll(/\((.*?)\)/g);
-      for (const textMatch of textParts) {
-        const text = textMatch[1];
-        if (text && /^[\x20-\x7E\s]+$/.test(text)) {
-          extractedParts.push(text);
-        }
-      }
-    }
-    
-    textContent = extractedParts.join(" ");
-    
-    // Clean up the text
-    textContent = textContent
-      .replace(/\s+/g, " ")
-      .replace(/[^\x20-\x7E\n]/g, "")
-      .trim();
 
-    if (textContent.length < 50) {
-      // If basic extraction failed, the PDF might be image-based
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Could not extract text from PDF. The file may be image-based or protected. Please copy and paste the text content instead." 
-        }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    console.log("PDF size:", uint8Array.length, "bytes");
+
+    // Extract text via PDF.js (serverless build)
+    const rawText = await extractTextFromPDF(uint8Array);
+    const textContent = cleanExtractedText(rawText);
+
+    if (!looksLikeExtractedText(textContent)) {
+      return createErrorResponse(
+        400,
+        "Could not extract readable text from this PDF. It may be image-based or protected. Please copy/paste the text content instead.",
       );
     }
 
     console.log("PDF text extracted, length:", textContent.length);
 
     // Clean up the uploaded file
-    await supabase.storage.from("annual-reports").remove([filePath]);
+    await supabase.storage.from("annual-reports").remove([validatedPath]);
 
-    return new Response(
-      JSON.stringify({ success: true, content: textContent }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true, content: textContent }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Error parsing PDF:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to parse PDF";
-    return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return createErrorResponse(500, "Failed to process PDF. Please try again.", error);
   }
 });
+
+async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
+  // NOTE: annual reports can be long; we cap by extracted character count to avoid timeouts.
+  const maxChars = 480_000;
+
+  const doc = await getDocument({ data: uint8Array, useSystemFonts: true }).promise;
+  const parts: string[] = [];
+  let total = 0;
+
+  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+    const page = await doc.getPage(pageNum);
+    const content = await page.getTextContent();
+
+    const pageText = (content.items as any[])
+      .map((it) => (typeof it?.str === "string" ? it.str : ""))
+      .filter(Boolean)
+      .join(" ");
+
+    if (pageText) {
+      parts.push(pageText);
+      total += pageText.length;
+      if (total >= maxChars) break;
+    }
+  }
+
+  return parts.join("\n\n");
+}
+
+function cleanExtractedText(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\t/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\n /g, "\n")
+    .trim();
+}
+
+function looksLikeExtractedText(text: string): boolean {
+  if (text.length < 200) return false;
+
+  // If there are too many control characters, it's almost certainly binary/garbage.
+  const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
+  if (controlChars / Math.max(1, text.length) > 0.01) return false;
+
+  // Require a minimal word count so we don't pass through short metadata-only results.
+  const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
+  return words >= 80;
+}

@@ -1,19 +1,21 @@
 import { useAccountData } from "@/context/AccountDataContext";
+import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { 
   Compass, 
   Target, 
   Lightbulb, 
-  ArrowRight, 
   Sparkles,
   TrendingUp,
-  CheckCircle2,
-  ArrowDown,
-  AlertCircle
+  CheckCircle,
+  ArrowRight,
+  AlertCircle,
+  Zap,
+  Shield
 } from "lucide-react";
 
 export const AccountStrategySlide = () => {
   const { data } = useAccountData();
-  const { basics, strategy, opportunities } = data;
+  const { basics, strategy, opportunities, generatedPlan } = data;
 
   // Get customer priorities (CEO/Board priorities)
   const customerPriorities = strategy.ceoBoardPriorities.slice(0, 4);
@@ -21,43 +23,32 @@ export const AccountStrategySlide = () => {
   // Get our strategic opportunities (account strategy)
   const strategicOpportunities = opportunities.opportunities.slice(0, 4);
 
-  // Generate alignment connections
-  const alignmentConnections = strategicOpportunities.map((opp, idx) => ({
-    opportunity: opp,
-    alignsTo: customerPriorities[idx % customerPriorities.length] || { title: "Customer Priority", description: "" },
-  }));
-
-  const gradientColors = [
-    { bg: "from-primary/20 to-primary/5", border: "border-primary/40", icon: "text-primary", glow: "shadow-primary/20" },
-    { bg: "from-accent/20 to-accent/5", border: "border-accent/40", icon: "text-accent", glow: "shadow-accent/20" },
-    { bg: "from-purple-500/20 to-purple-500/5", border: "border-purple-500/40", icon: "text-purple-400", glow: "shadow-purple-500/20" },
-    { bg: "from-amber-500/20 to-amber-500/5", border: "border-amber-500/40", icon: "text-amber-400", glow: "shadow-amber-500/20" },
-  ];
+  // Check if AI-generated (check any generated content)
+  const isAIGenerated = !!generatedPlan?.fy1Retrospective || !!generatedPlan?.strategicAlignment;
 
   const hasData = customerPriorities.length > 0 || strategicOpportunities.length > 0;
 
+  // Strategic thesis based on data
+  const strategicThesis = basics.accountName 
+    ? `Position ${basics.industry || "technology"} expertise to accelerate ${basics.accountName}'s transformation agenda through targeted capability alignment.`
+    : "Position our capabilities to accelerate the customer's transformation agenda through targeted strategic alignment.";
+
   return (
-    <div className="min-h-screen p-8 pb-32">
+    <div className="min-h-screen p-8 md:p-12 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div className="opacity-0 animate-fade-in">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                <Compass className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="badge-primary text-xs">FY26 Focus</span>
-              </div>
-            </div>
-            <h1 className="text-5xl font-bold text-foreground mb-2">
-              Account Strategy
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              {basics.accountName 
-                ? `Strategic focus areas aligned to ${basics.accountName}'s transformation priorities`
-                : "Strategic focus areas aligned to customer transformation priorities"}
-            </p>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Account Strategy
+          </h1>
+          <div className="flex items-center gap-2">
+            <RegenerateSectionButton section="executiveSummary" />
+            {isAIGenerated && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 border border-accent/20 text-xs text-accent font-medium">
+                <Sparkles className="w-3 h-3" />
+                AI Enhanced
+              </span>
+            )}
           </div>
         </div>
 
@@ -71,129 +62,169 @@ export const AccountStrategySlide = () => {
           </div>
         ) : (
           <>
-            {/* Strategic Bridge Visualization */}
-            <div className="relative">
-              {/* Customer Priorities Header */}
-              <div className="flex items-center gap-3 mb-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
-                  <Target className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">Customer Priorities</span>
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent" />
+            {/* Top Row - Account Context Cards */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="glass-card p-5 flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">Account:</span>
+                <span className="text-foreground font-medium">{basics.accountName || "Enterprise Account"}</span>
               </div>
+              <div className="glass-card p-5 flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">Strategic Focus:</span>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                    FY26 Priorities
+                  </span>
+                  <span className="text-foreground font-semibold">{strategicOpportunities.length} Areas</span>
+                </div>
+              </div>
+            </div>
 
-              {/* Main Grid - Strategic Alignment Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                {alignmentConnections.length > 0 ? (
-                  alignmentConnections.map((connection, index) => {
-                    const style = gradientColors[index % gradientColors.length];
-                    return (
-                      <div
-                        key={connection.opportunity.title}
-                        className="opacity-0 animate-fade-in"
-                        style={{ animationDelay: `${200 + index * 100}ms` }}
+            {/* Main Content - Two Columns */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              {/* Left Column - Customer Priorities */}
+              <div className="glass-card p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-primary" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-foreground">Customer Priorities</h2>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                    CEO/Board Agenda
+                  </span>
+                </div>
+
+                {customerPriorities.length > 0 ? (
+                  <div className="space-y-4">
+                    {customerPriorities.map((priority, index) => (
+                      <div 
+                        key={index} 
+                        className="opacity-0 animate-fade-in p-3 rounded-lg bg-secondary/30 border border-border/50 hover:border-primary/30 transition-colors"
+                        style={{ animationDelay: `${index * 100}ms` }}
                       >
-                        {/* Customer Priority Card - Top */}
-                        <div className={`glass-card p-4 rounded-2xl border-2 ${style.border} mb-3 relative overflow-hidden`}>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${style.bg} pointer-events-none`} />
-                          <div className="relative">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Target className={`w-4 h-4 ${style.icon}`} />
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Priority</span>
-                            </div>
-                            <h3 className="font-bold text-foreground text-sm leading-tight">
-                              {connection.alignsTo.title}
-                            </h3>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-xs font-bold text-primary">{index + 1}</span>
                           </div>
-                        </div>
-
-                        {/* Connection Arrow */}
-                        <div className="flex justify-center my-2">
-                          <div className={`w-8 h-8 rounded-full bg-gradient-to-b ${style.bg} border ${style.border} flex items-center justify-center shadow-lg ${style.glow}`}>
-                            <ArrowDown className={`w-4 h-4 ${style.icon}`} />
-                          </div>
-                        </div>
-
-                        {/* Our Strategic Response Card - Bottom */}
-                        <div className={`glass-card p-5 rounded-2xl border ${style.border} relative overflow-hidden group hover:scale-[1.02] transition-all duration-300 shadow-xl ${style.glow}`}>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${style.bg} opacity-50 pointer-events-none`} />
-                          <div className="relative">
-                            <div className="flex items-center gap-2 mb-3">
-                              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${style.bg} border ${style.border} flex items-center justify-center`}>
-                                <Lightbulb className={`w-4 h-4 ${style.icon}`} />
-                              </div>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Our Response</span>
-                            </div>
-                            <h3 className="font-bold text-foreground text-base mb-2 leading-tight group-hover:text-primary transition-colors">
-                              {connection.opportunity.title}
-                            </h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                              {connection.opportunity.description}
-                            </p>
-                            
-                            {/* Alignment Indicator */}
-                            <div className="mt-4 pt-3 border-t border-border/30">
-                              <div className="flex items-center gap-2">
-                                <CheckCircle2 className={`w-3.5 h-3.5 ${style.icon}`} />
-                                <span className="text-[10px] font-medium text-muted-foreground">
-                                  Aligned to: {connection.alignsTo.title.split(" ").slice(0, 3).join(" ")}...
-                                </span>
-                              </div>
-                            </div>
+                          <div>
+                            <h3 className="text-foreground font-semibold text-sm mb-1">{priority.title}</h3>
+                            {priority.description && (
+                              <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">{priority.description}</p>
+                            )}
                           </div>
                         </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="col-span-4 text-center py-8 text-muted-foreground">
-                    Add customer priorities and opportunities to see strategic alignment
+                    ))}
                   </div>
+                ) : (
+                  <p className="text-muted-foreground italic text-sm">
+                    Add customer priorities in the Input Form
+                  </p>
                 )}
               </div>
 
-              {/* Our Response Header */}
-              <div className="flex items-center gap-3 opacity-0 animate-fade-in" style={{ animationDelay: "600ms" }}>
-                <div className="flex-1 h-px bg-gradient-to-l from-accent/50 to-transparent" />
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50">
+              {/* Right Column - Our Strategic Response */}
+              <div className="glass-card p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+                      <Lightbulb className="w-4 h-4 text-accent" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-foreground">Our Strategic Response</h2>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-medium">
+                    Focus Areas
+                  </span>
+                </div>
+
+                {strategicOpportunities.length > 0 ? (
+                  <div className="space-y-4">
+                    {strategicOpportunities.map((opp, index) => (
+                      <div 
+                        key={index} 
+                        className="opacity-0 animate-fade-in p-3 rounded-lg bg-secondary/30 border border-border/50 hover:border-accent/30 transition-colors"
+                        style={{ animationDelay: `${index * 100 + 200}ms` }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Zap className="w-3 h-3 text-accent" />
+                          </div>
+                          <div>
+                            <h3 className="text-foreground font-semibold text-sm mb-1">{opp.title}</h3>
+                            {opp.description && (
+                              <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">{opp.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground italic text-sm">
+                    Add strategic opportunities in the Input Form
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Strategic Thesis - Full Width Narrative */}
+            <div className="glass-card p-6 mb-6 border-l-4 border-primary">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+                  <Compass className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-foreground">Strategic Thesis</h3>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-sm">
+                    {strategicThesis}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Row - Key Metrics */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="glass-card p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  <span className="text-2xl font-bold text-primary">{customerPriorities.length}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">Customer Priorities</span>
+              </div>
+              <div className="glass-card p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
                   <Lightbulb className="w-4 h-4 text-accent" />
-                  <span className="text-sm font-semibold text-foreground">Strategic Focus Areas</span>
+                  <span className="text-2xl font-bold text-accent">{strategicOpportunities.length}</span>
                 </div>
+                <span className="text-xs text-muted-foreground">Strategic Focus Areas</span>
+              </div>
+              <div className="glass-card p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <span className="text-2xl font-bold text-emerald-400">
+                    {Math.min(customerPriorities.length, strategicOpportunities.length)}
+                  </span>
+                </div>
+                <span className="text-xs text-muted-foreground">Direct Alignments</span>
               </div>
             </div>
 
-            {/* Bottom Call-to-Action */}
-            <div 
-              className="mt-8 glass-card p-6 rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 opacity-0 animate-fade-in"
-              style={{ animationDelay: "700ms" }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                    <TrendingUp className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground mb-1">Strategic Thesis</h3>
-                    <p className="text-muted-foreground max-w-2xl">
-                      {basics.accountName 
-                        ? `By aligning our capabilities directly to ${basics.accountName}'s stated priorities, we create a defensible position that competitors cannot easily replicate.`
-                        : "By aligning our capabilities directly to customer priorities, we create a defensible position that competitors cannot easily replicate."}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <span className="text-3xl font-bold text-primary">{strategicOpportunities.length}</span>
-                    <span className="text-sm text-muted-foreground block">Focus Areas</span>
-                  </div>
-                  <ArrowRight className="w-6 h-6 text-primary" />
-                </div>
+            {/* Status Bar */}
+            <div className="glass-card p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Shield className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Strategic positioning for {basics.accountName || "target account"}
+                </span>
               </div>
-            </div>
-
-            {/* Sparkle decoration */}
-            <div className="absolute top-20 right-20 opacity-20 pointer-events-none">
-              <Sparkles className="w-32 h-32 text-primary animate-pulse" />
+              <div className="flex items-center gap-2 text-primary">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-sm font-medium">Strategy Aligned</span>
+              </div>
             </div>
           </>
         )}
