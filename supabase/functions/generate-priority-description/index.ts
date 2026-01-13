@@ -82,11 +82,11 @@ Return ONLY the description. No quotes. No explanation. One sentence.`;
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openai/gpt-5.2",
         messages: [
           { role: "user", content: prompt }
         ],
-        max_tokens: 300,
+        max_completion_tokens: 300,
         temperature: 0.7,
       }),
     });

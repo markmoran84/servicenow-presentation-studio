@@ -160,7 +160,7 @@ BUSINESS MODEL CANVAS FRAMEWORK:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Create a comprehensive Business Model Canvas for ${companyName}. Use all available research to make it specific and actionable for strategic account planning.` }

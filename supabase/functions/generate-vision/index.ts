@@ -107,7 +107,7 @@ Generate ONE sentence tailored to ${companyName}'s specific strategic context. B
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openai/gpt-5.2",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Based on this comprehensive account context, generate a compelling, memorable vision statement for "ServiceNow at ${companyName}" that would resonate with their C-suite:\n\n${contextSummary}` }

@@ -764,245 +764,6 @@ const createAccountTeamSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 9: TASK-BASED AGILE AM MODEL
-// =============================================================================
-const createAgileTeamModelSlide = (pptx: pptxgen, data: AccountData) => {
-  const slide = pptx.addSlide();
-  setBackground(slide);
-
-  const accountName = data.basics.accountName || "Account";
-
-  addTitle(
-    slide,
-    "The Task-Based Agile AM Model",
-    `${accountName} Account Team — Dynamic Resource Activation`
-  );
-
-  const topY = 0.95;
-  const gap = 0.15;
-  const leftW = 4.15;
-  const rightW = CONTENT_W - leftW - gap;
-
-  // Left: Wheel graphic card
-  addCard(pptx, slide, MX, topY, leftW, 3.9, { accentBorder: C.primary });
-  slide.addText("The GTM Wheel of Fire", {
-    x: MX + 0.15,
-    y: topY + 0.12,
-    w: leftW - 0.3,
-    h: 0.3,
-    fontSize: HEADING_SIZE,
-    bold: true,
-    color: C.primary,
-    fontFace: FONT_HEADING,
-  });
-
-  // Draw the wheel graphic - matching the UI exactly
-  const wheelCenterX = MX + leftW / 2;
-  const wheelCenterY = topY + 2.15;
-  const outerR = 1.25;    // Outer ring edge
-  const middleR = 0.9;    // Middle ring (dark gap)
-  const innerR = 0.52;    // Core team circle
-
-  const outerRoles = [
-    { name: "BU Sales", color: C.accent },
-    { name: "Inspire Value", color: C.primary },
-    { name: "Impact", color: C.purple },
-    { name: "Sales Mgmt.", color: C.warning },
-    { name: "Elevate", color: C.accent },
-    { name: "Prod. Mgmt.", color: C.primary },
-    { name: "Marketing", color: C.purple },
-    { name: "Exec Sponsor", color: C.warning },
-  ];
-
-  // Active segments (static snapshot for export - showing a typical scenario)
-  const activeSegments = [0, 2, 5, 7];
-
-  // Draw outer ring (dark background)
-  slide.addShape(pptx.ShapeType.ellipse, {
-    x: wheelCenterX - outerR,
-    y: wheelCenterY - outerR,
-    w: outerR * 2,
-    h: outerR * 2,
-    fill: { color: "0A1525" },
-    line: { color: C.border, width: 1 },
-  });
-
-  // Draw middle dark ring
-  slide.addShape(pptx.ShapeType.ellipse, {
-    x: wheelCenterX - middleR,
-    y: wheelCenterY - middleR,
-    w: middleR * 2,
-    h: middleR * 2,
-    fill: { color: "0A1525" },
-    line: { color: "1E3A5F", width: 2 },
-  });
-
-  // Draw segment indicator lines (from middle ring outward)
-  outerRoles.forEach((role, i) => {
-    const segmentAngle = 360 / outerRoles.length;
-    const midAngle = i * segmentAngle - 90;
-    const midRad = (midAngle * Math.PI) / 180;
-    const isActive = activeSegments.includes(i);
-    
-    // Line from middle ring to outer ring
-    const startX = wheelCenterX + Math.cos(midRad) * middleR;
-    const startY = wheelCenterY + Math.sin(midRad) * middleR;
-    const endX = wheelCenterX + Math.cos(midRad) * outerR;
-    const endY = wheelCenterY + Math.sin(midRad) * outerR;
-
-    slide.addShape(pptx.ShapeType.line, {
-      x: startX,
-      y: startY,
-      w: endX - startX === 0 ? 0.001 : endX - startX,
-      h: endY - startY === 0 ? 0.001 : endY - startY,
-      line: { color: isActive ? C.primary : "1E3A5F", width: isActive ? 2 : 1 },
-    });
-  });
-
-  // Draw arrows from core to middle ring
-  outerRoles.forEach((role, i) => {
-    const segmentAngle = 360 / outerRoles.length;
-    const midAngle = i * segmentAngle - 90;
-    const midRad = (midAngle * Math.PI) / 180;
-    const isActive = activeSegments.includes(i);
-    
-    const startX = wheelCenterX + Math.cos(midRad) * (innerR + 0.08);
-    const startY = wheelCenterY + Math.sin(midRad) * (innerR + 0.08);
-    const endX = wheelCenterX + Math.cos(midRad) * (middleR - 0.08);
-    const endY = wheelCenterY + Math.sin(midRad) * (middleR - 0.08);
-
-    slide.addShape(pptx.ShapeType.line, {
-      x: startX,
-      y: startY,
-      w: endX - startX === 0 ? 0.001 : endX - startX,
-      h: endY - startY === 0 ? 0.001 : endY - startY,
-      line: { color: isActive ? C.primary : "374151", width: isActive ? 2 : 1 },
-    });
-  });
-
-  // Draw Core Team circle (solid green)
-  slide.addShape(pptx.ShapeType.ellipse, {
-    x: wheelCenterX - innerR,
-    y: wheelCenterY - innerR,
-    w: innerR * 2,
-    h: innerR * 2,
-    fill: { color: "34D399" },
-    line: { color: "6EE7B7", width: 2 },
-  });
-
-  // Core Team text
-  slide.addText("Core\nTeam", {
-    x: wheelCenterX - innerR,
-    y: wheelCenterY - 0.18,
-    w: innerR * 2,
-    h: 0.38,
-    fontSize: 10,
-    bold: true,
-    color: "065F46", // Dark green text
-    fontFace: FONT_HEADING,
-    align: "center",
-    valign: "middle",
-  });
-
-  // Role labels positioned around the wheel
-  outerRoles.forEach((role, i) => {
-    const segmentAngle = 360 / outerRoles.length;
-    const midAngle = i * segmentAngle - 90;
-    const midRad = (midAngle * Math.PI) / 180;
-    const isActive = activeSegments.includes(i);
-    
-    const labelR = outerR + 0.18;
-    const labelX = wheelCenterX + Math.cos(midRad) * labelR - 0.45;
-    const labelY = wheelCenterY + Math.sin(midRad) * labelR - 0.08;
-
-    slide.addText(role.name, {
-      x: labelX,
-      y: labelY,
-      w: 0.9,
-      h: 0.2,
-      fontSize: TINY_SIZE,
-      color: isActive ? C.white : C.muted,
-      fontFace: FONT_BODY,
-      align: "center",
-    });
-  });
-
-  // Right: Supporting bullets
-  addCard(pptx, slide, MX + leftW + gap, topY, rightW, 2.85, { accentBorder: C.accent });
-  slide.addText("Agile Operating Model", {
-    x: MX + leftW + gap + 0.15,
-    y: topY + 0.12,
-    w: rightW - 0.3,
-    h: 0.3,
-    fontSize: HEADING_SIZE,
-    bold: true,
-    color: C.accent,
-    fontFace: FONT_HEADING,
-  });
-
-  const bullets = [
-    {
-      t: "Dynamic Resource Activation",
-      d: "Core team activates specific resources based on current pursuit phase and customer needs",
-    },
-    {
-      t: "Scenario-Based Engagement",
-      d: "Different workstreams engage different combinations of expertise",
-    },
-    {
-      t: "Flexible Scale",
-      d: "Resources scale up or down based on deal complexity and strategic importance",
-    },
-    {
-      t: "Rapid Mobilization",
-      d: "Quick activation of specialized expertise when opportunities arise",
-    },
-  ];
-
-  bullets.forEach((b, i) => {
-    const y = topY + 0.55 + i * 0.55;
-    slide.addText(`${i + 1}. ${b.t}`, {
-      x: MX + leftW + gap + 0.15,
-      y,
-      w: rightW - 0.3,
-      h: 0.22,
-      fontSize: SMALL_SIZE,
-      bold: true,
-      color: C.white,
-      fontFace: FONT_BODY,
-    });
-    slide.addText(truncate(b.d, 72), {
-      x: MX + leftW + gap + 0.3,
-      y: y + 0.22,
-      w: rightW - 0.45,
-      h: 0.28,
-      fontSize: TINY_SIZE,
-      color: C.muted,
-      fontFace: FONT_BODY,
-    });
-  });
-
-  // Quote bar
-  addCard(pptx, slide, MX + leftW + gap, topY + 2.95, rightW, 0.95, { accentBorder: C.primary });
-  slide.addText(
-    "\"We operate in an agile fashion — the core team dynamically activates specialized resources as opportunities emerge and evolve.\"",
-    {
-      x: MX + leftW + gap + 0.15,
-      y: topY + 3.1,
-      w: rightW - 0.3,
-      h: 0.7,
-      fontSize: SMALL_SIZE,
-      italic: true,
-      color: C.white,
-      fontFace: FONT_BODY,
-      valign: "top",
-    }
-  );
-
-  return slide;
-};
-
-// =============================================================================
 // SLIDE 9: SWOT ANALYSIS
 // =============================================================================
 const createSWOTSlide = (pptx: pptxgen, data: AccountData) => {
@@ -1718,21 +1479,20 @@ export const exportToPowerPoint = async (data: AccountData) => {
   // 6. FY-1 Retrospective
   // 7. Strategic Alignment
   // 8. Account Team
-  // 9. Task-Based Agile AM Model
-  // 10. SWOT Analysis
-  // 11. Value Drivers
-  // 12. Key Workstreams (Big Bets)
-  // 13. Workstream Detail
-  // 14. AI Portfolio
-  // 15. Platform Vision
-  // 16. Roadmap
-  // 17. Risk & Mitigation
-  // 18. Governance
-  // 19. Weekly Update
-  // 20. Engagement
-  // 21. Pursuit Plan
-  // 22. Success Metrics
-  // 23. Thank You
+  // 9. SWOT Analysis
+  // 10. Value Drivers
+  // 11. Key Workstreams (Big Bets)
+  // 12. Workstream Detail
+  // 13. AI Portfolio
+  // 14. Platform Vision
+  // 15. Roadmap
+  // 16. Risk & Mitigation
+  // 17. Governance
+  // 18. Weekly Update
+  // 19. Engagement
+  // 20. Pursuit Plan
+  // 21. Success Metrics
+  // 22. Thank You
 
   slides.push(createCoverSlide(pptx, data));                    // 1
   slides.push(createExecutiveSummarySlide(pptx, data));         // 2
@@ -1742,21 +1502,20 @@ export const exportToPowerPoint = async (data: AccountData) => {
   slides.push(createRetrospectiveSlide(pptx, data));            // 6
   slides.push(createStrategicAlignmentSlide(pptx, data));       // 7
   slides.push(createAccountTeamSlide(pptx, data));              // 8
-  slides.push(createAgileTeamModelSlide(pptx, data));           // 9
-  slides.push(createSWOTSlide(pptx, data));                     // 10
-  slides.push(createValueDriversSlide(pptx, data));             // 11
-  slides.push(createBigBetsSlide(pptx, data));                  // 12
-  slides.push(createWorkstreamDetailSlide(pptx, data));         // 13
-  slides.push(createAIUseCasesSlide(pptx, data));               // 14
-  slides.push(createPlatformSlide(pptx, data));                 // 15
-  slides.push(createRoadmapSlide(pptx, data));                  // 16
-  slides.push(createRiskMitigationSlide(pptx, data));           // 17
-  slides.push(createGovernanceSlide(pptx, data));               // 18
-  slides.push(createWeeklyUpdateSlide(pptx, data));             // 19
-  slides.push(createEngagementSlide(pptx, data));               // 20
-  slides.push(createPursuitPlanSlide(pptx, data));              // 21
-  slides.push(createSuccessMetricsSlide(pptx, data));           // 22
-  slides.push(createClosingSlide(pptx, data));                  // 23
+  slides.push(createSWOTSlide(pptx, data));                     // 9
+  slides.push(createValueDriversSlide(pptx, data));             // 10
+  slides.push(createBigBetsSlide(pptx, data));                  // 11
+  slides.push(createWorkstreamDetailSlide(pptx, data));         // 12
+  slides.push(createAIUseCasesSlide(pptx, data));               // 13
+  slides.push(createPlatformSlide(pptx, data));                 // 14
+  slides.push(createRoadmapSlide(pptx, data));                  // 15
+  slides.push(createRiskMitigationSlide(pptx, data));           // 16
+  slides.push(createGovernanceSlide(pptx, data));               // 17
+  slides.push(createWeeklyUpdateSlide(pptx, data));             // 18
+  slides.push(createEngagementSlide(pptx, data));               // 19
+  slides.push(createPursuitPlanSlide(pptx, data));              // 20
+  slides.push(createSuccessMetricsSlide(pptx, data));           // 21
+  slides.push(createClosingSlide(pptx, data));                  // 22
 
   const exportId = new Date()
     .toISOString()

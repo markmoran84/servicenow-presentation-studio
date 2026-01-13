@@ -25,8 +25,7 @@ export type RegeneratablePlanSection =
   | "insight"
   | "platformCapabilities"
   | "riskOpportunityMatrix"
-  | "strategicAlignment"
-  | "riskRadar";
+  | "strategicAlignment";
 
 const sectionMeta: Record<
   RegeneratablePlanSection,
@@ -112,21 +111,18 @@ const sectionMeta: Record<
     label: "Strategic Alignment",
     planKeys: ["strategicAlignment"],
   },
-  riskRadar: {
-    label: "Risk Radar",
-    planKeys: ["riskRadar"],
-  },
 };
 
 export function RegenerateSectionButton({
   section,
-  label,
 }: {
   section: RegeneratablePlanSection;
-  label?: string;
 }) {
   const { data, patchGeneratedPlan } = useAccountData();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Only show the button once an AI plan exists (so "regenerate" is meaningful)
+  if (!data.generatedPlan) return null;
 
   const meta = sectionMeta[section];
 
@@ -136,7 +132,6 @@ export function RegenerateSectionButton({
   }, [data.generatedPlan, meta.planKeys]);
 
   const actionVerb = hasSection ? "Regenerate" : "Generate";
-  const buttonLabel = label || (hasSection ? `Regenerate` : `Generate`);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -185,7 +180,7 @@ export function RegenerateSectionButton({
       disabled={isLoading}
     >
       <RefreshCw className={isLoading ? "w-3 h-3 animate-spin" : "w-3 h-3"} />
-      {buttonLabel}
+      {actionVerb}
     </Button>
   );
 }

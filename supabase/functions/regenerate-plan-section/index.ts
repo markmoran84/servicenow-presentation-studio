@@ -25,8 +25,7 @@ type Section =
   | "insight"
   | "platformCapabilities"
   | "riskOpportunityMatrix"
-  | "strategicAlignment"
-  | "riskRadar";
+  | "strategicAlignment";
 
 const sectionSpecs: Record<
   Section,
@@ -126,43 +125,9 @@ const sectionSpecs: Record<
   customerStrategySynthesis: {
     keys: ["customerStrategySynthesis"],
     instruction:
-      `Transform the customer's extracted strategy into a STRATEGIC IMPERATIVES format - a structured canvas that translates raw strategy into executable priorities.
-
-CRITICAL INSTRUCTIONS:
-- Use the customer's EXACT language and phrasing from their annual report/strategy documents wherever possible
-- Do NOT invent generic business jargon or consulting-speak  
-- Preserve specificity: if they say "ROIC >7.5%" keep that exact figure
-- Mirror their terminology: if they call it "Gemini Network" use that name
-- This is a TRANSLATION exercise, not a rewriting exercise
-
-OUTPUT STRUCTURE:
-
-1. purpose: The customer's stated purpose/mission (1 sentence, use their exact words if available)
-
-2. longerTermAims: Array of 4-6 VERB-FIRST action statements representing long-term ambitions. Each has:
-   - title: VERB-FIRST action statement (e.g., "Become the global integrator of container logistics", "Deliver a connected, simplified customer experience end-to-end"). Start with action verbs like Become, Deliver, Improve, Grow, Digitise, Decarbonise, Lead, Drive, Transform, Scale
-   - description: 1-2 sentence elaboration with specific details from the customer's strategy
-
-3. annualTasks: Array of 3-4 VERB-FIRST action statements for the current/next fiscal year. Each has:
-   - title: VERB-FIRST action statement (e.g., "Strengthen customer focus and profitable growth", "Drive operational excellence across the network", "Accelerate technology and transformation"). Start with action verbs like Strengthen, Drive, Accelerate, Scale, Deliver, Transform, Optimise, Expand
-   - description: 1-2 sentence elaboration of what this task entails, with specific focus areas
-   - color: One of {blue|emerald|amber|cyan} for visual variety
-   
-4. objectives: Array of 6-8 specific objectives/initiatives that ladder up to the tasks. Each has:
-   - title: Specific objective (numbered if customer uses numbering)
-   - detail: Brief elaboration
-   - taskIndex: Which annualTask this objective supports (0-based index)
-   - isAIEnabled: true if this objective involves AI/automation (mark with green indicator)
-
-5. serviceNowAlignment: Array of 3-4 showing platform enablement opportunities:
-   - customerPriority: Customer's stated objective
-   - serviceNowValue: How ServiceNow enables this (be specific to products/capabilities)
-
-6. accentColor: Choose from {blue|emerald|amber|cyan|indigo} based on customer's brand/industry
-
-TONE: Senior strategist translating board-level strategy into an execution canvas. Preserve customer voice.`,
+      "Create a synthesis of the customer's strategy and how ServiceNow aligns. Include a 2-3 sentence narrative and exactly 4 alignment pairs showing customer priority matched to ServiceNow value.",
     outputShapeHint:
-      `{"customerStrategySynthesis":{"purpose":"Improving life for all by integrating the world","longerTermAims":[{"title":"Become the global integrator of container logistics","description":"Position as the end-to-end partner connecting Ocean, Logistics & Services, and Terminals as one integrated offering."},{"title":"Deliver a connected, simplified customer experience end-to-end","description":"Remove friction across touchpoints; make it effortless to do business with us regardless of service line."},{"title":"Improve reliability and network performance across Ocean–L&S–Terminals","description":"Raise schedule reliability and reduce dwell times through better coordination and visibility."},{"title":"Grow Logistics & Services with disciplined profitability","description":"Expand L&S revenue while maintaining ROIC >7.5% and healthy margins."},{"title":"Digitise and automate supply chain operations and decision-making","description":"Shift manual processes to digital workflows; enable real-time decisions through data."},{"title":"Decarbonise the business and lead green logistics at scale","description":"Deploy green methanol fleet; achieve net zero by 2040 across Scope 1, 2, and 3 emissions."}],"annualTasks":[{"title":"Strengthen customer focus and profitable growth","description":"Win with customers through speed, reliability, and an integrated end-to-end experience","color":"blue"},{"title":"Drive operational excellence across the network","description":"Improve network performance, reduce inefficiencies, and enhance coordination across Ocean, L&S, and Terminals","color":"emerald"},{"title":"Accelerate technology and transformation","description":"Modernise core systems, digitise workflows, and enable real-time decision-making at scale","color":"amber"},{"title":"Scale AI and data to power intelligent operations","description":"Deploy agentic AI workflows and leverage data to automate processes and improve service speed","color":"cyan"}],"objectives":[{"title":"1. Win with customers through speed and reliability","detail":"Deliver faster, more predictable experiences across every touchpoint","taskIndex":0,"isAIEnabled":false},{"title":"10. Deploy agentic AI workflows","detail":"Reduce customer query turnaround time and improve service speed","taskIndex":3,"isAIEnabled":true}],"serviceNowAlignment":[{"customerPriority":"Deploy agentic AI workflows","serviceNowValue":"Now Assist for workflow automation and case deflection"}],"accentColor":"emerald"}}`,
+      '{"customerStrategySynthesis":{"narrative":"The customer is pursuing an integrated logistics strategy...","serviceNowAlignment":[{"customerPriority":"AI-First Operations","serviceNowValue":"Workflow orchestration layer for AI operationalisation"}]}}',
   },
   weeklyUpdateContext: {
     keys: ["weeklyUpdateContext"],
@@ -205,33 +170,6 @@ TONE: Senior strategist translating board-level strategy into an execution canva
       "Create exactly 4 strategic alignment pairs showing how ServiceNow capabilities map to customer objectives. Each pair should have customerObjective, serviceNowCapability, and expected outcome. Include a 2-3 sentence narrative on strategic fit.",
     outputShapeHint:
       '{"strategicAlignment":{"alignments":[{"customerObjective":"Reduce operational costs by 20%","serviceNowCapability":"IT Service Management automation","outcome":"Projected 25% reduction in IT support costs within 18 months"}],"narrative":"ServiceNow\'s capabilities directly address the customer\'s strategic imperatives..."}}',
-  },
-  riskRadar: {
-    keys: ["riskRadar"],
-    instruction:
-      `Create a Risk Radar with 10-13 categorized risks across four quadrants for a comprehensive account risk view.
-
-QUADRANT CATEGORIES:
-1. STRATEGIC (risks 1-4): Risks that could limit our ability to position ServiceNow as a strategic platform partner and scale the account
-2. OPERATIONAL (risks 5-7): Risks that impact execution velocity, adoption, and realised value from ServiceNow deployments  
-3. GOVERNANCE (risks 8-9): Risks associated with governance, compliance, and decision-making processes
-4. COMMERCIAL (risks 10-13): Risks that could affect account growth, renewal confidence, and long-term commercial expansion
-
-SEVERITY LEVELS:
-- high: Critical risks closest to center of radar (immediate attention required)
-- medium: Moderate risks in middle ring (monitor closely)
-- low: Lower priority risks in outer ring (track and review)
-
-For each risk provide:
-- id: Sequential number 1-13
-- title: Short, specific risk title (e.g., "Incumbent Vendor Lock-in", "Executive Sponsor Departure")
-- description: 1 sentence explaining the risk and potential impact
-- category: One of {strategic|operational|governance|commercial}
-- severity: One of {high|medium|low}
-
-Ensure risks are specific to the account context, not generic. Reference actual account dynamics.`,
-    outputShapeHint:
-      `{"riskRadar":{"risks":[{"id":1,"title":"Platform Consolidation Competitor","description":"Customer actively evaluating alternative platforms that could displace ServiceNow footprint","category":"strategic","severity":"high"},{"id":2,"title":"Executive Sponsor Transition","description":"Key CIO sponsor retiring in 6 months with unknown successor alignment","category":"strategic","severity":"high"},{"id":3,"title":"Budget Reallocation to AI","description":"Digital transformation budget being redirected to AI-first initiatives outside ServiceNow","category":"strategic","severity":"medium"},{"id":4,"title":"SI Partner Influence","description":"Preferred SI partner recommending competitive solutions for new initiatives","category":"strategic","severity":"medium"},{"id":5,"title":"Adoption Velocity Gap","description":"Current deployment timeline lagging behind committed value realization milestones","category":"operational","severity":"high"},{"id":6,"title":"Integration Complexity","description":"Legacy system integration requirements creating implementation delays","category":"operational","severity":"medium"},{"id":7,"title":"Change Management Resistance","description":"End-user adoption resistance due to insufficient training investment","category":"operational","severity":"medium"},{"id":8,"title":"Procurement Process Delays","description":"New vendor governance requirements extending decision timelines by 90+ days","category":"governance","severity":"high"},{"id":9,"title":"Security Review Bottleneck","description":"Expanded security assessment requirements for cloud platforms","category":"governance","severity":"medium"},{"id":10,"title":"Renewal Price Sensitivity","description":"CFO mandate to reduce SaaS spend by 15% impacting renewal negotiations","category":"commercial","severity":"high"},{"id":11,"title":"Competitive Displacement","description":"Incumbent Microsoft footprint creating bundling pressure on new deals","category":"commercial","severity":"medium"},{"id":12,"title":"Budget Cycle Misalignment","description":"Fiscal year planning process not aligned with ServiceNow renewal timing","category":"commercial","severity":"medium"},{"id":13,"title":"Value Realization Skepticism","description":"Stakeholders questioning ROI from previous ServiceNow investments","category":"commercial","severity":"low"}],"narrative":"The risk radar highlights concentration in strategic and commercial quadrants, requiring executive-level engagement to address platform positioning and renewal confidence."}}`,
   },
 };
 
@@ -328,7 +266,7 @@ Return ONLY valid JSON.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "openai/gpt-5.2",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

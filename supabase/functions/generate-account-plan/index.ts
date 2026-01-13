@@ -189,14 +189,7 @@ Generate a comprehensive, board-ready account plan with these sections. Each sec
 
 16. fy1Retrospective: Object with "focusAreas" (array of 4), "keyLessons" (string), "lookingAhead" (string)
 
-17. customerStrategySynthesis: Object with:
-   - "strategicPillars": Array of 4 strategic pillars extracted from annual report, each with:
-     - "headline": Bold strategic theme (e.g., "Strengthen customer focus")
-     - "subtitle": Completing phrase (e.g., "and profitable growth")  
-     - "description": 2-3 sentence explanation of this strategy pillar and its business impact
-     - "icon": One of "target" | "users" | "trending-up" | "shield" | "globe" | "zap"
-   - "narrative": Overall synthesis of customer strategy
-   - "serviceNowAlignment": Array of 4 with "customerPriority" and "serviceNowValue"
+17. customerStrategySynthesis: Object with "narrative" and "serviceNowAlignment" (array of 4 with "customerPriority" and "serviceNowValue")
 
 18. weeklyUpdateContext: Object with "overallStatus", "keyHighlights" (array of 3), "criticalActions" (array of 2-3)
 
@@ -219,7 +212,7 @@ Return ONLY valid JSON. No markdown. Every element must reflect institutional-qu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }

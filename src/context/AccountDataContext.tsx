@@ -56,12 +56,10 @@ export interface FinancialSnapshot {
   strategicInvestmentAreas: string;
 }
 
-// Strategy item with title, description, and confidence/source metadata
+// Strategy item with title and optional description
 export interface StrategyItem {
   title: string;
   description: string;
-  confidence?: "explicit" | "contextually_derived";
-  sourceReference?: string;
 }
 
 // Section D — Customer Strategy Inputs
@@ -151,9 +149,6 @@ export interface AnnualReportHighlights {
   strategicAchievements: string[];
   executiveSummaryNarrative: string;
   strategicPillars: StrategicPillar[];
-  // Web-enriched fields
-  companyVision?: string;
-  companyMission?: string;
 }
 
 // Business Model Canvas (9 building blocks)
@@ -200,20 +195,8 @@ export interface AIGeneratedPlan {
   aiUseCases?: { title: string; description: string; priority: string; status: string }[];
   // FY-1 Retrospective AI-generated content
   fy1Retrospective?: { focusAreas: { title: string; description: string }[]; keyLessons: string; lookingAhead: string };
-  // Customer Strategy AI synthesis - Strategic Imperatives format
-  customerStrategySynthesis?: { 
-    // Legacy format (backward compatibility)
-    strategicPillars?: { headline: string; subtitle: string; description: string; icon: string }[];
-    narrative?: string; 
-    serviceNowAlignment?: { customerPriority: string; serviceNowValue: string }[];
-    layoutVariant?: "grid-2x2" | "stacked-cards" | "horizontal-flow" | "spotlight";
-    // New Strategic Imperatives format
-    purpose?: string;
-    longerTermAims?: { title: string; description: string }[];
-    annualTasks?: { title: string; description?: string; color: string }[];
-    objectives?: { title: string; detail: string; taskIndex: number; isAIEnabled?: boolean }[];
-    accentColor?: "blue" | "emerald" | "amber" | "purple" | "rose" | "cyan" | "indigo";
-  };
+  // Customer Strategy AI synthesis
+  customerStrategySynthesis?: { narrative: string; serviceNowAlignment: { customerPriority: string; serviceNowValue: string }[] };
   // Weekly Update dynamic content
   weeklyUpdateContext?: { overallStatus: string; keyHighlights: string[]; criticalActions: string[] };
   // Marketing Plan AI-generated content
@@ -226,17 +209,6 @@ export interface AIGeneratedPlan {
   riskOpportunityMatrix?: { items: { title: string; type: "risk" | "opportunity"; impact: string; likelihood: string; mitigation?: string }[]; narrative: string };
   // Strategic Alignment AI-generated content
   strategicAlignment?: { alignments: { customerObjective: string; serviceNowCapability: string; outcome: string }[]; narrative: string };
-  // Risk Radar - categorized risks by quadrant
-  riskRadar?: { 
-    risks: { 
-      id: number; 
-      title: string; 
-      description: string; 
-      category: "strategic" | "operational" | "governance" | "commercial"; 
-      severity: "high" | "medium" | "low" 
-    }[]; 
-    narrative?: string 
-  };
 }
 
 export interface AccountData {
@@ -345,12 +317,9 @@ interface AccountDataContextType {
   resetToDefaults: () => void;
   setGeneratedPlan: (plan: AIGeneratedPlan) => void;
   patchGeneratedPlan: (patch: Partial<AIGeneratedPlan>) => void;
-  reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
 }
 
-// Create context with stable reference - using displayName helps with HMR
-const AccountDataContext = createContext<AccountDataContextType | null>(null);
-AccountDataContext.displayName = "AccountDataContext";
+const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
 
 export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<AccountData>(defaultData);
@@ -381,31 +350,16 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
 
   const resetToDefaults = () => setData(defaultData);
 
-  const reorderExtendedTeam = (oldIndex: number, newIndex: number) => {
-    setData((prev) => {
-      const newExtendedTeam = [...prev.basics.extendedTeam];
-      const [removed] = newExtendedTeam.splice(oldIndex, 1);
-      newExtendedTeam.splice(newIndex, 0, removed);
-      return {
-        ...prev,
-        basics: {
-          ...prev.basics,
-          extendedTeam: newExtendedTeam,
-        },
-      };
-    });
-  };
-
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan }}>
       {children}
     </AccountDataContext.Provider>
   );
 };
 
-export const useAccountData = (): AccountDataContextType => {
+export const useAccountData = () => {
   const context = useContext(AccountDataContext);
-  if (context === null) {
+  if (!context) {
     throw new Error("useAccountData must be used within an AccountDataProvider");
   }
   return context;
