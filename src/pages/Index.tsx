@@ -27,6 +27,9 @@ import { SuccessSlide } from "@/components/slides/SuccessSlide";
 import { IntegratorStrategySlide } from "@/components/slides/IntegratorStrategySlide";
 import { AIChatAssistant } from "@/components/AIChatAssistant";
 
+const SLIDE_DESIGN_WIDTH = 1920;
+const SLIDE_DESIGN_HEIGHT = 1080;
+
 const slides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
@@ -59,8 +62,14 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
+
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
+
+  // Used only for on-screen presentation slides.
+  // We scale a fixed 1920×1080 "stage" to avoid aspect-ratio distortion.
+  const presentationViewportRef = useRef<HTMLDivElement>(null);
+  const [presentationScale, setPresentationScale] = useState(1);
 
   const goToPrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(0, prev - 1));
@@ -102,13 +111,13 @@ const Index = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isExporting) return; // Disable keyboard nav during export
-      
+
       // Ignore if user is typing in an input/textarea
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
-      
+
       if (e.key === "ArrowRight") {
         e.preventDefault();
         goToNext();
@@ -121,6 +130,28 @@ const Index = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNext, goToPrevious, isExporting]);
+
+  // Keep the on-screen slide stage perfectly 16:9 by scaling a fixed 1920×1080 canvas.
+  useEffect(() => {
+    if (isExporting) return;
+    const viewport = presentationViewportRef.current;
+    if (!viewport) return;
+
+    const update = () => {
+      const rect = viewport.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (!w || !h) return;
+      const nextScale = Math.min(w / SLIDE_DESIGN_WIDTH, h / SLIDE_DESIGN_HEIGHT);
+      setPresentationScale(nextScale || 1);
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(viewport);
+    return () => ro.disconnect();
+  }, [isExporting, currentSlide]);
 
   const currentSlideConfig = slides[currentSlide];
   const CurrentSlideComponent = currentSlideConfig.component;
@@ -142,32 +173,60 @@ const Index = () => {
       {isFormSlide ? (
         /* Form slides - full screen scrollable */
         <div className="flex-1 overflow-auto pb-24">
-          <div 
+          <div
             ref={slideContainerRef}
-            className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'}`}
+            className={`relative z-10 ${isExporting ? "" : "animate-fade-in"}`}
             key={currentSlide}
           >
             <CurrentSlideComponent onGenerate={goToFirstSlide} />
           </div>
         </div>
-      ) : (
-        /* Presentation slides - 16:9 letterboxed */
+      ) : isExporting ? (
+        /* Export mode - force exact 1920×1080 for pixel-perfect capture */
         <div className="flex-1 flex items-center justify-center pb-20 px-4 overflow-hidden">
-          <div 
+          <div
             ref={slideContainerRef}
-            className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} w-full h-full max-h-[calc(100vh-120px)]`}
+            className={`relative z-10 ${isExporting ? "" : "animate-fade-in"}`}
             key={currentSlide}
-            style={isExporting ? {
-              width: '1920px',
-              height: '1080px',
-              overflow: 'hidden',
-              background: 'linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)',
-            } : {
-              aspectRatio: '16 / 9',
-              maxWidth: 'calc((100vh - 120px) * 16 / 9)',
+            style={{
+              width: `${SLIDE_DESIGN_WIDTH}px`,
+              height: `${SLIDE_DESIGN_HEIGHT}px`,
+              overflow: "hidden",
+              background:
+                "linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)",
             }}
           >
             <CurrentSlideComponent />
+          </div>
+        </div>
+      ) : (
+        /* Presentation slides - 16:9 stage scaled to viewport (no squashing) */
+        <div
+          ref={presentationViewportRef}
+          className="flex-1 flex items-center justify-center pb-20 px-4 overflow-hidden"
+        >
+          <div
+            className={`relative z-10 ${exportSlideIndex === currentSlide ? "" : "animate-fade-in"}`}
+            style={{
+              width: `${SLIDE_DESIGN_WIDTH * presentationScale}px`,
+              height: `${SLIDE_DESIGN_HEIGHT * presentationScale}px`,
+            }}
+          >
+            <div
+              ref={slideContainerRef}
+              key={currentSlide}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: `${SLIDE_DESIGN_WIDTH}px`,
+                height: `${SLIDE_DESIGN_HEIGHT}px`,
+                transform: `scale(${presentationScale})`,
+                transformOrigin: "top left",
+                overflow: "hidden",
+              }}
+            >
+              <CurrentSlideComponent />
+            </div>
           </div>
         </div>
       )}
@@ -183,7 +242,7 @@ const Index = () => {
         onExportEnd={handleExportEnd}
         getSlideElement={getSlideElement}
       />
-      
+
       {/* AI Chat Assistant - floating button */}
       <AIChatAssistant />
     </div>
