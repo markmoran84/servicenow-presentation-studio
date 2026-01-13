@@ -1,6 +1,6 @@
 export const SlideFooter = () => {
   return (
-    <footer className="absolute bottom-0 left-0 right-0 px-8 py-3 flex items-center justify-between border-t border-border/20 bg-background/80 backdrop-blur-sm z-10">
+    <footer className="fixed bottom-0 left-0 right-0 px-8 py-3 flex items-center justify-between border-t border-border/20 bg-background/90 backdrop-blur-md z-50">
       <div className="flex items-center gap-6">
         {/* ServiceNow Logo - matching corporate template style */}
         <span className="sn-logo text-lg text-foreground">

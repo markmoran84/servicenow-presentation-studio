@@ -42,7 +42,7 @@ export const BusinessModelCanvasSlide = () => {
   const bm = data.businessModel;
 
   return (
-    <div className="slide-container flex flex-col h-full overflow-auto">
+    <div className="slide-container flex flex-col h-full">
       <div className="slide-header mb-4">
         <h1 className="slide-title">Business Model Canvas</h1>
         <p className="slide-subtitle">

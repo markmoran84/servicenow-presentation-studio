@@ -203,7 +203,7 @@ export const SlideNavigation = ({
   };
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-sn-navy/90 backdrop-blur-md rounded-full px-6 py-3 shadow-2xl border border-white/10">
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-sn-navy/90 backdrop-blur-md rounded-full px-6 py-3 shadow-2xl border border-white/10">
       <Button
         variant="ghost"
         size="icon"

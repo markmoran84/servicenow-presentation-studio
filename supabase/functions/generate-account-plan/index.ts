@@ -20,80 +20,20 @@ serve(async (req) => {
 
     console.log("Generating enterprise account plan for:", accountData.basics?.accountName);
 
-    // Generate a unique design seed for layout variation
-    const designSeed = Date.now() % 1000;
-    const layoutVariants = ["bold", "elegant", "dynamic", "structured", "minimal"];
-    const selectedLayout = layoutVariants[designSeed % layoutVariants.length];
-    const colorSchemes = ["emerald-cyan", "purple-amber", "blue-rose", "teal-orange", "indigo-gold"];
-    const selectedColorScheme = colorSchemes[(designSeed + 1) % colorSchemes.length];
-
     const systemPrompt = `You are an elite McKinsey-caliber enterprise account strategist for ServiceNow, trusted to craft account plans that have won $100M+ transformational deals. Your output quality must match the standards of Fortune 100 board presentations.
 
-═══════════════════════════════════════════════════════════════
-DESIGN VARIATION DIRECTIVE (Critical for Visual Excellence)
-═══════════════════════════════════════════════════════════════
-For THIS generation, create content optimized for a "${selectedLayout}" design aesthetic with "${selectedColorScheme}" color emphasis.
+STRATEGIC EXCELLENCE MANDATE:
+You synthesize raw account data into polished, executive-ready strategic content that drives C-suite conviction and accelerates complex enterprise sales.
 
-LAYOUT STYLE GUIDANCE:
-- "bold": Use punchy headlines, strong action verbs, 3-word taglines, high-impact statements
-- "elegant": Refined language, longer descriptive narratives, sophisticated business prose
-- "dynamic": Mix of concise bullets and narrative, emphasis on momentum and change
-- "structured": Methodical progression, numbered approaches, clear cause-effect relationships
-- "minimal": Stripped-down essential insights, every word counts, no filler
-
-Apply this style consistently across ALL sections to create a visually cohesive deck that looks DIFFERENT from previous generations while maintaining A-class quality.
-
-═══════════════════════════════════════════════════════════════
-STRATEGIC EXCELLENCE MANDATE
-═══════════════════════════════════════════════════════════════
-You are performing a DEEP SYNTHESIS of all account intelligence to create a coherent, interconnected strategic narrative. This is NOT a simple reformatting exercise—you must:
-
-1. CONNECT THE DOTS: Every section must reference and build upon other sections
-   - Observations inform implications
-   - Implications drive priorities
-   - Priorities manifest as workstreams
-   - Risks relate to specific initiatives
-   - Success metrics align to stated goals
-
-2. FIND THE THROUGH-LINES: Identify 2-3 central themes that connect:
-   - Customer's stated strategy → Their pain points → Our value proposition
-   - CEO priorities → Transformation gaps → ServiceNow capabilities
-   - Financial pressures → Digital opportunities → Quantified outcomes
-
-3. BUILD STRATEGIC TENSION: Every great account plan exposes tensions:
-   - Short-term cost pressure vs long-term transformation need
-   - Speed of execution vs depth of change
-   - Internal capability vs external partnership
-
-4. VARY THE CONTENT STRUCTURE: Create fresh, distinctive content by:
-   - Using different strategic frameworks each time (Porter, Blue Ocean, Jobs-to-be-Done, etc.)
-   - Varying the emphasis between customer-out vs capability-in perspectives
-   - Alternating between quantitative-led and qualitative-led insights
-   - Changing the narrative arc (problem-solution vs vision-roadmap vs tension-resolution)
-
-═══════════════════════════════════════════════════════════════
-CRITICAL QUALITY STANDARDS
-═══════════════════════════════════════════════════════════════
+CRITICAL QUALITY STANDARDS:
 1. PRECISION OVER PLATITUDES: Every insight must be specific, quantified where possible, and defensible. Generic statements like "drive digital transformation" are unacceptable.
 2. CUSTOMER-FIRST LANGUAGE: Use the customer's terminology, strategic priorities, and business context. Reference their stated goals, not hypotheticals.
 3. EXECUTIVE GRAVITAS: Write for C-suite audiences. Every sentence should pass the "Would a CEO quote this?" test.
 4. STRATEGIC COHERENCE: All sections must tell a unified story—observations lead to implications, implications to priorities, priorities to workstreams.
 5. COMMERCIAL RIGOR: Connect insights to ServiceNow's value proposition with quantified outcomes based on comparable deployments.
 6. TENSION AWARENESS: Identify the strategic dilemmas the customer faces and position ServiceNow as the resolution.
-7. FRESH PERSPECTIVES: Generate genuinely different strategic angles each time—avoid templated or formulaic outputs.
 
-═══════════════════════════════════════════════════════════════
-SYNTHESIS METHODOLOGY
-═══════════════════════════════════════════════════════════════
-STEP 1: Absorb ALL input data deeply
-STEP 2: Identify the 2-3 central strategic themes
-STEP 3: Map customer priorities to ServiceNow capabilities
-STEP 4: Build the narrative arc: Current State → Tension → Resolution → Future State
-STEP 5: Ensure every output section references specific input data
-STEP 6: Validate internal consistency across all sections
-STEP 7: Apply the "${selectedLayout}" style to all language and structure
-
-OUTPUT EXCELLENCE: Return a comprehensive JSON object with institutional-grade strategic content where every section is interconnected and styled for "${selectedLayout}" presentation.`;
+OUTPUT EXCELLENCE: Return a comprehensive JSON object with institutional-grade strategic content.`;
 
     const userPrompt = `Conduct a comprehensive strategic analysis and generate an enterprise-grade account plan for:
 
@@ -204,64 +144,52 @@ BUSINESS MODEL CANVAS
 ${JSON.stringify(accountData.businessModel || {}, null, 2)}
 
 ═══════════════════════════════════════════════════════════════
-DEEP SYNTHESIS INSTRUCTIONS
+CRITICAL SYNTHESIS INSTRUCTIONS
 ═══════════════════════════════════════════════════════════════
-You are now performing the SECOND PHASE of analysis. The first phase extracted raw data from documents.
-Your job is to CREATE COHERENCE and STRATEGIC NARRATIVE by:
-
 1. THREAD ALL INPUT DATA: Every section you generate must reference and build upon the input data provided above.
-2. FIND CONNECTING THEMES: Identify 2-3 central strategic threads that connect:
-   - Customer's stated strategy → Pain points → ServiceNow capabilities
-   - CEO priorities → Transformation gaps → Our value proposition
-   - Financial pressures → Digital opportunities → Quantified outcomes
-3. RESPECT USER-DEFINED PRIORITIES: The Account Priorities and Big Bets are user-defined inputs—enhance and elaborate on them, don't replace them.
-4. STRATEGIC COHERENCE: Observations → Implications → Priorities → Workstreams must tell ONE unified story.
-5. CUSTOMER LANGUAGE: Use terminology from the annual report and customer strategies throughout.
-6. QUANTIFIED OUTCOMES: Reference financial data (${accountData.financial?.customerRevenue || "revenue"}, ${accountData.financial?.marginEBIT || "margins"}) to create credible impact projections.
-7. EXECUTIVE CONTEXT: Reference the key executives (${accountData.accountStrategy?.keyExecutives?.map((e: any) => e.name).join(", ") || "leadership team"}) and their priorities where relevant.
-8. BUILD NARRATIVE ARC: Current State → Strategic Tension → Resolution Path → Future State
+2. RESPECT USER-DEFINED PRIORITIES: The Account Priorities and Big Bets are user-defined inputs—enhance and elaborate on them, don't replace them.
+3. STRATEGIC COHERENCE: Observations → Implications → Priorities → Workstreams must tell ONE unified story.
+4. CUSTOMER LANGUAGE: Use terminology from the annual report and customer strategies throughout.
+5. QUANTIFIED OUTCOMES: Reference financial data to create credible impact projections.
 
 ═══════════════════════════════════════════════════════════════
-REQUIRED OUTPUT STRUCTURE (Apply "${selectedLayout}" style throughout)
+REQUIRED OUTPUT STRUCTURE
 ═══════════════════════════════════════════════════════════════
-Generate a comprehensive, board-ready account plan with these sections. Each section must demonstrate strategic depth and commercial acumen. Apply the "${selectedLayout}" writing style consistently.
+Generate a comprehensive, board-ready account plan with these sections. Each section must demonstrate strategic depth and commercial acumen:
 
-1. layoutMetadata: Object with "style" ("${selectedLayout}"), "colorScheme" ("${selectedColorScheme}"), "generatedAt" (ISO timestamp)
+1. executiveSummaryNarrative: A compelling 3-4 sentence executive summary that a CEO could use verbatim. Lead with customer context, articulate strategic opportunity, quantify the prize.
 
-2. executiveSummaryNarrative: A compelling 3-4 sentence executive summary that a CEO could use verbatim. Lead with customer context, articulate strategic opportunity, quantify the prize. Style: ${selectedLayout === "bold" ? "Punchy, high-impact" : selectedLayout === "elegant" ? "Refined, sophisticated" : selectedLayout === "dynamic" ? "Action-oriented, momentum-driven" : selectedLayout === "structured" ? "Logical, methodical" : "Essential, stripped-down"}.
+2. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as "network"|"customer"|"technology"|"efficiency", "keyword" like "BETTER", "title", "tagline", "description", "outcome" with quantified impact)
 
-3. executiveSummaryPillars: Array of 4 strategic pillars (each with "icon" as "network"|"customer"|"technology"|"efficiency", "keyword" as a single POWER WORD, "title", "tagline", "description", "outcome" with quantified impact). Keywords should be distinctive: ${selectedLayout === "bold" ? "DOMINATE, TRANSFORM, ACCELERATE, CAPTURE" : selectedLayout === "elegant" ? "ELEVATE, REFINE, OPTIMIZE, CULTIVATE" : selectedLayout === "dynamic" ? "IGNITE, SURGE, PROPEL, UNLOCK" : selectedLayout === "structured" ? "ESTABLISH, INTEGRATE, SYSTEMATIZE, SCALE" : "FOCUS, SIMPLIFY, CORE, ESSENTIAL"}.
+3. strategicObservations: Array of 4 observations—verifiable facts about the account's current situation with clear business implications. Use their language.
 
-4. strategicObservations: Array of 4 observations—verifiable facts about the account's current situation with clear business implications. Use their language.
+4. strategicImplications: Array of 4 implications—what must change based on observations. Be specific about transformation required.
 
-5. strategicImplications: Array of 4 implications—what must change based on observations. Be specific about transformation required.
+5. strategicTensions: Array of 4 tensions—opposing forces the customer must balance (each with "heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma")
 
-6. strategicTensions: Array of 4 tensions—opposing forces the customer must balance (each with "heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma")
+6. strategicInsights: Array of 4 provocative insights—"aha moments" that reframe the opportunity. Each should pass the "Would an executive remember this?" test.
 
-7. strategicInsights: Array of 4 provocative insights—"aha moments" that reframe the opportunity. Each should pass the "Would an executive remember this?" test.
+7. valueHypotheses: Array of 4 testable hypotheses (each with "outcome", "mechanism", "timeframe", "impact" with specific dollar amounts)
 
-8. valueHypotheses: Array of 4 testable hypotheses (each with "outcome", "mechanism", "timeframe", "impact" with specific dollar amounts)
+8. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient)
 
-9. strategicPriorities: Array of 3 must-win priorities (each with "title", "whyNow", "ifWeLose", "winningLooks", "alignment", "color" as gradient from: "from-emerald-500 to-cyan-500", "from-purple-500 to-pink-500", "from-amber-500 to-orange-500", "from-blue-500 to-indigo-500", "from-rose-500 to-red-500")
+9. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "subtitle", "dealStatus", "targetClose", "acv", "steadyStateBenefit", "insight", "people" array)
 
-10. keyWorkstreams: Array of 3 transformation workstreams (each with "title", "subtitle", "dealStatus", "targetClose", "acv", "steadyStateBenefit", "insight", "people" array)
+10. risksMitigations: Array of 4 risks (each with "risk", "mitigation", "level" as High/Medium/Low)
 
-11. risksMitigations: Array of 4 risks (each with "risk", "mitigation", "level" as High/Medium/Low)
+11. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array of 3-4 items)
 
-12. roadmapPhases: Array of 3 phases (each with "quarter", "title", "activities" array of 3-4 items)
+12. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
 
-13. engagementStrategy: Object with "executiveAlignment" and "keyForums" arrays
+13. successMetrics: Array of 4 metrics (each with "metric" showing target, "label", "description")
 
-14. successMetrics: Array of 4 metrics (each with "metric" showing target, "label", "description")
+14. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 quantified strings, "alignment")
 
-15. coreValueDrivers: Array of 4 value drivers (each with "title", "description", "outcomes" array of 3 quantified strings, "alignment")
+15. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status")
 
-16. aiUseCases: Array of 4 AI use cases (each with "title", "description", "priority" as High/Medium/Low, "status")
+16. fy1Retrospective: Object with "focusAreas" (array of 4), "keyLessons" (string), "lookingAhead" (string)
 
-17. fy1Retrospective: Object with "focusAreas" (array of 4), "keyLessons" (string), "lookingAhead" (string)
-
-18. customerStrategySynthesis: Object with:
-   - "layoutVariant": one of "grid-2x2" | "stacked-cards" | "horizontal-flow" | "spotlight" (VARY this each generation)
+17. customerStrategySynthesis: Object with:
    - "strategicPillars": Array of 4 strategic pillars extracted from annual report, each with:
      - "headline": Bold strategic theme (e.g., "Strengthen customer focus")
      - "subtitle": Completing phrase (e.g., "and profitable growth")  

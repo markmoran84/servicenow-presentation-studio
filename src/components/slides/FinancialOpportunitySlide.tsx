@@ -63,7 +63,7 @@ export const FinancialOpportunitySlide = () => {
   const hasData = hasCurrentState || expansionTargets.length > 0;
 
   return (
-    <div className="h-full overflow-auto px-8 pt-6 pb-32">
+    <div className="px-8 pt-6 pb-32">
       <div className="flex items-center gap-3 mb-6 opacity-0 animate-fade-in">
         <DollarSign className="w-8 h-8 text-primary" />
         <h1 className="text-4xl font-bold text-foreground">Financial Opportunity</h1>

@@ -329,49 +329,6 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
         ...(extracted.companyMission && { companyMission: extracted.companyMission }),
       });
 
-      // Update Business Model Canvas if extracted
-      if (
-        extracted.keyPartners?.length ||
-        extracted.keyActivities?.length ||
-        extracted.valueProposition?.length ||
-        extracted.customerSegments?.length ||
-        extracted.revenueStreams?.length ||
-        extracted.competitors?.length
-      ) {
-        updateData("businessModel", {
-          ...(extracted.keyPartners?.length && { keyPartners: extracted.keyPartners }),
-          ...(extracted.keyActivities?.length && { keyActivities: extracted.keyActivities }),
-          ...(extracted.keyResources?.length && { keyResources: extracted.keyResources }),
-          ...(extracted.valueProposition?.length && { valueProposition: extracted.valueProposition }),
-          ...(extracted.customerRelationships?.length && { customerRelationships: extracted.customerRelationships }),
-          ...(extracted.channels?.length && { channels: extracted.channels }),
-          ...(extracted.customerSegments?.length && { customerSegments: extracted.customerSegments }),
-          ...(extracted.costStructure?.length && { costStructure: extracted.costStructure }),
-          ...(extracted.revenueStreams?.length && { revenueStreams: extracted.revenueStreams }),
-          ...(extracted.competitors?.length && { competitors: extracted.competitors }),
-        });
-      }
-
-      // Update additional basics if extracted
-      if (extracted.employeeCount || extracted.geographicPresence?.length) {
-        updateData("basics", {
-          ...(extracted.employeeCount && { numberOfEmployees: extracted.employeeCount }),
-          ...(extracted.geographicPresence?.length && { region: extracted.geographicPresence.join(", ") }),
-        });
-      }
-
-      // Update Account Strategy with executives if extracted
-      if (extracted.keyExecutives?.length) {
-        updateData("accountStrategy", {
-          keyExecutives: extracted.keyExecutives.map((exec: any) => ({
-            name: exec.name || "",
-            title: exec.title || "",
-            priorities: exec.priorities || "",
-            relevance: exec.relevance || "",
-          })),
-        });
-      }
-
       // Log web enrichment status
       if (usedWebSearch) {
         console.log("Analysis included web research enrichment");
@@ -379,23 +336,10 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
 
       setAnalysisComplete(true);
       
-      // Enhanced success message with field counts
-      const fieldsPopulated = [
-        extracted.accountName && "Account Name",
-        extracted.industry && "Industry",
-        extracted.revenue && "Financials",
-        extracted.corporateStrategy?.length && "Strategy",
-        extracted.painPoints?.length && "Pain Points",
-        extracted.opportunities?.length && "Opportunities",
-        extracted.strengths?.length && "SWOT",
-        extracted.keyExecutives?.length && "Executives",
-        extracted.keyPartners?.length && "Business Model",
-      ].filter(Boolean);
-
       if (usedWebSearch) {
-        toast.success(`Deep analysis complete! Populated: ${fieldsPopulated.join(", ")}. Enhanced with web research.`, { duration: 5000 });
+        toast.success("Analysis complete! Document + web research data populated.", { duration: 4000 });
       } else {
-        toast.success(`Deep analysis complete! Populated: ${fieldsPopulated.join(", ")}.`, { duration: 4000 });
+        toast.success("Analysis complete! Data populated across all relevant tabs.");
       }
 
       // Auto-generate the full plan if enabled - pass extracted data directly

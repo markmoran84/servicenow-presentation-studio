@@ -29,7 +29,7 @@ export const RiskOpportunitySlide = () => {
   const hasContent = items.length > 0;
 
   return (
-    <div className="h-full overflow-auto px-8 pt-6 pb-32">
+    <div className="px-8 pt-6 pb-32">
       <div className="flex items-center justify-between mb-6 opacity-0 animate-fade-in">
         <div className="flex items-center gap-3">
           <Target className="w-8 h-8 text-primary" />

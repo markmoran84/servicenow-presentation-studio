@@ -31,6 +31,7 @@ export interface AccountBasics {
   nextFYAmbition: string;
   threeYearAmbition: string;
   renewalDates: string;
+  visionStatement: string; // Account team vision for ServiceNow at [Customer]
   coreTeamMembers: CoreTeamMember[];
   extendedTeam: ExtendedTeamMember[];
 }
@@ -118,7 +119,6 @@ export interface BigBet {
 // Section G2 — Account Strategy
 export interface AccountStrategy {
   strategyNarrative: string;
-  visionStatement: string; // Account team vision for ServiceNow at [Customer]
   bigBets: BigBet[];
   keyExecutives: { name: string; role: string }[];
 }
@@ -183,8 +183,6 @@ export interface StrategicTension {
 
 // AI-Generated Strategic Plan Content
 export interface AIGeneratedPlan {
-  // Layout metadata for dynamic styling across slides
-  layoutMetadata?: { style: "bold" | "elegant" | "dynamic" | "structured" | "minimal"; colorScheme: string; generatedAt: string };
   executiveSummaryNarrative: string;
   executiveSummaryPillars?: { icon: "network" | "customer" | "technology" | "efficiency"; keyword: string; title: string; tagline: string; description: string; outcome: string }[];
   strategicObservations: { heading: string; detail: string }[];
@@ -268,6 +266,7 @@ const defaultData: AccountData = {
     nextFYAmbition: "",
     threeYearAmbition: "",
     renewalDates: "",
+    visionStatement: "",
     coreTeamMembers: [],
     extendedTeam: [],
   },
@@ -307,7 +306,6 @@ const defaultData: AccountData = {
   },
   accountStrategy: {
     strategyNarrative: "",
-    visionStatement: "",
     bigBets: [],
     keyExecutives: [],
   },

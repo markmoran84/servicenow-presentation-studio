@@ -48,7 +48,7 @@ export const GovernanceSlide = () => {
   const hasData = governanceItems.length > 0 || basics.accountName;
 
   return (
-    <div className="h-full overflow-auto px-8 pt-6 pb-32">
+    <div className="px-8 pt-6 pb-32">
       <h1 className="text-4xl font-bold text-foreground mb-6 opacity-0 animate-fade-in">
         Governance Model
       </h1>
