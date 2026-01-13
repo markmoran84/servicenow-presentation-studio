@@ -27,24 +27,28 @@ export const AccountStrategySlide = () => {
       icon: Crosshair,
       title: customerPriorities[0]?.title || "Customer & Commercial Transformation",
       description: customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.",
+      whyNow: "Decision window is live. Time to expand from replacement to end-to-end orchestration.",
       accent: "from-blue-500 to-cyan-400"
     },
     {
       icon: Rocket,
       title: customerPriorities[1]?.title || "Operationalising AI",
       description: customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.",
+      whyNow: "AI-first ambition is clear. This is the inflection point to embed AI in workflows.",
       accent: "from-violet-500 to-purple-400"
     },
     {
       icon: Shield,
       title: strategicOpportunities[0]?.title || "Platform Expansion Beyond IT",
       description: strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.",
+      whyNow: "Scaling integrated operations requires a common orchestration layer.",
       accent: "from-emerald-500 to-teal-400"
     },
     {
       icon: Lightbulb,
       title: strategicOpportunities[1]?.title || "Strategic Partnership Maturity",
       description: strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.",
+      whyNow: "Relationship has renewed confidence. Window to shift to strategic partnership.",
       accent: "from-amber-500 to-orange-400"
     }
   ];
@@ -157,9 +161,21 @@ export const AccountStrategySlide = () => {
                           {pillar.title}
                         </h3>
                         
-                        <p className="text-slate-400 text-xs leading-relaxed">
+                        <p className="text-slate-400 text-xs leading-relaxed mb-3">
                           {pillar.description}
                         </p>
+
+                        {/* Why Now */}
+                        <div className="pt-3 border-t border-white/5">
+                          <p className="text-[11px]">
+                            <span className="font-semibold bg-gradient-to-r bg-clip-text text-transparent" style={{
+                              backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`
+                            }}>
+                              <span className={`bg-gradient-to-r ${pillar.accent} bg-clip-text text-transparent font-semibold`}>Why now:</span>
+                            </span>{" "}
+                            <span className="text-slate-500">{pillar.whyNow}</span>
+                          </p>
+                        </div>
                       </div>
                     );
                   })}
