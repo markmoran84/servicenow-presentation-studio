@@ -437,71 +437,230 @@ const createCustomerStrategySlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 5: ACCOUNT STRATEGY
+// SLIDE 5: ACCOUNT STRATEGY (Premium Executive Design)
 // =============================================================================
 const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
-  setBackground(slide);
-  addTitle(slide, "Account Strategy", "ServiceNow Strategic Opportunities");
-
-  const topY = 0.95;
-  const colW = (CONTENT_W - 0.12) / 2;
+  
+  // Dark premium background
+  slide.background = { color: "0F172A" };
+  
+  // Add subtle gradient overlays
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: -1, y: -0.5, w: 4, h: 3,
+    fill: { color: "3B82F6", transparency: 92 },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: 7, y: 3, w: 4, h: 3,
+    fill: { color: "10B981", transparency: 92 },
+    line: { color: "10B981", transparency: 100 },
+  });
 
   const customerPriorities = data.strategy.ceoBoardPriorities || [];
   const strategicOpportunities = data.opportunities.opportunities || [];
 
-  addCard(pptx, slide, MX, topY, colW, 2.8);
-  slide.addText("Customer Priorities", {
-    x: MX + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.accent, fontFace: FONT_HEADING,
+  // Header with accent bar
+  slide.addShape(pptx.ShapeType.rect, {
+    x: MX, y: MY, w: 0.08, h: 0.7,
+    fill: { type: "solid", color: "3B82F6" },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  
+  slide.addText("Account Strategy", {
+    x: MX + 0.2, y: MY, w: 5, h: 0.4,
+    fontSize: 26, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("FY26", {
+    x: MX + 2.8, y: MY, w: 1, h: 0.4,
+    fontSize: 26, bold: true, color: "3B82F6", fontFace: FONT_HEADING,
+  });
+  slide.addText(data.basics.accountName || "Strategic Account", {
+    x: MX + 0.2, y: MY + 0.35, w: 4, h: 0.25,
+    fontSize: SMALL_SIZE, color: "64748B", fontFace: FONT_BODY,
   });
 
-  if (customerPriorities.length === 0) {
-    slide.addText("No customer priorities defined", {
-      x: MX + 0.12, y: topY + 0.4, w: colW - 0.24, h: 0.3,
-      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
-    });
-  } else {
-    customerPriorities.slice(0, 5).forEach((p, i) => {
-      const py = topY + 0.4 + i * 0.48;
-      addLeftBorder(pptx, slide, MX + 0.12, py, 0.4, C.accent);
-      slide.addText(p.title || "", {
-        x: MX + 0.25, y: py, w: colW - 0.4, h: 0.2,
-        fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-      });
-      slide.addText(truncate(p.description, 70), {
-        x: MX + 0.25, y: py + 0.2, w: colW - 0.4, h: 0.2,
-        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
-    });
-  }
-
-  const rx = MX + colW + 0.12;
-  addCard(pptx, slide, rx, topY, colW, 2.8, { accentBorder: C.primary });
-  slide.addText("Strategic Opportunities", {
-    x: rx + 0.12, y: topY + 0.08, w: colW - 0.24, h: 0.22,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.primary, fontFace: FONT_HEADING,
+  // Vision Banner
+  const visionY = 0.85;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: MX, y: visionY, w: CONTENT_W, h: 0.85,
+    fill: { color: "1E3A5F", transparency: 50 },
+    line: { color: "3B82F6", width: 0.5, transparency: 70 },
+    rectRadius: 0.08,
+  });
+  
+  slide.addText("OUR VISION", {
+    x: MX + 0.15, y: visionY + 0.1, w: 2, h: 0.18,
+    fontSize: TINY_SIZE, bold: true, color: "3B82F6", fontFace: FONT_BODY,
+  });
+  
+  const vision = data.basics.accountName 
+    ? `Build the digital backbone that powers ${data.basics.accountName}'s transformation strategy—enabling AI-first execution at scale.`
+    : "Build the digital backbone that powers the customer's transformation strategy—enabling AI-first execution at scale.";
+  
+  slide.addText(vision, {
+    x: MX + 0.15, y: visionY + 0.3, w: CONTENT_W - 0.3, h: 0.48,
+    fontSize: 14, color: C.white, fontFace: FONT_BODY, valign: "top",
   });
 
-  if (strategicOpportunities.length === 0) {
-    slide.addText("No strategic opportunities defined", {
-      x: rx + 0.12, y: topY + 0.4, w: colW - 0.24, h: 0.3,
-      fontSize: SMALL_SIZE, color: C.muted, fontFace: FONT_BODY,
+  // Strategic Pillars Section (Left - 2x2 grid)
+  const pillarsY = 1.85;
+  const leftW = 5.5;
+  const pillarsGap = 0.12;
+  const pillarW = (leftW - pillarsGap) / 2;
+  const pillarH = 1.45;
+
+  slide.addText("WHAT WE'LL FOCUS ON", {
+    x: MX, y: pillarsY, w: 3, h: 0.2,
+    fontSize: TINY_SIZE, color: "64748B", fontFace: FONT_BODY,
+  });
+  slide.addShape(pptx.ShapeType.rect, {
+    x: MX + 2.4, y: pillarsY + 0.08, w: 2.5, h: 0.01,
+    fill: { color: "334155" },
+    line: { color: "334155", transparency: 100 },
+  });
+
+  const pillars = [
+    {
+      title: customerPriorities[0]?.title || "Customer & Commercial Transformation",
+      desc: truncate(customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.", 90),
+      accent: "3B82F6"
+    },
+    {
+      title: customerPriorities[1]?.title || "Operationalising AI",
+      desc: truncate(customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.", 90),
+      accent: "8B5CF6"
+    },
+    {
+      title: strategicOpportunities[0]?.title || "Platform Expansion Beyond IT",
+      desc: truncate(strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.", 90),
+      accent: "10B981"
+    },
+    {
+      title: strategicOpportunities[1]?.title || "Strategic Partnership Maturity",
+      desc: truncate(strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.", 90),
+      accent: "F59E0B"
+    }
+  ];
+
+  const pillarStartY = pillarsY + 0.3;
+  pillars.forEach((p, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const px = MX + col * (pillarW + pillarsGap);
+    const py = pillarStartY + row * (pillarH + 0.1);
+
+    // Card background
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: px, y: py, w: pillarW, h: pillarH,
+      fill: { color: "1E293B", transparency: 60 },
+      line: { color: "334155", width: 0.5, transparency: 50 },
+      rectRadius: 0.06,
     });
-  } else {
-    strategicOpportunities.slice(0, 5).forEach((o, i) => {
-      const oy = topY + 0.4 + i * 0.48;
-      addLeftBorder(pptx, slide, rx + 0.12, oy, 0.4, C.primary);
-      slide.addText(o.title || "", {
-        x: rx + 0.25, y: oy, w: colW - 0.4, h: 0.2,
-        fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-      });
-      slide.addText(truncate(o.description, 70), {
-        x: rx + 0.25, y: oy + 0.2, w: colW - 0.4, h: 0.2,
-        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
+
+    // Top accent line
+    slide.addShape(pptx.ShapeType.rect, {
+      x: px, y: py, w: pillarW, h: 0.035,
+      fill: { color: p.accent },
+      line: { color: p.accent, transparency: 100 },
     });
-  }
+
+    // Number badge
+    slide.addText(String(i + 1).padStart(2, '0'), {
+      x: px + 0.55, y: py + 0.1, w: 0.4, h: 0.18,
+      fontSize: TINY_SIZE, color: "475569", fontFace: "Courier New",
+    });
+
+    // Title
+    slide.addText(truncate(p.title, 35), {
+      x: px + 0.1, y: py + 0.35, w: pillarW - 0.2, h: 0.35,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY, valign: "top",
+    });
+
+    // Description
+    slide.addText(p.desc, {
+      x: px + 0.1, y: py + 0.75, w: pillarW - 0.2, h: 0.6,
+      fontSize: TINY_SIZE, color: "94A3B8", fontFace: FONT_BODY, valign: "top",
+    });
+  });
+
+  // How We'll Win Section (Right)
+  const rightX = MX + leftW + 0.25;
+  const rightW = CONTENT_W - leftW - 0.25;
+  
+  slide.addText("HOW WE'LL WIN", {
+    x: rightX, y: pillarsY, w: 2, h: 0.2,
+    fontSize: TINY_SIZE, color: "64748B", fontFace: FONT_BODY,
+  });
+  slide.addShape(pptx.ShapeType.rect, {
+    x: rightX + 1.5, y: pillarsY + 0.08, w: rightW - 1.6, h: 0.01,
+    fill: { color: "334155" },
+    line: { color: "334155", transparency: 100 },
+  });
+
+  // How We'll Win card
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: rightX, y: pillarStartY, w: rightW, h: 2.2,
+    fill: { color: "1E293B", transparency: 40 },
+    line: { color: "334155", width: 0.5, transparency: 50 },
+    rectRadius: 0.08,
+  });
+
+  const winningMoves = [
+    { headline: "Align on a Single Narrative", subtext: "Integrator → Digital Backbone → AI-first → Customer outcomes" },
+    { headline: "Sequence to Protect Continuity", subtext: "Stabilise foundations, scale orchestration, embed AI" },
+    { headline: "Focus Value on Cost-to-Serve", subtext: "Cycle time, automation rate, service performance" },
+    { headline: "Co-create Multi-Year Roadmap", subtext: "Governance reducing risk and accelerating adoption" },
+  ];
+
+  winningMoves.forEach((move, i) => {
+    const my = pillarStartY + 0.15 + i * 0.5;
+    
+    // Bullet circle
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: rightX + 0.12, y: my + 0.02, w: 0.16, h: 0.16,
+      fill: { type: "solid", color: "3B82F6" },
+      line: { color: "3B82F6", transparency: 100 },
+    });
+    
+    slide.addText(move.headline, {
+      x: rightX + 0.35, y: my, w: rightW - 0.5, h: 0.2,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    slide.addText(move.subtext, {
+      x: rightX + 0.35, y: my + 0.2, w: rightW - 0.5, h: 0.2,
+      fontSize: TINY_SIZE, color: "64748B", fontFace: FONT_BODY,
+    });
+  });
+
+  // Target Outcomes (bottom right)
+  const outcomesY = pillarStartY + 2.35;
+  const outcomes = [
+    { value: "20-30%", label: "Cost Reduction" },
+    { value: "40%+", label: "Automation" },
+    { value: "50%", label: "Faster Cycles" },
+  ];
+  
+  const outcomeW = (rightW - 0.16) / 3;
+  outcomes.forEach((o, i) => {
+    const ox = rightX + i * (outcomeW + 0.08);
+    
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: ox, y: outcomesY, w: outcomeW, h: 0.65,
+      fill: { color: "1E293B", transparency: 70 },
+      line: { color: "334155", width: 0.5, transparency: 60 },
+      rectRadius: 0.05,
+    });
+    
+    slide.addText(o.value, {
+      x: ox, y: outcomesY + 0.08, w: outcomeW, h: 0.28,
+      fontSize: 14, bold: true, color: "3B82F6", fontFace: FONT_HEADING, align: "center",
+    });
+    slide.addText(o.label.toUpperCase(), {
+      x: ox, y: outcomesY + 0.38, w: outcomeW, h: 0.18,
+      fontSize: 6, color: "64748B", fontFace: FONT_BODY, align: "center",
+    });
+  });
 
   return slide;
 };
