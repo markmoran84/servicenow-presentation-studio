@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { InputFormSlide } from "@/components/slides/InputFormSlide";
 import { CoverSlide } from "@/components/slides/CoverSlide";
@@ -126,8 +125,11 @@ const Index = () => {
   const currentSlideConfig = slides[currentSlide];
   const CurrentSlideComponent = currentSlideConfig.component;
 
+  // Is this a form slide (needs full screen scrolling) or presentation slide (needs 16:9)?
+  const isFormSlide = currentSlideConfig.isForm;
+
   return (
-    <div className="min-h-screen gradient-hero relative overflow-y-auto">
+    <div className="min-h-screen gradient-hero relative flex flex-col">
       {/* Background decorations - hidden during export */}
       {!isExporting && (
         <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -136,24 +138,39 @@ const Index = () => {
         </div>
       )}
 
-      {/* Slide container - sized for export when exporting */}
-      <div 
-        ref={slideContainerRef}
-        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'}`}
-        key={currentSlide}
-        style={isExporting ? {
-          width: '1920px',
-          height: '1080px',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)',
-        } : undefined}
-      >
-        {currentSlideConfig.isForm ? (
-          <CurrentSlideComponent onGenerate={goToFirstSlide} />
-        ) : (
-          <CurrentSlideComponent />
-        )}
-      </div>
+      {/* Main content area */}
+      {isFormSlide ? (
+        /* Form slides - full screen scrollable */
+        <div className="flex-1 overflow-auto pb-24">
+          <div 
+            ref={slideContainerRef}
+            className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'}`}
+            key={currentSlide}
+          >
+            <CurrentSlideComponent onGenerate={goToFirstSlide} />
+          </div>
+        </div>
+      ) : (
+        /* Presentation slides - 16:9 letterboxed */
+        <div className="flex-1 flex items-center justify-center pb-20 px-4 overflow-hidden">
+          <div 
+            ref={slideContainerRef}
+            className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} w-full h-full max-h-[calc(100vh-120px)]`}
+            key={currentSlide}
+            style={isExporting ? {
+              width: '1920px',
+              height: '1080px',
+              overflow: 'hidden',
+              background: 'linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)',
+            } : {
+              aspectRatio: '16 / 9',
+              maxWidth: 'calc((100vh - 120px) * 16 / 9)',
+            }}
+          >
+            <CurrentSlideComponent />
+          </div>
+        </div>
+      )}
 
       <SlideNavigation
         currentSlide={currentSlide}
@@ -166,8 +183,6 @@ const Index = () => {
         onExportEnd={handleExportEnd}
         getSlideElement={getSlideElement}
       />
-
-      <SlideFooter />
       
       {/* AI Chat Assistant - floating button */}
       <AIChatAssistant />
