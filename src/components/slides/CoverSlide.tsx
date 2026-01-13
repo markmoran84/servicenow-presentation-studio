@@ -7,7 +7,7 @@ export const CoverSlide = () => {
   const monthYear = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="min-h-screen w-full flex flex-col relative overflow-hidden">
+    <div className="h-full w-full flex flex-col relative overflow-hidden">
       {/* Premium background with depth */}
       <div 
         className="absolute inset-0"
