@@ -522,27 +522,27 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
 
   const pillars = [
     {
-      title: customerPriorities[0]?.title || "Digital Transformation",
-      desc: truncate(customerPriorities[0]?.description || "Accelerate enterprise-wide digital initiatives.", 80),
-      whyNow: "Now Platform unifies fragmented systems into a single architecture.",
+      title: customerPriorities[0]?.title || "Customer & Commercial Transformation",
+      desc: truncate(customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.", 80),
+      whyNow: "Decision window is live. Time to expand from replacement to end-to-end orchestration.",
       accent: "3B82F6"
     },
     {
-      title: customerPriorities[1]?.title || "Operational Excellence",
-      desc: truncate(customerPriorities[1]?.description || "Streamline processes and reduce complexity.", 80),
-      whyNow: "Workflow automation delivers measurable ROI within 6 months.",
+      title: customerPriorities[1]?.title || "Operationalising AI",
+      desc: truncate(customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.", 80),
+      whyNow: "AI-first ambition is clear. This is the inflection point to embed AI in workflows.",
       accent: "8B5CF6"
     },
     {
-      title: strategicOpportunities[0]?.title || "Customer Experience",
-      desc: truncate(strategicOpportunities[0]?.description || "Deliver seamless omnichannel experiences.", 80),
-      whyNow: "CSM + FSM integration creates end-to-end service excellence.",
+      title: strategicOpportunities[0]?.title || "Platform Expansion Beyond IT",
+      desc: truncate(strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.", 80),
+      whyNow: "Scaling integrated operations requires a common orchestration layer.",
       accent: "10B981"
     },
     {
-      title: strategicOpportunities[1]?.title || "AI & Automation",
-      desc: truncate(strategicOpportunities[1]?.description || "Leverage intelligent automation at scale.", 80),
-      whyNow: "Now Assist brings GenAI to every workflow natively.",
+      title: strategicOpportunities[1]?.title || "Strategic Partnership Maturity",
+      desc: truncate(strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.", 80),
+      whyNow: "Relationship has renewed confidence. Window to shift to strategic partnership.",
       accent: "F59E0B"
     }
   ];
