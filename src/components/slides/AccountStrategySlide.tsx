@@ -1,5 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Sparkles,
   ArrowRight,
@@ -8,6 +9,8 @@ import {
   Rocket,
   Shield,
   Lightbulb,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 
 export const AccountStrategySlide = () => {
@@ -73,6 +76,60 @@ export const AccountStrategySlide = () => {
     }
   ];
 
+  // Customer Objectives - organized by category
+  const customerObjectives = [
+    {
+      category: "Strengthen customer focus & profitable growth",
+      bullets: [
+        "Reduce cost-to-serve through workflow automation and digital self-service",
+        "Release frontline capacity from manual case handling and rework",
+        "Improve service consistency while absorbing volume growth without proportional increases in operational cost"
+      ]
+    },
+    {
+      category: "Drive operational excellence across the network",
+      bullets: [
+        "Reduce manual coordination and exception handling across Ocean, L&S, and Terminals",
+        "Increase operational productivity and execution capacity through orchestration and automation",
+        "Improve reliability and response without adding structural overhead"
+      ]
+    },
+    {
+      category: "Accelerate technology & transformation",
+      bullets: [
+        "Simplify platforms and workflows to reduce dependency on manual intervention",
+        "Enable teams to scale execution through standardised, automated processes",
+        "Improve change velocity without increasing run cost"
+      ]
+    },
+    {
+      category: "Scale AI & data to power intelligent operations",
+      bullets: [
+        "Embed AI to augment teams and improve decision productivity",
+        "Reduce repetitive, low-value work through AI-assisted execution",
+        "Enable capacity uplift across customer and operational teams without additional headcount"
+      ]
+    }
+  ];
+
+  const mediumTermAmbitions = [
+    {
+      category: "Better efficiencies",
+      bullets: [
+        "Sustained productivity improvements across customer and operational teams",
+        "Lower manual effort and rework",
+        "Increased execution capacity per team"
+      ]
+    },
+    {
+      category: "Improve free cash flow",
+      bullets: [
+        "Margin improvement driven by productivity and automation",
+        "Ability to scale volumes without proportional cost increases"
+      ]
+    }
+  ];
+
   const vision = basics.accountName 
     ? `Build the digital backbone that powers ${basics.accountName}'s transformation strategy—enabling AI-first execution at scale.`
     : "Build the digital backbone that powers the customer's transformation strategy—enabling AI-first execution at scale.";
@@ -117,64 +174,113 @@ export const AccountStrategySlide = () => {
           <div className="flex-1 flex flex-col gap-8">
             
             {/* Vision Statement - Hero Banner */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600/20 via-transparent to-emerald-600/20 border border-white/5 p-8">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600/20 via-transparent to-emerald-600/20 border border-white/5 p-6">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.15),transparent_50%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(16,185,129,0.15),transparent_50%)]" />
               <div className="relative">
-                <div className="text-xs font-medium text-blue-400 uppercase tracking-[0.2em] mb-3">Our Vision</div>
-                <p className="text-2xl md:text-3xl font-light text-white leading-relaxed max-w-4xl">
+                <div className="text-xs font-medium text-blue-400 uppercase tracking-[0.2em] mb-2">Our Vision</div>
+                <p className="text-xl md:text-2xl font-light text-white leading-relaxed max-w-4xl">
                   {vision}
                 </p>
               </div>
             </div>
 
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-12 gap-8 flex-1">
+            {/* Three Column Layout */}
+            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
               
-              {/* Left: Strategic Pillars */}
-              <div className="col-span-7">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-xs font-medium text-slate-500 uppercase tracking-[0.15em]">What We'll Focus On</span>
-                  <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent" />
+              {/* Left: Customer Objectives */}
+              <div className="col-span-4 flex flex-col min-h-0">
+                <div className="flex items-center gap-3 mb-4">
+                  <Target className="w-4 h-4 text-blue-400" />
+                  <span className="text-xs font-medium text-slate-500 uppercase tracking-[0.15em]">Customer Objectives</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <ScrollArea className="flex-1 pr-3">
+                  <div className="space-y-4">
+                    {customerObjectives.map((section, sectionIndex) => (
+                      <div 
+                        key={sectionIndex}
+                        className="opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${sectionIndex * 80}ms` }}
+                      >
+                        <h4 className="text-xs font-semibold text-blue-400 mb-2 leading-tight">
+                          {section.category}
+                        </h4>
+                        <ul className="space-y-1.5">
+                          {section.bullets.map((bullet, bulletIndex) => (
+                            <li key={bulletIndex} className="flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed">
+                              <span className="text-blue-500 mt-1">•</span>
+                              <span>{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+
+                    {/* Medium-term Ambitions */}
+                    <div className="pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                        <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-[0.15em]">Medium-term Ambitions</span>
+                      </div>
+                      {mediumTermAmbitions.map((section, sectionIndex) => (
+                        <div 
+                          key={sectionIndex}
+                          className="mb-3 opacity-0 animate-fade-in"
+                          style={{ animationDelay: `${(customerObjectives.length + sectionIndex) * 80}ms` }}
+                        >
+                          <h4 className="text-xs font-semibold text-emerald-400 mb-1.5 leading-tight">
+                            {section.category}
+                          </h4>
+                          <ul className="space-y-1">
+                            {section.bullets.map((bullet, bulletIndex) => (
+                              <li key={bulletIndex} className="flex items-start gap-2 text-[10px] text-slate-400 leading-relaxed">
+                                <span className="text-emerald-500 mt-1">•</span>
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Middle: Strategic Pillars */}
+              <div className="col-span-4 flex flex-col min-h-0">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs font-medium text-slate-500 uppercase tracking-[0.15em]">What We'll Focus On</span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 flex-1">
                   {strategicPillars.map((pillar, index) => {
                     const Icon = pillar.icon;
                     return (
                       <div 
                         key={index}
-                        className="group relative rounded-xl bg-white/[0.02] border border-white/5 p-5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 opacity-0 animate-fade-in"
+                        className="group relative rounded-xl bg-white/[0.02] border border-white/5 p-4 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 opacity-0 animate-fade-in"
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
                         {/* Gradient accent line */}
                         <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${pillar.accent} rounded-t-xl opacity-60 group-hover:opacity-100 transition-opacity`} />
                         
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${pillar.accent} flex items-center justify-center shadow-lg`}>
-                            <Icon className="w-4 h-4 text-white" />
+                        <div className="flex items-start gap-3">
+                          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${pillar.accent} flex items-center justify-center shadow-lg flex-shrink-0`}>
+                            <Icon className="w-3.5 h-3.5 text-white" />
                           </div>
-                          <span className="text-slate-600 text-xs font-mono">{String(index + 1).padStart(2, '0')}</span>
-                        </div>
-                        
-                        <h3 className="text-white font-medium text-sm mb-2 leading-snug">
-                          {pillar.title}
-                        </h3>
-                        
-                        <p className="text-slate-400 text-xs leading-relaxed mb-3">
-                          {pillar.description}
-                        </p>
-
-                        {/* Why Now */}
-                        <div className="pt-3 border-t border-white/5">
-                          <p className="text-[11px]">
-                            <span className="font-semibold bg-gradient-to-r bg-clip-text text-transparent" style={{
-                              backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`
-                            }}>
-                              <span className={`bg-gradient-to-r ${pillar.accent} bg-clip-text text-transparent font-semibold`}>Why now:</span>
-                            </span>{" "}
-                            <span className="text-slate-500">{pillar.whyNow}</span>
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white font-medium text-xs mb-1 leading-snug">
+                              {pillar.title}
+                            </h3>
+                            <p className="text-slate-400 text-[10px] leading-relaxed mb-2">
+                              {pillar.description}
+                            </p>
+                            <p className="text-[9px]">
+                              <span className={`bg-gradient-to-r ${pillar.accent} bg-clip-text text-transparent font-semibold`}>Why now:</span>{" "}
+                              <span className="text-slate-500">{pillar.whyNow}</span>
+                            </p>
+                          </div>
                         </div>
                       </div>
                     );
@@ -183,27 +289,26 @@ export const AccountStrategySlide = () => {
               </div>
 
               {/* Right: How We'll Win */}
-              <div className="col-span-5">
-                <div className="flex items-center gap-3 mb-6">
+              <div className="col-span-4 flex flex-col min-h-0">
+                <div className="flex items-center gap-3 mb-4">
                   <span className="text-xs font-medium text-slate-500 uppercase tracking-[0.15em]">How We'll Win</span>
-                  <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent" />
                 </div>
 
-                <div className="rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-white/5 p-6">
-                  <div className="space-y-5">
+                <div className="rounded-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-white/5 p-5 flex-1">
+                  <div className="space-y-4">
                     {winningMoves.map((move, index) => (
                       <div 
                         key={index}
                         className="opacity-0 animate-fade-in"
                         style={{ animationDelay: `${400 + index * 100}ms` }}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mt-0.5">
-                            <ArrowRight className="w-3 h-3 text-white" />
+                        <div className="flex items-start gap-2.5">
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mt-0.5">
+                            <ArrowRight className="w-2.5 h-2.5 text-white" />
                           </div>
                           <div>
-                            <p className="text-white font-medium text-sm">{move.headline}</p>
-                            <p className="text-slate-500 text-xs mt-1 leading-relaxed">
+                            <p className="text-white font-medium text-xs">{move.headline}</p>
+                            <p className="text-slate-500 text-[10px] mt-0.5 leading-relaxed">
                               {move.subtext}
                             </p>
                           </div>
@@ -214,17 +319,16 @@ export const AccountStrategySlide = () => {
 
                   {/* Executive Sponsors */}
                   {executives.length > 0 && (
-                    <div className="mt-6 pt-5 border-t border-white/5">
-                      <p className="text-[10px] text-slate-600 uppercase tracking-[0.15em] mb-3">Key Sponsors</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mt-5 pt-4 border-t border-white/5">
+                      <p className="text-[9px] text-slate-600 uppercase tracking-[0.15em] mb-2">Key Sponsors</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {executives.map((exec: any, i: number) => (
                           <span 
                             key={i} 
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-xs"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px]"
                           >
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                             <span className="text-white">{exec.name || exec}</span>
-                            <span className="text-slate-600">•</span>
                             <span className="text-slate-500">{exec.title || "Executive"}</span>
                           </span>
                         ))}
@@ -234,7 +338,7 @@ export const AccountStrategySlide = () => {
                 </div>
 
                 {/* Target Outcomes - Compact */}
-                <div className="mt-4 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-3 gap-2">
                   {[
                     { value: "20-30%", label: "Cost Reduction" },
                     { value: "40%+", label: "Automation" },
@@ -242,13 +346,13 @@ export const AccountStrategySlide = () => {
                   ].map((outcome, index) => (
                     <div 
                       key={index}
-                      className="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5 opacity-0 animate-fade-in"
+                      className="text-center p-3 rounded-xl bg-white/[0.02] border border-white/5 opacity-0 animate-fade-in"
                       style={{ animationDelay: `${700 + index * 80}ms` }}
                     >
-                      <div className="text-xl font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                      <div className="text-lg font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
                         {outcome.value}
                       </div>
-                      <div className="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">
+                      <div className="text-[9px] text-slate-600 mt-0.5 uppercase tracking-wider">
                         {outcome.label}
                       </div>
                     </div>
