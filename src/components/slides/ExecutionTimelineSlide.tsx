@@ -1,5 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { Star, Target, Zap, Shield, Users } from "lucide-react";
+import { Star, Sparkles } from "lucide-react";
 
 interface TimelineActivity {
   label: string;
@@ -11,7 +11,8 @@ interface TimelineActivity {
 
 interface ExecutionTrack {
   category: string;
-  categoryColor: string;
+  accent: string;
+  accentBg: string;
   items: {
     name: string;
     activities: TimelineActivity[];
@@ -23,7 +24,8 @@ interface ExecutionTrack {
 const executionTracks: ExecutionTrack[] = [
   {
     category: "AI",
-    categoryColor: "from-emerald-500 to-emerald-600",
+    accent: "from-blue-500 to-cyan-400",
+    accentBg: "bg-blue-500/10",
     items: [
       {
         name: "AI Control Tower",
@@ -51,7 +53,8 @@ const executionTracks: ExecutionTrack[] = [
   },
   {
     category: "CRM",
-    categoryColor: "from-amber-500 to-yellow-500",
+    accent: "from-violet-500 to-purple-400",
+    accentBg: "bg-violet-500/10",
     items: [
       {
         name: "Ocean CRM",
@@ -81,7 +84,8 @@ const executionTracks: ExecutionTrack[] = [
   },
   {
     category: "Security",
-    categoryColor: "from-green-500 to-green-600",
+    accent: "from-emerald-500 to-teal-400",
+    accentBg: "bg-emerald-500/10",
     items: [
       {
         name: "Veza",
@@ -104,7 +108,8 @@ const executionTracks: ExecutionTrack[] = [
   },
   {
     category: "Executive Connect",
-    categoryColor: "from-green-600 to-emerald-500",
+    accent: "from-amber-500 to-orange-400",
+    accentBg: "bg-amber-500/10",
     items: [
       {
         name: "Executive Connect",
@@ -129,150 +134,163 @@ export const ExecutionTimelineSlide = () => {
   const targetACV = "$21M ACV";
 
   return (
-    <div className="p-6 min-h-[700px] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-white">
-            Roadmap to{" "}
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-              {targetACV}
-            </span>
-            {" "}by December 31, 2026
-          </h1>
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 border border-violet-500/30">
-              Execution Roadmap
-            </span>
-          </div>
-        </div>
-        <p className="text-slate-400 text-sm">
-          {basics?.accountName || "Account"} strategic execution timeline across all workstreams
-        </p>
-      </div>
-
-      {/* Timeline Grid */}
-      <div className="rounded-xl border border-slate-700/50 overflow-hidden bg-slate-900/50 backdrop-blur">
-        {/* Header Row */}
-        <div className="grid grid-cols-[140px_80px_repeat(6,1fr)_120px_80px] bg-gradient-to-r from-slate-800 to-slate-800/80 border-b border-slate-700/50">
-          <div className="p-3 text-xs font-bold text-slate-300 uppercase tracking-wider border-r border-slate-700/50 flex items-center justify-center">
-            Execution Tracks
-          </div>
-          <div className="p-3 border-r border-slate-700/50"></div>
-          {quarters.map((q, i) => (
-            <div key={i} className="p-3 text-xs font-bold text-slate-300 text-center border-r border-slate-700/50">
-              {q}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8 pb-28">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-1 h-12 bg-gradient-to-b from-blue-400 to-emerald-400 rounded-full" />
+            <div>
+              <h1 className="text-3xl font-light text-white tracking-tight">
+                Roadmap to{" "}
+                <span className="font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                  {targetACV}
+                </span>
+              </h1>
+              <p className="text-slate-500 text-sm mt-0.5">
+                {basics?.accountName || "Account"} • Target: December 31, 2026
+              </p>
             </div>
-          ))}
-          <div className="p-3 text-xs font-bold text-slate-300 text-center border-r border-slate-700/50">
-            Capabilities
           </div>
-          <div className="p-3 text-xs font-bold text-slate-300 text-center">
-            NNACV
-          </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs text-blue-400">
+            <Sparkles className="w-3 h-3" />
+            Execution Roadmap
+          </span>
         </div>
 
-        {/* Track Rows */}
-        {executionTracks.map((track, trackIdx) => (
-          <div key={trackIdx} className="border-b border-slate-700/30 last:border-b-0">
-            {track.items.map((item, itemIdx) => (
-              <div 
-                key={itemIdx} 
-                className="grid grid-cols-[140px_80px_repeat(6,1fr)_120px_80px] min-h-[52px] hover:bg-slate-800/30 transition-colors"
-              >
-                {/* Category Label - only show for first item */}
-                {itemIdx === 0 ? (
-                  <div 
-                    className={`p-2 text-xs font-bold text-white bg-gradient-to-r ${track.categoryColor} flex items-center justify-center border-r border-slate-700/50`}
-                    style={{ gridRow: `span ${track.items.length}` }}
-                  >
-                    <span className="writing-mode-vertical transform -rotate-0 text-center leading-tight">
-                      {track.category}
-                    </span>
-                  </div>
-                ) : null}
-                
-                {/* Item Name */}
-                <div className={`p-2 text-xs font-medium text-slate-200 flex items-center border-r border-slate-700/50 bg-gradient-to-r ${track.categoryColor} bg-opacity-20 ${itemIdx !== 0 ? 'col-start-2' : ''}`}>
-                  {item.name}
-                </div>
-
-                {/* Timeline Cells */}
-                {[1, 2, 3, 4, 5, 6].map((q) => (
-                  <div key={q} className="p-1 border-r border-slate-700/30 relative flex items-center justify-center">
-                    {item.activities
-                      .filter(a => a.startQ === q)
-                      .map((activity, aIdx) => (
-                        <div
-                          key={aIdx}
-                          className={`
-                            absolute left-1 right-1 flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium
-                            ${activity.type === 'milestone' && activity.highlight
-                              ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 shadow-lg shadow-amber-500/20'
-                              : activity.type === 'milestone'
-                              ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white'
-                              : activity.type === 'implementation'
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
-                              : 'bg-slate-700 text-slate-200 border border-slate-600'
-                            }
-                          `}
-                          style={{
-                            width: activity.spanQ > 1 ? `calc(${activity.spanQ * 100}% + ${(activity.spanQ - 1) * 8}px)` : 'calc(100% - 8px)',
-                            zIndex: 10
-                          }}
-                        >
-                          {activity.highlight && <Star className="w-3 h-3 flex-shrink-0" />}
-                          <span className="truncate">{activity.label}</span>
-                        </div>
-                      ))
-                    }
-                  </div>
-                ))}
-
-                {/* Capabilities - only show for first item */}
-                {itemIdx === 0 ? (
-                  <div 
-                    className="p-2 text-[10px] text-slate-300 flex items-center justify-center text-center border-r border-slate-700/50"
-                    style={{ gridRow: `span ${track.items.length}` }}
-                  >
-                    {track.capabilities.join(", ")}
-                  </div>
-                ) : null}
-
-                {/* Value - only show for first item */}
-                {itemIdx === 0 ? (
-                  <div 
-                    className="p-2 text-sm font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent flex items-center justify-center"
-                    style={{ gridRow: `span ${track.items.length}` }}
-                  >
-                    {track.value}
-                  </div>
-                ) : null}
+        {/* Timeline Grid */}
+        <div className="rounded-2xl border border-white/5 overflow-hidden bg-white/[0.02] backdrop-blur">
+          
+          {/* Header Row */}
+          <div className="grid grid-cols-[120px_100px_repeat(6,1fr)_100px_80px] bg-gradient-to-r from-slate-800/80 to-slate-800/40 border-b border-white/5">
+            <div className="p-4 text-xs font-medium text-slate-400 uppercase tracking-[0.1em] border-r border-white/5 flex items-center">
+              Workstream
+            </div>
+            <div className="p-4 border-r border-white/5"></div>
+            {quarters.map((q, i) => (
+              <div key={i} className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider">
+                {q}
               </div>
             ))}
+            <div className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider">
+              Capabilities
+            </div>
+            <div className="p-4 text-xs font-medium text-slate-400 text-center uppercase tracking-wider">
+              NNACV
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* Mega Deal Indicator */}
-      <div className="mt-4 flex items-center justify-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400"></div>
-          <span className="text-xs text-slate-400">Key Milestone</span>
+          {/* Track Rows */}
+          {executionTracks.map((track, trackIdx) => (
+            <div 
+              key={trackIdx} 
+              className="border-b border-white/5 last:border-b-0 opacity-0 animate-fade-in"
+              style={{ animationDelay: `${trackIdx * 100}ms` }}
+            >
+              {track.items.map((item, itemIdx) => (
+                <div 
+                  key={itemIdx} 
+                  className="grid grid-cols-[120px_100px_repeat(6,1fr)_100px_80px] min-h-[56px] hover:bg-white/[0.02] transition-colors group"
+                >
+                  {/* Category Label - only show for first item */}
+                  {itemIdx === 0 ? (
+                    <div 
+                      className={`p-3 text-xs font-semibold text-white bg-gradient-to-br ${track.accent} flex items-center justify-center border-r border-white/10`}
+                      style={{ gridRow: `span ${track.items.length}` }}
+                    >
+                      <span className="text-center leading-tight drop-shadow-sm">
+                        {track.category}
+                      </span>
+                    </div>
+                  ) : null}
+                  
+                  {/* Item Name */}
+                  <div className={`p-3 text-xs font-medium text-slate-300 flex items-center border-r border-white/5 ${track.accentBg} ${itemIdx !== 0 ? 'col-start-2' : ''}`}>
+                    {item.name}
+                  </div>
+
+                  {/* Timeline Cells */}
+                  {[1, 2, 3, 4, 5, 6].map((q) => (
+                    <div key={q} className="p-2 border-r border-white/5 relative flex items-center justify-center">
+                      {item.activities
+                        .filter(a => a.startQ === q)
+                        .map((activity, aIdx) => (
+                          <div
+                            key={aIdx}
+                            className={`
+                              absolute left-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium shadow-lg
+                              ${activity.type === 'milestone' && activity.highlight
+                                ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-blue-500/20'
+                                : activity.type === 'milestone'
+                                ? 'bg-gradient-to-r from-slate-600 to-slate-500 text-white shadow-slate-500/20'
+                                : activity.type === 'implementation'
+                                ? 'bg-gradient-to-r from-violet-500 to-purple-400 text-white shadow-violet-500/20'
+                                : 'bg-slate-800/80 text-slate-300 border border-white/10'
+                              }
+                            `}
+                            style={{
+                              width: activity.spanQ > 1 ? `calc(${activity.spanQ * 100}% + ${(activity.spanQ - 1) * 8}px)` : 'calc(100% - 16px)',
+                              zIndex: 10
+                            }}
+                          >
+                            {activity.highlight && <Star className="w-3 h-3 flex-shrink-0" />}
+                            <span className="truncate">{activity.label}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  ))}
+
+                  {/* Capabilities - only show for first item */}
+                  {itemIdx === 0 ? (
+                    <div 
+                      className="p-3 text-[10px] text-slate-400 flex items-center justify-center text-center border-r border-white/5"
+                      style={{ gridRow: `span ${track.items.length}` }}
+                    >
+                      {track.capabilities.join(", ")}
+                    </div>
+                  ) : null}
+
+                  {/* Value - only show for first item */}
+                  {itemIdx === 0 ? (
+                    <div 
+                      className="p-3 text-base font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent flex items-center justify-center"
+                      style={{ gridRow: `span ${track.items.length}` }}
+                    >
+                      {track.value}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-violet-500 to-purple-500"></div>
-          <span className="text-xs text-slate-400">Activity</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
-          <span className="text-xs text-slate-400">Implementation</span>
-        </div>
-        <div className="h-4 w-px bg-slate-700"></div>
-        <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/30">
-          <span className="text-xs font-semibold text-violet-300">
-            Close mega deal (AI, L&S) = 6-8M USD
-          </span>
+
+        {/* Legend */}
+        <div className="mt-6 flex items-center justify-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/30"></div>
+            <span className="text-xs text-slate-500">Key Milestone</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-slate-600 to-slate-500"></div>
+            <span className="text-xs text-slate-500">Milestone</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-violet-500 to-purple-400"></div>
+            <span className="text-xs text-slate-500">Implementation</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-slate-800 border border-white/10"></div>
+            <span className="text-xs text-slate-500">Activity</span>
+          </div>
+          <div className="h-4 w-px bg-slate-700/50"></div>
+          <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500/10 to-emerald-500/10 border border-white/5">
+            <span className="text-xs font-medium bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+              Close mega deal (AI, L&S) = 6-8M USD
+            </span>
+          </div>
         </div>
       </div>
     </div>
