@@ -17,34 +17,34 @@ export const KeyAsksSlide = () => {
   const leadershipAsks = [
     {
       icon: Users,
-      title: "Executive Sponsorship",
-      description: "Active engagement from P5 leadership in strategic conversations and relationship building",
+      title: "Executive Sponsorship & Air Cover",
+      description: "Senior leadership engagement to open doors and accelerate strategic conversations",
       items: [
-        "Quarterly executive touchpoints with customer C-suite",
-        "Internal alignment on account priorities and investments",
-        "Executive air cover for strategic decisions"
+        "P5 executive participation in key customer meetings",
+        "Access to ServiceNow executive briefing center",
+        "Internal advocacy for strategic investment decisions"
       ],
       color: "from-cyan-400 to-cyan-600"
     },
     {
       icon: Shield,
-      title: "Resource Commitment",
-      description: "Dedicated capacity and investment to execute against our strategic workstreams",
+      title: "Resource & Capacity Commitment",
+      description: "Dedicated specialist resources to execute against our strategic account plan",
       items: [
-        "Ring-fenced delivery resources for key initiatives",
-        "Budget allocation for solution development",
-        "Access to specialist skills and expertise"
+        "Priority access to solution consulting and architects",
+        "Pre-sales investment for POCs and demos",
+        "Dedicated customer success resources"
       ],
       color: "from-emerald-400 to-emerald-600"
     },
     {
       icon: Zap,
-      title: "Speed to Decision",
-      description: "Accelerated governance and approval processes for time-sensitive opportunities",
+      title: "Deal Velocity & Flexibility",
+      description: "Commercial agility to compete and win strategic opportunities",
       items: [
-        "Fast-track approval for strategic pursuits",
-        "Delegated authority for account-level decisions",
-        "Streamlined commercial sign-off processes"
+        "Fast-track deal desk approvals for strategic deals",
+        "Pricing flexibility for multi-year commitments",
+        "Creative commercial structures (co-investment, success-based)"
       ],
       color: "from-amber-400 to-amber-600"
     }
@@ -53,44 +53,44 @@ export const KeyAsksSlide = () => {
   const organizationalAsks = [
     {
       icon: Target,
-      title: "Cross-functional Alignment",
-      description: "Unified approach across all service lines and product areas",
+      title: "Cross-Functional Go-to-Market",
+      description: "Unified account strategy across all ServiceNow business units",
       items: [
-        "Single account strategy across all business units",
-        "Coordinated go-to-market and client engagement",
-        "Shared success metrics and accountability"
+        "Coordinated messaging across ITSM, ITOM, CSM, HRSD, etc.",
+        "Joint account planning with product specialists",
+        "Aligned quota and credit for collaborative wins"
       ],
       color: "from-violet-400 to-violet-600"
     },
     {
       icon: Handshake,
-      title: "Partner Ecosystem Access",
-      description: "Leverage strategic partnerships and alliances to strengthen our proposition",
+      title: "Partner & Ecosystem Leverage",
+      description: "Strategic partner engagement to strengthen our position and delivery capability",
       items: [
-        "Priority access to key technology partners",
-        "Joint solution development with alliance partners",
-        "Co-investment in customer-specific innovations"
+        "SI partner co-sell and implementation support",
+        "Technology partner integrations and joint solutions",
+        "Access to partner-funded resources for POVs"
       ],
       color: "from-rose-400 to-rose-600"
     },
     {
       icon: Building2,
-      title: "Operational Excellence",
-      description: "Consistent, high-quality delivery that builds trust and credibility",
+      title: "Marketing & Demand Investment",
+      description: "Account-based marketing support to build awareness and generate pipeline",
       items: [
-        "Proactive issue escalation and resolution",
-        "Continuous improvement in service delivery",
-        "Investment in account-specific capabilities"
+        "Executive events and customer roundtables",
+        "Custom content and thought leadership",
+        "Reference customer and case study development"
       ],
       color: "from-blue-400 to-blue-600"
     }
   ];
 
   const successFactors = [
-    "Unified leadership commitment to the account strategy",
-    "Clear accountability and decision-making authority",
-    "Sustained investment through the transformation journey",
-    "Regular cadence of strategic reviews and course corrections"
+    "Visible P5 commitment signals account priority to the customer",
+    "Resource certainty enables proactive pursuit execution",
+    "Commercial flexibility wins competitive displacement deals",
+    "Cross-BU alignment prevents internal friction and confusion"
   ];
 
   return (
