@@ -629,7 +629,7 @@ const createAccountStrategySlide = (pptx: pptxgen, data: AccountData) => {
 
   const winningMoves = [
     { headline: "Align on a Single Narrative", subtext: "Integrator → Digital Backbone → AI-first → Customer outcomes" },
-    { headline: "Sequence to Protect Continuity", subtext: "Stabilise foundations, scale orchestration, embed AI" },
+    { headline: "Land & Expand Through Quick Wins", subtext: "Prove value fast, build momentum, unlock broader investment" },
     { headline: "Focus Value on Cost-to-Serve", subtext: "Cycle time, automation rate, service performance" },
     { headline: "Co-create Multi-Year Roadmap", subtext: "Governance reducing risk and accelerating adoption" },
   ];
