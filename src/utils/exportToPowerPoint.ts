@@ -1516,7 +1516,287 @@ const createRoadmapSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 16: RISK & MITIGATION
+// SLIDE 16: KEY ASKS
+// =============================================================================
+const createKeyAsksSlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  
+  // Dark premium background
+  slide.background = { color: "0F172A" };
+  
+  // Gradient overlays
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: -1, y: -0.5, w: 4, h: 3,
+    fill: { color: "3B82F6", transparency: 92 },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: 7, y: 3, w: 4, h: 3,
+    fill: { color: "10B981", transparency: 92 },
+    line: { color: "10B981", transparency: 100 },
+  });
+
+  // Header with accent bar
+  slide.addShape(pptx.ShapeType.rect, {
+    x: MX, y: MY, w: 0.08, h: 0.7,
+    fill: { type: "solid", color: "3B82F6" },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  
+  slide.addText("Key Asks", {
+    x: MX + 0.2, y: MY, w: 5, h: 0.4,
+    fontSize: 26, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("FY26", {
+    x: MX + 1.8, y: MY, w: 1, h: 0.4,
+    fontSize: 26, bold: true, color: "3B82F6", fontFace: FONT_HEADING,
+  });
+  slide.addText(data.basics.accountName || "Account", {
+    x: MX + 0.2, y: MY + 0.38, w: 5, h: 0.2,
+    fontSize: SUBTITLE_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  const topY = 1.0;
+  const colW = (CONTENT_W - 0.15) / 2;
+  const cardH = 2.6;
+
+  // Left Column: From P5 Leadership
+  addCard(pptx, slide, MX, topY, colW, cardH, { accentBorder: "3B82F6" });
+  slide.addText("From P5 Leadership", {
+    x: MX + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.25,
+    fontSize: HEADING_SIZE, bold: true, color: "3B82F6", fontFace: FONT_HEADING,
+  });
+
+  const leadershipAsks = [
+    { title: "Executive Sponsorship", items: ["CCO/CTO alignment meetings", "Quarterly business reviews"] },
+    { title: "Resource Commitment", items: ["Dedicated account resources", "Specialist overlay support"] },
+    { title: "Investment Support", items: ["Strategic initiative funding", "Innovation partnerships"] },
+  ];
+
+  leadershipAsks.forEach((ask, i) => {
+    const ay = topY + 0.45 + i * 0.7;
+    addLeftBorder(pptx, slide, MX + 0.15, ay, 0.55, "3B82F6");
+    slide.addText(ask.title, {
+      x: MX + 0.28, y: ay, w: colW - 0.45, h: 0.2,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    ask.items.slice(0, 2).forEach((item, j) => {
+      slide.addText(`• ${item}`, {
+        x: MX + 0.28, y: ay + 0.22 + j * 0.16, w: colW - 0.45, h: 0.16,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
+  });
+
+  // Right Column: From the Organisation
+  const rx = MX + colW + 0.15;
+  addCard(pptx, slide, rx, topY, colW, cardH, { accentBorder: "10B981" });
+  slide.addText("From the Organisation", {
+    x: rx + 0.15, y: topY + 0.12, w: colW - 0.3, h: 0.25,
+    fontSize: HEADING_SIZE, bold: true, color: "10B981", fontFace: FONT_HEADING,
+  });
+
+  const orgAsks = [
+    { title: "Strategic Alignment", items: ["Cross-functional coordination", "Unified messaging"] },
+    { title: "Enablement Support", items: ["Training & certification", "Use case development"] },
+    { title: "Execution Velocity", items: ["Fast-track procurement", "Streamlined governance"] },
+  ];
+
+  orgAsks.forEach((ask, i) => {
+    const ay = topY + 0.45 + i * 0.7;
+    addLeftBorder(pptx, slide, rx + 0.15, ay, 0.55, "10B981");
+    slide.addText(ask.title, {
+      x: rx + 0.28, y: ay, w: colW - 0.45, h: 0.2,
+      fontSize: BODY_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+    ask.items.slice(0, 2).forEach((item, j) => {
+      slide.addText(`• ${item}`, {
+        x: rx + 0.28, y: ay + 0.22 + j * 0.16, w: colW - 0.45, h: 0.16,
+        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+      });
+    });
+  });
+
+  // Critical Success Factors banner
+  const bannerY = topY + cardH + 0.15;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: MX, y: bannerY, w: CONTENT_W, h: 0.55,
+    fill: { color: "1E293B" },
+    line: { color: "334155", width: 0.5 },
+    rectRadius: 0.08,
+  });
+  slide.addText("Critical Success Factors:", {
+    x: MX + 0.15, y: bannerY + 0.08, w: 2, h: 0.18,
+    fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+  });
+  slide.addText("Executive visibility  •  Cross-functional alignment  •  Strategic investment  •  Fast execution", {
+    x: MX + 0.15, y: bannerY + 0.28, w: CONTENT_W - 0.3, h: 0.18,
+    fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  return slide;
+};
+
+// =============================================================================
+// SLIDE 17: EXECUTION TIMELINE
+// =============================================================================
+const createExecutionTimelineSlide = (pptx: pptxgen, data: AccountData) => {
+  const slide = pptx.addSlide();
+  
+  // Dark premium background
+  slide.background = { color: "0F172A" };
+  
+  // Gradient overlays
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: -1, y: -0.5, w: 4, h: 3,
+    fill: { color: "3B82F6", transparency: 92 },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  slide.addShape(pptx.ShapeType.ellipse, {
+    x: 7, y: 3, w: 4, h: 3,
+    fill: { color: "10B981", transparency: 92 },
+    line: { color: "10B981", transparency: 100 },
+  });
+
+  // Header with accent bar
+  slide.addShape(pptx.ShapeType.rect, {
+    x: MX, y: MY, w: 0.08, h: 0.7,
+    fill: { type: "solid", color: "3B82F6" },
+    line: { color: "3B82F6", transparency: 100 },
+  });
+  
+  slide.addText("Roadmap to ", {
+    x: MX + 0.2, y: MY, w: 2, h: 0.4,
+    fontSize: 24, color: C.white, fontFace: FONT_HEADING,
+  });
+  slide.addText("$21M ACV", {
+    x: MX + 2.1, y: MY, w: 1.8, h: 0.4,
+    fontSize: 24, bold: true, color: "10B981", fontFace: FONT_HEADING,
+  });
+  slide.addText(`${data.basics.accountName || "Account"} • Target: December 31, 2026`, {
+    x: MX + 0.2, y: MY + 0.38, w: 5, h: 0.2,
+    fontSize: SUBTITLE_SIZE, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  const topY = 0.95;
+  const quarters = ["Q1-26", "Q2-26", "Q3-26", "Q4-26", "2027", "2028"];
+  const tracks = [
+    { name: "AI", color: "3B82F6", value: "$2M" },
+    { name: "CRM", color: "8B5CF6", value: "$17M" },
+    { name: "Security", color: "10B981", value: "$2M" },
+    { name: "Exec Connect", color: "F59E0B", value: "" },
+  ];
+
+  // Table header
+  const tableX = MX;
+  const tableW = CONTENT_W;
+  const colW = 0.9;
+  const trackColW = 0.8;
+  const qColW = (tableW - trackColW - 0.6 - 0.5) / 6;
+  const rowH = 0.55;
+  const headerH = 0.35;
+
+  // Header row background
+  slide.addShape(pptx.ShapeType.rect, {
+    x: tableX, y: topY, w: tableW, h: headerH,
+    fill: { color: "1E293B" },
+    line: { color: "334155", width: 0.5 },
+  });
+
+  // Header labels
+  slide.addText("Workstream", {
+    x: tableX + 0.08, y: topY + 0.08, w: trackColW - 0.1, h: 0.2,
+    fontSize: TINY_SIZE, bold: true, color: C.muted, fontFace: FONT_BODY,
+  });
+
+  quarters.forEach((q, i) => {
+    slide.addText(q, {
+      x: tableX + trackColW + i * qColW + 0.05, y: topY + 0.08, w: qColW - 0.1, h: 0.2,
+      fontSize: TINY_SIZE, bold: true, color: C.muted, fontFace: FONT_BODY, align: "center",
+    });
+  });
+
+  slide.addText("NNACV", {
+    x: tableX + tableW - 0.55, y: topY + 0.08, w: 0.5, h: 0.2,
+    fontSize: TINY_SIZE, bold: true, color: C.muted, fontFace: FONT_BODY, align: "center",
+  });
+
+  // Track rows
+  tracks.forEach((track, i) => {
+    const ry = topY + headerH + i * rowH;
+    
+    // Row background
+    slide.addShape(pptx.ShapeType.rect, {
+      x: tableX, y: ry, w: tableW, h: rowH,
+      fill: { color: i % 2 === 0 ? "0F172A" : "1E293B", transparency: 50 },
+      line: { color: "334155", width: 0.25 },
+    });
+
+    // Track name with color
+    slide.addShape(pptx.ShapeType.rect, {
+      x: tableX, y: ry, w: trackColW, h: rowH,
+      fill: { color: track.color, transparency: 80 },
+      line: { color: track.color, width: 0.5 },
+    });
+    slide.addText(track.name, {
+      x: tableX + 0.08, y: ry + 0.15, w: trackColW - 0.16, h: 0.25,
+      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
+    });
+
+    // NNACV value
+    if (track.value) {
+      slide.addText(track.value, {
+        x: tableX + tableW - 0.55, y: ry + 0.15, w: 0.5, h: 0.25,
+        fontSize: BODY_SIZE, bold: true, color: "10B981", fontFace: FONT_HEADING, align: "center",
+      });
+    }
+  });
+
+  // Legend
+  const legendY = topY + headerH + tracks.length * rowH + 0.2;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: MX, y: legendY, w: CONTENT_W, h: 0.4,
+    fill: { color: "1E293B", transparency: 50 },
+    line: { color: "334155", width: 0.5 },
+    rectRadius: 0.08,
+  });
+
+  const legendItems = [
+    { label: "Key Milestone", color: "3B82F6" },
+    { label: "Implementation", color: "8B5CF6" },
+    { label: "Activity", color: "64748B" },
+  ];
+
+  legendItems.forEach((item, i) => {
+    const lx = MX + 0.3 + i * 1.6;
+    slide.addShape(pptx.ShapeType.ellipse, {
+      x: lx, y: legendY + 0.14, w: 0.12, h: 0.12,
+      fill: { color: item.color },
+      line: { color: item.color, transparency: 100 },
+    });
+    slide.addText(item.label, {
+      x: lx + 0.18, y: legendY + 0.1, w: 1.2, h: 0.2,
+      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
+    });
+  });
+
+  // Mega deal indicator
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x: MX + 5.5, y: legendY + 0.05, w: 3.4, h: 0.3,
+    fill: { color: "3B82F6", transparency: 85 },
+    line: { color: "3B82F6", width: 0.5 },
+    rectRadius: 0.15,
+  });
+  slide.addText("Close mega deal (AI, L&S) = 6-8M USD", {
+    x: MX + 5.6, y: legendY + 0.08, w: 3.2, h: 0.24,
+    fontSize: TINY_SIZE, bold: true, color: "60A5FA", fontFace: FONT_BODY, align: "center",
+  });
+
+  return slide;
+};
+
+// =============================================================================
+// SLIDE 18: RISK & MITIGATION
 // =============================================================================
 const createRiskMitigationSlide = (pptx: pptxgen, data: AccountData) => {
   const slide = pptx.addSlide();
@@ -1906,13 +2186,15 @@ export const exportToPowerPoint = async (data: AccountData) => {
   // 14. AI Portfolio
   // 15. Platform Vision
   // 16. Roadmap
-  // 17. Risk & Mitigation
-  // 18. Governance
-  // 19. Weekly Update
-  // 20. Engagement
-  // 21. Pursuit Plan
-  // 22. Success Metrics
-  // 23. Thank You
+  // 17. Key Asks
+  // 18. Execution Timeline
+  // 19. Risk & Mitigation
+  // 20. Governance
+  // 21. Weekly Update
+  // 22. Engagement
+  // 23. Pursuit Plan
+  // 24. Success Metrics
+  // 25. Thank You
 
   slides.push(createCoverSlide(pptx, data));                    // 1
   slides.push(createExecutiveSummarySlide(pptx, data));         // 2
@@ -1930,13 +2212,15 @@ export const exportToPowerPoint = async (data: AccountData) => {
   slides.push(createAIUseCasesSlide(pptx, data));               // 14
   slides.push(createPlatformSlide(pptx, data));                 // 15
   slides.push(createRoadmapSlide(pptx, data));                  // 16
-  slides.push(createRiskMitigationSlide(pptx, data));           // 17
-  slides.push(createGovernanceSlide(pptx, data));               // 18
-  slides.push(createWeeklyUpdateSlide(pptx, data));             // 19
-  slides.push(createEngagementSlide(pptx, data));               // 20
-  slides.push(createPursuitPlanSlide(pptx, data));              // 21
-  slides.push(createSuccessMetricsSlide(pptx, data));           // 22
-  slides.push(createClosingSlide(pptx, data));                  // 23
+  slides.push(createKeyAsksSlide(pptx, data));                  // 17
+  slides.push(createExecutionTimelineSlide(pptx, data));        // 18
+  slides.push(createRiskMitigationSlide(pptx, data));           // 19
+  slides.push(createGovernanceSlide(pptx, data));               // 20
+  slides.push(createWeeklyUpdateSlide(pptx, data));             // 21
+  slides.push(createEngagementSlide(pptx, data));               // 22
+  slides.push(createPursuitPlanSlide(pptx, data));              // 23
+  slides.push(createSuccessMetricsSlide(pptx, data));           // 24
+  slides.push(createClosingSlide(pptx, data));                  // 25
 
   const exportId = new Date()
     .toISOString()
