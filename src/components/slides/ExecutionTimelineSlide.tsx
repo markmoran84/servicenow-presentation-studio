@@ -159,112 +159,111 @@ export const ExecutionTimelineSlide = () => {
           </span>
         </div>
 
-        {/* Timeline Grid */}
+        {/* Timeline Table */}
         <div className="rounded-2xl border border-white/5 overflow-hidden bg-white/[0.02] backdrop-blur">
-          
-          {/* Header Row */}
-          <div className="grid grid-cols-[120px_100px_repeat(6,1fr)_100px_80px] bg-gradient-to-r from-slate-800/80 to-slate-800/40 border-b border-white/5">
-            <div className="p-4 text-xs font-medium text-slate-400 uppercase tracking-[0.1em] border-r border-white/5 flex items-center">
-              Workstream
-            </div>
-            <div className="p-4 border-r border-white/5"></div>
-            {quarters.map((q, i) => (
-              <div key={i} className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider">
-                {q}
-              </div>
-            ))}
-            <div className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider">
-              Capabilities
-            </div>
-            <div className="p-4 text-xs font-medium text-slate-400 text-center uppercase tracking-wider">
-              NNACV
-            </div>
-          </div>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gradient-to-r from-slate-800/80 to-slate-800/40">
+                <th className="p-4 text-xs font-medium text-slate-400 uppercase tracking-[0.1em] border-r border-white/5 text-left w-[100px]">
+                  Workstream
+                </th>
+                <th className="p-4 text-xs font-medium text-slate-400 uppercase tracking-[0.1em] border-r border-white/5 text-left w-[100px]">
+                  Initiative
+                </th>
+                {quarters.map((q, i) => (
+                  <th key={i} className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider">
+                    {q}
+                  </th>
+                ))}
+                <th className="p-4 text-xs font-medium text-slate-400 text-center border-r border-white/5 uppercase tracking-wider w-[100px]">
+                  Capabilities
+                </th>
+                <th className="p-4 text-xs font-medium text-slate-400 text-center uppercase tracking-wider w-[80px]">
+                  NNACV
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {executionTracks.map((track, trackIdx) => (
+                track.items.map((item, itemIdx) => (
+                  <tr 
+                    key={`${trackIdx}-${itemIdx}`}
+                    className="border-b border-white/5 last:border-b-0 hover:bg-white/[0.02] transition-colors opacity-0 animate-fade-in"
+                    style={{ animationDelay: `${trackIdx * 100 + itemIdx * 50}ms` }}
+                  >
+                    {/* Category - only on first row of track */}
+                    {itemIdx === 0 && (
+                      <td 
+                        rowSpan={track.items.length}
+                        className={`p-3 text-xs font-semibold text-white bg-gradient-to-br ${track.accent} border-r border-white/10 text-center align-middle`}
+                      >
+                        <span className="drop-shadow-sm">{track.category}</span>
+                      </td>
+                    )}
+                    
+                    {/* Item Name */}
+                    <td className={`p-3 text-xs font-medium text-slate-300 border-r border-white/5 ${track.accentBg}`}>
+                      {item.name}
+                    </td>
 
-          {/* Track Rows */}
-          {executionTracks.map((track, trackIdx) => (
-            <div 
-              key={trackIdx} 
-              className="border-b border-white/5 last:border-b-0 opacity-0 animate-fade-in"
-              style={{ animationDelay: `${trackIdx * 100}ms` }}
-            >
-              {track.items.map((item, itemIdx) => (
-                <div 
-                  key={itemIdx} 
-                  className="grid grid-cols-[120px_100px_repeat(6,1fr)_100px_80px] min-h-[56px] hover:bg-white/[0.02] transition-colors group"
-                >
-                  {/* Category Label - only show for first item */}
-                  {itemIdx === 0 ? (
-                    <div 
-                      className={`p-3 text-xs font-semibold text-white bg-gradient-to-br ${track.accent} flex items-center justify-center border-r border-white/10`}
-                      style={{ gridRow: `span ${track.items.length}` }}
-                    >
-                      <span className="text-center leading-tight drop-shadow-sm">
-                        {track.category}
-                      </span>
-                    </div>
-                  ) : null}
-                  
-                  {/* Item Name */}
-                  <div className={`p-3 text-xs font-medium text-slate-300 flex items-center border-r border-white/5 ${track.accentBg} ${itemIdx !== 0 ? 'col-start-2' : ''}`}>
-                    {item.name}
-                  </div>
+                    {/* Timeline Cells */}
+                    {[1, 2, 3, 4, 5, 6].map((q) => (
+                      <td key={q} className="p-2 border-r border-white/5 relative h-[52px]">
+                        {item.activities
+                          .filter(a => a.startQ === q)
+                          .map((activity, aIdx) => (
+                            <div
+                              key={aIdx}
+                              className={`
+                                absolute top-1/2 -translate-y-1/2 left-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium shadow-lg
+                                ${activity.type === 'milestone' && activity.highlight
+                                  ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-blue-500/20'
+                                  : activity.type === 'milestone'
+                                  ? 'bg-gradient-to-r from-slate-600 to-slate-500 text-white shadow-slate-500/20'
+                                  : activity.type === 'implementation'
+                                  ? 'bg-gradient-to-r from-violet-500 to-purple-400 text-white shadow-violet-500/20'
+                                  : 'bg-slate-800/80 text-slate-300 border border-white/10'
+                                }
+                              `}
+                              style={{
+                                width: activity.spanQ > 1 ? `calc(${activity.spanQ * 100}% + ${(activity.spanQ - 1) * 8}px)` : 'calc(100% - 16px)',
+                                zIndex: 10
+                              }}
+                            >
+                              {activity.highlight && <Star className="w-3 h-3 flex-shrink-0" />}
+                              <span className="truncate">{activity.label}</span>
+                            </div>
+                          ))
+                        }
+                      </td>
+                    ))}
 
-                  {/* Timeline Cells */}
-                  {[1, 2, 3, 4, 5, 6].map((q) => (
-                    <div key={q} className="p-2 border-r border-white/5 relative flex items-center justify-center">
-                      {item.activities
-                        .filter(a => a.startQ === q)
-                        .map((activity, aIdx) => (
-                          <div
-                            key={aIdx}
-                            className={`
-                              absolute left-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium shadow-lg
-                              ${activity.type === 'milestone' && activity.highlight
-                                ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-blue-500/20'
-                                : activity.type === 'milestone'
-                                ? 'bg-gradient-to-r from-slate-600 to-slate-500 text-white shadow-slate-500/20'
-                                : activity.type === 'implementation'
-                                ? 'bg-gradient-to-r from-violet-500 to-purple-400 text-white shadow-violet-500/20'
-                                : 'bg-slate-800/80 text-slate-300 border border-white/10'
-                              }
-                            `}
-                            style={{
-                              width: activity.spanQ > 1 ? `calc(${activity.spanQ * 100}% + ${(activity.spanQ - 1) * 8}px)` : 'calc(100% - 16px)',
-                              zIndex: 10
-                            }}
-                          >
-                            {activity.highlight && <Star className="w-3 h-3 flex-shrink-0" />}
-                            <span className="truncate">{activity.label}</span>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  ))}
+                    {/* Capabilities - only on first row of track */}
+                    {itemIdx === 0 && (
+                      <td 
+                        rowSpan={track.items.length}
+                        className="p-3 text-[10px] text-slate-400 text-center border-r border-white/5 align-middle"
+                      >
+                        {track.capabilities.join(", ")}
+                      </td>
+                    )}
 
-                  {/* Capabilities - only show for first item */}
-                  {itemIdx === 0 ? (
-                    <div 
-                      className="p-3 text-[10px] text-slate-400 flex items-center justify-center text-center border-r border-white/5"
-                      style={{ gridRow: `span ${track.items.length}` }}
-                    >
-                      {track.capabilities.join(", ")}
-                    </div>
-                  ) : null}
-
-                  {/* Value - only show for first item */}
-                  {itemIdx === 0 ? (
-                    <div 
-                      className="p-3 text-base font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent flex items-center justify-center"
-                      style={{ gridRow: `span ${track.items.length}` }}
-                    >
-                      {track.value}
-                    </div>
-                  ) : null}
-                </div>
+                    {/* Value - only on first row of track */}
+                    {itemIdx === 0 && (
+                      <td 
+                        rowSpan={track.items.length}
+                        className="p-3 text-base font-semibold text-center align-middle"
+                      >
+                        <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                          {track.value}
+                        </span>
+                      </td>
+                    )}
+                  </tr>
+                ))
               ))}
-            </div>
-          ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Legend */}
