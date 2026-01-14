@@ -60,8 +60,8 @@ export const AccountStrategySlide = () => {
       subtext: "Integrator Strategy → Digital Backbone → AI-first execution → Customer outcomes"
     },
     {
-      headline: "Sequence to Protect Continuity",
-      subtext: "Stabilise foundations, scale orchestration, embed AI across priority workflows"
+      headline: "Land & Expand Through Quick Wins",
+      subtext: "Prove value fast, build momentum, unlock broader enterprise investment"
     },
     {
       headline: "Focus Value on Cost-to-Serve",
