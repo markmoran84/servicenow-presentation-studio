@@ -25,51 +25,31 @@ export const AccountStrategySlide = () => {
   const strategicPillars = [
     {
       icon: Crosshair,
-      title: customerPriorities[0]?.title || "Strengthen customer focus & profitable growth",
+      title: customerPriorities[0]?.title || "Customer & Commercial Transformation",
       description: customerPriorities[0]?.description || "Deliver scalable, orchestrated customer service and commercial execution foundation.",
       whyNow: "Decision window is live. Time to expand from replacement to end-to-end orchestration.",
-      accent: "from-blue-500 to-cyan-400",
-      objectives: [
-        "Reduce cost-to-serve through workflow automation and digital self-service",
-        "Release frontline capacity from manual case handling and rework",
-        "Improve service consistency while absorbing volume growth"
-      ]
+      accent: "from-blue-500 to-cyan-400"
     },
     {
       icon: Rocket,
-      title: customerPriorities[1]?.title || "Drive operational excellence across the network",
-      description: customerPriorities[1]?.description || "Reduce manual coordination and exception handling across Ocean, L&S, and Terminals.",
-      whyNow: "Scaling integrated operations requires a common orchestration layer.",
-      accent: "from-violet-500 to-purple-400",
-      objectives: [
-        "Reduce manual coordination and exception handling",
-        "Increase operational productivity through orchestration",
-        "Improve reliability without adding structural overhead"
-      ]
+      title: customerPriorities[1]?.title || "Operationalising AI",
+      description: customerPriorities[1]?.description || "Move AI beyond isolated use cases to improve execution speed and decision quality.",
+      whyNow: "AI-first ambition is clear. This is the inflection point to embed AI in workflows.",
+      accent: "from-violet-500 to-purple-400"
     },
     {
       icon: Shield,
-      title: strategicOpportunities[0]?.title || "Accelerate technology & transformation",
-      description: strategicOpportunities[0]?.description || "Simplify platforms and workflows to reduce dependency on manual intervention.",
-      whyNow: "Platform consolidation creates momentum for broader adoption.",
-      accent: "from-emerald-500 to-teal-400",
-      objectives: [
-        "Simplify platforms and reduce manual intervention",
-        "Enable teams to scale through standardised processes",
-        "Improve change velocity without increasing run cost"
-      ]
+      title: strategicOpportunities[0]?.title || "Platform Expansion Beyond IT",
+      description: strategicOpportunities[0]?.description || "Broaden platform adoption using customer and service workflows as the entry point.",
+      whyNow: "Scaling integrated operations requires a common orchestration layer.",
+      accent: "from-emerald-500 to-teal-400"
     },
     {
       icon: Lightbulb,
-      title: strategicOpportunities[1]?.title || "Scale AI & data to power intelligent operations",
-      description: strategicOpportunities[1]?.description || "Embed AI to augment teams and improve decision productivity.",
-      whyNow: "AI-first ambition is clear. Inflection point to embed AI in workflows.",
-      accent: "from-amber-500 to-orange-400",
-      objectives: [
-        "Embed AI to augment teams and improve decision productivity",
-        "Reduce repetitive, low-value work through AI-assisted execution",
-        "Enable capacity uplift without additional headcount"
-      ]
+      title: strategicOpportunities[1]?.title || "Strategic Partnership Maturity",
+      description: strategicOpportunities[1]?.description || "Evolve toward long-term strategic partner underpinning digital and AI ambition.",
+      whyNow: "Relationship has renewed confidence. Window to shift to strategic partnership.",
+      accent: "from-amber-500 to-orange-400"
     }
   ];
 
@@ -90,25 +70,6 @@ export const AccountStrategySlide = () => {
     {
       headline: "Co-create Multi-Year Roadmap",
       subtext: "Governance model reducing delivery risk and accelerating adoption"
-    }
-  ];
-
-  // Medium-term ambitions
-  const ambitions = [
-    {
-      title: "Better efficiencies",
-      bullets: ["Sustained productivity improvements", "Lower manual effort and rework", "Increased execution capacity per team"],
-      accent: "from-blue-500 to-cyan-400"
-    },
-    {
-      title: "Improve free cash flow",
-      bullets: ["Margin improvement driven by automation", "Scale volumes without proportional cost"],
-      accent: "from-emerald-500 to-teal-400"
-    },
-    {
-      title: "Grow the business",
-      bullets: ["Customer experience differentiation", "Data-driven decision making"],
-      accent: "from-amber-500 to-orange-400"
     }
   ];
 
@@ -177,76 +138,47 @@ export const AccountStrategySlide = () => {
                   <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   {strategicPillars.map((pillar, index) => {
                     const Icon = pillar.icon;
                     return (
                       <div 
                         key={index}
-                        className="group relative rounded-xl bg-white/[0.02] border border-white/5 p-4 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 opacity-0 animate-fade-in"
+                        className="group relative rounded-xl bg-white/[0.02] border border-white/5 p-5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 opacity-0 animate-fade-in"
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
                         {/* Gradient accent line */}
                         <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${pillar.accent} rounded-t-xl opacity-60 group-hover:opacity-100 transition-opacity`} />
                         
-                        <div className="flex items-start gap-2 mb-2">
-                          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${pillar.accent} flex items-center justify-center shadow-lg flex-shrink-0`}>
-                            <Icon className="w-3.5 h-3.5 text-white" />
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${pillar.accent} flex items-center justify-center shadow-lg`}>
+                            <Icon className="w-4 h-4 text-white" />
                           </div>
-                          <h3 className="text-white font-medium text-xs leading-snug flex-1">
-                            {pillar.title}
-                          </h3>
+                          <span className="text-slate-600 text-xs font-mono">{String(index + 1).padStart(2, '0')}</span>
                         </div>
                         
-                        {/* Objectives as bullet points */}
-                        <div className="space-y-1 mt-3">
-                          {pillar.objectives.map((obj, objIdx) => (
-                            <div key={objIdx} className="flex items-start gap-2">
-                              <div className={`w-1 h-1 rounded-full bg-gradient-to-r ${pillar.accent} mt-1.5 flex-shrink-0`} />
-                              <p className="text-slate-400 text-[10px] leading-relaxed">{obj}</p>
-                            </div>
-                          ))}
-                        </div>
+                        <h3 className="text-white font-medium text-sm mb-2 leading-snug">
+                          {pillar.title}
+                        </h3>
+                        
+                        <p className="text-slate-400 text-xs leading-relaxed mb-3">
+                          {pillar.description}
+                        </p>
 
                         {/* Why Now */}
-                        <div className="pt-2 mt-2 border-t border-white/5">
-                          <p className="text-[9px]">
-                            <span className={`bg-gradient-to-r ${pillar.accent} bg-clip-text text-transparent font-semibold`}>Why now:</span>{" "}
+                        <div className="pt-3 border-t border-white/5">
+                          <p className="text-[11px]">
+                            <span className="font-semibold bg-gradient-to-r bg-clip-text text-transparent" style={{
+                              backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))`
+                            }}>
+                              <span className={`bg-gradient-to-r ${pillar.accent} bg-clip-text text-transparent font-semibold`}>Why now:</span>
+                            </span>{" "}
                             <span className="text-slate-500">{pillar.whyNow}</span>
                           </p>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-
-                {/* Medium-term Ambitions */}
-                <div className="mt-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[10px] font-medium text-slate-600 uppercase tracking-[0.15em]">Medium-term Ambitions</span>
-                    <div className="flex-1 h-px bg-gradient-to-r from-slate-800 to-transparent" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {ambitions.map((amb, index) => (
-                      <div 
-                        key={index}
-                        className="rounded-lg bg-white/[0.02] border border-white/5 p-3 opacity-0 animate-fade-in"
-                        style={{ animationDelay: `${600 + index * 100}ms` }}
-                      >
-                        <h4 className={`text-xs font-semibold bg-gradient-to-r ${amb.accent} bg-clip-text text-transparent mb-2`}>
-                          {amb.title}
-                        </h4>
-                        <div className="space-y-1">
-                          {amb.bullets.map((bullet, bIdx) => (
-                            <div key={bIdx} className="flex items-start gap-1.5">
-                              <div className="w-1 h-1 rounded-full bg-slate-600 mt-1.5 flex-shrink-0" />
-                              <p className="text-slate-500 text-[9px] leading-relaxed">{bullet}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
 
