@@ -24,6 +24,7 @@ import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
 import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
+import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
 
 const slides = [
@@ -50,7 +51,8 @@ const slides = [
   { component: ExecutiveEngagementSlide, label: "18. Engagement" },
   { component: PursuitPlanSlide, label: "18. Pursuit Plan" },
   { component: KeyAsksSlide, label: "19. Key Asks" },
-  { component: SuccessSlide, label: "20. Success Metrics" },
+  { component: ExecutionTimelineSlide, label: "20. Execution Timeline" },
+  { component: SuccessSlide, label: "21. Success Metrics" },
 ];
 
 const Index = () => {
