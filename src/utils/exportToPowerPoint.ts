@@ -1877,98 +1877,6 @@ const createClosingSlide = (pptx: pptxgen, data: AccountData) => {
 };
 
 // =============================================================================
-// SLIDE 22: KEY ASKS
-// =============================================================================
-const createKeyAsksSlide = (pptx: pptxgen, data: AccountData) => {
-  const slide = pptx.addSlide();
-  setBackground(slide);
-  addTitle(slide, "Key Asks", `What we need to execute our ${data.basics.accountName || "Account"} strategy`);
-
-  const topY = 0.95;
-  const colW = (CONTENT_W - 0.12) / 2;
-
-  // Left column - From P5 Leadership
-  slide.addText("From P5 Leadership", {
-    x: MX + 0.1, y: topY, w: colW - 0.2, h: 0.25,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.accent, fontFace: FONT_HEADING,
-  });
-
-  const leadershipAsks = [
-    { title: "Executive Sponsorship & Air Cover", items: ["P5 exec participation in key meetings", "Access to executive briefing center", "Internal advocacy for investments"] },
-    { title: "Resource & Capacity Commitment", items: ["Priority access to solution consulting", "Pre-sales investment for POCs", "Dedicated customer success resources"] },
-    { title: "Deal Velocity & Flexibility", items: ["Fast-track deal desk approvals", "Pricing flexibility for multi-year", "Creative commercial structures"] },
-  ];
-
-  leadershipAsks.forEach((ask, i) => {
-    const ay = topY + 0.35 + i * 1.0;
-    addCard(pptx, slide, MX, ay, colW, 0.9, { accentBorder: C.accent });
-    addLeftBorder(pptx, slide, MX + 0.08, ay + 0.1, 0.7, C.accent);
-    slide.addText(ask.title, {
-      x: MX + 0.18, y: ay + 0.08, w: colW - 0.3, h: 0.22,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-    });
-    ask.items.forEach((item, j) => {
-      slide.addText(`• ${item}`, {
-        x: MX + 0.18, y: ay + 0.32 + j * 0.18, w: colW - 0.3, h: 0.18,
-        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
-    });
-  });
-
-  // Right column - From the Organisation
-  const rx = MX + colW + 0.12;
-  slide.addText("From the Organisation", {
-    x: rx + 0.1, y: topY, w: colW - 0.2, h: 0.25,
-    fontSize: HEADING_SIZE - 2, bold: true, color: C.purple, fontFace: FONT_HEADING,
-  });
-
-  const orgAsks = [
-    { title: "Cross-Functional Go-to-Market", items: ["Coordinated messaging across BUs", "Joint account planning with specialists", "Aligned quota and credit"] },
-    { title: "Partner & Ecosystem Leverage", items: ["SI partner co-sell support", "Technology partner integrations", "Partner-funded POV resources"] },
-    { title: "Marketing & Demand Investment", items: ["Executive events and roundtables", "Custom content and thought leadership", "Reference customer development"] },
-  ];
-
-  orgAsks.forEach((ask, i) => {
-    const ay = topY + 0.35 + i * 1.0;
-    addCard(pptx, slide, rx, ay, colW, 0.9, { accentBorder: C.purple });
-    addLeftBorder(pptx, slide, rx + 0.08, ay + 0.1, 0.7, C.purple);
-    slide.addText(ask.title, {
-      x: rx + 0.18, y: ay + 0.08, w: colW - 0.3, h: 0.22,
-      fontSize: SMALL_SIZE, bold: true, color: C.white, fontFace: FONT_BODY,
-    });
-    ask.items.forEach((item, j) => {
-      slide.addText(`• ${item}`, {
-        x: rx + 0.18, y: ay + 0.32 + j * 0.18, w: colW - 0.3, h: 0.18,
-        fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-      });
-    });
-  });
-
-  // Bottom success factors
-  const sfY = topY + 3.5;
-  addCard(pptx, slide, MX, sfY, CONTENT_W, 0.65);
-  slide.addText("Critical Success Factors", {
-    x: MX + 0.12, y: sfY + 0.08, w: 2, h: 0.2,
-    fontSize: SMALL_SIZE, bold: true, color: C.primary, fontFace: FONT_HEADING,
-  });
-  
-  const factors = [
-    "P5 commitment signals priority",
-    "Resource certainty enables execution",
-    "Commercial flexibility wins deals",
-    "Cross-BU alignment prevents friction"
-  ];
-  factors.forEach((f, i) => {
-    slide.addText(`${i + 1}. ${f}`, {
-      x: MX + 0.12 + i * 2.2, y: sfY + 0.32, w: 2.1, h: 0.25,
-      fontSize: TINY_SIZE, color: C.muted, fontFace: FONT_BODY,
-    });
-  });
-
-  return slide;
-};
-
-// =============================================================================
 // MAIN EXPORT FUNCTION - EXACT MATCH TO WEB SLIDE ORDER
 // =============================================================================
 export const exportToPowerPoint = async (data: AccountData) => {
@@ -2000,12 +1908,11 @@ export const exportToPowerPoint = async (data: AccountData) => {
   // 16. Roadmap
   // 17. Risk & Mitigation
   // 18. Governance
-  // 19. Key Asks
-  // 20. Weekly Update
-  // 21. Engagement
-  // 22. Pursuit Plan
-  // 23. Success Metrics
-  // 24. Thank You
+  // 19. Weekly Update
+  // 20. Engagement
+  // 21. Pursuit Plan
+  // 22. Success Metrics
+  // 23. Thank You
 
   slides.push(createCoverSlide(pptx, data));                    // 1
   slides.push(createExecutiveSummarySlide(pptx, data));         // 2
@@ -2025,12 +1932,11 @@ export const exportToPowerPoint = async (data: AccountData) => {
   slides.push(createRoadmapSlide(pptx, data));                  // 16
   slides.push(createRiskMitigationSlide(pptx, data));           // 17
   slides.push(createGovernanceSlide(pptx, data));               // 18
-  slides.push(createKeyAsksSlide(pptx, data));                  // 19
-  slides.push(createWeeklyUpdateSlide(pptx, data));             // 20
-  slides.push(createEngagementSlide(pptx, data));               // 21
-  slides.push(createPursuitPlanSlide(pptx, data));              // 22
-  slides.push(createSuccessMetricsSlide(pptx, data));           // 23
-  slides.push(createClosingSlide(pptx, data));                  // 24
+  slides.push(createWeeklyUpdateSlide(pptx, data));             // 19
+  slides.push(createEngagementSlide(pptx, data));               // 20
+  slides.push(createPursuitPlanSlide(pptx, data));              // 21
+  slides.push(createSuccessMetricsSlide(pptx, data));           // 22
+  slides.push(createClosingSlide(pptx, data));                  // 23
 
   const exportId = new Date()
     .toISOString()
