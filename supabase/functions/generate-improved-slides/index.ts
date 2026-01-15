@@ -1,5 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -45,9 +43,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
 
     // Prepare the context for slide generation
     const slideSuggestions = analysis.slideSuggestions || [];
@@ -100,109 +99,129 @@ Focus on:
 - Creating a cohesive narrative flow
 - Making each slide visually impactful`;
 
-    const { data: aiData, error: aiError } = await supabase.functions.invoke(
-      "supabase-ai-internal--completions",
-      {
-        body: {
-          model: "google/gemini-2.5-pro",
-          messages: [
-            {
-              role: "system",
-              content: "You are an expert presentation consultant who creates compelling, executive-ready presentations with detailed speaker notes.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "generate_improved_presentation",
-                description: "Generate an improved presentation with slides and speaker notes",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    title: {
-                      type: "string",
-                      description: "Presentation title",
-                    },
-                    companyName: {
-                      type: "string",
-                      description: "Company name",
-                    },
-                    totalSlides: {
-                      type: "number",
-                      description: "Total number of slides",
-                    },
-                    overallNarrative: {
-                      type: "string",
-                      description: "The overarching story arc of the presentation",
-                    },
-                    keyThemes: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "Key themes running through the presentation",
-                    },
-                    slides: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          slideNumber: { type: "number" },
-                          title: { type: "string" },
-                          keyPoints: {
-                            type: "array",
-                            items: { type: "string" },
-                          },
-                          visualSuggestion: { type: "string" },
-                          dataHighlight: { type: "string" },
-                          speakerNotes: {
-                            type: "object",
-                            properties: {
-                              openingHook: { type: "string" },
-                              talkingPoints: {
-                                type: "array",
-                                items: { type: "string" },
-                              },
-                              dataToMention: {
-                                type: "array",
-                                items: { type: "string" },
-                              },
-                              transitionToNext: { type: "string" },
-                              estimatedDuration: { type: "string" },
-                            },
-                            required: ["openingHook", "talkingPoints", "estimatedDuration"],
-                          },
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert presentation consultant who creates compelling, executive-ready presentations with detailed speaker notes.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "generate_improved_presentation",
+              description: "Generate an improved presentation with slides and speaker notes",
+              parameters: {
+                type: "object",
+                properties: {
+                  title: {
+                    type: "string",
+                    description: "Presentation title",
+                  },
+                  companyName: {
+                    type: "string",
+                    description: "Company name",
+                  },
+                  totalSlides: {
+                    type: "number",
+                    description: "Total number of slides",
+                  },
+                  overallNarrative: {
+                    type: "string",
+                    description: "The overarching story arc of the presentation",
+                  },
+                  keyThemes: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Key themes running through the presentation",
+                  },
+                  slides: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        slideNumber: { type: "number" },
+                        title: { type: "string" },
+                        keyPoints: {
+                          type: "array",
+                          items: { type: "string" },
                         },
-                        required: ["slideNumber", "title", "keyPoints", "speakerNotes"],
+                        visualSuggestion: { type: "string" },
+                        dataHighlight: { type: "string" },
+                        speakerNotes: {
+                          type: "object",
+                          properties: {
+                            openingHook: { type: "string" },
+                            talkingPoints: {
+                              type: "array",
+                              items: { type: "string" },
+                            },
+                            dataToMention: {
+                              type: "array",
+                              items: { type: "string" },
+                            },
+                            transitionToNext: { type: "string" },
+                            estimatedDuration: { type: "string" },
+                          },
+                          required: ["openingHook", "talkingPoints", "estimatedDuration"],
+                        },
                       },
-                    },
-                    closingTips: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "Tips for delivering the presentation effectively",
+                      required: ["slideNumber", "title", "keyPoints", "speakerNotes"],
                     },
                   },
-                  required: ["title", "companyName", "totalSlides", "overallNarrative", "keyThemes", "slides"],
+                  closingTips: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Tips for delivering the presentation effectively",
+                  },
                 },
+                required: ["title", "companyName", "totalSlides", "overallNarrative", "keyThemes", "slides"],
               },
             },
-          ],
-          tool_choice: { type: "function", function: { name: "generate_improved_presentation" } },
-        },
-      }
-    );
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "generate_improved_presentation" } },
+      }),
+    });
 
-    if (aiError) {
-      console.error("AI error:", aiError);
-      throw new Error(`AI processing failed: ${aiError.message}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI Gateway error:", response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Rate limit exceeded. Please try again in a moment." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ success: false, error: "AI credits exhausted. Please add funds to continue." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      throw new Error(`AI processing failed: ${response.status}`);
     }
+
+    const aiData = await response.json();
 
     // Extract the tool call result
     const toolCall = aiData?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
+      console.error("Unexpected AI response:", JSON.stringify(aiData));
       throw new Error("No slide data generated");
     }
 
