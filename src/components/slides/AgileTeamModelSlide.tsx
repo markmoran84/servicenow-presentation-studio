@@ -1,6 +1,7 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { useState, useEffect, useRef } from "react";
 import GifRecorder from "./GifRecorder";
+import slideBackground from "@/assets/slide-background.png";
 
 const AgileTeamModelSlide = () => {
   const { data } = useAccountData();
@@ -108,7 +109,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ background: 'radial-gradient(ellipse at 30% 20%, #2a5a6a 0%, #1e4555 25%, #1a3545 45%, #152535 70%, #0f1a2a 100%)' }}>
+    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
@@ -133,7 +134,7 @@ const AgileTeamModelSlide = () => {
             />
           </div>
           
-          <div ref={wheelRef} className="p-4 rounded-2xl" style={{ background: 'radial-gradient(ellipse at 30% 20%, #2a5a6a 0%, #1e4555 25%, #1a3545 45%, #152535 70%, #0f1a2a 100%)' }}>
+          <div ref={wheelRef} className="p-4 rounded-2xl" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
