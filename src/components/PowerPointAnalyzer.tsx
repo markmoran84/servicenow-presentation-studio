@@ -50,6 +50,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
   const [webSearchUsed, setWebSearchUsed] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["gaps", "suggestions"]));
   const [parsedContent, setParsedContent] = useState<string>("");
+  const [parsedSlideCount, setParsedSlideCount] = useState<number | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +64,69 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       }
       return newSet;
     });
+  };
+
+  const normalizeAnalysis = (raw: unknown): PresentationAnalysis => {
+    const obj = (raw && typeof raw === "object") ? (raw as Record<string, unknown>) : {};
+
+    const normalizePriority = (p: unknown): "high" | "medium" | "low" => {
+      return p === "high" || p === "medium" || p === "low" ? p : "medium";
+    };
+
+    const strengthsRaw = Array.isArray(obj.strengths) ? obj.strengths : [];
+    const gapsRaw = Array.isArray(obj.gaps) ? obj.gaps : [];
+    const slideSuggestionsRaw = Array.isArray(obj.slideSuggestions) ? obj.slideSuggestions : [];
+
+    const webInsightsRaw = Array.isArray(obj.webInsights) ? obj.webInsights : null;
+    const missingSlidesRaw = Array.isArray(obj.missingSlides) ? obj.missingSlides : null;
+    const executiveTipsRaw = Array.isArray(obj.executiveTips) ? obj.executiveTips : null;
+
+    return {
+      companyName: typeof obj.companyName === "string" ? obj.companyName : "Unknown Company",
+      industry: typeof obj.industry === "string" ? obj.industry : undefined,
+      overallScore: typeof obj.overallScore === "number" ? obj.overallScore : Number(obj.overallScore ?? 0) || 0,
+      overallAssessment: typeof obj.overallAssessment === "string" ? obj.overallAssessment : "",
+      strengths: strengthsRaw
+        .filter(Boolean)
+        .map((s: any) => ({
+          title: String(s?.title ?? "Strength"),
+          detail: String(s?.detail ?? ""),
+        })),
+      gaps: gapsRaw
+        .filter(Boolean)
+        .map((g: any) => ({
+          title: String(g?.title ?? "Gap"),
+          detail: String(g?.detail ?? ""),
+          priority: normalizePriority(g?.priority),
+        })),
+      webInsights: webInsightsRaw
+        ? webInsightsRaw
+            .filter(Boolean)
+            .map((w: any) => ({
+              insight: String(w?.insight ?? ""),
+              suggestion: String(w?.suggestion ?? ""),
+            }))
+            .filter((w: any) => (w.insight || w.suggestion))
+        : undefined,
+      slideSuggestions: slideSuggestionsRaw
+        .filter(Boolean)
+        .map((s: any) => ({
+          slideTitle: String(s?.slideTitle ?? "Slide"),
+          currentState: String(s?.currentState ?? ""),
+          suggestion: String(s?.suggestion ?? ""),
+          priority: normalizePriority(s?.priority),
+        })),
+      missingSlides: missingSlidesRaw
+        ? missingSlidesRaw
+            .filter(Boolean)
+            .map((m: any) => ({
+              title: String(m?.title ?? "Additional slide"),
+              rationale: String(m?.rationale ?? ""),
+              suggestedContent: String(m?.suggestedContent ?? ""),
+            }))
+        : undefined,
+      executiveTips: executiveTipsRaw ? executiveTipsRaw.filter(Boolean).map((t: any) => String(t)) : undefined,
+    };
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +187,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       const content = parseData.content || "";
       const slideCount = parseData.slideCount || 0;
       setParsedContent(content);
+      setParsedSlideCount(slideCount);
 
       toast.loading("Analyzing presentation and researching company...", { id: "pptx-analysis" });
 
@@ -134,7 +199,8 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       if (analysisError) throw analysisError;
       if (!analysisData?.success) throw new Error(analysisData?.error || "Failed to analyze presentation");
 
-      setAnalysis(analysisData.data);
+      const normalized = normalizeAnalysis(analysisData.data);
+      setAnalysis(normalized);
       setWebSearchUsed(analysisData.webSearchUsed || false);
 
       // Update account data with identified company
@@ -271,7 +337,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
             </div>
           </>
         ) : (
-          <ScrollArea className="max-h-[600px]">
+          <ScrollArea className="h-[70vh] max-h-[600px]">
             <div className="space-y-4 pr-4">
               {/* Company & Score Header */}
               <div className="flex items-start justify-between p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
@@ -426,6 +492,33 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* Extracted Content */}
+              {parsedContent && (
+                <Collapsible
+                  open={expandedSections.has("extracted")}
+                  onOpenChange={() => toggleSection("extracted")}
+                >
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto bg-muted/30 hover:bg-muted/40">
+                      <span className="flex items-center gap-2 font-semibold">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                        Extracted slide text{parsedSlideCount ? ` (${parsedSlideCount})` : ""}
+                      </span>
+                      {expandedSections.has("extracted") ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 pt-2">
+                    <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
+                      <pre className="whitespace-pre-wrap text-xs text-muted-foreground">
+                        {parsedContent.length > 20000
+                          ? `${parsedContent.slice(0, 20000)}\n\n… (truncated)`
+                          : parsedContent}
+                      </pre>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
               {/* Missing Slides */}
               {analysis.missingSlides && analysis.missingSlides.length > 0 && (
                 <Collapsible 
@@ -482,6 +575,8 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                   onClick={() => {
                     setAnalysis(null);
                     setParsedContent("");
+                    setParsedSlideCount(null);
+                    setSelectedFileName(null);
                   }}
                   className="flex-1 gap-2"
                 >
