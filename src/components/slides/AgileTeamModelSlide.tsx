@@ -109,7 +109,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div ref={slideRef} className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <div ref={slideRef} data-gif-container="true" className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
@@ -136,7 +136,7 @@ const AgileTeamModelSlide = () => {
             />
           </div>
           
-          <div ref={wheelRef} className="p-4">
+          <div ref={wheelRef} data-gif-wheel="true" className="p-0">
             <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
@@ -183,8 +183,8 @@ const AgileTeamModelSlide = () => {
               </marker>
             </defs>
 
-            {/* Outer ring background - transparent */}
-            <circle cx={centerX} cy={centerY} r={outerRadius} fill="transparent" />
+            {/* Outer ring background */}
+            <circle cx={centerX} cy={centerY} r={outerRadius} fill="#0a1525" />
 
             {/* Outer ring segments */}
             {outerRoles.map((_, index) => {
@@ -203,12 +203,12 @@ const AgileTeamModelSlide = () => {
               );
             })}
 
-            {/* Middle ring - transparent */}
+            {/* Middle ring (darker) */}
             <circle 
               cx={centerX} 
               cy={centerY} 
               r={middleRadius} 
-              fill="transparent"
+              fill="#0a1525"
               stroke="#1e3a5f"
               strokeWidth="2"
             />

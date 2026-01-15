@@ -25,6 +25,12 @@ const GifRecorder = ({
   const [progress, setProgress] = useState(0);
   const framesRef = useRef<string[]>([]);
   const recordingRef = useRef(false);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const framesRef = useRef<string[]>([]);
+  const recordingRef = useRef(false);
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   const bgImagePromiseRef = useRef<Promise<HTMLImageElement> | null>(null);
 
@@ -52,7 +58,10 @@ const GifRecorder = ({
     if (!targetRef.current) return null;
 
     try {
-      const canvas = await html2canvas(targetRef.current, {
+      const targetEl = targetRef.current;
+
+      // Capture the wheel only, preserving alpha
+      const wheelCanvas = await html2canvas(targetEl, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
@@ -60,20 +69,19 @@ const GifRecorder = ({
         logging: false,
       });
 
-      // If we have a slide background image + container, bake the matching background INTO the frame.
-      // This avoids black fills in GIFs (GIF doesn't support full alpha transparency).
+      // GIFs don't support full alpha transparency; bake the *exact slide background* behind the wheel.
       if (backgroundImage && frameContainerRef?.current) {
         const bgImg = await getBackgroundImage();
         if (bgImg) {
           const slideRect = frameContainerRef.current.getBoundingClientRect();
-          const targetRect = targetRef.current.getBoundingClientRect();
+          const targetRect = targetEl.getBoundingClientRect();
 
           const containerW = slideRect.width;
           const containerH = slideRect.height;
           const imgW = bgImg.naturalWidth || bgImg.width;
           const imgH = bgImg.naturalHeight || bgImg.height;
 
-          // Replicate CSS: background-size: cover; background-position: center
+          // Match CSS: background-size: cover; background-position: center
           const coverScale = Math.max(containerW / imgW, containerH / imgH);
           const drawnW = imgW * coverScale;
           const drawnH = imgH * coverScale;
@@ -83,12 +91,12 @@ const GifRecorder = ({
           const tx = targetRect.left - slideRect.left;
           const ty = targetRect.top - slideRect.top;
 
-          const ratioX = canvas.width / targetRect.width;
-          const ratioY = canvas.height / targetRect.height;
+          const ratioX = wheelCanvas.width / targetRect.width;
+          const ratioY = wheelCanvas.height / targetRect.height;
 
           const out = document.createElement("canvas");
-          out.width = canvas.width;
-          out.height = canvas.height;
+          out.width = wheelCanvas.width;
+          out.height = wheelCanvas.height;
 
           const ctx = out.getContext("2d");
           if (ctx) {
@@ -99,70 +107,90 @@ const GifRecorder = ({
               drawnW * ratioX,
               drawnH * ratioY
             );
-            ctx.drawImage(canvas, 0, 0);
+            ctx.drawImage(wheelCanvas, 0, 0);
             return out.toDataURL("image/png");
           }
         }
       }
 
-      return canvas.toDataURL("image/png");
+      return wheelCanvas.toDataURL("image/png");
     } catch (error) {
       console.error("Frame capture error:", error);
       return null;
     }
-  }, [targetRef, backgroundImage, frameContainerRef, getBackgroundImage]);
+  }, [targetRef, frameContainerRef, backgroundImage, getBackgroundImage]);
 
-  const createGif = useCallback(async (frames: string[]) => {
-    // Dynamically import GIF.js
-    const GIF = (await import("gif.js")).default;
-    
-    // Fetch the worker script and create a blob URL to avoid CORS issues
-    const workerResponse = await fetch("https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js");
-    const workerBlob = new Blob([await workerResponse.text()], { type: "application/javascript" });
-    const workerUrl = URL.createObjectURL(workerBlob);
-    
-    return new Promise<Blob>((resolve, reject) => {
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: targetRef.current?.offsetWidth || 600,
-        height: targetRef.current?.offsetHeight || 600,
-        workerScript: workerUrl,
+  const createGif = useCallback(
+    async (frames: string[]) => {
+      // Dynamically import GIF.js
+      const GIF = (await import("gif.js")).default;
+
+      // Fetch the worker script and create a blob URL to avoid CORS issues
+      const workerResponse = await fetch(
+        "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js"
+      );
+      const workerBlob = new Blob([await workerResponse.text()], {
+        type: "application/javascript",
       });
+      const workerUrl = URL.createObjectURL(workerBlob);
 
-      let loadedFrames = 0;
-      
-      frames.forEach((frameData) => {
-        const img = new Image();
-        img.onload = () => {
+      const loadImage = (src: string) =>
+        new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("Failed to load frame image"));
+          img.src = src;
+        });
+
+      const firstImg = await loadImage(frames[0]);
+
+      return new Promise<Blob>((resolve, reject) => {
+        const gif = new GIF({
+          workers: 2,
+          quality: 10,
+          width: firstImg.width,
+          height: firstImg.height,
+          workerScript: workerUrl,
+        });
+
+        let loadedFrames = 0;
+
+        const handleFrameLoaded = (img: HTMLImageElement) => {
           gif.addFrame(img, { delay: 1000 / frameRate });
           loadedFrames++;
           setProgress(Math.round((loadedFrames / frames.length) * 50) + 50);
-          
+
           if (loadedFrames === frames.length) {
             gif.render();
           }
         };
-        img.onerror = () => {
-          loadedFrames++;
-          if (loadedFrames === frames.length) {
-            gif.render();
-          }
-        };
-        img.src = frameData;
-      });
 
-      gif.on("finished", (blob: Blob) => {
-        URL.revokeObjectURL(workerUrl);
-        resolve(blob);
-      });
+        // Add first frame immediately
+        handleFrameLoaded(firstImg);
 
-      gif.on("error", (error: Error) => {
-        URL.revokeObjectURL(workerUrl);
-        reject(error);
+        // Load + add remaining frames
+        frames.slice(1).forEach((frameData) => {
+          loadImage(frameData)
+            .then(handleFrameLoaded)
+            .catch(() => {
+              loadedFrames++;
+              if (loadedFrames === frames.length) gif.render();
+            });
+        });
+
+        gif.on("finished", (blob: Blob) => {
+          URL.revokeObjectURL(workerUrl);
+          resolve(blob);
+        });
+
+        gif.on("error", (error: Error) => {
+          URL.revokeObjectURL(workerUrl);
+          reject(error);
+        });
       });
-    });
-  }, [targetRef, frameRate]);
+    },
+    [frameRate]
+  );
 
   const startRecording = useCallback(async () => {
     if (!targetRef.current) return;
