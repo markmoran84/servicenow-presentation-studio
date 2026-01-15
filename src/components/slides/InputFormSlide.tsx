@@ -9,9 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
+import { PowerPointAnalyzer } from "@/components/PowerPointAnalyzer";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2, Presentation
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -178,10 +179,16 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
 
           {/* AI Annual Report Analyzer */}
           <TabsContent value="aiAnalyzer" className="space-y-4">
-            <AnnualReportAnalyzer onGeneratePlan={async () => {
-              // Navigate to first slide after generation
-              onGenerate?.();
-            }} />
+            <div className="grid lg:grid-cols-2 gap-4">
+              <AnnualReportAnalyzer onGeneratePlan={async () => {
+                // Navigate to first slide after generation
+                onGenerate?.();
+              }} />
+              <PowerPointAnalyzer onGenerateTalkingNotes={() => {
+                // This would open the talking notes panel - handled by parent
+                toast.info("Navigate to any slide and click 'Notes' in the navigation bar to generate talking notes");
+              }} />
+            </div>
           </TabsContent>
 
           {/* Section A - Account Basics */}
