@@ -1,30 +1,56 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Video, Download, Loader2, StopCircle } from "lucide-react";
+import { Video, Loader2, StopCircle } from "lucide-react";
 import html2canvas from "html2canvas";
 
 interface GifRecorderProps {
   targetRef: React.RefObject<HTMLElement>;
+  frameContainerRef?: React.RefObject<HTMLElement>; // Used to composite the parent background into the recording
+  backgroundImage?: string; // Same image used by the slide background
   duration?: number; // Total recording duration in ms
   frameRate?: number; // Frames per second
   fileName?: string;
 }
 
-const GifRecorder = ({ 
-  targetRef, 
+const GifRecorder = ({
+  targetRef,
+  frameContainerRef,
+  backgroundImage,
   duration = 12000, // Default 12 seconds (covers full animation cycle)
   frameRate = 10,
-  fileName = "animation"
+  fileName = "animation",
 }: GifRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const framesRef = useRef<string[]>([]);
   const recordingRef = useRef(false);
+  const bgImageRef = useRef<HTMLImageElement | null>(null);
+  const bgImagePromiseRef = useRef<Promise<HTMLImageElement> | null>(null);
+
+  const getBackgroundImage = useCallback(async () => {
+    if (!backgroundImage) return null;
+
+    if (bgImageRef.current) return bgImageRef.current;
+
+    if (!bgImagePromiseRef.current) {
+      bgImagePromiseRef.current = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          bgImageRef.current = img;
+          resolve(img);
+        };
+        img.onerror = () => reject(new Error("Failed to load background image"));
+        img.src = backgroundImage;
+      });
+    }
+
+    return bgImagePromiseRef.current;
+  }, [backgroundImage]);
 
   const captureFrame = useCallback(async (): Promise<string | null> => {
     if (!targetRef.current) return null;
-    
+
     try {
       const canvas = await html2canvas(targetRef.current, {
         scale: 1,
@@ -33,12 +59,58 @@ const GifRecorder = ({
         backgroundColor: null,
         logging: false,
       });
+
+      // If we have a slide background image + container, bake the matching background INTO the frame.
+      // This avoids black fills in GIFs (GIF doesn't support full alpha transparency).
+      if (backgroundImage && frameContainerRef?.current) {
+        const bgImg = await getBackgroundImage();
+        if (bgImg) {
+          const slideRect = frameContainerRef.current.getBoundingClientRect();
+          const targetRect = targetRef.current.getBoundingClientRect();
+
+          const containerW = slideRect.width;
+          const containerH = slideRect.height;
+          const imgW = bgImg.naturalWidth || bgImg.width;
+          const imgH = bgImg.naturalHeight || bgImg.height;
+
+          // Replicate CSS: background-size: cover; background-position: center
+          const coverScale = Math.max(containerW / imgW, containerH / imgH);
+          const drawnW = imgW * coverScale;
+          const drawnH = imgH * coverScale;
+          const offsetX = (containerW - drawnW) / 2;
+          const offsetY = (containerH - drawnH) / 2;
+
+          const tx = targetRect.left - slideRect.left;
+          const ty = targetRect.top - slideRect.top;
+
+          const ratioX = canvas.width / targetRect.width;
+          const ratioY = canvas.height / targetRect.height;
+
+          const out = document.createElement("canvas");
+          out.width = canvas.width;
+          out.height = canvas.height;
+
+          const ctx = out.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(
+              bgImg,
+              (offsetX - tx) * ratioX,
+              (offsetY - ty) * ratioY,
+              drawnW * ratioX,
+              drawnH * ratioY
+            );
+            ctx.drawImage(canvas, 0, 0);
+            return out.toDataURL("image/png");
+          }
+        }
+      }
+
       return canvas.toDataURL("image/png");
     } catch (error) {
       console.error("Frame capture error:", error);
       return null;
     }
-  }, [targetRef]);
+  }, [targetRef, backgroundImage, frameContainerRef, getBackgroundImage]);
 
   const createGif = useCallback(async (frames: string[]) => {
     // Dynamically import GIF.js
