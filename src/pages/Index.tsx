@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { TalkingNotesPanel } from "@/components/TalkingNotesPanel";
@@ -27,7 +27,6 @@ import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
 import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
-import { ImprovedSlideComponent } from "@/components/slides/ImprovedSlideComponent";
 import { useAccountData } from "@/context/AccountDataContext";
 
 const slides = [
@@ -59,27 +58,16 @@ const slides = [
 ];
 
 const Index = () => {
-  const { data, setImprovedPresentation } = useAccountData();
+  const { data } = useAccountData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
   const [talkingNotesOpen, setTalkingNotesOpen] = useState(false);
-  const [showImprovedSlides, setShowImprovedSlides] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
 
-  // Create dynamic slides array based on whether we're in improved mode
-  const activeSlides = useMemo(() => {
-    if (showImprovedSlides && data.improvedPresentation?.slides) {
-      return data.improvedPresentation.slides.map((slide, index) => ({
-        component: () => <ImprovedSlideComponent slide={slide} showNotes={talkingNotesOpen} />,
-        label: `${slide.slideNumber}. ${slide.title}`,
-        isForm: false,
-        isImproved: true,
-      }));
-    }
-    return slides.map(s => ({ ...s, isImproved: false }));
-  }, [showImprovedSlides, data.improvedPresentation, talkingNotesOpen]);
+  // Use the original slides array directly - data updates will be reflected automatically
+  const activeSlides = slides;
 
   const goToPrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(0, prev - 1));
@@ -93,18 +81,11 @@ const Index = () => {
     setCurrentSlide(1); // Navigate to Cover slide
   }, []);
 
-  // Navigate to improved slides after accept changes
+  // Navigate to Executive Summary slide after accepting improvements
   const handleAcceptImprovedSlides = useCallback(() => {
-    setShowImprovedSlides(true);
-    setCurrentSlide(0);
+    // Navigate to slide 2 (Executive Summary) - the first content slide after Cover
+    setCurrentSlide(2);
   }, []);
-
-  // Clear improved slides and return to original
-  const handleClearImprovedSlides = useCallback(() => {
-    setShowImprovedSlides(false);
-    setImprovedPresentation(undefined);
-    setCurrentSlide(0);
-  }, [setImprovedPresentation]);
 
   // Export handlers
   const handleExportStart = useCallback(() => {
@@ -171,29 +152,12 @@ const Index = () => {
         </div>
       )}
 
-      {/* Improved slides banner */}
-      {showImprovedSlides && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">✨ Viewing Improved Presentation</span>
-            <span className="text-purple-200">
-              ({data.improvedPresentation?.totalSlides} slides • {data.improvedPresentation?.companyName})
-            </span>
-          </div>
-          <button
-            onClick={handleClearImprovedSlides}
-            className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-md text-sm transition-colors"
-          >
-            Back to Original
-          </button>
-        </div>
-      )}
 
       {/* Slide container - sized for export when exporting */}
       <div 
         ref={slideContainerRef}
-        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} ${talkingNotesOpen ? 'mr-[420px]' : ''} ${showImprovedSlides ? 'pt-10' : ''}`}
-        key={`${showImprovedSlides ? 'improved' : 'original'}-${currentSlide}`}
+        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} ${talkingNotesOpen ? 'mr-[420px]' : ''}`}
+        key={`slide-${currentSlide}`}
         style={isExporting ? {
           width: '1920px',
           height: '1080px',
@@ -222,15 +186,12 @@ const Index = () => {
         talkingNotesOpen={talkingNotesOpen}
       />
 
-      {/* Talking Notes Panel - only show for non-improved slides */}
-      {!showImprovedSlides && (
-        <TalkingNotesPanel
-          isOpen={talkingNotesOpen}
-          onClose={() => setTalkingNotesOpen(false)}
-          currentSlideIndex={currentSlide}
-          slideLabels={slides.map((s) => s.label)}
-        />
-      )}
+      <TalkingNotesPanel
+        isOpen={talkingNotesOpen}
+        onClose={() => setTalkingNotesOpen(false)}
+        currentSlideIndex={currentSlide}
+        slideLabels={slides.map((s) => s.label)}
+      />
 
       <SlideFooter />
     </div>

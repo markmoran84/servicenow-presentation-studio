@@ -75,7 +75,7 @@ interface PowerPointAnalyzerProps {
 }
 
 export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: PowerPointAnalyzerProps) => {
-  const { data, updateData, setImprovedPresentation: setContextImprovedPresentation } = useAccountData();
+  const { data, updateData, setImprovedPresentation: setContextImprovedPresentation, setGeneratedPlan } = useAccountData();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<PresentationAnalysis | null>(null);
   const [webSearchUsed, setWebSearchUsed] = useState(false);
@@ -479,7 +479,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
     }
   };
 
-  // Handle accepting changes and generating improved slides
+  // Handle accepting changes and generating improved plan data
   const handleAcceptChanges = async () => {
     if (!analysis) {
       toast.error("No analysis available");
@@ -488,7 +488,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
 
     setIsGeneratingSlides(true);
     try {
-      toast.loading("Generating improved slides with speaker notes...", { id: "improved-slides" });
+      toast.loading("Generating improved account plan...", { id: "improved-slides" });
 
       const { data: responseData, error } = await supabase.functions.invoke("generate-improved-slides", {
         body: {
@@ -496,25 +496,26 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
           originalContent: parsedContent,
           companyName: analysis.companyName || data.basics.accountName,
           industry: analysis.industry || data.basics.industry,
+          currentAccountData: data,
         },
       });
 
       if (error) throw error;
-      if (!responseData.success) throw new Error(responseData.error || "Failed to generate slides");
+      if (!responseData.success) throw new Error(responseData.error || "Failed to generate improved plan");
 
-      const presentation = responseData.data as ImprovedPresentation;
-      setImprovedPresentation(presentation);
-      // Store in context for main carousel
-      setContextImprovedPresentation(presentation);
-      setShowSlidesView(true);
-      setCurrentImprovedSlide(0);
-      toast.success("Improved presentation generated!", { id: "improved-slides" });
+      // The response is now an AIGeneratedPlan structure
+      const improvedPlan = responseData.data;
       
-      // Navigate to the improved slides in main carousel
+      // Update the context with the improved plan data - this will update all existing slides
+      setGeneratedPlan(improvedPlan);
+      
+      toast.success("Account plan updated with improvements!", { id: "improved-slides" });
+      
+      // Navigate to the first content slide (Executive Summary)
       onAcceptChanges?.();
     } catch (error) {
-      console.error("Error generating improved slides:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to generate improved slides", { id: "improved-slides" });
+      console.error("Error generating improved plan:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate improved plan", { id: "improved-slides" });
     } finally {
       setIsGeneratingSlides(false);
     }

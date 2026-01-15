@@ -3,38 +3,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface SlideContent {
-  slideNumber: number;
-  title: string;
-  keyPoints: string[];
-  visualSuggestion?: string;
-  dataHighlight?: string;
-  speakerNotes: {
-    openingHook: string;
-    talkingPoints: string[];
-    dataToMention?: string[];
-    transitionToNext?: string;
-    estimatedDuration: string;
-  };
-}
-
-interface ImprovedPresentation {
-  title: string;
-  companyName: string;
-  totalSlides: number;
-  overallNarrative: string;
-  keyThemes: string[];
-  slides: SlideContent[];
-  closingTips?: string[];
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { analysis, originalContent, companyName, industry } = await req.json();
+    const { analysis, originalContent, companyName, industry, currentAccountData } = await req.json();
 
     if (!analysis) {
       return new Response(
@@ -55,10 +30,13 @@ Deno.serve(async (req) => {
     const missingSlides = analysis.missingSlides || [];
     const strengths = analysis.strengths || [];
 
-    const prompt = `You are a senior presentation consultant. Based on the analysis of an existing presentation about ${companyName || "a company"} in ${industry || "their industry"}, create an improved version of the presentation as a series of web slides.
+    const prompt = `You are a senior presentation consultant for ServiceNow. Based on the analysis of an existing presentation about ${companyName || "a company"} in ${industry || "their industry"}, generate IMPROVED CONTENT that will populate an existing account plan template.
 
 ORIGINAL PRESENTATION CONTENT:
-${originalContent?.slice(0, 15000) || "Not provided"}
+${originalContent?.slice(0, 12000) || "Not provided"}
+
+CURRENT ACCOUNT DATA (if available):
+${JSON.stringify(currentAccountData || {}, null, 2).slice(0, 5000)}
 
 ANALYSIS SUMMARY:
 - Overall Score: ${analysis.overallScore}/10
@@ -79,25 +57,23 @@ ${webInsights.map((w: any) => `- ${w.insight} → ${w.suggestion}`).join("\n")}
 MISSING SLIDES TO ADD:
 ${missingSlides.map((m: any) => `- ${m.title}: ${m.rationale} (Include: ${m.suggestedContent})`).join("\n")}
 
-Create an improved presentation with 8-15 slides. For each slide, provide:
-1. A compelling title
-2. 3-5 key bullet points (concise, impactful)
-3. A visual suggestion (chart type, image concept, or layout idea)
-4. Data highlight if relevant
-5. Comprehensive speaker notes including:
-   - Opening hook (1 sentence to grab attention)
-   - Talking points (detailed notes for the presenter)
-   - Data points to mention verbally
-   - Transition to next slide
-   - Estimated speaking duration
+Your task is to generate IMPROVED account plan content that:
+1. Addresses all high-priority gaps identified
+2. Incorporates web research insights
+3. Maintains the identified strengths
+4. Creates a cohesive strategic narrative
 
-Focus on:
-- Addressing all high-priority gaps
-- Incorporating web research insights
-- Adding the missing slides
-- Maintaining the identified strengths
-- Creating a cohesive narrative flow
-- Making each slide visually impactful`;
+The output will populate existing slide templates, so generate content that fits these sections:
+- Executive Summary (narrative + 4 strategic pillars)
+- Strategic Observations, Implications, Tensions, Insights
+- Value Hypotheses (4 testable hypotheses)
+- Strategic Priorities (3 must-win priorities)
+- Key Workstreams (initiatives with ACV targets)
+- Risks & Mitigations
+- Roadmap Phases
+- Success Metrics
+- Core Value Drivers
+- AI Use Cases`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -106,11 +82,11 @@ Focus on:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: "You are an expert presentation consultant who creates compelling, executive-ready presentations with detailed speaker notes.",
+            content: "You are an elite McKinsey-caliber enterprise account strategist for ServiceNow. Generate comprehensive, board-ready strategic content.",
           },
           {
             role: "user",
@@ -121,78 +97,264 @@ Focus on:
           {
             type: "function",
             function: {
-              name: "generate_improved_presentation",
-              description: "Generate an improved presentation with slides and speaker notes",
+              name: "generate_improved_account_plan",
+              description: "Generate improved account plan content to populate existing slide templates",
               parameters: {
                 type: "object",
                 properties: {
-                  title: {
+                  executiveSummaryNarrative: {
                     type: "string",
-                    description: "Presentation title",
+                    description: "A compelling 3-4 sentence executive summary",
                   },
-                  companyName: {
-                    type: "string",
-                    description: "Company name",
-                  },
-                  totalSlides: {
-                    type: "number",
-                    description: "Total number of slides",
-                  },
-                  overallNarrative: {
-                    type: "string",
-                    description: "The overarching story arc of the presentation",
-                  },
-                  keyThemes: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "Key themes running through the presentation",
-                  },
-                  slides: {
+                  executiveSummaryPillars: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        slideNumber: { type: "number" },
+                        icon: { type: "string", enum: ["network", "customer", "technology", "efficiency"] },
+                        keyword: { type: "string" },
                         title: { type: "string" },
-                        keyPoints: {
+                        tagline: { type: "string" },
+                        description: { type: "string" },
+                        outcome: { type: "string" },
+                      },
+                      required: ["icon", "keyword", "title", "tagline", "description", "outcome"],
+                    },
+                    description: "4 strategic pillars",
+                  },
+                  strategicObservations: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        heading: { type: "string" },
+                        detail: { type: "string" },
+                      },
+                      required: ["heading", "detail"],
+                    },
+                    description: "4 strategic observations",
+                  },
+                  strategicImplications: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        heading: { type: "string" },
+                        detail: { type: "string" },
+                      },
+                      required: ["heading", "detail"],
+                    },
+                    description: "4 strategic implications",
+                  },
+                  strategicTensions: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        heading: { type: "string" },
+                        detail: { type: "string" },
+                        leftLabel: { type: "string" },
+                        leftDescription: { type: "string" },
+                        rightLabel: { type: "string" },
+                        rightDescription: { type: "string" },
+                        dilemma: { type: "string" },
+                      },
+                      required: ["heading", "detail", "leftLabel", "leftDescription", "rightLabel", "rightDescription", "dilemma"],
+                    },
+                    description: "4 strategic tensions",
+                  },
+                  strategicInsights: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        heading: { type: "string" },
+                        detail: { type: "string" },
+                      },
+                      required: ["heading", "detail"],
+                    },
+                    description: "4 strategic insights",
+                  },
+                  valueHypotheses: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        outcome: { type: "string" },
+                        mechanism: { type: "string" },
+                        timeframe: { type: "string" },
+                        impact: { type: "string" },
+                      },
+                      required: ["outcome", "mechanism", "timeframe", "impact"],
+                    },
+                    description: "4 value hypotheses",
+                  },
+                  strategicPriorities: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        whyNow: { type: "string" },
+                        ifWeLose: { type: "string" },
+                        winningLooks: { type: "string" },
+                        alignment: { type: "string" },
+                        color: { type: "string" },
+                      },
+                      required: ["title", "whyNow", "ifWeLose"],
+                    },
+                    description: "3 strategic priorities",
+                  },
+                  keyWorkstreams: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        subtitle: { type: "string" },
+                        dealStatus: { type: "string" },
+                        targetClose: { type: "string" },
+                        acv: { type: "string" },
+                        steadyStateBenefit: { type: "string" },
+                        insight: { type: "string" },
+                        people: {
                           type: "array",
-                          items: { type: "string" },
-                        },
-                        visualSuggestion: { type: "string" },
-                        dataHighlight: { type: "string" },
-                        speakerNotes: {
-                          type: "object",
-                          properties: {
-                            openingHook: { type: "string" },
-                            talkingPoints: {
-                              type: "array",
-                              items: { type: "string" },
+                          items: {
+                            type: "object",
+                            properties: {
+                              name: { type: "string" },
+                              role: { type: "string" },
                             },
-                            dataToMention: {
-                              type: "array",
-                              items: { type: "string" },
-                            },
-                            transitionToNext: { type: "string" },
-                            estimatedDuration: { type: "string" },
                           },
-                          required: ["openingHook", "talkingPoints", "estimatedDuration"],
                         },
                       },
-                      required: ["slideNumber", "title", "keyPoints", "speakerNotes"],
+                      required: ["title", "targetClose", "acv", "insight"],
+                    },
+                    description: "3-5 key workstreams",
+                  },
+                  risksMitigations: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        risk: { type: "string" },
+                        mitigation: { type: "string" },
+                        level: { type: "string" },
+                      },
+                      required: ["risk", "mitigation", "level"],
+                    },
+                    description: "4 risks with mitigations",
+                  },
+                  roadmapPhases: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        quarter: { type: "string" },
+                        title: { type: "string" },
+                        activities: { type: "array", items: { type: "string" } },
+                      },
+                      required: ["quarter", "title", "activities"],
+                    },
+                    description: "3 roadmap phases",
+                  },
+                  engagementStrategy: {
+                    type: "object",
+                    properties: {
+                      executiveAlignment: { type: "array", items: { type: "string" } },
+                      keyForums: { type: "array", items: { type: "string" } },
                     },
                   },
-                  closingTips: {
+                  successMetrics: {
                     type: "array",
-                    items: { type: "string" },
-                    description: "Tips for delivering the presentation effectively",
+                    items: {
+                      type: "object",
+                      properties: {
+                        metric: { type: "string" },
+                        label: { type: "string" },
+                        description: { type: "string" },
+                      },
+                      required: ["metric", "label", "description"],
+                    },
+                    description: "4 success metrics",
+                  },
+                  coreValueDrivers: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        outcomes: { type: "array", items: { type: "string" } },
+                        alignment: { type: "string" },
+                      },
+                      required: ["title", "description", "outcomes", "alignment"],
+                    },
+                    description: "4 core value drivers",
+                  },
+                  aiUseCases: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        priority: { type: "string" },
+                        status: { type: "string" },
+                      },
+                      required: ["title", "description", "priority", "status"],
+                    },
+                    description: "4 AI use cases",
+                  },
+                  fy1Retrospective: {
+                    type: "object",
+                    properties: {
+                      focusAreas: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string" },
+                            description: { type: "string" },
+                          },
+                        },
+                      },
+                      keyLessons: { type: "string" },
+                      lookingAhead: { type: "string" },
+                    },
+                  },
+                  customerStrategySynthesis: {
+                    type: "object",
+                    properties: {
+                      narrative: { type: "string" },
+                      serviceNowAlignment: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            customerPriority: { type: "string" },
+                            serviceNowValue: { type: "string" },
+                          },
+                        },
+                      },
+                    },
                   },
                 },
-                required: ["title", "companyName", "totalSlides", "overallNarrative", "keyThemes", "slides"],
+                required: [
+                  "executiveSummaryNarrative",
+                  "executiveSummaryPillars",
+                  "strategicObservations",
+                  "strategicImplications",
+                  "strategicPriorities",
+                  "keyWorkstreams",
+                  "risksMitigations",
+                  "successMetrics",
+                ],
               },
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "generate_improved_presentation" } },
+        tool_choice: { type: "function", function: { name: "generate_improved_account_plan" } },
       }),
     });
 
@@ -222,30 +384,30 @@ Focus on:
     const toolCall = aiData?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
       console.error("Unexpected AI response:", JSON.stringify(aiData));
-      throw new Error("No slide data generated");
+      throw new Error("No plan data generated");
     }
 
-    let improvedPresentation: ImprovedPresentation;
+    let improvedPlan;
     try {
-      improvedPresentation = JSON.parse(toolCall.function.arguments);
+      improvedPlan = JSON.parse(toolCall.function.arguments);
     } catch (e) {
       console.error("Failed to parse AI response:", e);
-      throw new Error("Failed to parse generated slides");
+      throw new Error("Failed to parse generated plan");
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        data: improvedPresentation,
+        data: improvedPlan,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Error generating improved slides:", error);
+    console.error("Error generating improved plan:", error);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : "Failed to generate improved slides",
+        error: error instanceof Error ? error.message : "Failed to generate improved plan",
       }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
