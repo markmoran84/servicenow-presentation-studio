@@ -134,7 +134,7 @@ const AgileTeamModelSlide = () => {
             />
           </div>
           
-          <div ref={wheelRef} className="p-4 rounded-2xl" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          <div ref={wheelRef} className="p-4">
             <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
