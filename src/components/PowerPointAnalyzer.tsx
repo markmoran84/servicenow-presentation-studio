@@ -21,11 +21,33 @@ import {
   Target,
   TrendingUp,
   AlertCircle,
-  FileText
+  FileText,
+  Clock,
+  MessageCircle,
+  Quote,
+  ArrowLeft
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountData } from "@/context/AccountDataContext";
 import { toast } from "sonner";
+
+interface SlideNote {
+  slideId: string;
+  slideLabel: string;
+  openingHook: string;
+  keyPoints: string[];
+  dataToMention?: string[];
+  anticipatedQuestions?: { question: string; suggestedResponse: string }[];
+  transitionToNext?: string;
+  speakingDuration?: string;
+}
+
+interface TalkingNotes {
+  overallNarrative: string;
+  keyThemes: string[];
+  slideNotes: SlideNote[];
+  closingRecommendations?: string[];
+}
 
 interface PresentationAnalysis {
   companyName: string;
@@ -45,7 +67,7 @@ interface PowerPointAnalyzerProps {
 }
 
 export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyzerProps) => {
-  const { updateData } = useAccountData();
+  const { data, updateData } = useAccountData();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<PresentationAnalysis | null>(null);
   const [webSearchUsed, setWebSearchUsed] = useState(false);
@@ -54,6 +76,13 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
   const [parsedSlideCount, setParsedSlideCount] = useState<number | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Talking notes state
+  const [talkingNotes, setTalkingNotes] = useState<TalkingNotes | null>(null);
+  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
+  const [notesWebSearchUsed, setNotesWebSearchUsed] = useState(false);
+  const [showNotesView, setShowNotesView] = useState(false);
+  const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -62,6 +91,18 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
         newSet.delete(section);
       } else {
         newSet.add(section);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleNoteSlide = (index: number) => {
+    setExpandedNotes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
       }
       return newSet;
     });
@@ -349,6 +390,156 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     }
   };
 
+  // Extract slides from parsed content for talking notes
+  const extractSlidesFromContent = (content: string): { label: string; index: number; description: string }[] => {
+    const slideRegex = /\[Slide (\d+)\]/g;
+    const slides: { label: string; index: number; description: string }[] = [];
+    let match;
+    let slideIndex = 0;
+    
+    while ((match = slideRegex.exec(content)) !== null) {
+      slides.push({
+        label: `Slide ${match[1]}`,
+        index: slideIndex,
+        description: `Content from slide ${match[1]}`
+      });
+      slideIndex++;
+    }
+    
+    // If no slides found, create generic ones based on slide count
+    if (slides.length === 0 && parsedSlideCount) {
+      for (let i = 1; i <= parsedSlideCount; i++) {
+        slides.push({
+          label: `Slide ${i}`,
+          index: i - 1,
+          description: `Presentation slide ${i}`
+        });
+      }
+    }
+    
+    return slides;
+  };
+
+  const handleGenerateTalkingNotes = async () => {
+    if (!data.basics.accountName && !analysis?.companyName) {
+      toast.error("Please upload a presentation first to identify the company");
+      return;
+    }
+
+    setIsGeneratingNotes(true);
+    try {
+      toast.loading("Generating talking notes for all slides...", { id: "talking-notes" });
+      
+      const slideInfo = extractSlidesFromContent(parsedContent);
+      
+      const { data: responseData, error } = await supabase.functions.invoke("generate-talking-notes", {
+        body: { 
+          accountData: {
+            ...data,
+            basics: {
+              ...data.basics,
+              accountName: data.basics.accountName || analysis?.companyName || "Unknown Company",
+              industry: data.basics.industry || analysis?.industry || ""
+            }
+          },
+          documentContent: parsedContent,
+          slideInfo
+        }
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Failed to generate notes");
+
+      setTalkingNotes(responseData.data);
+      setNotesWebSearchUsed(responseData.webSearchUsed || false);
+      setShowNotesView(true);
+      // Expand all slides by default
+      setExpandedNotes(new Set(responseData.data.slideNotes.map((_: any, i: number) => i)));
+      toast.success("Talking notes generated for all slides!", { id: "talking-notes" });
+    } catch (error) {
+      console.error("Error generating talking notes:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate talking notes", { id: "talking-notes" });
+    } finally {
+      setIsGeneratingNotes(false);
+    }
+  };
+
+  // Render slide note content
+  const renderSlideNoteContent = (note: SlideNote) => (
+    <div className="space-y-4">
+      {/* Opening Hook */}
+      <div>
+        <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+          Opening Hook
+        </h5>
+        <p className="text-sm italic text-foreground/90">"{note.openingHook}"</p>
+      </div>
+
+      {/* Key Points */}
+      <div>
+        <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Key Points
+        </h5>
+        <ul className="space-y-2">
+          {note.keyPoints.map((point, idx) => (
+            <li key={idx} className="text-sm flex items-start gap-2">
+              <TrendingUp className="w-3 h-3 text-primary mt-1 flex-shrink-0" />
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Data to Mention */}
+      {note.dataToMention && note.dataToMention.length > 0 && (
+        <div>
+          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            Data Points
+          </h5>
+          <div className="space-y-1">
+            {note.dataToMention.map((d, idx) => (
+              <div key={idx} className="text-sm flex items-start gap-2 bg-muted/30 rounded px-2 py-1">
+                <Quote className="w-3 h-3 text-accent mt-1 flex-shrink-0" />
+                <span className="font-medium">{d}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Anticipated Questions */}
+      {note.anticipatedQuestions && note.anticipatedQuestions.length > 0 && (
+        <div>
+          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            Anticipated Questions
+          </h5>
+          <div className="space-y-3">
+            {note.anticipatedQuestions.map((qa, idx) => (
+              <div key={idx} className="bg-muted/20 rounded-lg p-2">
+                <p className="text-sm font-medium flex items-start gap-2">
+                  <MessageCircle className="w-3 h-3 text-amber-500 mt-1 flex-shrink-0" />
+                  {qa.question}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1 ml-5">
+                  → {qa.suggestedResponse}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Transition */}
+      {note.transitionToNext && (
+        <div className="border-t border-border/50 pt-3">
+          <p className="text-xs text-muted-foreground">
+            <span className="font-semibold">Transition:</span> {note.transitionToNext}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <Card className="glass-card border-purple-500/30">
       <CardHeader>
@@ -361,7 +552,164 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!analysis ? (
+        {/* Talking Notes View */}
+        {showNotesView && talkingNotes ? (
+          <ScrollArea className="h-[70vh] max-h-[700px]">
+            <div className="space-y-4 pr-4">
+              {/* Header with Back Button */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowNotesView(false)}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Analysis
+                </Button>
+                {notesWebSearchUsed && (
+                  <Badge variant="outline" className="text-xs">
+                    <Globe className="w-3 h-3 mr-1" />
+                    Web Enhanced
+                  </Badge>
+                )}
+              </div>
+
+              {/* Title */}
+              <div className="text-center py-4">
+                <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+                  <Mic className="w-6 h-6 text-primary" />
+                  Talking Notes
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  {analysis?.companyName || data.basics.accountName} - {talkingNotes.slideNotes.length} slides
+                </p>
+              </div>
+
+              {/* Overall Narrative */}
+              <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-primary" />
+                    Story Arc
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="py-2 px-4">
+                  <p className="text-sm text-foreground/90">{talkingNotes.overallNarrative}</p>
+                </CardContent>
+              </Card>
+
+              {/* Key Themes */}
+              <div className="flex flex-wrap gap-2">
+                {talkingNotes.keyThemes.map((theme, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    {theme}
+                  </Badge>
+                ))}
+              </div>
+
+              {/* All Slides with Notes */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Presentation className="w-5 h-5 text-purple-500" />
+                  All Slides
+                </h3>
+                {talkingNotes.slideNotes.map((note, index) => (
+                  <Card 
+                    key={index} 
+                    className="border-l-4 border-l-primary/50 overflow-hidden"
+                  >
+                    <Collapsible 
+                      open={expandedNotes.has(index)}
+                      onOpenChange={() => toggleNoteSlide(index)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center font-bold text-primary">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-foreground">{note.slideLabel}</h4>
+                              <p className="text-xs text-muted-foreground line-clamp-1">{note.openingHook}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {note.speakingDuration && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {note.speakingDuration}
+                              </span>
+                            )}
+                            {expandedNotes.has(index) ? (
+                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4 pt-0 border-t border-border/50">
+                          <div className="pt-4">
+                            {renderSlideNoteContent(note)}
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Closing Recommendations */}
+              {talkingNotes.closingRecommendations && talkingNotes.closingRecommendations.length > 0 && (
+                <Card className="bg-muted/50">
+                  <CardHeader className="py-3 px-4">
+                    <CardTitle className="text-sm">Delivery Tips</CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-2 px-4">
+                    <ul className="space-y-2">
+                      {talkingNotes.closingRecommendations.map((rec, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-primary">•</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Regenerate Button */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowNotesView(false)}
+                  className="flex-1 gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Analysis
+                </Button>
+                <Button 
+                  onClick={handleGenerateTalkingNotes} 
+                  disabled={isGeneratingNotes}
+                  className="flex-1 gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {isGeneratingNotes ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Regenerate Notes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </ScrollArea>
+        ) : !analysis ? (
           <>
             <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
               <p className="text-sm text-muted-foreground">
@@ -677,21 +1025,31 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                     setParsedContent("");
                     setParsedSlideCount(null);
                     setSelectedFileName(null);
+                    setTalkingNotes(null);
+                    setShowNotesView(false);
                   }}
                   className="flex-1 gap-2"
                 >
                   <FileText className="w-4 h-4" />
                   Analyze Another
                 </Button>
-                {onGenerateTalkingNotes && (
-                  <Button
-                    onClick={onGenerateTalkingNotes}
-                    className="flex-1 gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  >
-                    <Mic className="w-4 h-4" />
-                    Generate Talking Notes
-                  </Button>
-                )}
+                <Button
+                  onClick={handleGenerateTalkingNotes}
+                  disabled={isGeneratingNotes}
+                  className="flex-1 gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {isGeneratingNotes ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating Notes...
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4" />
+                      Generate Talking Notes
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </ScrollArea>
