@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Loader2, Camera, FileText, Shapes } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, Camera, FileText, Shapes, Mic } from "lucide-react";
 import { exportToPowerPoint } from "@/utils/exportToPowerPoint";
 import { captureElementAsImage, createPowerPointFromImages } from "@/utils/captureSlides";
 import { exportToVectorPDF } from "@/utils/exportToPDF";
@@ -18,6 +18,8 @@ interface SlideNavigationProps {
   onExportSlide?: (index: number) => Promise<void>;
   onExportEnd?: () => void;
   getSlideElement?: () => HTMLElement | null;
+  onOpenTalkingNotes?: () => void;
+  talkingNotesOpen?: boolean;
 }
 
 export const SlideNavigation = ({
@@ -30,6 +32,8 @@ export const SlideNavigation = ({
   onExportSlide,
   onExportEnd,
   getSlideElement,
+  onOpenTalkingNotes,
+  talkingNotesOpen,
 }: SlideNavigationProps) => {
   const { data } = useAccountData();
   const [isExporting, setIsExporting] = useState(false);
@@ -314,6 +318,20 @@ export const SlideNavigation = ({
             Export
           </>
         )}
+      </Button>
+
+      <div className="w-px h-6 bg-white/20 mx-1" />
+
+      {/* Talking Notes Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onOpenTalkingNotes}
+        disabled={isExporting}
+        className={`text-white hover:bg-white/10 gap-2 ${talkingNotesOpen ? 'bg-primary/30' : ''}`}
+      >
+        <Mic className="w-4 h-4" />
+        Notes
       </Button>
     </div>
   );

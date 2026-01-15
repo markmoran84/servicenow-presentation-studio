@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
+import { TalkingNotesPanel } from "@/components/TalkingNotesPanel";
 import { InputFormSlide } from "@/components/slides/InputFormSlide";
 import { CoverSlide } from "@/components/slides/CoverSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
@@ -59,6 +60,7 @@ const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
+  const [talkingNotesOpen, setTalkingNotesOpen] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
 
@@ -97,6 +99,10 @@ const Index = () => {
 
   const getSlideElement = useCallback(() => {
     return slideContainerRef.current;
+  }, []);
+
+  const handleOpenTalkingNotes = useCallback(() => {
+    setTalkingNotesOpen(prev => !prev);
   }, []);
 
   useEffect(() => {
@@ -138,7 +144,7 @@ const Index = () => {
       {/* Slide container - sized for export when exporting */}
       <div 
         ref={slideContainerRef}
-        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'}`}
+        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} ${talkingNotesOpen ? 'mr-[420px]' : ''}`}
         key={currentSlide}
         style={isExporting ? {
           width: '1920px',
@@ -164,6 +170,16 @@ const Index = () => {
         onExportSlide={handleExportSlide}
         onExportEnd={handleExportEnd}
         getSlideElement={getSlideElement}
+        onOpenTalkingNotes={handleOpenTalkingNotes}
+        talkingNotesOpen={talkingNotesOpen}
+      />
+
+      {/* Talking Notes Panel */}
+      <TalkingNotesPanel
+        isOpen={talkingNotesOpen}
+        onClose={() => setTalkingNotesOpen(false)}
+        currentSlideIndex={currentSlide}
+        slideLabels={slides.map((s) => s.label)}
       />
 
       <SlideFooter />
