@@ -53,30 +53,8 @@ interface TalkingNotes {
   closingRecommendations?: string[];
 }
 
-interface ImprovedSlide {
-  slideNumber: number;
-  title: string;
-  keyPoints: string[];
-  visualSuggestion?: string;
-  dataHighlight?: string;
-  speakerNotes: {
-    openingHook: string;
-    talkingPoints: string[];
-    dataToMention?: string[];
-    transitionToNext?: string;
-    estimatedDuration: string;
-  };
-}
-
-interface ImprovedPresentation {
-  title: string;
-  companyName: string;
-  totalSlides: number;
-  overallNarrative: string;
-  keyThemes: string[];
-  slides: ImprovedSlide[];
-  closingTips?: string[];
-}
+// Using ImprovedSlide and ImprovedPresentation from context
+import type { ImprovedSlide, ImprovedPresentation } from "@/context/AccountDataContext";
 
 interface PresentationAnalysis {
   companyName: string;
@@ -93,10 +71,11 @@ interface PresentationAnalysis {
 
 interface PowerPointAnalyzerProps {
   onGenerateTalkingNotes?: () => void;
+  onAcceptChanges?: () => void;
 }
 
-export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyzerProps) => {
-  const { data, updateData } = useAccountData();
+export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: PowerPointAnalyzerProps) => {
+  const { data, updateData, setImprovedPresentation: setContextImprovedPresentation } = useAccountData();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<PresentationAnalysis | null>(null);
   const [webSearchUsed, setWebSearchUsed] = useState(false);
@@ -523,10 +502,16 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       if (error) throw error;
       if (!responseData.success) throw new Error(responseData.error || "Failed to generate slides");
 
-      setImprovedPresentation(responseData.data);
+      const presentation = responseData.data as ImprovedPresentation;
+      setImprovedPresentation(presentation);
+      // Store in context for main carousel
+      setContextImprovedPresentation(presentation);
       setShowSlidesView(true);
       setCurrentImprovedSlide(0);
       toast.success("Improved presentation generated!", { id: "improved-slides" });
+      
+      // Navigate to the improved slides in main carousel
+      onAcceptChanges?.();
     } catch (error) {
       console.error("Error generating improved slides:", error);
       toast.error(error instanceof Error ? error.message : "Failed to generate improved slides", { id: "improved-slides" });

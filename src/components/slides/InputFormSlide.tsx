@@ -18,9 +18,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface InputFormSlideProps {
   onGenerate?: () => void;
+  onAcceptImprovedSlides?: () => void;
 }
 
-export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
+export const InputFormSlide = ({ onGenerate, onAcceptImprovedSlides }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults, setGeneratedPlan } = useAccountData();
   const [activeTab, setActiveTab] = useState("aiAnalyzer");
   const [isGeneratingVision, setIsGeneratingVision] = useState(false);
@@ -184,10 +185,13 @@ export const InputFormSlide = ({ onGenerate }: InputFormSlideProps) => {
                 // Navigate to first slide after generation
                 onGenerate?.();
               }} />
-              <PowerPointAnalyzer onGenerateTalkingNotes={() => {
-                // This would open the talking notes panel - handled by parent
-                toast.info("Navigate to any slide and click 'Notes' in the navigation bar to generate talking notes");
-              }} />
+              <PowerPointAnalyzer 
+                onGenerateTalkingNotes={() => {
+                  // This would open the talking notes panel - handled by parent
+                  toast.info("Navigate to any slide and click 'Notes' in the navigation bar to generate talking notes");
+                }}
+                onAcceptChanges={onAcceptImprovedSlides}
+              />
             </div>
           </TabsContent>
 
