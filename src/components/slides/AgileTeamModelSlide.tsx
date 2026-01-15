@@ -133,7 +133,7 @@ const AgileTeamModelSlide = () => {
             />
           </div>
           
-          <div ref={wheelRef} className="bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744] p-4 rounded-2xl">
+          <div ref={wheelRef} className="p-4">
             <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
@@ -284,16 +284,6 @@ const AgileTeamModelSlide = () => {
               );
             })}
             </svg>
-
-            {/* Label below graphic */}
-            <div className="text-center mt-5">
-              <p className="text-emerald-400 font-bold text-xl">
-                The GTM Wheel of Fire
-              </p>
-              <p className="text-gray-400 text-sm mt-1">
-                Active resources illuminate based on current pursuit
-              </p>
-            </div>
           </div>
         </div>
 
