@@ -74,8 +74,12 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       return;
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 50MB.");
+    // File size check - 50MB limit
+    const maxSize = 50 * 1024 * 1024;
+    console.log(`File: ${file.name}, Size: ${file.size} bytes, Max: ${maxSize} bytes`);
+    
+    if (file.size > maxSize) {
+      toast.error(`File too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 50MB.`);
       return;
     }
 
@@ -85,11 +89,18 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     try {
       // Upload to storage first
       const storageName = `${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage
+      console.log(`Uploading to storage: ${storageName}`);
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("annual-reports")
         .upload(storageName, file);
 
-      if (uploadError) throw uploadError;
+      console.log("Upload result:", { uploadData, uploadError });
+      
+      if (uploadError) {
+        console.error("Storage upload error:", uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
 
       toast.loading("Extracting content from PowerPoint...", { id: "pptx-analysis" });
 
