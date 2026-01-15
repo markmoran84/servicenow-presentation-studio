@@ -74,12 +74,12 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
       return;
     }
 
-    // File size check - 50MB limit
-    const maxSize = 50 * 1024 * 1024;
+    // File size check - 110MB limit
+    const maxSize = 110 * 1024 * 1024;
     console.log(`File: ${file.name}, Size: ${file.size} bytes, Max: ${maxSize} bytes`);
     
     if (file.size > maxSize) {
-      toast.error(`File too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 50MB.`);
+      toast.error(`File too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 110MB.`);
       return;
     }
 
