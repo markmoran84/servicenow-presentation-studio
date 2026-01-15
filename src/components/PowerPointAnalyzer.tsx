@@ -222,29 +222,36 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                 ref={fileInputRef}
                 type="file"
                 accept=".pptx,.ppt"
-                onChange={handleFileUpload}
+                onChange={(e) => {
+                  console.log("File input changed:", e.target.files);
+                  handleFileUpload(e);
+                }}
                 className="hidden"
                 id="pptx-upload"
               />
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isAnalyzing}
-                className="gap-2 border-purple-500/50 hover:bg-purple-500/10"
-                size="lg"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Upload PowerPoint
-                  </>
-                )}
-              </Button>
+              <label htmlFor="pptx-upload">
+                <Button
+                  variant="outline"
+                  disabled={isAnalyzing}
+                  className="gap-2 border-purple-500/50 hover:bg-purple-500/10 cursor-pointer"
+                  size="lg"
+                  asChild
+                >
+                  <span>
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload PowerPoint
+                      </>
+                    )}
+                  </span>
+                </Button>
+              </label>
             </div>
           </>
         ) : (
