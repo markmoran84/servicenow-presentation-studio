@@ -25,12 +25,6 @@ const GifRecorder = ({
   const [progress, setProgress] = useState(0);
   const framesRef = useRef<string[]>([]);
   const recordingRef = useRef(false);
-
-  const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const framesRef = useRef<string[]>([]);
-  const recordingRef = useRef(false);
   const bgImageRef = useRef<HTMLImageElement | null>(null);
   const bgImagePromiseRef = useRef<Promise<HTMLImageElement> | null>(null);
 
