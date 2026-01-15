@@ -58,7 +58,7 @@ const slides = [
 ];
 
 const Index = () => {
-  const { data } = useAccountData();
+  const { data } = useAccountData(); // Force rebuild
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
