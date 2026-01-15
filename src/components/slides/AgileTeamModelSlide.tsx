@@ -108,7 +108,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
+    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8 bg-gradient-to-br from-[#1a3a4a] via-[#1e4a5a] to-[#0f2535]">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
