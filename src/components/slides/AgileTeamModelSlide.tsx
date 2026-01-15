@@ -1,7 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { useState, useEffect, useRef } from "react";
 import GifRecorder from "./GifRecorder";
-import slideBackground from "@/assets/slide-background.png";
 
 const AgileTeamModelSlide = () => {
   const { data } = useAccountData();
@@ -109,7 +108,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${slideBackground})` }}>
+    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8 bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744]">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">

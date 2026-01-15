@@ -1,8 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Video, Loader2, StopCircle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Video, Download, Loader2, StopCircle } from "lucide-react";
 import html2canvas from "html2canvas";
 
 interface GifRecorderProps {
@@ -21,7 +19,6 @@ const GifRecorder = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [transparentBg, setTransparentBg] = useState(false);
   const framesRef = useRef<string[]>([]);
   const recordingRef = useRef(false);
 
@@ -33,7 +30,7 @@ const GifRecorder = ({
         scale: 1,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: transparentBg ? null : "#0a1525",
+        backgroundColor: null,
         logging: false,
       });
       return canvas.toDataURL("image/png");
@@ -41,7 +38,7 @@ const GifRecorder = ({
       console.error("Frame capture error:", error);
       return null;
     }
-  }, [targetRef, transparentBg]);
+  }, [targetRef]);
 
   const createGif = useCallback(async (frames: string[]) => {
     // Dynamically import GIF.js
@@ -59,7 +56,6 @@ const GifRecorder = ({
         width: targetRef.current?.offsetWidth || 600,
         height: targetRef.current?.offsetHeight || 600,
         workerScript: workerUrl,
-        transparent: transparentBg ? 0x000000 : null,
       });
 
       let loadedFrames = 0;
@@ -94,7 +90,7 @@ const GifRecorder = ({
         reject(error);
       });
     });
-  }, [targetRef, frameRate, transparentBg]);
+  }, [targetRef, frameRate]);
 
   const startRecording = useCallback(async () => {
     if (!targetRef.current) return;
@@ -181,28 +177,15 @@ const GifRecorder = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <Switch 
-          id="transparent-bg" 
-          checked={transparentBg} 
-          onCheckedChange={setTransparentBg}
-          disabled={isRecording || isProcessing}
-        />
-        <Label htmlFor="transparent-bg" className="text-xs text-gray-300">
-          Transparent BG
-        </Label>
-      </div>
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={startRecording}
-        className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30"
-      >
-        <Video className="w-4 h-4 mr-2" />
-        Record as GIF
-      </Button>
-    </div>
+    <Button 
+      variant="outline" 
+      size="sm"
+      onClick={startRecording}
+      className="bg-emerald-500/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/30"
+    >
+      <Video className="w-4 h-4 mr-2" />
+      Record as GIF
+    </Button>
   );
 };
 
