@@ -50,6 +50,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
   const [webSearchUsed, setWebSearchUsed] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["gaps", "suggestions"]));
   const [parsedContent, setParsedContent] = useState<string>("");
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleSection = (section: string) => {
@@ -68,6 +69,8 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setSelectedFileName(file.name);
+
     const fileName = file.name.toLowerCase();
     if (!fileName.endsWith(".pptx") && !fileName.endsWith(".ppt")) {
       toast.error("Please upload a PowerPoint file (.pptx or .ppt)");
@@ -77,9 +80,11 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     // File size check - 110MB limit
     const maxSize = 110 * 1024 * 1024;
     console.log(`File: ${file.name}, Size: ${file.size} bytes, Max: ${maxSize} bytes`);
-    
+
     if (file.size > maxSize) {
-      toast.error(`File too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 110MB.`);
+      toast.error(
+        `File too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Maximum size is 110MB.`
+      );
       return;
     }
 
@@ -87,16 +92,19 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     setAnalysis(null);
 
     try {
+      toast.loading("Uploading PowerPoint...", { id: "pptx-analysis" });
+
       // Upload to storage first
-      const storageName = `${Date.now()}-${file.name}`;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
+      const storageName = `${Date.now()}-${safeName}`;
       console.log(`Uploading to storage: ${storageName}`);
-      
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("annual-reports")
         .upload(storageName, file);
 
       console.log("Upload result:", { uploadData, uploadError });
-      
+
       if (uploadError) {
         console.error("Storage upload error:", uploadError);
         throw new Error(`Upload failed: ${uploadError.message}`);
@@ -223,35 +231,43 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                 type="file"
                 accept=".pptx,.ppt"
                 onChange={(e) => {
-                  console.log("File input changed:", e.target.files);
+                  const picked = e.target.files?.[0];
+                  if (picked) {
+                    setSelectedFileName(picked.name);
+                    toast.info(`Selected: ${picked.name}`);
+                  }
                   handleFileUpload(e);
                 }}
-                className="hidden"
-                id="pptx-upload"
+                className="sr-only"
               />
-              <label htmlFor="pptx-upload">
-                <Button
-                  variant="outline"
-                  disabled={isAnalyzing}
-                  className="gap-2 border-purple-500/50 hover:bg-purple-500/10 cursor-pointer"
-                  size="lg"
-                  asChild
-                >
-                  <span>
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        Upload PowerPoint
-                      </>
-                    )}
-                  </span>
-                </Button>
-              </label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  toast.info("Choose a PowerPoint file to analyze");
+                  fileInputRef.current?.click();
+                }}
+                disabled={isAnalyzing}
+                className="gap-2 border-purple-500/50 hover:bg-purple-500/10"
+                size="lg"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    Upload PowerPoint
+                  </>
+                )}
+              </Button>
+              {selectedFileName && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Selected: <span className="text-foreground">{selectedFileName}</span>
+                </p>
+              )}
             </div>
           </>
         ) : (
