@@ -28,6 +28,7 @@ import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
 import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
 import { ImprovedSlideComponent } from "@/components/slides/ImprovedSlideComponent";
+import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
 import { useAccountData } from "@/context/AccountDataContext";
 
 // Default slides for annual report / manual input flow
@@ -60,7 +61,7 @@ const defaultSlides = [
 ];
 
 const Index = () => {
-  const { data, setImprovedPresentation } = useAccountData();
+  const { data, setImprovedPresentation, setEnhancedPresentation } = useAccountData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
@@ -69,14 +70,27 @@ const Index = () => {
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
 
-  // Check if we're in PPT mode (improvedPresentation exists)
-  const isPPTMode = !!data.improvedPresentation;
+  // Check if we're in PPT mode (enhanced or legacy improved presentation)
+  const enhancedPresentation = data.enhancedPresentation;
+  const isPPTMode = !!enhancedPresentation || !!data.improvedPresentation;
   const improvedPresentation = data.improvedPresentation;
 
   // Build active slides based on mode
   const activeSlides = useMemo(() => {
+    // Enhanced PPT mode with pixel-perfect layout
+    if (enhancedPresentation) {
+      return [
+        { label: "Input Form", isForm: true, component: InputFormSlide },
+        ...enhancedPresentation.slides.map((slide) => ({
+          label: `${slide.slideNumber}. ${slide.title}`,
+          isForm: false,
+          enhancedSlide: slide,
+          theme: enhancedPresentation.extractedTheme,
+        })),
+      ];
+    }
+    // Legacy improved presentation mode
     if (isPPTMode && improvedPresentation) {
-      // PPT mode: Input Form + PPT slides
       return [
         { label: "Input Form", isForm: true, component: InputFormSlide },
         ...improvedPresentation.slides.map((slide) => ({
@@ -88,7 +102,7 @@ const Index = () => {
     }
     // Default mode: use standard slide deck
     return defaultSlides;
-  }, [isPPTMode, improvedPresentation]);
+  }, [isPPTMode, improvedPresentation, enhancedPresentation]);
 
   // Get slide labels for navigation
   const slideLabels = useMemo(() => activeSlides.map((s) => s.label), [activeSlides]);
@@ -113,8 +127,9 @@ const Index = () => {
   // Reset to default mode (exit PPT mode)
   const handleResetToDefault = useCallback(() => {
     setImprovedPresentation(undefined);
+    setEnhancedPresentation(undefined);
     setCurrentSlide(0);
-  }, [setImprovedPresentation]);
+  }, [setImprovedPresentation, setEnhancedPresentation]);
 
   // Export handlers
   const handleExportStart = useCallback(() => {
@@ -177,7 +192,21 @@ const Index = () => {
     const currentSlideConfig = activeSlides[currentSlide];
     if (!currentSlideConfig) return null;
 
-    // Check if it's a PPT slide
+    // Check if it's an enhanced PPT slide (pixel-perfect)
+    if ("enhancedSlide" in currentSlideConfig && currentSlideConfig.enhancedSlide) {
+      return (
+        <PPTSlideRenderer 
+          slide={currentSlideConfig.enhancedSlide} 
+          showNotes={showSpeakerNotes}
+          theme={currentSlideConfig.theme || enhancedPresentation?.extractedTheme || {
+            colors: { accent1: '#84CC16', accent2: '#22D3EE', accent3: '#A855F7', background1: '#0B1D26', background2: '#1a3a4a', text1: '#FFFFFF', text2: '#94A3B8' },
+            fonts: { heading: 'Inter', body: 'Inter' }
+          }}
+        />
+      );
+    }
+
+    // Check if it's a legacy PPT slide
     if ("pptSlide" in currentSlideConfig && currentSlideConfig.pptSlide) {
       return (
         <ImprovedSlideComponent 

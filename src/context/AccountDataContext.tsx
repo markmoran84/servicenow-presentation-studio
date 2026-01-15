@@ -192,6 +192,9 @@ export interface ImprovedPresentation {
   closingTips?: string[];
 }
 
+// Re-export enhanced types from pptxLayout
+export type { EnhancedImprovedSlide, EnhancedImprovedPresentation, PPTXExtractedPresentation } from "@/types/pptxLayout";
+
 // Strategic Tension interface for StrategicTensionSlide
 export interface StrategicTension {
   heading: string;
@@ -252,6 +255,8 @@ export interface AccountData {
   businessModel: BusinessModelCanvas;
   generatedPlan?: AIGeneratedPlan;
   improvedPresentation?: ImprovedPresentation;
+  // Enhanced presentation with pixel-perfect layout
+  enhancedPresentation?: import("@/types/pptxLayout").EnhancedImprovedPresentation;
 }
 
 // Default placeholder data (generic)
@@ -346,6 +351,7 @@ interface AccountDataContextType {
   setGeneratedPlan: (plan: AIGeneratedPlan) => void;
   patchGeneratedPlan: (patch: Partial<AIGeneratedPlan>) => void;
   reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
+  setEnhancedPresentation: (presentation: import("@/types/pptxLayout").EnhancedImprovedPresentation | undefined) => void;
   setImprovedPresentation: (presentation: ImprovedPresentation | undefined) => void;
 }
 
@@ -402,8 +408,15 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const setEnhancedPresentation = (presentation: import("@/types/pptxLayout").EnhancedImprovedPresentation | undefined) => {
+    setData((prev) => ({
+      ...prev,
+      enhancedPresentation: presentation,
+    }));
+  };
+
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam, setImprovedPresentation }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam, setImprovedPresentation, setEnhancedPresentation }}>
       {children}
     </AccountDataContext.Provider>
   );
