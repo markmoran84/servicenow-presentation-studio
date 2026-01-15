@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -129,6 +130,83 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     };
   };
 
+  const decodeXmlEntities = (value: string) => {
+    return value
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, "&");
+  };
+
+  const extractTextFromPptxXml = (xml: string) => {
+    const textMatches = xml.match(/<a:t>([^<]*)<\/a:t>/g) || [];
+    return textMatches
+      .map((match) => match.replace(/<a:t>([^<]*)<\/a:t>/, "$1"))
+      .map(decodeXmlEntities)
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  const parsePptxInBrowser = async (file: File): Promise<{ content: string; slideCount: number }> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const slideTexts: string[] = [];
+
+    const slideFiles = Object.keys(zip.files)
+      .filter((name) => /ppt\/slides\/slide\d+\.xml$/.test(name))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || "0", 10);
+        const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || "0", 10);
+        return numA - numB;
+      });
+
+    const slideCount = slideFiles.length;
+
+    for (const slideFile of slideFiles) {
+      const xml = await zip.file(slideFile)?.async("string");
+      if (!xml) continue;
+
+      const slideText = extractTextFromPptxXml(xml);
+      if (slideText.trim()) {
+        const slideNum = slideFile.match(/slide(\d+)\.xml/)?.[1] || "?";
+        slideTexts.push(`[Slide ${slideNum}]\n${slideText}`);
+      }
+    }
+
+    const noteFiles = Object.keys(zip.files).filter((name) => /ppt\/notesSlides\/notesSlide\d+\.xml$/.test(name));
+
+    for (const noteFile of noteFiles) {
+      const xml = await zip.file(noteFile)?.async("string");
+      if (!xml) continue;
+
+      const tokens = extractTextFromPptxXml(xml)
+        .split(/\s+/)
+        .filter((t) => t.trim().length > 0 && !/^\d+$/.test(t));
+      const noteText = tokens.join(" ");
+
+      if (noteText.trim() && noteText.length > 20) {
+        const slideNum = noteFile.match(/notesSlide(\d+)\.xml/)?.[1] || "?";
+        slideTexts.push(`[Notes for Slide ${slideNum}]\n${noteText}`);
+      }
+    }
+
+    const extractedText = slideTexts.join("\n\n").trim();
+
+    if (!extractedText || extractedText.length < 50) {
+      throw new Error(
+        "Could not extract meaningful text from the PowerPoint. The file may be image-based or protected."
+      );
+    }
+
+    return {
+      content: extractedText.slice(0, 100000),
+      slideCount,
+    };
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -176,16 +254,38 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
 
       toast.loading("Extracting content from PowerPoint...", { id: "pptx-analysis" });
 
-      // Parse the PowerPoint using our parse-document endpoint
-      const { data: parseData, error: parseError } = await supabase.functions.invoke("parse-document", {
-        body: { filePath: storageName, fileType: "pptx" }
-      });
+      // Large PPTX files can exceed backend function memory limits.
+      // For those (and as a fallback), extract slide text in the browser.
+      const shouldParseInBrowser = fileName.endsWith(".pptx") && file.size > 25 * 1024 * 1024;
 
-      if (parseError) throw parseError;
-      if (!parseData?.success) throw new Error(parseData?.error || "Failed to parse PowerPoint");
+      let content = "";
+      let slideCount = 0;
 
-      const content = parseData.content || "";
-      const slideCount = parseData.slideCount || 0;
+      if (shouldParseInBrowser) {
+        console.log("Parsing PPTX in browser (large file)");
+        const parsed = await parsePptxInBrowser(file);
+        content = parsed.content;
+        slideCount = parsed.slideCount;
+      } else {
+        try {
+          // Parse the PowerPoint using our backend parse-document endpoint
+          const { data: parseData, error: parseError } = await supabase.functions.invoke("parse-document", {
+            body: { filePath: storageName, fileType: "pptx" },
+          });
+
+          if (parseError) throw parseError;
+          if (!parseData?.success) throw new Error(parseData?.error || "Failed to parse PowerPoint");
+
+          content = parseData.content || "";
+          slideCount = parseData.slideCount || 0;
+        } catch (e) {
+          console.warn("Backend parse failed; falling back to browser parsing", e);
+          const parsed = await parsePptxInBrowser(file);
+          content = parsed.content;
+          slideCount = parsed.slideCount;
+        }
+      }
+
       setParsedContent(content);
       setParsedSlideCount(slideCount);
 
@@ -193,7 +293,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
 
       // Analyze the presentation
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke("analyze-presentation", {
-        body: { presentationContent: content, slideCount }
+        body: { presentationContent: content, slideCount },
       });
 
       if (analysisError) throw analysisError;
