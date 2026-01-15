@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { analysis, originalContent, companyName, industry, slideCount } = await req.json();
+    const { analysis, originalContent, companyName, industry, slideCount, extractedSlides } = await req.json();
 
     if (!analysis || !originalContent) {
       return new Response(
@@ -25,14 +25,45 @@ Deno.serve(async (req) => {
 
     // Extract slide information from original content
     const slideRegex = /\[Slide (\d+)\]\n([\s\S]*?)(?=\[Slide \d+\]|\[Notes for Slide|\s*$)/g;
-    const slides: { number: number; content: string }[] = [];
+    const slides: { number: number; content: string; title?: string }[] = [];
     let match;
     while ((match = slideRegex.exec(originalContent)) !== null) {
+      const content = match[2].trim();
+      // Try to extract title (first line or first sentence)
+      const firstLine = content.split('\n')[0]?.trim() || '';
       slides.push({
         number: parseInt(match[1], 10),
-        content: match[2].trim(),
+        content,
+        title: firstLine.length < 100 ? firstLine : undefined,
       });
     }
+
+    // If we have extracted slides with layout data, include that context
+    const hasLayoutData = extractedSlides && Array.isArray(extractedSlides) && extractedSlides.length > 0;
+
+    // Build detailed slide context for each slide
+    const slideContexts = slides.map((s, idx) => {
+      const layoutInfo = hasLayoutData && extractedSlides[idx] ? extractedSlides[idx] : null;
+      let layoutDescription = "";
+      
+      if (layoutInfo?.layout) {
+        const layout = layoutInfo.layout;
+        layoutDescription = `
+Layout Type: ${layout.layoutType}
+Number of shapes/elements: ${layout.shapes?.length || 0}
+Has title placeholder: ${layout.shapes?.some((sh: any) => sh.placeholder?.type === 'title') || false}
+Has body/content area: ${layout.shapes?.some((sh: any) => sh.placeholder?.type === 'body' || sh.placeholder?.type === 'content') || false}`;
+      }
+      
+      return `
+═══════════════════════════════════════
+SLIDE ${s.number}${s.title ? ` - "${s.title}"` : ''}
+═══════════════════════════════════════
+ORIGINAL CONTENT:
+${s.content}
+${layoutDescription}
+`;
+    }).join('\n');
 
     // If no slides found, create placeholders
     const effectiveSlideCount = slides.length > 0 ? slides.length : (slideCount || 10);
@@ -42,30 +73,60 @@ Deno.serve(async (req) => {
     const webInsights = analysis.webInsights || [];
     const strengths = analysis.strengths || [];
 
-    const prompt = `You are a senior presentation consultant. Your task is to REWRITE and ENHANCE the actual slide content from an uploaded PowerPoint presentation.
+    const prompt = `You are a world-class presentation designer and content strategist. Your task is to TRANSFORM this uploaded PowerPoint presentation into a polished, executive-ready deck.
 
-CRITICAL INSTRUCTIONS:
-- DO NOT describe what improvements to make - ACTUALLY MAKE the improvements
-- DO NOT say "Add specific data about..." - WRITE the specific data point
-- DO NOT give meta-suggestions - WRITE the actual enhanced content
-- Each keyPoint should be a COMPLETE, polished bullet point ready for the presentation
-- Transform vague content into specific, impactful statements
+COMPANY CONTEXT:
+- Company: ${companyName || "the company"}
+- Industry: ${industry || "their industry"}
 
-ORIGINAL PRESENTATION (${effectiveSlideCount} slides) for ${companyName || "the company"} in ${industry || "their industry"}:
-${slides.map(s => `[Slide ${s.number}]:\n${s.content}`).join("\n\n---\n\n")}
+ANALYSIS FINDINGS:
+- Current Score: ${analysis.overallScore}/10
+- Assessment: ${analysis.overallAssessment}
+- Strengths: ${strengths.map((s: { title: string }) => s.title).join(", ")}
+- Gaps to address: ${gaps.map((g: { title: string; detail: string }) => `${g.title}: ${g.detail}`).join("; ")}
+- Web research insights: ${webInsights.map((w: { insight: string }) => w.insight).join("; ")}
 
-ANALYSIS INSIGHTS TO APPLY:
-- Score: ${analysis.overallScore}/10 - ${analysis.overallAssessment}
-- Gaps to fix: ${gaps.map((g: { title: string; detail: string }) => g.title).join(", ")}
-- Suggestions: ${slideSuggestions.map((s: { slideTitle: string; suggestion: string }) => s.suggestion).join("; ")}
+SLIDE-BY-SLIDE CONTENT TO IMPROVE:
+${slideContexts}
 
-YOUR OUTPUT:
-For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTENT:
-- title: The original or improved slide title
-- keyPoints: 3-5 COMPLETE, POLISHED bullet points with the actual enhanced content (not suggestions about what to add)
-- visualSuggestion: What visual would strengthen this slide
-- dataHighlight: A specific data point or metric to emphasize (if applicable)
-- speakerNotes: Practical notes for presenting this slide`;
+═══════════════════════════════════════════════════════════════════════════════
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. PRESERVE THE ORIGINAL SLIDE STRUCTURE
+   - Keep the same number of slides (${effectiveSlideCount})
+   - Maintain the original slide order and general topic flow
+   - Each slide should stay focused on its original topic
+
+2. TRANSFORM THE CONTENT - DON'T DESCRIBE IT
+   ❌ DON'T write: "Add specific revenue figures"
+   ✅ DO write: "$4.2B revenue with 12% YoY growth"
+   
+   ❌ DON'T write: "Include customer pain points"
+   ✅ DO write: "Legacy systems causing 40% operational overhead"
+   
+   ❌ DON'T write: "Mention strategic priorities"
+   ✅ DO write: "Digital transformation to reduce time-to-market by 60%"
+
+3. MAKE EVERY BULLET POINT CONCRETE AND ACTIONABLE
+   - Use specific numbers, percentages, dollar amounts
+   - Name specific products, technologies, or initiatives
+   - Include timeframes and measurable outcomes
+   - Reference actual business context from the analysis
+
+4. MATCH THE VISUAL STYLE
+   - Keep titles concise (under 8 words)
+   - Use parallel structure in bullet points
+   - Maintain professional, executive-level language
+   - Each slide should have 3-5 key points maximum
+
+5. SPEAKER NOTES SHOULD BE PRESENTER-READY
+   - Opening hooks should grab attention
+   - Talking points should expand on the slides naturally
+   - Include specific data points to mention verbally
+   - Provide smooth transitions between slides
+
+Generate THE ACTUAL IMPROVED CONTENT for all ${effectiveSlideCount} slides.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -74,11 +135,18 @@ For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTE
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: "You are an elite presentation strategist. REWRITE the slides with actual improved content - do not describe improvements, MAKE them. Every bullet point should be a complete, polished statement ready for the presentation. Never say 'Add X' or 'Include Y' - write the actual X and Y content.",
+            content: `You are McKinsey's top presentation strategist. Your job is to REWRITE presentations with actual improved content, not meta-commentary about what to improve.
+
+REMEMBER:
+- Write the actual content, not descriptions of content
+- Every bullet point must be a complete, polished statement
+- Use specific data, metrics, and business context
+- Match executive presentation standards
+- Never use placeholder language like "Add X" or "Include Y"`,
           },
           {
             role: "user",
@@ -89,8 +157,8 @@ For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTE
           {
             type: "function",
             function: {
-              name: "generate_improved_presentation",
-              description: "Generate improved presentation slides matching the original structure",
+              name: "generate_enhanced_presentation",
+              description: "Generate an enhanced presentation with improved content for each slide, maintaining the original structure",
               parameters: {
                 type: "object",
                 properties: {
@@ -121,40 +189,59 @@ For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTE
                       type: "object",
                       properties: {
                         slideNumber: { type: "number" },
-                        title: { type: "string" },
-                        keyPoints: {
-                          type: "array",
-                          items: { type: "string" },
-                          description: "3-5 key bullet points",
+                        title: { 
+                          type: "string",
+                          description: "Concise slide title (under 8 words)"
                         },
-                        visualSuggestion: { type: "string" },
-                        dataHighlight: { type: "string" },
+                        improvedContent: {
+                          type: "object",
+                          properties: {
+                            title: { type: "string", description: "The improved slide title" },
+                            keyPoints: {
+                              type: "array",
+                              items: { type: "string" },
+                              description: "3-5 polished, specific bullet points with actual content (not meta-descriptions)"
+                            },
+                            dataPoints: {
+                              type: "array",
+                              items: { type: "string" },
+                              description: "Specific metrics, percentages, or figures to highlight"
+                            },
+                            visualSuggestion: { 
+                              type: "string",
+                              description: "Specific visual element that would enhance this slide"
+                            }
+                          },
+                          required: ["keyPoints"]
+                        },
                         speakerNotes: {
                           type: "object",
                           properties: {
-                            openingHook: { type: "string" },
+                            openingHook: { type: "string", description: "Attention-grabbing opening line" },
                             talkingPoints: {
                               type: "array",
                               items: { type: "string" },
+                              description: "Expanded talking points for the presenter"
                             },
                             dataToMention: {
                               type: "array",
                               items: { type: "string" },
+                              description: "Specific data points to mention verbally"
                             },
-                            transitionToNext: { type: "string" },
-                            estimatedDuration: { type: "string" },
+                            transitionToNext: { type: "string", description: "Smooth transition to next slide" },
+                            estimatedDuration: { type: "string", description: "e.g., '2-3 minutes'" },
                           },
                           required: ["openingHook", "talkingPoints", "estimatedDuration"],
                         },
                       },
-                      required: ["slideNumber", "title", "keyPoints", "speakerNotes"],
+                      required: ["slideNumber", "title", "improvedContent", "speakerNotes"],
                     },
                     description: `Array of ${effectiveSlideCount} improved slides`,
                   },
                   closingTips: {
                     type: "array",
                     items: { type: "string" },
-                    description: "Tips for delivering the presentation",
+                    description: "Tips for delivering the presentation effectively",
                   },
                 },
                 required: ["title", "companyName", "totalSlides", "overallNarrative", "keyThemes", "slides"],
@@ -162,7 +249,7 @@ For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTE
             },
           },
         ],
-        tool_choice: { type: "function", function: { name: "generate_improved_presentation" } },
+        tool_choice: { type: "function", function: { name: "generate_enhanced_presentation" } },
       }),
     });
 
@@ -195,18 +282,32 @@ For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTE
       throw new Error("No presentation data generated");
     }
 
-    let improvedPresentation;
+    let enhancedPresentation;
     try {
-      improvedPresentation = JSON.parse(toolCall.function.arguments);
+      enhancedPresentation = JSON.parse(toolCall.function.arguments);
     } catch (e) {
       console.error("Failed to parse AI response:", e);
       throw new Error("Failed to parse generated presentation");
     }
 
+    // Merge with extracted layout data if available
+    if (hasLayoutData && enhancedPresentation.slides) {
+      enhancedPresentation.slides = enhancedPresentation.slides.map((slide: any, idx: number) => {
+        const extractedSlide = extractedSlides[idx];
+        if (extractedSlide?.layout) {
+          return {
+            ...slide,
+            originalLayout: extractedSlide.layout,
+          };
+        }
+        return slide;
+      });
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
-        data: improvedPresentation,
+        data: enhancedPresentation,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
