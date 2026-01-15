@@ -1,10 +1,12 @@
 import { useAccountData } from "@/context/AccountDataContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import GifRecorder from "./GifRecorder";
 
 const AgileTeamModelSlide = () => {
   const { data } = useAccountData();
   const companyName = data.basics.accountName || "Company";
   const [activeSegments, setActiveSegments] = useState<number[]>([0, 2, 5]);
+  const wheelRef = useRef<HTMLDivElement>(null);
 
   // Cycle through different "active" configurations to show dynamic resource allocation
   useEffect(() => {
@@ -121,7 +123,18 @@ const AgileTeamModelSlide = () => {
       <div className="flex-1 grid grid-cols-[620px_1fr] gap-16 items-center max-lg:grid-cols-1 max-lg:items-start">
         {/* Left Side - GTM Wheel Graphic */}
         <div className="w-[620px] max-lg:w-full flex flex-col items-center justify-center">
-          <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
+          {/* GIF Recorder Button */}
+          <div className="absolute top-4 right-4 z-10">
+            <GifRecorder 
+              targetRef={wheelRef} 
+              duration={12000} 
+              frameRate={8}
+              fileName="gtm-wheel-animation"
+            />
+          </div>
+          
+          <div ref={wheelRef} className="bg-gradient-to-br from-[#0f1628] via-[#162033] to-[#1a2744] p-4 rounded-2xl">
+            <svg width="520" height="520" viewBox="0 0 440 440" className="drop-shadow-2xl">
             <defs>
               {/* Gradients for active/inactive segments */}
               <radialGradient id="activeGradient" cx="50%" cy="50%" r="50%">
@@ -270,16 +283,17 @@ const AgileTeamModelSlide = () => {
                 </g>
               );
             })}
-          </svg>
+            </svg>
 
-          {/* Label below graphic */}
-          <div className="text-center mt-5">
-            <p className="text-emerald-400 font-bold text-xl">
-              The GTM Wheel of Fire
-            </p>
-            <p className="text-gray-400 text-sm mt-1">
-              Active resources illuminate based on current pursuit
-            </p>
+            {/* Label below graphic */}
+            <div className="text-center mt-5">
+              <p className="text-emerald-400 font-bold text-xl">
+                The GTM Wheel of Fire
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Active resources illuminate based on current pursuit
+              </p>
+            </div>
           </div>
         </div>
 
