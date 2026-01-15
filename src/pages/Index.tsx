@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { TalkingNotesPanel } from "@/components/TalkingNotesPanel";
@@ -27,9 +27,11 @@ import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
 import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
+import { ImprovedSlideComponent } from "@/components/slides/ImprovedSlideComponent";
 import { useAccountData } from "@/context/AccountDataContext";
 
-const slides = [
+// Default slides for annual report / manual input flow
+const defaultSlides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
@@ -58,16 +60,38 @@ const slides = [
 ];
 
 const Index = () => {
-  const { data } = useAccountData(); // Force rebuild
+  const { data, setImprovedPresentation } = useAccountData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
   const [talkingNotesOpen, setTalkingNotesOpen] = useState(false);
+  const [showSpeakerNotes, setShowSpeakerNotes] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
 
-  // Use the original slides array directly - data updates will be reflected automatically
-  const activeSlides = slides;
+  // Check if we're in PPT mode (improvedPresentation exists)
+  const isPPTMode = !!data.improvedPresentation;
+  const improvedPresentation = data.improvedPresentation;
+
+  // Build active slides based on mode
+  const activeSlides = useMemo(() => {
+    if (isPPTMode && improvedPresentation) {
+      // PPT mode: Input Form + PPT slides
+      return [
+        { label: "Input Form", isForm: true, component: InputFormSlide },
+        ...improvedPresentation.slides.map((slide) => ({
+          label: `${slide.slideNumber}. ${slide.title}`,
+          isForm: false,
+          pptSlide: slide,
+        })),
+      ];
+    }
+    // Default mode: use standard slide deck
+    return defaultSlides;
+  }, [isPPTMode, improvedPresentation]);
+
+  // Get slide labels for navigation
+  const slideLabels = useMemo(() => activeSlides.map((s) => s.label), [activeSlides]);
 
   const goToPrevious = useCallback(() => {
     setCurrentSlide((prev) => Math.max(0, prev - 1));
@@ -78,14 +102,19 @@ const Index = () => {
   }, [activeSlides.length]);
 
   const goToFirstSlide = useCallback(() => {
-    setCurrentSlide(1); // Navigate to Cover slide
+    setCurrentSlide(1); // Navigate to first content slide (after Input Form)
   }, []);
 
-  // Navigate to Executive Summary slide after accepting improvements
+  // Navigate to first content slide after accepting PPT improvements
   const handleAcceptImprovedSlides = useCallback(() => {
-    // Navigate to slide 2 (Executive Summary) - the first content slide after Cover
-    setCurrentSlide(2);
+    setCurrentSlide(1); // First PPT slide (index 1, after Input Form)
   }, []);
+
+  // Reset to default mode (exit PPT mode)
+  const handleResetToDefault = useCallback(() => {
+    setImprovedPresentation(undefined);
+    setCurrentSlide(0);
+  }, [setImprovedPresentation]);
 
   // Export handlers
   const handleExportStart = useCallback(() => {
@@ -96,7 +125,6 @@ const Index = () => {
   const handleExportSlide = useCallback(async (index: number) => {
     setExportSlideIndex(index);
     setCurrentSlide(index);
-    // Return a promise that resolves after state update and render
     return new Promise<void>((resolve) => {
       setTimeout(resolve, 100);
     });
@@ -113,34 +141,70 @@ const Index = () => {
   }, []);
 
   const handleOpenTalkingNotes = useCallback(() => {
-    setTalkingNotesOpen(prev => !prev);
+    setTalkingNotesOpen((prev) => !prev);
   }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isExporting) return; // Disable keyboard nav during export
-      
-      // Ignore if user is typing in an input/textarea
+      if (isExporting) return;
+
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
-      
+
       if (e.key === "ArrowRight") {
         e.preventDefault();
         goToNext();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         goToPrevious();
+      } else if (e.key === "n" || e.key === "N") {
+        // Toggle speaker notes with 'N' key in PPT mode
+        if (isPPTMode) {
+          e.preventDefault();
+          setShowSpeakerNotes((prev) => !prev);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToNext, goToPrevious, isExporting]);
+  }, [goToNext, goToPrevious, isExporting, isPPTMode]);
 
-  const currentSlideConfig = activeSlides[currentSlide];
-  const CurrentSlideComponent = currentSlideConfig?.component;
+  // Render the current slide
+  const renderCurrentSlide = () => {
+    const currentSlideConfig = activeSlides[currentSlide];
+    if (!currentSlideConfig) return null;
+
+    // Check if it's a PPT slide
+    if ("pptSlide" in currentSlideConfig && currentSlideConfig.pptSlide) {
+      return (
+        <ImprovedSlideComponent 
+          slide={currentSlideConfig.pptSlide} 
+          showNotes={showSpeakerNotes} 
+        />
+      );
+    }
+
+    // Default slide component
+    if ("component" in currentSlideConfig && currentSlideConfig.component) {
+      const CurrentSlideComponent = currentSlideConfig.component;
+      
+      if (currentSlideConfig.isForm) {
+        return (
+          <CurrentSlideComponent 
+            onGenerate={goToFirstSlide} 
+            onAcceptImprovedSlides={handleAcceptImprovedSlides} 
+          />
+        );
+      }
+
+      return <CurrentSlideComponent />;
+    }
+
+    return null;
+  };
 
   return (
     <div className="min-h-screen gradient-hero relative overflow-y-auto">
@@ -152,24 +216,48 @@ const Index = () => {
         </div>
       )}
 
+      {/* PPT Mode Indicator */}
+      {isPPTMode && !isExporting && currentSlide > 0 && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <span className="px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-xs text-blue-400 font-medium">
+            PPT Mode • {improvedPresentation?.totalSlides} slides
+          </span>
+          <button
+            onClick={handleResetToDefault}
+            className="px-3 py-1.5 rounded-full bg-slate-700/50 border border-slate-600/30 text-xs text-slate-300 hover:bg-slate-600/50 transition-colors"
+          >
+            Exit PPT Mode
+          </button>
+          <button
+            onClick={() => setShowSpeakerNotes((prev) => !prev)}
+            className={`px-3 py-1.5 rounded-full border text-xs transition-colors ${
+              showSpeakerNotes 
+                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" 
+                : "bg-slate-700/50 border-slate-600/30 text-slate-300 hover:bg-slate-600/50"
+            }`}
+          >
+            {showSpeakerNotes ? "Hide Notes" : "Show Notes"}
+          </button>
+        </div>
+      )}
 
-      {/* Slide container - sized for export when exporting */}
-      <div 
+      {/* Slide container */}
+      <div
         ref={slideContainerRef}
-        className={`relative z-10 ${isExporting ? '' : 'animate-fade-in'} ${talkingNotesOpen ? 'mr-[420px]' : ''}`}
+        className={`relative z-10 ${isExporting ? "" : "animate-fade-in"} ${talkingNotesOpen ? "mr-[420px]" : ""}`}
         key={`slide-${currentSlide}`}
-        style={isExporting ? {
-          width: '1920px',
-          height: '1080px',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)',
-        } : undefined}
+        style={
+          isExporting
+            ? {
+                width: "1920px",
+                height: "1080px",
+                overflow: "hidden",
+                background: "linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)",
+              }
+            : undefined
+        }
       >
-        {currentSlideConfig?.isForm ? (
-          <CurrentSlideComponent onGenerate={goToFirstSlide} onAcceptImprovedSlides={handleAcceptImprovedSlides} />
-        ) : CurrentSlideComponent ? (
-          <CurrentSlideComponent />
-        ) : null}
+        {renderCurrentSlide()}
       </div>
 
       <SlideNavigation
@@ -177,7 +265,7 @@ const Index = () => {
         totalSlides={activeSlides.length}
         onPrevious={goToPrevious}
         onNext={goToNext}
-        slideLabels={activeSlides.map((s) => s.label)}
+        slideLabels={slideLabels}
         onExportStart={handleExportStart}
         onExportSlide={handleExportSlide}
         onExportEnd={handleExportEnd}
@@ -190,7 +278,7 @@ const Index = () => {
         isOpen={talkingNotesOpen}
         onClose={() => setTalkingNotesOpen(false)}
         currentSlideIndex={currentSlide}
-        slideLabels={slides.map((s) => s.label)}
+        slideLabels={slideLabels}
       />
 
       <SlideFooter />
