@@ -180,8 +180,8 @@ const AgileTeamModelSlide = () => {
               </marker>
             </defs>
 
-            {/* Outer ring background */}
-            <circle cx={centerX} cy={centerY} r={outerRadius} fill="#0a1525" />
+            {/* Outer ring background - transparent */}
+            <circle cx={centerX} cy={centerY} r={outerRadius} fill="transparent" />
 
             {/* Outer ring segments */}
             {outerRoles.map((_, index) => {
@@ -200,12 +200,12 @@ const AgileTeamModelSlide = () => {
               );
             })}
 
-            {/* Middle ring (darker) */}
+            {/* Middle ring - transparent */}
             <circle 
               cx={centerX} 
               cy={centerY} 
               r={middleRadius} 
-              fill="#0a1525"
+              fill="transparent"
               stroke="#1e3a5f"
               strokeWidth="2"
             />
