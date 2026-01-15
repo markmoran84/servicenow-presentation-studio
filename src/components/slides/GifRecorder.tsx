@@ -44,18 +44,23 @@ const GifRecorder = ({
     // Dynamically import GIF.js
     const GIF = (await import("gif.js")).default;
     
+    // Fetch the worker script and create a blob URL to avoid CORS issues
+    const workerResponse = await fetch("https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js");
+    const workerBlob = new Blob([await workerResponse.text()], { type: "application/javascript" });
+    const workerUrl = URL.createObjectURL(workerBlob);
+    
     return new Promise<Blob>((resolve, reject) => {
       const gif = new GIF({
         workers: 2,
         quality: 10,
         width: targetRef.current?.offsetWidth || 600,
         height: targetRef.current?.offsetHeight || 600,
-        workerScript: "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js",
+        workerScript: workerUrl,
       });
 
       let loadedFrames = 0;
       
-      frames.forEach((frameData, index) => {
+      frames.forEach((frameData) => {
         const img = new Image();
         img.onload = () => {
           gif.addFrame(img, { delay: 1000 / frameRate });
@@ -76,10 +81,12 @@ const GifRecorder = ({
       });
 
       gif.on("finished", (blob: Blob) => {
+        URL.revokeObjectURL(workerUrl);
         resolve(blob);
       });
 
       gif.on("error", (error: Error) => {
+        URL.revokeObjectURL(workerUrl);
         reject(error);
       });
     });
