@@ -479,7 +479,7 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
     }
   };
 
-  // Handle accepting changes and generating improved plan data
+  // Handle accepting changes and generating improved PPT-based slides
   const handleAcceptChanges = async () => {
     if (!analysis) {
       toast.error("No analysis available");
@@ -488,34 +488,35 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
 
     setIsGeneratingSlides(true);
     try {
-      toast.loading("Generating improved account plan...", { id: "improved-slides" });
+      toast.loading("Generating improved presentation slides...", { id: "improved-slides" });
 
-      const { data: responseData, error } = await supabase.functions.invoke("generate-improved-slides", {
+      // Use the new generate-ppt-slides function that creates ImprovedPresentation
+      const { data: responseData, error } = await supabase.functions.invoke("generate-ppt-slides", {
         body: {
           analysis,
           originalContent: parsedContent,
           companyName: analysis.companyName || data.basics.accountName,
           industry: analysis.industry || data.basics.industry,
-          currentAccountData: data,
+          slideCount: parsedSlideCount,
         },
       });
 
       if (error) throw error;
-      if (!responseData.success) throw new Error(responseData.error || "Failed to generate improved plan");
+      if (!responseData.success) throw new Error(responseData.error || "Failed to generate improved slides");
 
-      // The response is now an AIGeneratedPlan structure
-      const improvedPlan = responseData.data;
+      // The response is an ImprovedPresentation structure
+      const improvedPres: ImprovedPresentation = responseData.data;
       
-      // Update the context with the improved plan data - this will update all existing slides
-      setGeneratedPlan(improvedPlan);
+      // Store in context - this will switch Index.tsx to PPT mode
+      setContextImprovedPresentation(improvedPres);
       
-      toast.success("Account plan updated with improvements!", { id: "improved-slides" });
+      toast.success("Presentation slides improved!", { id: "improved-slides" });
       
-      // Navigate to the first content slide (Executive Summary)
+      // Navigate to the first PPT slide
       onAcceptChanges?.();
     } catch (error) {
-      console.error("Error generating improved plan:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to generate improved plan", { id: "improved-slides" });
+      console.error("Error generating improved slides:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate improved slides", { id: "improved-slides" });
     } finally {
       setIsGeneratingSlides(false);
     }
