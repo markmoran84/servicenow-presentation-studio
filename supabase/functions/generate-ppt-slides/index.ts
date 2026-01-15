@@ -42,33 +42,30 @@ Deno.serve(async (req) => {
     const webInsights = analysis.webInsights || [];
     const strengths = analysis.strengths || [];
 
-    const prompt = `You are a senior presentation consultant. Based on the analysis of an existing PowerPoint presentation about ${companyName || "a company"} in ${industry || "their industry"}, generate IMPROVED SLIDE CONTENT that maintains the EXACT same slide order and structure as the original.
+    const prompt = `You are a senior presentation consultant. Your task is to REWRITE and ENHANCE the actual slide content from an uploaded PowerPoint presentation.
 
-ORIGINAL PRESENTATION HAS ${effectiveSlideCount} SLIDES:
-${slides.map(s => `[Slide ${s.number}]: ${s.content.slice(0, 500)}`).join("\n\n")}
+CRITICAL INSTRUCTIONS:
+- DO NOT describe what improvements to make - ACTUALLY MAKE the improvements
+- DO NOT say "Add specific data about..." - WRITE the specific data point
+- DO NOT give meta-suggestions - WRITE the actual enhanced content
+- Each keyPoint should be a COMPLETE, polished bullet point ready for the presentation
+- Transform vague content into specific, impactful statements
 
-ANALYSIS:
-- Overall Score: ${analysis.overallScore}/10
-- Assessment: ${analysis.overallAssessment}
+ORIGINAL PRESENTATION (${effectiveSlideCount} slides) for ${companyName || "the company"} in ${industry || "their industry"}:
+${slides.map(s => `[Slide ${s.number}]:\n${s.content}`).join("\n\n---\n\n")}
 
-STRENGTHS TO MAINTAIN:
-${strengths.map((s: { title: string; detail: string }) => `- ${s.title}: ${s.detail}`).join("\n")}
+ANALYSIS INSIGHTS TO APPLY:
+- Score: ${analysis.overallScore}/10 - ${analysis.overallAssessment}
+- Gaps to fix: ${gaps.map((g: { title: string; detail: string }) => g.title).join(", ")}
+- Suggestions: ${slideSuggestions.map((s: { slideTitle: string; suggestion: string }) => s.suggestion).join("; ")}
 
-GAPS TO ADDRESS:
-${gaps.map((g: { priority: string; title: string; detail: string }) => `- [${g.priority.toUpperCase()}] ${g.title}: ${g.detail}`).join("\n")}
-
-SLIDE SUGGESTIONS:
-${slideSuggestions.map((s: { slideTitle: string; currentState: string; suggestion: string }) => `- ${s.slideTitle}: ${s.suggestion}`).join("\n")}
-
-WEB INSIGHTS:
-${webInsights.map((w: { insight: string; suggestion: string }) => `- ${w.insight}`).join("\n")}
-
-Generate improved content for EACH of the ${effectiveSlideCount} slides. Maintain the original slide order and purpose, but enhance the content based on the analysis. Each slide should have:
-- A clear, impactful title
-- 3-5 key bullet points (enhanced based on analysis)
-- A visual suggestion
-- A data highlight (if applicable)
-- Speaker notes with opening hook, talking points, and transition`;
+YOUR OUTPUT:
+For each of the ${effectiveSlideCount} slides, provide THE ACTUAL IMPROVED CONTENT:
+- title: The original or improved slide title
+- keyPoints: 3-5 COMPLETE, POLISHED bullet points with the actual enhanced content (not suggestions about what to add)
+- visualSuggestion: What visual would strengthen this slide
+- dataHighlight: A specific data point or metric to emphasize (if applicable)
+- speakerNotes: Practical notes for presenting this slide`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -81,7 +78,7 @@ Generate improved content for EACH of the ${effectiveSlideCount} slides. Maintai
         messages: [
           {
             role: "system",
-            content: "You are an elite presentation strategist. Generate improved slide content that maintains the original structure while addressing identified gaps.",
+            content: "You are an elite presentation strategist. REWRITE the slides with actual improved content - do not describe improvements, MAKE them. Every bullet point should be a complete, polished statement ready for the presentation. Never say 'Add X' or 'Include Y' - write the actual X and Y content.",
           },
           {
             role: "user",
