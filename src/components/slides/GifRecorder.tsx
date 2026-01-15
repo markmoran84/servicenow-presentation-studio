@@ -54,57 +54,28 @@ const GifRecorder = ({
     try {
       const targetEl = targetRef.current;
 
-      // Capture the wheel only, preserving alpha
+      // Capture ONLY the wheel with fully transparent background
       const wheelCanvas = await html2canvas(targetEl, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: null,
+        backgroundColor: null, // Transparent background
         logging: false,
       });
 
-      // GIFs don't support full alpha transparency; bake the *exact slide background* behind the wheel.
-      if (backgroundImage && frameContainerRef?.current) {
-        const bgImg = await getBackgroundImage();
-        if (bgImg) {
-          const slideRect = frameContainerRef.current.getBoundingClientRect();
-          const targetRect = targetEl.getBoundingClientRect();
-
-          const containerW = slideRect.width;
-          const containerH = slideRect.height;
-          const imgW = bgImg.naturalWidth || bgImg.width;
-          const imgH = bgImg.naturalHeight || bgImg.height;
-
-          // Match CSS: background-size: cover; background-position: center
-          const coverScale = Math.max(containerW / imgW, containerH / imgH);
-          const drawnW = imgW * coverScale;
-          const drawnH = imgH * coverScale;
-          const offsetX = (containerW - drawnW) / 2;
-          const offsetY = (containerH - drawnH) / 2;
-
-          const tx = targetRect.left - slideRect.left;
-          const ty = targetRect.top - slideRect.top;
-
-          const ratioX = wheelCanvas.width / targetRect.width;
-          const ratioY = wheelCanvas.height / targetRect.height;
-
-          const out = document.createElement("canvas");
-          out.width = wheelCanvas.width;
-          out.height = wheelCanvas.height;
-
-          const ctx = out.getContext("2d");
-          if (ctx) {
-            ctx.drawImage(
-              bgImg,
-              (offsetX - tx) * ratioX,
-              (offsetY - ty) * ratioY,
-              drawnW * ratioX,
-              drawnH * ratioY
-            );
-            ctx.drawImage(wheelCanvas, 0, 0);
-            return out.toDataURL("image/png");
-          }
-        }
+      // Create output canvas with white background for GIF (GIF doesn't support alpha)
+      const out = document.createElement("canvas");
+      out.width = wheelCanvas.width;
+      out.height = wheelCanvas.height;
+      const ctx = out.getContext("2d");
+      
+      if (ctx) {
+        // Fill with white background so there's no black
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, out.width, out.height);
+        // Draw the wheel on top
+        ctx.drawImage(wheelCanvas, 0, 0);
+        return out.toDataURL("image/png");
       }
 
       return wheelCanvas.toDataURL("image/png");
@@ -112,7 +83,7 @@ const GifRecorder = ({
       console.error("Frame capture error:", error);
       return null;
     }
-  }, [targetRef, frameContainerRef, backgroundImage, getBackgroundImage]);
+  }, [targetRef]);
 
   const createGif = useCallback(
     async (frames: string[]) => {
