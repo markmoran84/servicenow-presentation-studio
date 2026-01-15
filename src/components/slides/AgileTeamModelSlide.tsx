@@ -7,8 +7,8 @@ const AgileTeamModelSlide = () => {
   const { data } = useAccountData();
   const companyName = data.basics.accountName || "Company";
   const [activeSegments, setActiveSegments] = useState<number[]>([0, 2, 5]);
+  const slideRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
-
   // Cycle through different "active" configurations to show dynamic resource allocation
   useEffect(() => {
     const scenarios = [
@@ -109,7 +109,7 @@ const AgileTeamModelSlide = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <div ref={slideRef} className="w-full h-full flex flex-col px-16 pt-10 pb-8" style={{ backgroundImage: `url(${slideBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
@@ -127,8 +127,10 @@ const AgileTeamModelSlide = () => {
           {/* GIF Recorder Button */}
           <div className="absolute top-4 right-4 z-10">
             <GifRecorder 
-              targetRef={wheelRef} 
-              duration={12000} 
+              targetRef={wheelRef}
+              frameContainerRef={slideRef}
+              backgroundImage={slideBackground}
+              duration={12000}
               frameRate={8}
               fileName="gtm-wheel-animation"
             />
