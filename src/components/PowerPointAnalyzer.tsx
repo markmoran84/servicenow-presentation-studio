@@ -25,7 +25,11 @@ import {
   Clock,
   MessageCircle,
   Quote,
-  ArrowLeft
+  ArrowLeft,
+  Check,
+  Layout,
+  Eye,
+  ChevronLeft
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountData } from "@/context/AccountDataContext";
@@ -47,6 +51,31 @@ interface TalkingNotes {
   keyThemes: string[];
   slideNotes: SlideNote[];
   closingRecommendations?: string[];
+}
+
+interface ImprovedSlide {
+  slideNumber: number;
+  title: string;
+  keyPoints: string[];
+  visualSuggestion?: string;
+  dataHighlight?: string;
+  speakerNotes: {
+    openingHook: string;
+    talkingPoints: string[];
+    dataToMention?: string[];
+    transitionToNext?: string;
+    estimatedDuration: string;
+  };
+}
+
+interface ImprovedPresentation {
+  title: string;
+  companyName: string;
+  totalSlides: number;
+  overallNarrative: string;
+  keyThemes: string[];
+  slides: ImprovedSlide[];
+  closingTips?: string[];
 }
 
 interface PresentationAnalysis {
@@ -83,6 +112,13 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
   const [notesWebSearchUsed, setNotesWebSearchUsed] = useState(false);
   const [showNotesView, setShowNotesView] = useState(false);
   const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
+  
+  // Improved slides state
+  const [improvedPresentation, setImprovedPresentation] = useState<ImprovedPresentation | null>(null);
+  const [isGeneratingSlides, setIsGeneratingSlides] = useState(false);
+  const [showSlidesView, setShowSlidesView] = useState(false);
+  const [currentImprovedSlide, setCurrentImprovedSlide] = useState(0);
+  const [showSlideNotes, setShowSlideNotes] = useState(true);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -464,6 +500,162 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
     }
   };
 
+  // Handle accepting changes and generating improved slides
+  const handleAcceptChanges = async () => {
+    if (!analysis) {
+      toast.error("No analysis available");
+      return;
+    }
+
+    setIsGeneratingSlides(true);
+    try {
+      toast.loading("Generating improved slides with speaker notes...", { id: "improved-slides" });
+
+      const { data: responseData, error } = await supabase.functions.invoke("generate-improved-slides", {
+        body: {
+          analysis,
+          originalContent: parsedContent,
+          companyName: analysis.companyName || data.basics.accountName,
+          industry: analysis.industry || data.basics.industry,
+        },
+      });
+
+      if (error) throw error;
+      if (!responseData.success) throw new Error(responseData.error || "Failed to generate slides");
+
+      setImprovedPresentation(responseData.data);
+      setShowSlidesView(true);
+      setCurrentImprovedSlide(0);
+      toast.success("Improved presentation generated!", { id: "improved-slides" });
+    } catch (error) {
+      console.error("Error generating improved slides:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to generate improved slides", { id: "improved-slides" });
+    } finally {
+      setIsGeneratingSlides(false);
+    }
+  };
+
+  // Navigate between improved slides
+  const goToPreviousSlide = () => {
+    if (improvedPresentation && currentImprovedSlide > 0) {
+      setCurrentImprovedSlide(currentImprovedSlide - 1);
+    }
+  };
+
+  const goToNextSlide = () => {
+    if (improvedPresentation && currentImprovedSlide < improvedPresentation.slides.length - 1) {
+      setCurrentImprovedSlide(currentImprovedSlide + 1);
+    }
+  };
+
+  // Render improved slide content
+  const renderImprovedSlide = (slide: ImprovedSlide) => (
+    <div className="h-full flex flex-col">
+      {/* Slide Content */}
+      <div className="flex-1 p-8 flex flex-col">
+        {/* Slide Title */}
+        <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg">
+            {slide.slideNumber}
+          </div>
+          {slide.title}
+        </h2>
+
+        {/* Key Points */}
+        <div className="flex-1 space-y-4">
+          {slide.keyPoints.map((point, idx) => (
+            <div key={idx} className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/10">
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Check className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <p className="text-base text-foreground leading-relaxed">{point}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Visual Suggestion & Data Highlight */}
+        <div className="mt-6 flex gap-4">
+          {slide.visualSuggestion && (
+            <div className="flex-1 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-center gap-2 mb-1">
+                <Layout className="w-4 h-4 text-blue-500" />
+                <span className="text-xs font-semibold text-blue-400 uppercase">Visual</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{slide.visualSuggestion}</p>
+            </div>
+          )}
+          {slide.dataHighlight && (
+            <div className="flex-1 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-semibold text-amber-400 uppercase">Data</span>
+              </div>
+              <p className="text-sm text-muted-foreground">{slide.dataHighlight}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Speaker Notes Panel */}
+      {showSlideNotes && (
+        <div className="border-t border-border/50 bg-muted/20 p-4 max-h-[40%] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Mic className="w-4 h-4 text-primary" />
+              Speaker Notes
+            </h4>
+            <Badge variant="outline" className="text-xs">
+              <Clock className="w-3 h-3 mr-1" />
+              {slide.speakerNotes.estimatedDuration}
+            </Badge>
+          </div>
+
+          {/* Opening Hook */}
+          <div className="mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Opening Hook</p>
+            <p className="text-sm italic text-primary">"{slide.speakerNotes.openingHook}"</p>
+          </div>
+
+          {/* Talking Points */}
+          <div className="mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Talking Points</p>
+            <ul className="space-y-2">
+              {slide.speakerNotes.talkingPoints.map((point, idx) => (
+                <li key={idx} className="text-sm text-foreground/90 flex items-start gap-2">
+                  <span className="text-primary font-bold">•</span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Data to Mention */}
+          {slide.speakerNotes.dataToMention && slide.speakerNotes.dataToMention.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-medium text-muted-foreground uppercase mb-2">Data Points</p>
+              <div className="flex flex-wrap gap-2">
+                {slide.speakerNotes.dataToMention.map((data, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    {data}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Transition */}
+          {slide.speakerNotes.transitionToNext && (
+            <div className="pt-2 border-t border-border/30">
+              <p className="text-xs text-muted-foreground">
+                <span className="font-semibold">→ Transition:</span> {slide.speakerNotes.transitionToNext}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   // Render slide note content
   const renderSlideNoteContent = (note: SlideNote) => (
     <div className="space-y-4">
@@ -552,8 +744,114 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Talking Notes View */}
-        {showNotesView && talkingNotes ? (
+        {/* Improved Slides View */}
+        {showSlidesView && improvedPresentation ? (
+          <div className="h-[80vh] max-h-[800px] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-border/50">
+              <Button
+                variant="ghost"
+                onClick={() => setShowSlidesView(false)}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Analysis
+              </Button>
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-foreground">{improvedPresentation.title}</h3>
+                <p className="text-xs text-muted-foreground">{improvedPresentation.companyName}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSlideNotes(!showSlideNotes)}
+                className="gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                {showSlideNotes ? "Hide Notes" : "Show Notes"}
+              </Button>
+            </div>
+
+            {/* Presentation Info */}
+            <div className="py-3 px-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg my-3">
+              <p className="text-sm text-foreground/90">{improvedPresentation.overallNarrative}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {improvedPresentation.keyThemes.map((theme, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs">
+                    {theme}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Slide Content */}
+            <div className="flex-1 border border-border/30 rounded-lg bg-card overflow-hidden">
+              {renderImprovedSlide(improvedPresentation.slides[currentImprovedSlide])}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between pt-4 border-t border-border/50 mt-4">
+              <Button
+                variant="outline"
+                onClick={goToPreviousSlide}
+                disabled={currentImprovedSlide === 0}
+                className="gap-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                {improvedPresentation.slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentImprovedSlide(idx)}
+                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                      idx === currentImprovedSlide 
+                        ? "bg-primary" 
+                        : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {currentImprovedSlide + 1} / {improvedPresentation.slides.length}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={goToNextSlide}
+                  disabled={currentImprovedSlide === improvedPresentation.slides.length - 1}
+                  className="gap-2"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Closing Tips */}
+            {improvedPresentation.closingTips && improvedPresentation.closingTips.length > 0 && (
+              <Card className="mt-4 bg-muted/30">
+                <CardContent className="p-4">
+                  <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Delivery Tips
+                  </h4>
+                  <ul className="space-y-1">
+                    {improvedPresentation.closingTips.map((tip, idx) => (
+                      <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                        <span className="text-primary">•</span>
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        ) : showNotesView && talkingNotes ? (
           <ScrollArea className="h-[70vh] max-h-[700px]">
             <div className="space-y-4 pr-4">
               {/* Header with Back Button */}
@@ -1016,6 +1314,41 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                 </Card>
               )}
 
+              {/* Accept Changes Button - Primary CTA */}
+              <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-foreground flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-500" />
+                        Ready to apply improvements?
+                      </h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Generate improved slides with all suggestions integrated and speaker notes included.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleAcceptChanges}
+                      disabled={isGeneratingSlides}
+                      className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                      size="lg"
+                    >
+                      {isGeneratingSlides ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          Accept Changes
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
                 <Button
@@ -1027,6 +1360,8 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes }: PowerPointAnalyze
                     setSelectedFileName(null);
                     setTalkingNotes(null);
                     setShowNotesView(false);
+                    setImprovedPresentation(null);
+                    setShowSlidesView(false);
                   }}
                   className="flex-1 gap-2"
                 >
