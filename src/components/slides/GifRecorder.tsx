@@ -56,8 +56,6 @@ const GifRecorder = ({
         width: targetRef.current?.offsetWidth || 600,
         height: targetRef.current?.offsetHeight || 600,
         workerScript: workerUrl,
-        transparent: 0x000000, // Treat black as transparent
-        background: '#0000', // Transparent background
       });
 
       let loadedFrames = 0;
