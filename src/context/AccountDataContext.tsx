@@ -165,6 +165,33 @@ export interface BusinessModelCanvas {
   competitors: string[];
 }
 
+// Improved Slide from PowerPoint analysis
+export interface ImprovedSlide {
+  slideNumber: number;
+  title: string;
+  keyPoints: string[];
+  visualSuggestion?: string;
+  dataHighlight?: string;
+  speakerNotes: {
+    openingHook: string;
+    talkingPoints: string[];
+    dataToMention?: string[];
+    transitionToNext?: string;
+    estimatedDuration: string;
+  };
+}
+
+// Improved Presentation from PowerPoint analysis
+export interface ImprovedPresentation {
+  title: string;
+  companyName: string;
+  totalSlides: number;
+  overallNarrative: string;
+  keyThemes: string[];
+  slides: ImprovedSlide[];
+  closingTips?: string[];
+}
+
 // Strategic Tension interface for StrategicTensionSlide
 export interface StrategicTension {
   heading: string;
@@ -224,6 +251,7 @@ export interface AccountData {
   annualReport: AnnualReportHighlights;
   businessModel: BusinessModelCanvas;
   generatedPlan?: AIGeneratedPlan;
+  improvedPresentation?: ImprovedPresentation;
 }
 
 // Default placeholder data (generic)
@@ -318,6 +346,7 @@ interface AccountDataContextType {
   setGeneratedPlan: (plan: AIGeneratedPlan) => void;
   patchGeneratedPlan: (patch: Partial<AIGeneratedPlan>) => void;
   reorderExtendedTeam: (oldIndex: number, newIndex: number) => void;
+  setImprovedPresentation: (presentation: ImprovedPresentation | undefined) => void;
 }
 
 const AccountDataContext = createContext<AccountDataContextType | undefined>(undefined);
@@ -366,8 +395,15 @@ export const AccountDataProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const setImprovedPresentation = (presentation: ImprovedPresentation | undefined) => {
+    setData((prev) => ({
+      ...prev,
+      improvedPresentation: presentation,
+    }));
+  };
+
   return (
-    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam }}>
+    <AccountDataContext.Provider value={{ data, updateData, resetToDefaults, setGeneratedPlan, patchGeneratedPlan, reorderExtendedTeam, setImprovedPresentation }}>
       {children}
     </AccountDataContext.Provider>
   );
