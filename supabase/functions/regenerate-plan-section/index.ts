@@ -1,9 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import {
+  corsHeaders,
+  callAIGateway,
+  handleAPIError,
+  getAPIKey,
+  parseJsonSafe,
+  successResponse,
+  errorResponse,
+} from "../_shared/validation.ts";
 
 type Section =
   | "executiveSummary"
@@ -211,15 +215,10 @@ serve(async (req) => {
     const { accountData, section } = await req.json();
 
     if (!section || !(section in sectionSpecs)) {
-      return new Response(JSON.stringify({ success: false, error: "Invalid section" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponse(400, "Invalid section");
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
+    const LOVABLE_API_KEY = getAPIKey();
     const spec = sectionSpecs[section as Section];
 
     const systemPrompt = `You are an elite McKinsey-caliber enterprise account strategist for ServiceNow.
@@ -280,58 +279,22 @@ ${spec.outputShapeHint}
 
 Return ONLY valid JSON.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "openai/gpt-5.2",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.75,
-      }),
+    const { content } = await callAIGateway({
+      apiKey: LOVABLE_API_KEY,
+      model: "openai/gpt-5.2",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.75,
     });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ success: false, error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ success: false, error: "AI credits exhausted. Please add credits to continue." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ success: false, error: "AI gateway error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const aiResponse = await response.json();
-    const content = aiResponse?.choices?.[0]?.message?.content;
 
     if (!content) throw new Error("No content in AI response");
 
-    let parsed: any;
-    try {
-      parsed = JSON.parse(cleanJson(content));
-    } catch (e) {
-      console.error("Failed to parse AI response:", content);
-      throw new Error("Failed to parse AI-generated section");
-    }
+    const parsed = parseJsonSafe<Record<string, unknown>>(content, "section");
 
     // Validate required keys exist
-    const missing = spec.keys.filter((k) => parsed?.[k] == null);
+    const missing = spec.keys.filter((k) => parsed[k] == null);
     if (missing.length > 0) {
       throw new Error(`AI output missing keys: ${missing.join(", ")}`);
     }
@@ -339,20 +302,9 @@ Return ONLY valid JSON.`;
     const patch: Record<string, unknown> = {};
     for (const k of spec.keys) patch[k] = parsed[k];
 
-    return new Response(JSON.stringify({ success: true, patch }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return successResponse(patch, { patch });
   } catch (error) {
     console.error("Error regenerating plan section:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    return handleAPIError(error);
   }
 });
