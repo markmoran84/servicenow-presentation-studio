@@ -228,6 +228,7 @@ Return ONLY valid JSON. No markdown. Every element must reflect institutional-qu
         { role: "user", content: userPrompt }
       ],
       temperature: 0.7,
+      max_tokens: 32000,
     });
 
     if (!content) {

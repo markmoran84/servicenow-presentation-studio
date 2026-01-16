@@ -92,6 +92,7 @@ export async function callAIGateway(options: {
   temperature?: number;
   tools?: unknown[];
   tool_choice?: unknown;
+  max_tokens?: number;
 }): Promise<{ content: string | null; toolCalls: unknown[] | null; rawResponse: unknown }> {
   const {
     apiKey,
@@ -100,12 +101,14 @@ export async function callAIGateway(options: {
     temperature = 0.7,
     tools,
     tool_choice,
+    max_tokens = 16000,
   } = options;
 
   const body: Record<string, unknown> = {
     model,
     messages,
     temperature,
+    max_tokens,
   };
 
   if (tools && tools.length > 0) {
@@ -114,6 +117,8 @@ export async function callAIGateway(options: {
       body.tool_choice = tool_choice;
     }
   }
+
+  console.log(`Calling AI gateway with model: ${model}, max_tokens: ${max_tokens}`);
 
   const response = await fetchWithRetry(AI_GATEWAY_URL, {
     method: "POST",
@@ -139,11 +144,29 @@ export async function callAIGateway(options: {
     throw new Error(`AI gateway error: ${response.status}`);
   }
 
-  const aiResponse = await response.json();
+  // Parse response with better error handling
+  let aiResponse;
+  try {
+    const responseText = await response.text();
+    if (!responseText || responseText.trim() === '') {
+      throw new Error("Empty response from AI gateway");
+    }
+    aiResponse = JSON.parse(responseText);
+  } catch (parseError) {
+    console.error("Failed to parse AI gateway response:", parseError);
+    throw new Error("Failed to parse AI gateway response - response may have been truncated");
+  }
+  
   const choice = aiResponse.choices?.[0];
   
   if (!choice) {
+    console.error("No choices in AI response:", JSON.stringify(aiResponse).slice(0, 500));
     throw new Error("No response from AI model");
+  }
+
+  // Check if response was truncated
+  if (choice.finish_reason === 'length') {
+    console.warn("AI response was truncated due to max_tokens limit");
   }
 
   return {
