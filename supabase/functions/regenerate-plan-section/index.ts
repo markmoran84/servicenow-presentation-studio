@@ -18,6 +18,7 @@ type Section =
   | "strategicTensions"
   | "valueHypotheses"
   | "risksMitigations"
+  | "keyRisks"
   | "fy1Retrospective"
   | "customerStrategySynthesis"
   | "weeklyUpdateContext"
@@ -114,6 +115,26 @@ const sectionSpecs: Record<
       "Create exactly 4 risks with mitigation strategies. Level must be High, Medium, or Low. Be specific about the risk and actionable on mitigation.",
     outputShapeHint:
       '{"risksMitigations":[{"risk":"Incumbent Vendor Lock-in","mitigation":"Lead with differentiated AI narrative; demonstrate clear TCO advantage","level":"High"}]}',
+  },
+  keyRisks: {
+    keys: ["keyRisks"],
+    instruction:
+      `Create exactly 10-13 categorized risks distributed across 4 categories. Analyze ALL input data to identify synergies, dependencies, and strategic threads. Each risk must have:
+      - "risk": Clear, specific risk title
+      - "description": Brief explanation of the risk context
+      - "category": One of "Strategic" | "Operational" | "Governance" | "Commercial"
+      - "severity": Number 1-5 (5 = highest/most critical)
+      - "mitigation": Specific mitigation strategy
+      
+      CATEGORY DISTRIBUTION:
+      • Strategic (3-4 risks): Risks limiting ServiceNow positioning - competitor displacement, strategy misalignment, sponsor changes
+      • Operational (3-4 risks): Risks impacting execution - implementation delays, resource constraints, change management failures
+      • Governance (2-3 risks): Governance risks - decision bottlenecks, stakeholder alignment, compliance requirements
+      • Commercial (3-4 risks): Commercial risks - budget constraints, procurement delays, competitive pricing pressure
+      
+      CRITICAL: Derive risks from ACTUAL account data - financial pressures, prior failures, SWOT threats, pain points, strategic tensions.`,
+    outputShapeHint:
+      '{"keyRisks":[{"risk":"Executive Sponsor Transition","description":"Key sponsor departing creates relationship gap","category":"Strategic","severity":5,"mitigation":"Accelerate multi-threaded engagement across leadership team"},{"risk":"Budget Cycle Misalignment","description":"Customer fiscal year ends Q4, may delay Q1 decisions","category":"Commercial","severity":3,"mitigation":"Pre-negotiate framework agreement before budget lock"}]}',
   },
   fy1Retrospective: {
     keys: ["fy1Retrospective"],
