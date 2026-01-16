@@ -65,7 +65,7 @@ serve(async (req) => {
   }
 
   try {
-    const { accountData, documentContent, slideInfo } = await req.json();
+    const { accountData, documentContent, slideInfo, audienceType = "external" } = await req.json();
 
     if (!accountData?.basics?.accountName) {
       return new Response(
@@ -150,7 +150,50 @@ UPLOADED DOCUMENT CONTENT (Annual Report / Account Plan)
 ${documentContent.slice(0, 30000)}
 ` : '';
 
+    // Audience-specific guidance
+    const audienceGuidance = audienceType === "internal" 
+      ? `
+═══════════════════════════════════════════════════════════════
+AUDIENCE: INTERNAL STAKEHOLDERS
+═══════════════════════════════════════════════════════════════
+
+This presentation is for INTERNAL stakeholders (leadership, account teams, sales reviews).
+
+ADJUST YOUR NOTES TO:
+- Be candid about challenges and risks - internal audiences need the full picture
+- Include competitive positioning and internal strategy discussions
+- Reference internal metrics, pipeline numbers, and forecasts openly
+- Discuss resource needs, asks, and escalations directly
+- Use internal terminology and acronyms freely
+- Include win/loss analysis and lessons learned
+- Be direct about what support is needed from leadership
+- Discuss internal dependencies and coordination needs
+- Include honest assessments of competitive threats
+- Reference internal playbooks and methodologies
+`
+      : `
+═══════════════════════════════════════════════════════════════
+AUDIENCE: EXTERNAL CUSTOMER
+═══════════════════════════════════════════════════════════════
+
+This presentation is for CUSTOMER/EXTERNAL stakeholders (executives at ${companyName}).
+
+ADJUST YOUR NOTES TO:
+- Focus on customer value and outcomes, not internal metrics
+- Avoid internal jargon, acronyms, and processes
+- Emphasize partnership language and collaborative framing
+- Reference the customer's strategic priorities and how we align
+- Use their terminology and industry language
+- Focus on business outcomes they care about
+- Include thought leadership and industry insights
+- Be polished and executive-ready in tone
+- Avoid discussing internal pricing, margins, or competitive comparisons
+- Frame everything in terms of their success, not ours
+`;
+
     const systemPrompt = `You are an elite executive presentation coach and sales strategist. Your job is to create CONVERSATIONAL, NATURAL talking notes that help the presenter sound confident, knowledgeable, and compelling.
+
+${audienceGuidance}
 
 ═══════════════════════════════════════════════════════════════
 YOUR MISSION
@@ -159,9 +202,9 @@ YOUR MISSION
 Create presenter notes that are:
 1. CONVERSATIONAL - Written as you would actually speak, not formal text
 2. CONFIDENT - Use assertive language, not hedging
-3. VALUE-FOCUSED - Always tie back to customer outcomes
+3. VALUE-FOCUSED - Always tie back to ${audienceType === "internal" ? "account success and internal objectives" : "customer outcomes"}
 4. STORY-DRIVEN - Use real data points and examples from the research
-5. EXECUTIVE-READY - Language appropriate for C-suite conversations
+5. EXECUTIVE-READY - Language appropriate for ${audienceType === "internal" ? "internal leadership" : "C-suite"} conversations
 
 ═══════════════════════════════════════════════════════════════
 TONE & STYLE GUIDELINES
@@ -172,14 +215,15 @@ TONE & STYLE GUIDELINES
 - Include specific numbers and data points from research
 - Reference recent news or announcements when relevant
 - Use transition phrases: "What's interesting is...", "The key insight here..."
-- Include rhetorical questions to engage: "So what does this mean for [Company]?"
+- Include rhetorical questions to engage
 - Add emphasis cues: [PAUSE], [KEY POINT], [TRANSITION]
+${audienceType === "internal" ? "- Be direct about challenges, risks, and asks\n- Include internal metrics and competitive intel" : "- Keep focus on customer value and partnership\n- Avoid internal terminology"}
 
 ❌ DON'T:
 - Sound robotic or scripted
 - Use corporate jargon without purpose
 - Be vague when you have specific data
-- Forget to connect to customer value
+${audienceType === "internal" ? "- Sugarcoat challenges or risks" : "- Discuss internal pricing or competitive details"}
 - Ignore the competitive context
 
 ═══════════════════════════════════════════════════════════════
@@ -190,7 +234,7 @@ For each slide, provide:
 1. OPENING HOOK (1-2 sentences) - Attention-grabbing opener
 2. KEY TALKING POINTS (3-5 bullets) - Main messages to convey
 3. DATA POINTS TO MENTION - Specific numbers/facts to cite
-4. ANTICIPATED QUESTIONS - What execs might ask, with suggested responses
+4. ANTICIPATED QUESTIONS - What ${audienceType === "internal" ? "leadership" : "execs"} might ask, with suggested responses
 5. TRANSITION TO NEXT - How to smoothly move to the next slide
 
 ${webContext}
@@ -201,7 +245,18 @@ SLIDES TO CREATE NOTES FOR:
 ${slideContext}
 `;
 
-    const userPrompt = `Generate comprehensive, conversational talking notes for presenting this account plan to executive stakeholders at ${companyName}.
+    const userPrompt = audienceType === "internal" 
+      ? `Generate comprehensive talking notes for presenting this account plan in an INTERNAL review setting (leadership, account team, sales reviews).
+
+The notes should:
+1. Be candid about challenges, risks, and asks
+2. Include internal metrics and competitive intelligence
+3. Reference pipeline, forecast, and resource needs directly
+4. Anticipate questions from internal leadership
+5. Build a compelling case for support and resources
+
+This is an internal presentation about ${companyName} - we can be direct about our strategy, challenges, and what we need.`
+      : `Generate comprehensive, conversational talking notes for presenting this account plan to executive stakeholders at ${companyName}.
 
 The notes should:
 1. Sound natural when spoken aloud
