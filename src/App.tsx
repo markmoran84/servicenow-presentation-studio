@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AccountDataProvider } from "@/context/AccountDataContext";
+import { AIAgentPanel } from "@/components/AIAgentPanel";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <AIAgentPanel />
       </TooltipProvider>
     </AccountDataProvider>
   </QueryClientProvider>
