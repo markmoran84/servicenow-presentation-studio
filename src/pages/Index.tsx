@@ -28,7 +28,7 @@ import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
 import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
-import { ImprovedSlideComponent } from "@/components/slides/ImprovedSlideComponent";
+import { PresentationSlide } from "@/components/slides/PresentationSlide";
 import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
 import { useAccountData } from "@/context/AccountDataContext";
 
@@ -211,8 +211,9 @@ const Index = () => {
     // Check if it's a legacy PPT slide
     if ("pptSlide" in currentSlideConfig && currentSlideConfig.pptSlide) {
       return (
-        <ImprovedSlideComponent 
+        <PresentationSlide 
           slide={currentSlideConfig.pptSlide} 
+          companyName={improvedPresentation?.companyName || data.basics.accountName || "Company"}
           showNotes={showSpeakerNotes} 
         />
       );
