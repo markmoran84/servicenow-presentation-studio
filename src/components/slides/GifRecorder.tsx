@@ -56,7 +56,7 @@ const GifRecorder = ({
 
       // Capture ONLY the wheel with high resolution for crisp output
       const wheelCanvas = await html2canvas(targetEl, {
-        scale: 2, // 2x resolution for crisp, clear output
+        scale: 4, // 4x resolution for maximum sharpness
         useCORS: true,
         allowTaint: true,
         backgroundColor: null, // Transparent background
