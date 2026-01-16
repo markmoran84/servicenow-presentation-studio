@@ -19,6 +19,7 @@ import { WorkstreamDetailSlide } from "@/components/slides/WorkstreamDetailSlide
 import { AIUseCasesSlide } from "@/components/slides/AIUseCasesSlide";
 import { PlatformSlide } from "@/components/slides/PlatformSlide";
 import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
+import { KeyRisksSlide } from "@/components/slides/KeyRisksSlide";
 import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
 import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
 import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
@@ -50,14 +51,15 @@ const defaultSlides = [
   { component: AIUseCasesSlide, label: "12. AI Portfolio" },
   { component: PlatformSlide, label: "13. Platform Vision" },
   { component: RoadmapSlide, label: "14. Roadmap" },
-  { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
-  { component: GovernanceSlide, label: "16. Governance" },
-  { component: WeeklyUpdateSlide, label: "17. Weekly Update" },
-  { component: ExecutiveEngagementSlide, label: "18. Engagement" },
-  { component: PursuitPlanSlide, label: "18. Pursuit Plan" },
-  { component: KeyAsksSlide, label: "19. Key Asks" },
-  { component: ExecutionTimelineSlide, label: "20. Execution Timeline" },
-  { component: SuccessSlide, label: "21. Success Metrics" },
+  { component: KeyRisksSlide, label: "15. Key Risks" },
+  { component: RiskMitigationSlide, label: "16. Risk & Mitigation" },
+  { component: GovernanceSlide, label: "17. Governance" },
+  { component: WeeklyUpdateSlide, label: "18. Weekly Update" },
+  { component: ExecutiveEngagementSlide, label: "19. Engagement" },
+  { component: PursuitPlanSlide, label: "20. Pursuit Plan" },
+  { component: KeyAsksSlide, label: "21. Key Asks" },
+  { component: ExecutionTimelineSlide, label: "22. Execution Timeline" },
+  { component: SuccessSlide, label: "23. Success Metrics" },
 ];
 
 const Index = () => {
