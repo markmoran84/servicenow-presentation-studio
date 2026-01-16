@@ -488,9 +488,9 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
 
     setIsGeneratingSlides(true);
     try {
-      toast.loading("Generating improved presentation slides...", { id: "improved-slides" });
+      toast.loading("Generating improved presentation slides with AI...", { id: "improved-slides" });
 
-      // Use the new generate-ppt-slides function that creates ImprovedPresentation
+      // Use the generate-ppt-slides function that creates enhanced presentation
       const { data: responseData, error } = await supabase.functions.invoke("generate-ppt-slides", {
         body: {
           analysis,
@@ -504,13 +504,39 @@ export const PowerPointAnalyzer = ({ onGenerateTalkingNotes, onAcceptChanges }: 
       if (error) throw error;
       if (!responseData.success) throw new Error(responseData.error || "Failed to generate improved slides");
 
-      // The response is an ImprovedPresentation structure
-      const improvedPres: ImprovedPresentation = responseData.data;
+      // Transform the response to match ImprovedPresentation interface
+      // The edge function returns slides with improvedContent.keyPoints, we need to flatten it
+      const rawData = responseData.data;
+      
+      const transformedSlides: import("@/context/AccountDataContext").ImprovedSlide[] = (rawData.slides || []).map((slide: any) => ({
+        slideNumber: slide.slideNumber || 1,
+        title: slide.improvedContent?.title || slide.title || "Untitled Slide",
+        keyPoints: slide.improvedContent?.keyPoints || slide.keyPoints || [],
+        visualSuggestion: slide.improvedContent?.visualSuggestion || slide.visualSuggestion,
+        dataHighlight: slide.improvedContent?.dataPoints?.[0] || slide.dataHighlight,
+        speakerNotes: {
+          openingHook: slide.speakerNotes?.openingHook || "",
+          talkingPoints: slide.speakerNotes?.talkingPoints || [],
+          dataToMention: slide.speakerNotes?.dataToMention || slide.improvedContent?.dataPoints || [],
+          transitionToNext: slide.speakerNotes?.transitionToNext,
+          estimatedDuration: slide.speakerNotes?.estimatedDuration || "2-3 minutes",
+        },
+      }));
+
+      const improvedPres: ImprovedPresentation = {
+        title: rawData.title || `${analysis.companyName} - Improved Presentation`,
+        companyName: rawData.companyName || analysis.companyName || data.basics.accountName || "Company",
+        totalSlides: transformedSlides.length,
+        overallNarrative: rawData.overallNarrative || analysis.overallAssessment || "",
+        keyThemes: rawData.keyThemes || [],
+        slides: transformedSlides,
+        closingTips: rawData.closingTips || [],
+      };
       
       // Store in context - this will switch Index.tsx to PPT mode
       setContextImprovedPresentation(improvedPres);
       
-      toast.success("Presentation slides improved!", { id: "improved-slides" });
+      toast.success(`${transformedSlides.length} slides generated and improved!`, { id: "improved-slides" });
       
       // Navigate to the first PPT slide
       onAcceptChanges?.();
