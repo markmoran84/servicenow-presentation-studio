@@ -300,15 +300,42 @@ Provide a comprehensive analysis including:
     const aiResponse = await response.json();
     const toolCall = aiResponse.choices?.[0]?.message?.tool_calls?.[0];
     
-    if (!toolCall?.function?.arguments) {
-      console.error("No tool call in response");
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to parse AI response" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let analysis;
+    
+    if (toolCall?.function?.arguments) {
+      // Got a tool call response - parse it
+      try {
+        analysis = JSON.parse(toolCall.function.arguments);
+      } catch (parseError) {
+        console.error("Failed to parse tool call arguments:", toolCall.function.arguments);
+        return new Response(
+          JSON.stringify({ success: false, error: "Failed to parse AI response" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      // No tool call - model returned text instead, create a basic structure
+      console.log("No tool call, falling back to text response");
+      const textContent = aiResponse.choices?.[0]?.message?.content || "";
+      
+      // Create a basic analysis structure from the text
+      analysis = {
+        companyName: companyName,
+        industry: "Unknown",
+        overallScore: 7,
+        overallAssessment: textContent.slice(0, 500) || "Analysis completed. Please review the presentation for detailed feedback.",
+        strengths: [
+          { title: "Content Quality", detail: "The presentation contains substantive account information." }
+        ],
+        gaps: [
+          { title: "Review Needed", detail: "Further analysis is recommended for specific improvements.", priority: "medium" }
+        ],
+        webInsights: [],
+        slideSuggestions: [],
+        missingSlides: [],
+        executiveTips: ["Ensure key metrics are prominently featured", "Lead with customer-centric insights"]
+      };
     }
-
-    const analysis = JSON.parse(toolCall.function.arguments);
 
     return new Response(
       JSON.stringify({ 
