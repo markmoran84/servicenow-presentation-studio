@@ -16,11 +16,15 @@ import {
   Quote,
   Globe,
   X,
-  Lightbulb
+  Lightbulb,
+  Users,
+  Building2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccountData } from "@/context/AccountDataContext";
 import { toast } from "sonner";
+
+type AudienceType = "internal" | "external";
 
 interface SlideNote {
   slideId: string;
@@ -60,6 +64,7 @@ export const TalkingNotesPanel = ({
   const [talkingNotes, setTalkingNotes] = useState<TalkingNotes | null>(null);
   const [webSearchUsed, setWebSearchUsed] = useState(false);
   const [expandedSlides, setExpandedSlides] = useState<Set<number>>(new Set([currentSlideIndex]));
+  const [audienceType, setAudienceType] = useState<AudienceType>("external");
 
   const handleGenerateNotes = async () => {
     if (!data.basics.accountName) {
@@ -79,7 +84,8 @@ export const TalkingNotesPanel = ({
         body: { 
           accountData: data,
           documentContent,
-          slideInfo
+          slideInfo,
+          audienceType
         }
       });
 
@@ -171,12 +177,49 @@ export const TalkingNotesPanel = ({
       {/* Content */}
       <ScrollArea className="flex-1 p-4">
         {!talkingNotes ? (
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <Mic className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Generate Talking Notes</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-[280px] mx-auto">
               AI will analyze your account data and web research to create natural, conversational presenter notes.
             </p>
+
+            {/* Audience Type Selection */}
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Presentation Audience
+              </p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={() => setAudienceType("external")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    audienceType === "external"
+                      ? "bg-primary/15 border-primary/40 text-primary"
+                      : "bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <Building2 className="w-4 h-4" />
+                  Customer
+                </button>
+                <button
+                  onClick={() => setAudienceType("internal")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    audienceType === "internal"
+                      ? "bg-accent/15 border-accent/40 text-accent"
+                      : "bg-muted/30 border-border/50 text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <Users className="w-4 h-4" />
+                  Internal
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {audienceType === "external" 
+                  ? "Notes optimized for customer-facing presentations" 
+                  : "Notes optimized for internal stakeholder reviews"}
+              </p>
+            </div>
+
             <Button 
               onClick={handleGenerateNotes} 
               disabled={isGenerating}
