@@ -95,7 +95,7 @@ export const ImprovedSlideComponent = ({ slide, showNotes = false }: ImprovedSli
 
         {/* Key Points - Premium glass cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {slide.keyPoints.map((point, idx) => (
+          {(slide.keyPoints || []).map((point, idx) => (
             <div
               key={idx}
               className={`glass-card p-5 ${theme.border} border-l-4 opacity-0 animate-fade-in hover:scale-[1.01] transition-all duration-300`}
@@ -118,7 +118,7 @@ export const ImprovedSlideComponent = ({ slide, showNotes = false }: ImprovedSli
           {slide.visualSuggestion && (
             <div 
               className="glass-card p-6 border-l-4 border-l-accent opacity-0 animate-fade-in"
-              style={{ animationDelay: `${100 + slide.keyPoints.length * 75 + 50}ms` }}
+              style={{ animationDelay: `${100 + (slide.keyPoints?.length || 0) * 75 + 50}ms` }}
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0 border border-white/5">
@@ -134,7 +134,7 @@ export const ImprovedSlideComponent = ({ slide, showNotes = false }: ImprovedSli
           {slide.dataHighlight && (
             <div 
               className="glass-card p-6 border-l-4 border-l-amber-500 opacity-0 animate-fade-in"
-              style={{ animationDelay: `${100 + slide.keyPoints.length * 75 + 100}ms` }}
+              style={{ animationDelay: `${100 + (slide.keyPoints?.length || 0) * 75 + 100}ms` }}
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0 border border-white/5">
@@ -153,7 +153,7 @@ export const ImprovedSlideComponent = ({ slide, showNotes = false }: ImprovedSli
         {showNotes && slide.speakerNotes && (
           <div 
             className="mt-auto glass-card p-6 opacity-0 animate-fade-in"
-            style={{ animationDelay: `${100 + slide.keyPoints.length * 75 + 150}ms` }}
+            style={{ animationDelay: `${100 + (slide.keyPoints?.length || 0) * 75 + 150}ms` }}
           >
             <div className="flex items-center gap-3 mb-5">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${theme.accent} flex items-center justify-center shadow-lg`}>
