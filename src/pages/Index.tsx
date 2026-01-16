@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { SlideFooter } from "@/components/SlideFooter";
 import { SlideNavigation } from "@/components/slides/SlideNavigation";
 import { TalkingNotesPanel } from "@/components/TalkingNotesPanel";
-import { InputFormSlide } from "@/components/slides/InputFormSlide";
+import { GuidedInputFlow } from "@/components/input/GuidedInputFlow";
 import { CoverSlide } from "@/components/slides/CoverSlide";
 import { ExecutiveSummarySlide } from "@/components/slides/ExecutiveSummarySlide";
 import { CustomerSnapshotSlide } from "@/components/slides/CustomerSnapshotSlide";
@@ -36,7 +36,7 @@ import { useAccountData } from "@/context/AccountDataContext";
 
 // Default slides for annual report / manual input flow
 const defaultSlides = [
-  { component: InputFormSlide, label: "Input Form", isForm: true },
+  { component: GuidedInputFlow, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
   { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
   { component: CustomerSnapshotSlide, label: "2. Customer Snapshot" },
@@ -85,7 +85,7 @@ const Index = () => {
     // Enhanced PPT mode with pixel-perfect layout
     if (enhancedPresentation) {
       return [
-        { label: "Input Form", isForm: true, component: InputFormSlide },
+        { label: "Input Form", isForm: true, component: GuidedInputFlow },
         ...enhancedPresentation.slides.map((slide) => ({
           label: `${slide.slideNumber}. ${slide.title}`,
           isForm: false,
@@ -97,7 +97,7 @@ const Index = () => {
     // Legacy improved presentation mode
     if (isPPTMode && improvedPresentation) {
       return [
-        { label: "Input Form", isForm: true, component: InputFormSlide },
+        { label: "Input Form", isForm: true, component: GuidedInputFlow },
         ...improvedPresentation.slides.map((slide) => ({
           label: `${slide.slideNumber}. ${slide.title}`,
           isForm: false,
