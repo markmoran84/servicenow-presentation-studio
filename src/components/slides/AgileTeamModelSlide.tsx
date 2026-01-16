@@ -141,16 +141,16 @@ const AgileTeamModelSlide = () => {
             <defs>
               {/* Gradients for active/inactive segments */}
               <radialGradient id="activeGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#059669" />
+                <stop offset="0%" stopColor="#7DE868" />
+                <stop offset="100%" stopColor="#61D84E" />
               </radialGradient>
               <radialGradient id="inactiveGradient" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#1e3a5f" />
                 <stop offset="100%" stopColor="#0f2744" />
               </radialGradient>
               <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#6ee7b7" />
-                <stop offset="100%" stopColor="#34d399" />
+                <stop offset="0%" stopColor="#7DE868" />
+                <stop offset="100%" stopColor="#61D84E" />
               </radialGradient>
               {/* Glow filter for active segments */}
               <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -179,7 +179,7 @@ const AgileTeamModelSlide = () => {
                 refY="5"
                 orient="auto"
               >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#61D84E" />
               </marker>
             </defs>
 
@@ -194,7 +194,7 @@ const AgileTeamModelSlide = () => {
                   key={`outer-${index}`}
                   d={generateSegmentPath(index, middleRadius + 2, outerRadius - 2)}
                   fill={isActive ? "url(#activeGradient)" : "url(#inactiveGradient)"}
-                  stroke={isActive ? "#6ee7b7" : "#1e3a5f"}
+                  stroke={isActive ? "#61D84E" : "#1e3a5f"}
                   strokeWidth="1"
                   filter={isActive ? "url(#glow)" : undefined}
                   className="transition-all duration-700"
@@ -224,7 +224,7 @@ const AgileTeamModelSlide = () => {
                     y1={arrow.startY}
                     x2={arrow.endX}
                     y2={arrow.endY}
-                    stroke={isActive ? "#34d399" : "#374151"}
+                    stroke={isActive ? "#61D84E" : "#374151"}
                     strokeWidth={isActive ? "3" : "2"}
                     markerEnd={isActive ? "url(#arrowMarkerActive)" : "url(#arrowMarker)"}
                     style={{ opacity: isActive ? 1 : 0.4 }}
