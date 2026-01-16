@@ -18,6 +18,7 @@ export type RegeneratablePlanSection =
   | "strategicTensions"
   | "valueHypotheses"
   | "risksMitigations"
+  | "keyRisks"
   | "fy1Retrospective"
   | "customerStrategySynthesis"
   | "weeklyUpdateContext"
@@ -78,6 +79,10 @@ const sectionMeta: Record<
   risksMitigations: {
     label: "Risks & Mitigations",
     planKeys: ["risksMitigations"],
+  },
+  keyRisks: {
+    label: "Key Risks",
+    planKeys: ["keyRisks"],
   },
   fy1Retrospective: {
     label: "FY-1 Retrospective",

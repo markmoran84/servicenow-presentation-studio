@@ -1,20 +1,40 @@
-import { useAccountData } from "@/context/AccountDataContext";
+import { useAccountData, CategorizedRisk } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
 import { ShieldAlert, AlertTriangle, CheckCircle, TrendingDown, ShieldCheck, Sparkles, AlertCircle } from "lucide-react";
+import { useMemo } from "react";
+
+// Category colors
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
+  Strategic: { bg: "bg-blue-500/20", text: "text-blue-400", border: "border-blue-500/30" },
+  Operational: { bg: "bg-amber-500/20", text: "text-amber-400", border: "border-amber-500/30" },
+  Governance: { bg: "bg-purple-500/20", text: "text-purple-400", border: "border-purple-500/30" },
+  Commercial: { bg: "bg-emerald-500/20", text: "text-emerald-400", border: "border-emerald-500/30" },
+};
 
 export const RiskMitigationSlide = () => {
   const { data } = useAccountData();
   const { basics, generatedPlan } = data;
 
-  // Use AI-generated risks if available
-  const isAIGenerated = !!generatedPlan?.risksMitigations && generatedPlan.risksMitigations.length > 0;
-  const risks = generatedPlan?.risksMitigations?.slice(0, 4) || [];
+  // Use categorized keyRisks if available, fall back to legacy risksMitigations
+  const risks = useMemo(() => {
+    if (generatedPlan?.keyRisks && generatedPlan.keyRisks.length > 0) {
+      return generatedPlan.keyRisks.map((risk) => ({
+        risk: risk.risk,
+        mitigation: risk.mitigation,
+        level: risk.severity >= 4 ? "High" : risk.severity >= 2 ? "Medium" : "Low",
+        category: risk.category,
+      }));
+    }
+    return generatedPlan?.risksMitigations?.slice(0, 8) || [];
+  }, [generatedPlan]);
+
+  const isAIGenerated = risks.length > 0;
 
   const getLevelColor = (level: string) => {
     switch (level) {
       case "High": return { bg: "bg-destructive/20", text: "text-destructive", border: "border-destructive/30", dot: "bg-destructive" };
       case "Medium": return { bg: "bg-amber-500/20", text: "text-amber-500", border: "border-amber-500/30", dot: "bg-amber-500" };
-      case "Low": return { bg: "bg-primary/20", text: "text-primary", border: "border-primary/30", dot: "bg-primary" };
+      case "Low": return { bg: "bg-[#61D84E]/20", text: "text-[#61D84E]", border: "border-[#61D84E]/30", dot: "bg-[#61D84E]" };
       default: return { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
     }
   };
