@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { PowerPointAnalyzer } from "@/components/PowerPointAnalyzer";
+import { AccountPlanExtractor } from "@/components/AccountPlanExtractor";
 import { toast } from "sonner";
 import { 
   FileText, 
@@ -13,7 +14,8 @@ import {
   PlusCircle,
   ArrowLeft,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -191,28 +193,24 @@ export function AIImportStep({ onNext, onSkip, onAcceptImprovedSlides }: AIImpor
             <Card className="border-dashed border-2 bg-muted/20">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Sparkles className="w-5 h-5 text-primary" />
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <Download className="w-5 h-5 text-purple-500" />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">How this works:</p>
+                    <p className="text-sm font-medium">Extract & Use Existing Data</p>
                     <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
                       <li>Upload your existing account plan PowerPoint</li>
-                      <li>AI will extract all relevant data (company info, strategy, etc.)</li>
-                      <li>Review and edit the extracted information</li>
-                      <li>Generate an enhanced, improved version</li>
+                      <li>AI extracts company info, strategy, pain points, etc.</li>
+                      <li>Data auto-fills the form for you to review/edit</li>
+                      <li>Generate a fresh, enhanced account plan</li>
                     </ol>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <PowerPointAnalyzer 
-              onGenerateTalkingNotes={() => {
-                toast.info("Navigate to any slide and click 'Notes' to generate talking notes");
-              }}
-              onAcceptChanges={() => {
+            <AccountPlanExtractor 
+              onDataExtracted={() => {
                 setHasImported(true);
-                onAcceptImprovedSlides?.();
               }}
             />
           </div>
