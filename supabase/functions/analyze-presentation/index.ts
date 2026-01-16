@@ -5,6 +5,42 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Retry helper for transient errors (503, timeouts)
+async function fetchWithRetry(
+  url: string, 
+  options: RequestInit, 
+  maxRetries = 3
+): Promise<Response> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Retry on 503 (service unavailable) or 502 (bad gateway)
+      if (response.status === 503 || response.status === 502) {
+        const errorText = await response.text();
+        console.log(`Attempt ${attempt + 1}/${maxRetries}: Got ${response.status}, retrying...`);
+        lastError = new Error(`Gateway error ${response.status}: ${errorText}`);
+        
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      console.log(`Attempt ${attempt + 1}/${maxRetries}: Fetch failed, retrying...`);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+  
+  throw lastError || new Error("All retry attempts failed");
+}
+
 // Search for company information
 async function searchCompanyInfo(companyName: string, searchType: string): Promise<string> {
   const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
@@ -86,7 +122,7 @@ serve(async (req) => {
 
     // First, identify the company from the presentation
     console.log("Identifying company from presentation...");
-    const identifyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const identifyResponse = await fetchWithRetry("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -162,7 +198,7 @@ Provide a comprehensive analysis including:
 4. Specific suggestions for improvement
 5. Information from web research that should be incorporated`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetchWithRetry("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -272,7 +308,7 @@ Provide a comprehensive analysis including:
         ],
         tool_choice: { type: "function", function: { name: "analyze_presentation" } }
       }),
-    });
+    }, 3);
 
     if (!response.ok) {
       const errorText = await response.text();
