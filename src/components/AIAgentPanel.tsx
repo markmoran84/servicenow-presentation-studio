@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, Send, Loader2, Sparkles, X, Maximize2, Minimize2, Trash2, ChevronDown } from "lucide-react";
+import { Bot, Send, Loader2, Sparkles, X, Maximize2, Minimize2, Trash2, ChevronDown, Presentation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useAccountData } from "@/context/AccountDataContext";
+import { useAccountData, ImprovedPresentation, ImprovedSlide } from "@/context/AccountDataContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -23,13 +23,14 @@ interface ToolCall {
 }
 
 const SUGGESTIONS = [
+  "Create a 5-slide executive presentation",
   "Add 3 strategic priorities based on our pain points",
+  "Generate a complete account plan deck with 8 slides",
   "Create a SWOT analysis for this account",
-  "Generate an executive summary narrative",
   "Add a new Big Bet for AI transformation",
-  "Suggest value hypotheses based on our strategy",
   "Create a 4-quarter roadmap",
-  "Add risk mitigations for our opportunities",
+  "Generate slides about our value proposition",
+  "Add a slide about competitive positioning",
 ];
 
 export function AIAgentPanel() {
@@ -42,7 +43,7 @@ export function AIAgentPanel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
-  const { data, updateData, patchGeneratedPlan } = useAccountData();
+  const { data, updateData, patchGeneratedPlan, setImprovedPresentation } = useAccountData();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -82,14 +83,142 @@ export function AIAgentPanel() {
           });
           call.applied = true;
         } else if (call.name === "generate_content") {
-          // Content generation is handled by the AI response itself
+          call.applied = true;
+        } else if (call.name === "generate_slides") {
+          // Generate a complete presentation
+          const args = call.arguments as {
+            title: string;
+            overallNarrative: string;
+            keyThemes: string[];
+            slides: Array<{
+              slideNumber?: number;
+              title: string;
+              keyPoints: string[];
+              visualSuggestion?: string;
+              dataHighlight?: string;
+              speakerNotes: {
+                openingHook: string;
+                talkingPoints: string[];
+                dataToMention?: string[];
+                transitionToNext?: string;
+                estimatedDuration: string;
+              };
+            }>;
+            closingTips?: string[];
+          };
+          
+          const presentation: ImprovedPresentation = {
+            title: args.title,
+            companyName: data.basics.accountName || "Company",
+            totalSlides: args.slides.length,
+            overallNarrative: args.overallNarrative,
+            keyThemes: args.keyThemes,
+            slides: args.slides.map((s, i) => ({
+              slideNumber: s.slideNumber || i + 1,
+              title: s.title,
+              keyPoints: s.keyPoints,
+              visualSuggestion: s.visualSuggestion,
+              dataHighlight: s.dataHighlight,
+              speakerNotes: s.speakerNotes,
+            })),
+            closingTips: args.closingTips,
+          };
+          
+          setImprovedPresentation(presentation);
+          call.applied = true;
+        } else if (call.name === "add_slide") {
+          // Add a single slide
+          const args = call.arguments as {
+            position?: number;
+            slide: {
+              title: string;
+              keyPoints: string[];
+              visualSuggestion?: string;
+              dataHighlight?: string;
+              speakerNotes: {
+                openingHook: string;
+                talkingPoints: string[];
+                dataToMention?: string[];
+                transitionToNext?: string;
+                estimatedDuration: string;
+              };
+            };
+          };
+          
+          const existingSlides = data.improvedPresentation?.slides || [];
+          const position = args.position ? args.position - 1 : existingSlides.length;
+          
+          const newSlide: ImprovedSlide = {
+            slideNumber: position + 1,
+            title: args.slide.title,
+            keyPoints: args.slide.keyPoints,
+            visualSuggestion: args.slide.visualSuggestion,
+            dataHighlight: args.slide.dataHighlight,
+            speakerNotes: args.slide.speakerNotes,
+          };
+          
+          const newSlides = [...existingSlides];
+          newSlides.splice(position, 0, newSlide);
+          // Renumber slides
+          newSlides.forEach((s, i) => { s.slideNumber = i + 1; });
+          
+          if (data.improvedPresentation) {
+            setImprovedPresentation({
+              ...data.improvedPresentation,
+              slides: newSlides,
+              totalSlides: newSlides.length,
+            });
+          } else {
+            setImprovedPresentation({
+              title: `${data.basics.accountName || "Account"} Presentation`,
+              companyName: data.basics.accountName || "Company",
+              totalSlides: newSlides.length,
+              overallNarrative: "",
+              keyThemes: [],
+              slides: newSlides,
+            });
+          }
+          call.applied = true;
+        } else if (call.name === "update_slide") {
+          const args = call.arguments as {
+            slideNumber: number;
+            updates: Partial<ImprovedSlide>;
+          };
+          
+          if (data.improvedPresentation?.slides) {
+            const slides = [...data.improvedPresentation.slides];
+            const idx = args.slideNumber - 1;
+            if (idx >= 0 && idx < slides.length) {
+              slides[idx] = { ...slides[idx], ...args.updates };
+              setImprovedPresentation({
+                ...data.improvedPresentation,
+                slides,
+              });
+            }
+          }
+          call.applied = true;
+        } else if (call.name === "remove_slide") {
+          const args = call.arguments as { slideNumber: number };
+          
+          if (data.improvedPresentation?.slides) {
+            const slides = data.improvedPresentation.slides.filter(
+              (_, i) => i !== args.slideNumber - 1
+            );
+            // Renumber
+            slides.forEach((s, i) => { s.slideNumber = i + 1; });
+            setImprovedPresentation({
+              ...data.improvedPresentation,
+              slides,
+              totalSlides: slides.length,
+            });
+          }
           call.applied = true;
         }
       } catch (error) {
         console.error("Error applying tool call:", call.name, error);
       }
     }
-  }, [data, updateData, patchGeneratedPlan]);
+  }, [data, updateData, patchGeneratedPlan, setImprovedPresentation]);
 
   const parseSSEResponse = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
     const decoder = new TextDecoder();
