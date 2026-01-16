@@ -30,6 +30,8 @@ import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSli
 import { SuccessSlide } from "@/components/slides/SuccessSlide";
 import { PresentationSlide } from "@/components/slides/PresentationSlide";
 import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { SavePlanDialog } from "@/components/plans/SavePlanDialog";
 import { useAccountData } from "@/context/AccountDataContext";
 
 // Default slides for annual report / manual input flow
@@ -63,12 +65,13 @@ const defaultSlides = [
 ];
 
 const Index = () => {
-  const { data, setImprovedPresentation, setEnhancedPresentation } = useAccountData();
+  const { data, setImprovedPresentation, setEnhancedPresentation, resetToDefaults } = useAccountData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSlideIndex, setExportSlideIndex] = useState<number | null>(null);
   const [talkingNotesOpen, setTalkingNotesOpen] = useState(false);
   const [showSpeakerNotes, setShowSpeakerNotes] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const savedSlideRef = useRef<number>(0);
 
@@ -132,6 +135,12 @@ const Index = () => {
     setEnhancedPresentation(undefined);
     setCurrentSlide(0);
   }, [setImprovedPresentation, setEnhancedPresentation]);
+
+  // Handle creating a new plan
+  const handleNewPlan = useCallback(() => {
+    resetToDefaults();
+    setCurrentSlide(0);
+  }, [resetToDefaults]);
 
   // Export handlers
   const handleExportStart = useCallback(() => {
@@ -240,6 +249,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen gradient-hero relative overflow-y-auto">
+      {/* App Header */}
+      <AppHeader 
+        onNewPlan={handleNewPlan} 
+        currentPlanName={data.basics.accountName || undefined}
+      />
+
       {/* Background decorations - hidden during export */}
       {!isExporting && (
         <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -273,10 +288,10 @@ const Index = () => {
         </div>
       )}
 
-      {/* Slide container */}
+      {/* Slide container - add top padding for header */}
       <div
         ref={slideContainerRef}
-        className={`relative z-10 ${isExporting ? "" : "animate-fade-in"} ${talkingNotesOpen ? "mr-[420px]" : ""}`}
+        className={`relative z-10 pt-16 ${isExporting ? "" : "animate-fade-in"} ${talkingNotesOpen ? "mr-[420px]" : ""}`}
         key={`slide-${currentSlide}`}
         style={
           isExporting
@@ -284,6 +299,7 @@ const Index = () => {
                 width: "1920px",
                 height: "1080px",
                 overflow: "hidden",
+                paddingTop: 0,
                 background: "linear-gradient(135deg, #0B1D26 0%, #1a3a4a 50%, #0B1D26 100%)",
               }
             : undefined
@@ -314,6 +330,12 @@ const Index = () => {
       />
 
       <SlideFooter />
+
+      {/* Save Plan Dialog */}
+      <SavePlanDialog 
+        isOpen={saveDialogOpen} 
+        onClose={() => setSaveDialogOpen(false)} 
+      />
     </div>
   );
 };
