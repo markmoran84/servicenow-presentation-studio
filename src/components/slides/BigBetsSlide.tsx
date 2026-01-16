@@ -244,7 +244,9 @@ export const BigBetsSlide = () => {
               <div className="text-right">
                 <span className="text-2xl font-bold text-primary">
                   {workstreams.reduce((sum, w) => {
-                    const val = parseFloat((w.netNewACV || "0").replace(/[^0-9.]/g, "")) || 0;
+                    const rawVal = w.netNewACV;
+                    const strVal = typeof rawVal === 'number' ? String(rawVal) : (rawVal || "0");
+                    const val = parseFloat(strVal.replace(/[^0-9.]/g, "")) || 0;
                     return sum + val;
                   }, 0).toFixed(0)}M+
                 </span>
