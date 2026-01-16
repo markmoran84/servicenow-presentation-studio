@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-const SYSTEM_PROMPT = `You are an expert AI assistant for enterprise account planning. You have FULL AUTHORITY to create, modify, and adjust all aspects of the account plan.
+const SYSTEM_PROMPT = `You are an expert AI assistant for enterprise account planning. You have FULL AUTHORITY to create, modify, and adjust all aspects of the account plan, INCLUDING GENERATING COMPLETE PRESENTATION SLIDES.
 
 You can manipulate the following data structures:
 
@@ -59,6 +59,27 @@ You can manipulate the following data structures:
 - risksMitigations: [{risk, mitigation, level}]
 - roadmapPhases: [{quarter, title, activities[]}]
 - successMetrics: [{metric, label, description}]
+
+## PRESENTATION SLIDES (improvedPresentation)
+You can generate complete presentation decks! Each slide has:
+- slideNumber: number
+- title: string (compelling slide title)
+- keyPoints: string[] (3-5 bullet points)
+- visualSuggestion?: string (design recommendations)
+- dataHighlight?: string (key metric to emphasize)
+- speakerNotes: {
+    openingHook: string (attention-grabbing opener),
+    talkingPoints: string[] (what to say),
+    dataToMention?: string[] (stats to reference),
+    transitionToNext?: string (how to transition),
+    estimatedDuration: string (e.g., "2-3 minutes")
+  }
+
+When generating slides, use the generate_slides tool. Create compelling, strategic presentations with:
+- Clear narrative arc across slides
+- Strong opening hooks in speaker notes
+- Data-driven key points when possible
+- Professional transitions between slides
 
 When the user asks you to do something, respond with:
 1. A brief explanation of what you'll do
@@ -193,6 +214,152 @@ const tools = [
         required: ["query"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_slides",
+      description: "Generate a complete presentation slide deck. Use this when the user asks to create slides, a presentation, or a deck.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { 
+            type: "string", 
+            description: "Overall presentation title" 
+          },
+          overallNarrative: {
+            type: "string",
+            description: "The key story/message of the entire presentation"
+          },
+          keyThemes: {
+            type: "array",
+            items: { type: "string" },
+            description: "3-5 key themes that run through the presentation"
+          },
+          slides: {
+            type: "array",
+            description: "Array of slides to generate",
+            items: {
+              type: "object",
+              properties: {
+                slideNumber: { type: "number" },
+                title: { type: "string", description: "Compelling slide title" },
+                keyPoints: { 
+                  type: "array", 
+                  items: { type: "string" },
+                  description: "3-5 key bullet points"
+                },
+                visualSuggestion: { type: "string", description: "Design/visual recommendations" },
+                dataHighlight: { type: "string", description: "Key metric or data point to emphasize" },
+                speakerNotes: {
+                  type: "object",
+                  properties: {
+                    openingHook: { type: "string", description: "Attention-grabbing opener" },
+                    talkingPoints: { type: "array", items: { type: "string" } },
+                    dataToMention: { type: "array", items: { type: "string" } },
+                    transitionToNext: { type: "string" },
+                    estimatedDuration: { type: "string" }
+                  },
+                  required: ["openingHook", "talkingPoints", "estimatedDuration"]
+                }
+              },
+              required: ["slideNumber", "title", "keyPoints", "speakerNotes"]
+            }
+          },
+          closingTips: {
+            type: "array",
+            items: { type: "string" },
+            description: "Tips for delivering the presentation effectively"
+          }
+        },
+        required: ["title", "overallNarrative", "keyThemes", "slides"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_slide",
+      description: "Add a single slide to the existing presentation",
+      parameters: {
+        type: "object",
+        properties: {
+          position: { 
+            type: "number", 
+            description: "Where to insert the slide (1-based). If not specified, adds to end." 
+          },
+          slide: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              keyPoints: { type: "array", items: { type: "string" } },
+              visualSuggestion: { type: "string" },
+              dataHighlight: { type: "string" },
+              speakerNotes: {
+                type: "object",
+                properties: {
+                  openingHook: { type: "string" },
+                  talkingPoints: { type: "array", items: { type: "string" } },
+                  dataToMention: { type: "array", items: { type: "string" } },
+                  transitionToNext: { type: "string" },
+                  estimatedDuration: { type: "string" }
+                },
+                required: ["openingHook", "talkingPoints", "estimatedDuration"]
+              }
+            },
+            required: ["title", "keyPoints", "speakerNotes"]
+          }
+        },
+        required: ["slide"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_slide",
+      description: "Update an existing slide in the presentation",
+      parameters: {
+        type: "object",
+        properties: {
+          slideNumber: { type: "number", description: "Which slide to update (1-based)" },
+          updates: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              keyPoints: { type: "array", items: { type: "string" } },
+              visualSuggestion: { type: "string" },
+              dataHighlight: { type: "string" },
+              speakerNotes: {
+                type: "object",
+                properties: {
+                  openingHook: { type: "string" },
+                  talkingPoints: { type: "array", items: { type: "string" } },
+                  dataToMention: { type: "array", items: { type: "string" } },
+                  transitionToNext: { type: "string" },
+                  estimatedDuration: { type: "string" }
+                }
+              }
+            }
+          }
+        },
+        required: ["slideNumber", "updates"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "remove_slide",
+      description: "Remove a slide from the presentation",
+      parameters: {
+        type: "object",
+        properties: {
+          slideNumber: { type: "number", description: "Which slide to remove (1-based)" }
+        },
+        required: ["slideNumber"]
+      }
+    }
   }
 ];
 
@@ -210,6 +377,10 @@ serve(async (req) => {
     }
 
     // Build context about current account state
+    const presentationInfo = accountData?.improvedPresentation 
+      ? `Current Presentation: "${accountData.improvedPresentation.title}" with ${accountData.improvedPresentation.slides?.length || 0} slides`
+      : "No presentation generated yet.";
+    
     const accountContext = `
 ## CURRENT ACCOUNT STATE
 Company: ${accountData?.basics?.accountName || "Not set"}
@@ -228,6 +399,7 @@ Pain Points: ${accountData?.painPoints?.painPoints?.length || 0}
 Opportunities: ${accountData?.opportunities?.opportunities?.length || 0}
 
 ${accountData?.generatedPlan ? "Has AI-generated strategic plan." : "No AI-generated plan yet."}
+${presentationInfo}
 `;
 
     const fullMessages: Message[] = [
