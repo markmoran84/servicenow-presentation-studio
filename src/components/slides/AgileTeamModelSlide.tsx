@@ -60,9 +60,9 @@ const AgileTeamModelSlide = () => {
 
   const centerX = 220;
   const centerY = 220;
-  const outerRadius = 210;
-  const middleRadius = 135;
-  const innerRadius = 75;
+  const outerRadius = 215;
+  const middleRadius = 120;
+  const innerRadius = 70;
 
   // Generate segment paths for the outer ring
   const generateSegmentPath = (index: number, startR: number, endR: number) => {
