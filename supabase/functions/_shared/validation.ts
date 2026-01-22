@@ -104,11 +104,15 @@ export async function callAIGateway(options: {
     max_tokens = 16000,
   } = options;
 
+  // OpenAI models use max_completion_tokens, others use max_tokens
+  const isOpenAIModel = model.startsWith("openai/");
+  const tokenParam = isOpenAIModel ? "max_completion_tokens" : "max_tokens";
+
   const body: Record<string, unknown> = {
     model,
     messages,
     temperature,
-    max_tokens,
+    [tokenParam]: max_tokens,
   };
 
   if (tools && tools.length > 0) {
@@ -118,7 +122,7 @@ export async function callAIGateway(options: {
     }
   }
 
-  console.log(`Calling AI gateway with model: ${model}, max_tokens: ${max_tokens}`);
+  console.log(`Calling AI gateway with model: ${model}, ${tokenParam}: ${max_tokens}`);
 
   const response = await fetchWithRetry(AI_GATEWAY_URL, {
     method: "POST",
