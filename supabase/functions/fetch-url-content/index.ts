@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, createErrorResponse, validateUrl } from "../_shared/validation.ts";
 
-const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB limit for PDFs
+const MAX_PDF_SIZE = 15 * 1024 * 1024; // 15MB limit for PDF downloads (parse-pdf handles page limits)
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
