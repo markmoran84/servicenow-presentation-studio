@@ -211,7 +211,8 @@ const Index = () => {
         return (
           <CurrentSlideComponent 
             onGenerate={goToFirstSlide} 
-            onAcceptImprovedSlides={handleAcceptImprovedSlides} 
+            onAcceptImprovedSlides={handleAcceptImprovedSlides}
+            onNavigateToSlide={setCurrentSlide}
           />
         );
       }
