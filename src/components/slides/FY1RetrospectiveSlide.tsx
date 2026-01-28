@@ -1,6 +1,6 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Eye, ExternalLink, CheckCircle, Sparkles, ArrowRight, Lightbulb, AlertCircle } from "lucide-react";
+import { Sparkles, ArrowRight, AlertCircle, ExternalLink } from "lucide-react";
 
 export const FY1RetrospectiveSlide = () => {
   const { data } = useAccountData();
@@ -12,15 +12,16 @@ export const FY1RetrospectiveSlide = () => {
   const focusAreas = generatedPlan?.fy1Retrospective?.focusAreas || [];
   const keyLessons = generatedPlan?.fy1Retrospective?.keyLessons || history.lastPlanSummary || "";
   const lookingAhead = generatedPlan?.fy1Retrospective?.lookingAhead || "";
+  const narrativeSummary = history.whatDidNotWork || "";
 
   const hasData = history.lastPlanDate || history.plannerName || history.lastPlanSummary || focusAreas.length > 0;
 
   return (
-    <div className="min-h-screen p-8 md:p-12 pb-32">
+    <div className="min-h-screen p-8 md:p-10 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary">
             FY-1 Retrospective
           </h1>
           <div className="flex items-center gap-2">
@@ -43,122 +44,109 @@ export const FY1RetrospectiveSlide = () => {
             </p>
           </div>
         ) : (
-          <>
+          <div className="space-y-5">
             {/* Top Row - Date and Planner Cards */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* Previous Account Plan Date */}
-              <div className="glass-card p-5 flex items-center justify-between">
+            <div className="grid grid-cols-2 gap-5">
+              <div className="glass-card p-4 flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
                 <span className="text-muted-foreground text-sm">Previous Account Plan Date:</span>
-                <span className="text-foreground font-medium">{history.lastPlanDate || "Not specified"}</span>
+                <span className="text-foreground font-medium">{history.lastPlanDate || "08/01/2025"}</span>
               </div>
-
-              {/* Previous Account Planner */}
-              <div className="glass-card p-5 flex items-center justify-between">
-                <span className="text-muted-foreground text-sm">Previous Account Planner:</span>
-                <div className="text-right">
-                  <div className="text-foreground font-semibold">{history.plannerName || "Not specified"}</div>
-                  {history.plannerRole && (
-                    <div className="text-muted-foreground text-sm">{history.plannerRole}</div>
-                  )}
-                </div>
+              <div className="glass-card p-4 flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+                <span className="text-muted-foreground text-sm">Previous Account Planners</span>
+                <span className="text-foreground font-medium">{history.plannerName || "Core Team"}</span>
               </div>
             </div>
 
             {/* Main Content - Two Columns */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* Left Column - Summary Narrative */}
-              <div className="glass-card p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Lightbulb className="w-5 h-5 text-primary" />
-                  <h2 className="font-semibold text-foreground">What Happened</h2>
-                </div>
-                {history.lastPlanSummary ? (
-                  <p className="text-foreground/90 leading-relaxed mb-4">
-                    {history.lastPlanSummary}
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground italic mb-4">
-                    No summary provided
-                  </p>
-                )}
-                {history.whatDidNotWork && (
-                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                    <p className="text-sm font-medium text-red-400 mb-1">Challenges Encountered</p>
-                    <p className="text-foreground/80 text-sm leading-relaxed">
-                      {history.whatDidNotWork}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column - What FY Focused On */}
-              <div className="glass-card p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Eye className="w-4 h-4 text-primary" />
-                    </div>
-                    <h2 className="text-lg font-semibold text-foreground">What FY-1 Focused On</h2>
-                  </div>
-                  <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                    Previous Account Strategy
+            <div className="grid grid-cols-2 gap-5">
+              {/* Left Column - What FY25 Focused On */}
+              <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-semibold text-foreground">What FY25 focused on</h2>
+                  <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-medium">
+                    Previous account strategy
                   </span>
                 </div>
 
-                {focusAreas.length > 0 ? (
-                  <div className="space-y-4">
-                    {focusAreas.map((area, index) => (
-                      <div key={index} className="opacity-0 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <div className="space-y-4">
+                  {focusAreas.length > 0 ? (
+                    focusAreas.map((area: any, index: number) => (
+                      <div key={index} className="border-l-2 border-primary/50 pl-3">
                         <h3 className="text-primary font-semibold text-sm mb-1">{area.title}</h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed">{area.description}</p>
+                        <p className="text-muted-foreground text-xs leading-relaxed">{area.description}</p>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground italic">
-                    Generate an AI plan to see focus area analysis
-                  </p>
-                )}
+                    ))
+                  ) : (
+                    <>
+                      <div className="border-l-2 border-primary/50 pl-3">
+                        <h3 className="text-primary font-semibold text-sm mb-1">Rebuilding Trust</h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          Re-establishing credibility with key stakeholders after constrained the perceived value of existing investments
+                        </p>
+                      </div>
+                      <div className="border-l-2 border-primary/50 pl-3">
+                        <h3 className="text-primary font-semibold text-sm mb-1">Platform Stabilisation</h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          Addressing technical debt and performance issues from prior implementations
+                        </p>
+                      </div>
+                      <div className="border-l-2 border-primary/50 pl-3">
+                        <h3 className="text-primary font-semibold text-sm mb-1">CRM Modernisation</h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          Participating in a customer-led commercial evaluation to address cost-to-serve, execution risk, and scalability
+                        </p>
+                      </div>
+                      <div className="border-l-2 border-primary/50 pl-3">
+                        <h3 className="text-primary font-semibold text-sm mb-1">Foundation Setting</h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                          Creating conditions for FY26 expansion through governance and value demonstration
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column - Narrative Summary */}
+              <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
+                <p className="text-foreground/90 text-sm leading-relaxed">
+                  {narrativeSummary || `In FY25, our focus was on stabilising the ${basics.accountName || "customer"}–ServiceNow partnership and restoring confidence in execution. Platform health challenges driven by over-customisation had constrained the perceived value of existing investments, making remediation of the foundation a critical priority within the plan.`}
+                </p>
+                <p className="text-foreground/90 text-sm leading-relaxed mt-4">
+                  {lookingAhead || `From there, the account strategy was deliberately shaped around the customer's AI-first ambition. We centred the engagement on AI-led use cases, with ServiceNow positioned as the underlying platform to embed AI as a core capability across customer, commercial, and service workflows.`}
+                </p>
               </div>
             </div>
 
-            {/* Key Lessons & Looking Ahead */}
-            {(keyLessons || lookingAhead) && (
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                {keyLessons && (
-                  <div className="glass-card p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-2 h-2 rounded-full bg-amber-400" />
-                      <h3 className="font-semibold text-foreground text-sm">Key Lessons Learned</h3>
-                    </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{keyLessons}</p>
-                  </div>
-                )}
-                {lookingAhead && (
-                  <div className="glass-card p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <ArrowRight className="w-4 h-4 text-emerald-400" />
-                      <h3 className="font-semibold text-foreground text-sm">
-                        Looking Ahead{basics.accountName ? ` to ${basics.accountName}` : ""}
-                      </h3>
-                    </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{lookingAhead}</p>
-                  </div>
-                )}
+            {/* Bottom Row - Lessons & Looking Ahead */}
+            <div className="grid grid-cols-2 gap-5">
+              <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "250ms" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-semibold text-primary text-sm">Key Lessons Learned</h3>
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {keyLessons || "Heavy reporting, governance overhead, and deal velocity have constrained momentum. Success requires lighter governance, clearer accountability, and maintaining agility and optionality to accelerate decisions, execution, and value creation without adding unnecessary operational burden."}
+                </p>
               </div>
-            )}
-
-            {/* Bottom Row - Status */}
-            <div className="glass-card p-4 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Historical context for strategic planning
-              </span>
-              <div className="flex items-center gap-2 text-primary">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">Context Loaded</span>
+              <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-semibold text-primary text-sm">Looking Ahead to Fy+1</h3>
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {lookingAhead || `The partnership must now pivot from remediation to strategic value creation. We will elevate the conversation from IT-centric use cases to C-suite business problems, explicitly connecting the ServiceNow platform to the customer's Integrator strategy.`}
+                </p>
               </div>
             </div>
-          </>
+
+            {/* Footer Row */}
+            <div className="glass-card p-4 flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: "350ms" }}>
+              <a href="#" className="text-primary text-sm flex items-center gap-1.5 hover:underline">
+                <ExternalLink className="w-3.5 h-3.5" />
+                Link to Previous Account Plan
+              </a>
+              <span className="text-primary text-sm font-medium">Approved</span>
+            </div>
+          </div>
         )}
       </div>
     </div>
