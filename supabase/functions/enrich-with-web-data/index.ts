@@ -216,6 +216,19 @@ RULES:
                     type: "string",
                     description: "Sustainability/net zero commitment"
                   },
+                  visionStatement: {
+                    type: "string",
+                    description: "Company vision statement - a short aspirational phrase (e.g., 'All the way', 'Making it easier for everyone to experience the world')"
+                  },
+                  purposeStatement: {
+                    type: "string",
+                    description: "Company purpose/mission statement - why they exist"
+                  },
+                  longTermAims: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Long-term strategic aims (4-6 items)"
+                  },
                   executives: {
                     type: "array",
                     items: {
@@ -297,6 +310,9 @@ RULES:
     if (enrichedData.growthRate) enrichedFields.push('growthRate');
     if (enrichedData.marginEBIT) enrichedFields.push('marginEBIT');
     if (enrichedData.netZeroTarget) enrichedFields.push('netZeroTarget');
+    if (enrichedData.visionStatement) enrichedFields.push('visionStatement');
+    if (enrichedData.purposeStatement) enrichedFields.push('purposeStatement');
+    if (enrichedData.longTermAims?.length) enrichedFields.push('longTermAims');
     if (enrichedData.executives?.length) enrichedFields.push('executives');
     if (enrichedData.strategicPriorities?.length) enrichedFields.push('strategicPriorities');
     if (enrichedData.digitalInitiatives?.length) enrichedFields.push('digitalInitiatives');
