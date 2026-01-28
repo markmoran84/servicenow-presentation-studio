@@ -21,51 +21,97 @@ Deno.serve(async (req) => {
     // Check if there's an existing strategy to build upon
     const existingStrategy = accountData.accountStrategy?.strategyNarrative;
     const existingBigBets = accountData.accountStrategy?.bigBets || [];
+    
+    // Extract rich context from all data sources
+    const basics = accountData.basics || {};
+    const strategy = accountData.strategy || {};
+    const painPoints = accountData.painPoints?.painPoints || [];
+    const opportunities = accountData.opportunities?.opportunities || [];
+    const annualReport = accountData.annualReport || {};
+    const swot = accountData.swot || {};
+    const financial = accountData.financial || {};
+    const engagement = accountData.engagement || {};
+    
+    // Build dynamic context sections based on available data
+    const hasAnnualReport = annualReport.executiveSummaryNarrative || annualReport.strategicAchievements?.length > 0;
+    const hasTransformationThemes = strategy.transformationThemes?.length > 0;
+    const hasDigitalStrategies = strategy.digitalStrategies?.length > 0;
+    const hasCeoPriorities = strategy.ceoBoardPriorities?.length > 0;
+    const hasFinancialContext = financial.customerRevenue || financial.growthRate;
+    const hasExecutives = engagement.knownExecutiveSponsors?.length > 0;
 
-    const prompt = `You are a strategic account planning expert for enterprise technology sales. Based on the following account data, write a compelling account strategy narrative.
+    const prompt = `You are a strategic account planning expert for enterprise technology sales at ServiceNow. Your task is to write a compelling, highly specific account strategy narrative that demonstrates deep understanding of this customer's unique situation.
 
-The narrative should:
-- Be 2-3 paragraphs (150-250 words)
-- Focus on the strategic opportunity for ServiceNow at this account
-- Reference key pain points and how ServiceNow addresses them
-- Mention the primary commercial wedge and expansion path
-- Be written in first-person plural ("Our strategy..." "We will...")
-- Sound professional and confident, suitable for executive presentations
-${existingBigBets.length > 0 ? "- Reference and align with the defined Big Bets/workstreams" : ""}
-${existingStrategy ? "- Build upon and improve the existing strategy direction shown below" : ""}
+CRITICAL REQUIREMENTS:
+- Be SPECIFIC to this account - reference their actual initiatives, metrics, and terminology
+- Connect ServiceNow capabilities DIRECTLY to their stated priorities and pain points
+- Use their language and strategic framing (quote their transformation themes if available)
+- The narrative should feel like it was written by someone who deeply understands their business
+- Avoid generic statements that could apply to any company
 
-Account Data:
-- Account Name: ${accountData.basics?.accountName || "Unknown"}
-- Industry: ${accountData.basics?.industry || "Unknown"}
-- Current ACV: ${accountData.basics?.currentContractValue || "Unknown"}
-- Next FY Ambition: ${accountData.basics?.nextFYAmbition || "Unknown"}
-- 3 Year Ambition: ${accountData.basics?.threeYearAmbition || "Unknown"}
+FORMAT:
+- 2-3 paragraphs (200-300 words)
+- Written in first-person plural ("Our strategy..." "We will...")
+- Professional and confident tone for executive presentations
+- Each paragraph should have a distinct purpose: (1) Strategic context & alignment, (2) Value proposition & differentiation, (3) Execution approach & outcomes
 
-Customer Corporate Strategy:
-${accountData.strategy?.corporateStrategy?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+=== ACCOUNT CONTEXT ===
 
-Customer Digital Strategies:
-${accountData.strategy?.digitalStrategies?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+Company: ${basics.accountName || "Unknown"}
+Industry: ${basics.industry || "Unknown"}
+${hasFinancialContext ? `Revenue: ${financial.customerRevenue || "Unknown"} | Growth: ${financial.growthRate || "Unknown"}` : ""}
+Current ACV: ${basics.currentContractValue || "Not specified"}
+FY Target: ${basics.nextFYAmbition || "Not specified"} | 3-Year Ambition: ${basics.threeYearAmbition || "Not specified"}
 
-CEO/Board Priorities:
-${accountData.strategy?.ceoBoardPriorities?.map((s: any) => `- ${s.title}: ${s.description}`).join("\n") || "Not specified"}
+${hasAnnualReport ? `=== EXECUTIVE SUMMARY (from their Annual Report) ===
+${annualReport.executiveSummaryNarrative || ""}
 
-Key Pain Points:
-${accountData.painPoints?.painPoints?.map((p: any) => `- ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+Key Achievements:
+${annualReport.strategicAchievements?.map((a: string) => `• ${a}`).join("\n") || "Not available"}
+` : ""}
 
-Strategic Opportunities:
-${accountData.opportunities?.opportunities?.map((o: any) => `- ${o.title}: ${o.description}`).join("\n") || "Not specified"}
+${hasTransformationThemes ? `=== TRANSFORMATION THEMES (their strategic priorities) ===
+${strategy.transformationThemes.map((t: any) => `• ${t.title}: ${t.description}`).join("\n")}
+` : ""}
 
-Annual Report Highlights:
-${accountData.annualReport?.executiveSummaryNarrative || "Not available"}
+${hasCeoPriorities ? `=== CEO/BOARD PRIORITIES ===
+${strategy.ceoBoardPriorities.map((p: any) => `• ${p.title}: ${p.description}`).join("\n")}
+` : ""}
 
-${existingBigBets.length > 0 ? `Defined Big Bets (align strategy to these workstreams):
-${existingBigBets.map((b: any) => `- ${b.title}: ${b.subtitle || ""} (${b.dealStatus}, ${b.netNewACV})`).join("\n")}` : ""}
+${hasDigitalStrategies ? `=== DIGITAL STRATEGY INITIATIVES ===
+${strategy.digitalStrategies.map((d: any) => `• ${d.title}: ${d.description}`).join("\n")}
+` : ""}
 
-${existingStrategy ? `Existing Strategy Direction (improve and build upon this):
-${existingStrategy}` : ""}
+=== CORPORATE STRATEGY ===
+${strategy.corporateStrategy?.map((s: any) => `• ${s.title}: ${s.description}`).join("\n") || "Not specified"}
 
-Write only the strategy narrative, no headers or formatting.`;
+=== PAIN POINTS (opportunities for ServiceNow) ===
+${painPoints.map((p: any) => `• ${p.title}: ${p.description}`).join("\n") || "Not specified"}
+
+=== STRATEGIC OPPORTUNITIES ===
+${opportunities.map((o: any) => `• ${o.title}: ${o.description}`).join("\n") || "Not specified"}
+
+${swot.strengths?.length > 0 ? `=== CUSTOMER STRENGTHS (to leverage) ===
+${swot.strengths.slice(0, 4).map((s: string) => `• ${s}`).join("\n")}
+` : ""}
+
+${swot.threats?.length > 0 ? `=== MARKET THREATS (where ServiceNow can help) ===
+${swot.threats.slice(0, 3).map((t: string) => `• ${t}`).join("\n")}
+` : ""}
+
+${existingBigBets.length > 0 ? `=== DEFINED BIG BETS / WORKSTREAMS ===
+${existingBigBets.map((b: any) => `• ${b.title}: ${b.subtitle || ""} (${b.dealStatus}, ${b.netNewACV})`).join("\n")}
+` : ""}
+
+${hasExecutives ? `=== KEY EXECUTIVE SPONSORS ===
+${engagement.knownExecutiveSponsors.join(", ")}
+` : ""}
+
+${existingStrategy ? `=== EXISTING STRATEGY (improve and build upon) ===
+${existingStrategy}
+` : ""}
+
+Write the strategy narrative now. Be specific, reference their actual initiatives by name, and make clear connections between their priorities and ServiceNow's platform capabilities.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
