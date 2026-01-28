@@ -162,8 +162,10 @@ export interface AnnualReportHighlights {
   purposeStatement?: string;
   // Long-term strategic aims
   longTermAims?: string[];
-  // Medium-term ambitions with descriptions
-  mediumTermAmbitions?: { title: string; bullets: string[] }[];
+  // Medium-term ambitions with metrics
+  mediumTermAmbitions?: { title: string; metric: string; bullets: string[] }[];
+  // Detailed strategic objectives by theme
+  strategicObjectives?: { theme: string; bullets: string[] }[];
 }
 
 // Business Model Canvas (9 building blocks)
