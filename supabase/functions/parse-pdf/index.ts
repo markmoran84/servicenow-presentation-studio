@@ -150,6 +150,11 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
 
 function cleanExtractedText(text: string): string {
   return text
+    // Remove non-whitespace control chars that often appear in PDF extraction output
+    // (keep \n, \r, \t so we can normalize them below)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+    // Remove common zero-width characters
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
     .replace(/\r\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/\t/g, " ")
@@ -165,11 +170,12 @@ function looksLikeExtractedText(text: string): boolean {
     return false;
   }
 
-  // If there are too many control characters, it's almost certainly binary/garbage.
-  const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
-  const controlRatio = controlChars / Math.max(1, text.length);
-  if (controlRatio > 0.02) {
-    console.log("Validation failed: too many control chars", controlRatio);
+  // If there are too many *non-whitespace* control characters, it's almost certainly binary/garbage.
+  // (\n, \r, \t are allowed and should not count against the ratio)
+  const badControls = (text.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g) || []).length;
+  const badControlRatio = badControls / Math.max(1, text.length);
+  if (badControlRatio > 0.005) {
+    console.log("Validation failed: too many non-whitespace control chars", badControlRatio);
     return false;
   }
 
