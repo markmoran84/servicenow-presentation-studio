@@ -39,6 +39,28 @@ Deno.serve(async (req) => {
     const hasCeoPriorities = strategy.ceoBoardPriorities?.length > 0;
     const hasFinancialContext = financial.customerRevenue || financial.growthRate;
     const hasExecutives = engagement.knownExecutiveSponsors?.length > 0;
+    const hasCorporateStrategy = strategy.corporateStrategy?.length > 0;
+    const hasPainPoints = painPoints.length > 0;
+    const hasOpportunities = opportunities.length > 0;
+    const hasSwot = swot.strengths?.length > 0 || swot.threats?.length > 0;
+    const hasBigBets = existingBigBets.length > 0;
+
+    // Track which data sources were used
+    const dataSources: { name: string; available: boolean; weight: number }[] = [
+      { name: "Annual Report", available: hasAnnualReport, weight: 25 },
+      { name: "CEO/Board Priorities", available: hasCeoPriorities, weight: 20 },
+      { name: "Transformation Themes", available: hasTransformationThemes, weight: 15 },
+      { name: "Digital Strategies", available: hasDigitalStrategies, weight: 10 },
+      { name: "Corporate Strategy", available: hasCorporateStrategy, weight: 10 },
+      { name: "Pain Points", available: hasPainPoints, weight: 5 },
+      { name: "Opportunities", available: hasOpportunities, weight: 5 },
+      { name: "SWOT Analysis", available: hasSwot, weight: 5 },
+      { name: "Financial Context", available: hasFinancialContext, weight: 3 },
+      { name: "Executive Sponsors", available: hasExecutives, weight: 2 },
+    ];
+
+    const usedSources = dataSources.filter(s => s.available);
+    const confidenceScore = usedSources.reduce((acc, s) => acc + s.weight, 0);
 
     const prompt = `You are a strategic account planning expert for enterprise technology sales at ServiceNow. Your task is to write a compelling, highly specific account strategy narrative that demonstrates deep understanding of this customer's unique situation.
 
@@ -162,7 +184,12 @@ Write the strategy narrative now. Be specific, reference their actual initiative
     return new Response(
       JSON.stringify({ 
         success: true, 
-        strategyNarrative 
+        strategyNarrative,
+        metadata: {
+          dataSources: usedSources.map(s => s.name),
+          confidenceScore,
+          generatedAt: new Date().toISOString()
+        }
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

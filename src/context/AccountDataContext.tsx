@@ -114,11 +114,19 @@ export interface BigBet {
   products: string[]; // ServiceNow products e.g. CSM, AI Control Tower, CPQ
 }
 
+// Strategy Generation Metadata
+export interface StrategyMetadata {
+  dataSources: string[];
+  confidenceScore: number;
+  generatedAt: string;
+}
+
 // Section G2 — Account Strategy
 export interface AccountStrategy {
   strategyNarrative: string;
   bigBets: BigBet[];
   keyExecutives: { name: string; role: string }[];
+  metadata?: StrategyMetadata;
 }
 
 // Section H — SWOT Analysis
