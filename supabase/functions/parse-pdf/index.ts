@@ -1,15 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import {
-  getDocument,
-  GlobalWorkerOptions,
-} from "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.mjs";
+import { extractText, getDocumentProxy } from "https://esm.sh/unpdf@0.12.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 const MAX_PDF_SIZE = 15 * 1024 * 1024; // 15MB (URL import + uploads)
-
-// Required for pdfjs-dist legacy build; worker is disabled, but workerSrc must be set.
-GlobalWorkerOptions.workerSrc = "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.worker.mjs";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -107,16 +101,7 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
   const maxPages = 15; // Only first 15 pages
   const maxChars = 150_000; // Max characters
 
-  const loadingTask = getDocument({
-    data: uint8Array,
-    // Important for edge runtimes (avoid Worker usage / remote worker loading)
-    disableWorker: true,
-    useSystemFonts: true,
-    disableFontFace: true,
-    isEvalSupported: false,
-  } as any);
-
-  const doc = await loadingTask.promise;
+  const doc = await getDocumentProxy(uint8Array);
   const pagesToProcess = Math.min(doc.numPages, maxPages);
   
   console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
@@ -130,10 +115,10 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
         const page = await doc.getPage(pageNum);
         const content = await page.getTextContent();
 
-      const pageText = (content.items as any[])
-        .map((it) => (typeof it?.str === "string" ? it.str : ""))
-        .filter(Boolean)
-        .join(" ");
+        const pageText = (content.items as any[])
+          .map((it) => (typeof it?.str === "string" ? it.str : ""))
+          .filter(Boolean)
+          .join(" ");
 
         if (pageText) {
           parts.push(pageText);
@@ -143,23 +128,14 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
             break;
           }
         }
-
-        // Free page resources where supported
-        try {
-          // @ts-ignore
-          page.cleanup?.();
-        } catch {
-          // ignore
-        }
       } catch (pageError) {
         console.warn(`Error processing page ${pageNum}:`, pageError);
         // Continue with other pages
       }
     }
   } finally {
-    // Free document resources where supported
+    // Free document resources
     try {
-      // pdfjs-dist exposes destroy()
       await (doc as any).destroy?.();
     } catch {
       // ignore
