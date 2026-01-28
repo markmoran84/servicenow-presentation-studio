@@ -84,13 +84,22 @@ Deno.serve(async (req) => {
     const prompt = `You are writing an internal account intelligence briefing note for enterprise sales.
 Tone: JOURNALISTIC and FACTUAL — like an analyst briefing, not a sales pitch.
 
-EXAMPLES (voice only):
-- "${companyRef} is pursuing an ambitious AI strategy, but Salesforce's current offerings aren't delivering the required value. As a result, ${companyRef} plans to replace Service Cloud with solutions from ServiceNow, Microsoft, or Oracle. A final decision is expected in Q1."
-- "${companyRef}'s CPQ process has been a long-standing challenge, with significant gaps still filled using Excel. Over 230 people currently maintain the existing system. The goal is to start with a small-scale implementation and expand over time."
+THE BIG BET YOU ARE WRITING ABOUT:
+Title: "${betTitle}"
+Subtitle: ${betSubtitle}
+Target Close: ${betTargetClose}
+Investment: ${betInvestment}
+
+CRITICAL: Your insight MUST be specifically about "${betTitle}". The insight should explain WHY this particular initiative ("${betTitle}") matters to ${companyRef} and what drives it.
+
+EXAMPLES (voice only — adapt to reference the specific Big Bet title above):
+- "${companyRef} is pursuing ${betTitle || "this initiative"} because Salesforce's current offerings aren't delivering required value. A final decision is expected in Q1."
+- "${companyRef}'s focus on ${betTitle || "this transformation"} stems from a long-standing CPQ challenge, with gaps still filled using Excel. Over 230 people maintain the existing system."
 
 STYLE RULES (mandatory):
-- Start with "${companyRef} is..." OR "${companyRef}'s [process] has..."
+- Start with "${companyRef} is..." OR "${companyRef}'s [focus on ${betTitle}]..."
 - 2–3 short declarative sentences total
+- MUST reference or directly relate to "${betTitle}" — do not write a generic insight
 - Include at least ONE concrete detail taken from the context below (a number, date/quarter, or a specific stated issue)
 - Include a decision timeline IF it is in the context
 - No buzzwords. No hype. No "leverage", "synergy", "transform"
@@ -99,12 +108,6 @@ STYLE RULES (mandatory):
 ${isSampleAccount ? "- IMPORTANT: Never use the word 'Maersk' or 'A.P. Møller'. Only refer to the company as 'the customer'." : ""}
 
 ANGLE TO EMPHASIZE: ${angle}
-
-BIG BET CONTEXT:
-Title: ${betTitle}
-Subtitle: ${betSubtitle}
-Target Close: ${betTargetClose}
-Investment: ${betInvestment}
 
 ACCOUNT CONTEXT:
 Company: ${companyRef} (${industryRef})
