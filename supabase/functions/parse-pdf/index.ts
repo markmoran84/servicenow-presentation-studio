@@ -159,13 +159,32 @@ function cleanExtractedText(text: string): string {
 }
 
 function looksLikeExtractedText(text: string): boolean {
-  if (text.length < 200) return false;
+  // Very short content is likely metadata-only
+  if (text.length < 100) {
+    console.log("Validation failed: text too short", text.length);
+    return false;
+  }
 
   // If there are too many control characters, it's almost certainly binary/garbage.
   const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
-  if (controlChars / Math.max(1, text.length) > 0.01) return false;
+  const controlRatio = controlChars / Math.max(1, text.length);
+  if (controlRatio > 0.02) {
+    console.log("Validation failed: too many control chars", controlRatio);
+    return false;
+  }
 
-  // Require a minimal word count so we don't pass through short metadata-only results.
-  const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
-  return words >= 80;
+  // Count word-like tokens (letters, numbers, common punctuation in words)
+  // More lenient regex to handle financial data, non-English chars, etc.
+  const words = (text.match(/[\w\u00C0-\u024F]{2,}/g) || []).length;
+  
+  // For longer texts, require proportionally fewer words (annual reports have tables/numbers)
+  const minWords = Math.min(30, Math.floor(text.length / 200));
+  
+  if (words < minWords) {
+    console.log("Validation failed: not enough words", words, "< min", minWords);
+    return false;
+  }
+
+  console.log("Validation passed: chars", text.length, "words", words);
+  return true;
 }
