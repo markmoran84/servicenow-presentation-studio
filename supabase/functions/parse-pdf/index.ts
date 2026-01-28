@@ -1,11 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-// pdfjs-serverless does not have a default export in edge runtime
-// @ts-ignore - pdfjs-serverless types/exports vary across runtimes
-import * as pdfjs from "https://esm.sh/pdfjs-serverless@0.4.1";
+import {
+  getDocument,
+  GlobalWorkerOptions,
+} from "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.mjs";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 const MAX_PDF_SIZE = 15 * 1024 * 1024; // 15MB (URL import + uploads)
+
+// Required for pdfjs-dist legacy build; worker is disabled, but workerSrc must be set.
+GlobalWorkerOptions.workerSrc = "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.worker.mjs";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -103,8 +107,16 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
   const maxPages = 15; // Only first 15 pages
   const maxChars = 150_000; // Max characters
 
-  // @ts-ignore - pdfjs-serverless API
-  const doc = await pdfjs.getDocument({ data: uint8Array, useSystemFonts: true }).promise;
+  const loadingTask = getDocument({
+    data: uint8Array,
+    // Important for edge runtimes (avoid Worker usage / remote worker loading)
+    disableWorker: true,
+    useSystemFonts: true,
+    disableFontFace: true,
+    isEvalSupported: false,
+  } as any);
+
+  const doc = await loadingTask.promise;
   const pagesToProcess = Math.min(doc.numPages, maxPages);
   
   console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
@@ -147,8 +159,8 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
   } finally {
     // Free document resources where supported
     try {
-      // @ts-ignore
-      await doc.destroy?.();
+      // pdfjs-dist exposes destroy()
+      await (doc as any).destroy?.();
     } catch {
       // ignore
     }
