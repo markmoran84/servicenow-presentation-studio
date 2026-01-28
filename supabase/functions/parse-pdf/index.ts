@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getDocument } from "https://esm.sh/pdfjs-serverless";
+import { extractText } from "https://esm.sh/unpdf@0.12.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 serve(async (req) => {
@@ -49,15 +49,15 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Validate file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024;
+    // Validate file size (max 25MB for memory safety)
+    const maxSize = 25 * 1024 * 1024;
     if (uint8Array.length > maxSize) {
-      return createErrorResponse(400, "File too large. Maximum size is 50MB.");
+      return createErrorResponse(400, "File too large. Maximum size is 25MB.");
     }
 
     console.log("PDF size:", uint8Array.length, "bytes");
 
-    // Extract text via PDF.js (serverless build)
+    // Extract text via unpdf (lightweight, edge-compatible)
     const rawText = await extractTextFromPDF(uint8Array);
     const textContent = cleanExtractedText(rawText);
 
@@ -77,35 +77,34 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error("PDF processing error:", error);
     return createErrorResponse(500, "Failed to process PDF. Please try again.", error);
   }
 });
 
 async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  // NOTE: annual reports can be long; we cap by extracted character count to avoid timeouts.
-  const maxChars = 480_000;
+  // Use unpdf which is lighter weight and edge-compatible
+  // Limit to first 40 pages to avoid memory issues
+  const maxPages = 40;
+  const maxChars = 400_000;
 
-  const doc = await getDocument({ data: uint8Array, useSystemFonts: true }).promise;
-  const parts: string[] = [];
-  let total = 0;
-
-  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    const page = await doc.getPage(pageNum);
-    const content = await page.getTextContent();
-
-    const pageText = (content.items as any[])
-      .map((it) => (typeof it?.str === "string" ? it.str : ""))
-      .filter(Boolean)
-      .join(" ");
-
-    if (pageText) {
-      parts.push(pageText);
-      total += pageText.length;
-      if (total >= maxChars) break;
+  try {
+    const { text, totalPages } = await extractText(uint8Array, { 
+      mergePages: true 
+    });
+    
+    console.log(`Extracted text from PDF with ${totalPages} pages`);
+    
+    // Truncate if too long
+    if (text.length > maxChars) {
+      return text.slice(0, maxChars);
     }
+    
+    return text;
+  } catch (extractError) {
+    console.error("unpdf extraction failed:", extractError);
+    throw new Error("PDF text extraction failed");
   }
-
-  return parts.join("\n\n");
 }
 
 function cleanExtractedText(text: string): string {
