@@ -114,6 +114,11 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
           ...(extractedData.keyMilestones?.length && { keyMilestones: extractedData.keyMilestones }),
           ...(extractedData.strategicAchievements?.length && { strategicAchievements: extractedData.strategicAchievements }),
           ...(extractedData.executiveSummaryNarrative && { executiveSummaryNarrative: extractedData.executiveSummaryNarrative }),
+          // CRITICAL: Vision and Purpose fields
+          ...(extractedData.visionStatement && { visionStatement: extractedData.visionStatement }),
+          ...(extractedData.purposeStatement && { purposeStatement: extractedData.purposeStatement }),
+          ...(extractedData.longTermAims?.length && { longTermAims: extractedData.longTermAims }),
+          ...(extractedData.mediumTermAmbitions?.length && { mediumTermAmbitions: extractedData.mediumTermAmbitions }),
         }
       } : data;
       
@@ -269,7 +274,7 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
         });
       }
 
-      // Update Annual Report tab
+      // Update Annual Report tab - INCLUDING vision and purpose
       updateData("annualReport", {
         ...(extracted.revenue && { revenue: extracted.revenue }),
         ...(extracted.revenueComparison && { revenueComparison: extracted.revenueComparison }),
@@ -278,6 +283,11 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
         ...(extracted.keyMilestones?.length && { keyMilestones: extracted.keyMilestones }),
         ...(extracted.strategicAchievements?.length && { strategicAchievements: extracted.strategicAchievements }),
         ...(extracted.executiveSummaryNarrative && { executiveSummaryNarrative: extracted.executiveSummaryNarrative }),
+        // CRITICAL: Vision and Purpose fields
+        ...(extracted.visionStatement && { visionStatement: extracted.visionStatement }),
+        ...(extracted.purposeStatement && { purposeStatement: extracted.purposeStatement }),
+        ...(extracted.longTermAims?.length && { longTermAims: extracted.longTermAims }),
+        ...(extracted.mediumTermAmbitions?.length && { mediumTermAmbitions: extracted.mediumTermAmbitions }),
       });
 
       setAnalysisComplete(true);
@@ -415,10 +425,13 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
         updatedCount++;
       }
 
-      // Update Annual Report data
-      if (enriched.netZeroTarget && !data.annualReport.netZeroTarget) {
+      // Update Annual Report data - INCLUDING vision and purpose
+      if (enriched.netZeroTarget || enriched.visionStatement || enriched.purposeStatement || enriched.longTermAims?.length) {
         updateData("annualReport", {
-          netZeroTarget: enriched.netZeroTarget
+          ...(enriched.netZeroTarget && !data.annualReport.netZeroTarget && { netZeroTarget: enriched.netZeroTarget }),
+          ...(enriched.visionStatement && !data.annualReport.visionStatement && { visionStatement: enriched.visionStatement }),
+          ...(enriched.purposeStatement && !data.annualReport.purposeStatement && { purposeStatement: enriched.purposeStatement }),
+          ...(enriched.longTermAims?.length && !data.annualReport.longTermAims?.length && { longTermAims: enriched.longTermAims }),
         });
         updatedCount++;
       }
