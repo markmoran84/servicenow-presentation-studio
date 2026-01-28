@@ -9,57 +9,26 @@ import { CustomerSnapshotSlide } from "@/components/slides/CustomerSnapshotSlide
 import { CustomerStrategySlide } from "@/components/slides/CustomerStrategySlide";
 import { AccountStrategySlide } from "@/components/slides/AccountStrategySlide";
 import { FY1RetrospectiveSlide } from "@/components/slides/FY1RetrospectiveSlide";
-import { StrategicAlignmentSlide } from "@/components/slides/StrategicAlignmentSlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
-import AgileTeamModelSlide from "@/components/slides/AgileTeamModelSlide";
-import { SWOTSlide } from "@/components/slides/SWOTSlide";
-import { CoreValueDriversSlide } from "@/components/slides/CoreValueDriversSlide";
+import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
 import { WorkstreamDetailSlide } from "@/components/slides/WorkstreamDetailSlide";
-import { AIUseCasesSlide } from "@/components/slides/AIUseCasesSlide";
-import { PlatformSlide } from "@/components/slides/PlatformSlide";
-import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
-import { KeyRisksSlide } from "@/components/slides/KeyRisksSlide";
-import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
-import { GovernanceSlide } from "@/components/slides/GovernanceSlide";
-import { WeeklyUpdateSlide } from "@/components/slides/WeeklyUpdateSlide";
-import { ExecutiveEngagementSlide } from "@/components/slides/ExecutiveEngagementSlide";
-import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
-import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
-import { ExecutionTimelineSlide } from "@/components/slides/ExecutionTimelineSlide";
-import { SuccessSlide } from "@/components/slides/SuccessSlide";
 import { PresentationSlide } from "@/components/slides/PresentationSlide";
 import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
 import { useAccountData } from "@/context/AccountDataContext";
 
-// Default slides for annual report / manual input flow
+// Default slides in exact order matching uploaded templates
 const defaultSlides = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
-  { component: ExecutiveSummarySlide, label: "1. Executive Summary" },
-  { component: CustomerSnapshotSlide, label: "2. Customer Snapshot" },
-  { component: CustomerStrategySlide, label: "3. Customer Strategy" },
-  { component: AccountStrategySlide, label: "4. Account Strategy" },
-  { component: FY1RetrospectiveSlide, label: "5. FY-1 Retrospective" },
-  { component: StrategicAlignmentSlide, label: "6. Strategic Alignment" },
-  { component: AccountTeamSlide, label: "7. Account Team" },
-  { component: AgileTeamModelSlide, label: "8. Agile Team Model" },
-  { component: SWOTSlide, label: "9. SWOT Analysis" },
-  { component: CoreValueDriversSlide, label: "9. Value Drivers" },
-  { component: BigBetsSlide, label: "10. Key Workstreams" },
-  { component: WorkstreamDetailSlide, label: "11. Workstream Detail" },
-  { component: AIUseCasesSlide, label: "12. AI Portfolio" },
-  { component: PlatformSlide, label: "13. Platform Vision" },
-  { component: RoadmapSlide, label: "14. Roadmap" },
-  { component: KeyRisksSlide, label: "15. Key Risks" },
-  { component: RiskMitigationSlide, label: "16. Risk & Mitigation" },
-  { component: GovernanceSlide, label: "17. Governance" },
-  { component: WeeklyUpdateSlide, label: "18. Weekly Update" },
-  { component: ExecutiveEngagementSlide, label: "19. Engagement" },
-  { component: PursuitPlanSlide, label: "20. Pursuit Plan" },
-  { component: KeyAsksSlide, label: "21. Key Asks" },
-  { component: ExecutionTimelineSlide, label: "22. Execution Timeline" },
-  { component: SuccessSlide, label: "23. Success Metrics" },
+  { component: CustomerSnapshotSlide, label: "1. Customer Snapshot" },
+  { component: FY1RetrospectiveSlide, label: "2. FY25 Retrospective" },
+  { component: AccountTeamSlide, label: "3. Account Team" },
+  { component: CustomerStrategySlide, label: "4. Customer Strategy" },
+  { component: StrategicPrioritiesSlide, label: "5. Strategic Priorities" },
+  { component: AccountStrategySlide, label: "6. Account Strategy" },
+  { component: BigBetsSlide, label: "7. Key Workstreams" },
+  { component: WorkstreamDetailSlide, label: "8. Workstream Detail" },
 ];
 
 const Index = () => {
