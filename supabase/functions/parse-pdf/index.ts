@@ -1,10 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getDocument, GlobalWorkerOptions } from "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.mjs";
+// @ts-ignore - pdfjs-serverless has runtime exports
+import pdfjs from "https://esm.sh/pdfjs-serverless@0.4.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
-
-// Disable worker for edge function environment
-GlobalWorkerOptions.workerSrc = "";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -52,12 +50,16 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Validate file size (max 20MB for processing - larger files cause CPU timeouts)
-    const maxSize = 20 * 1024 * 1024;
+    // Strict file size limit to prevent CPU timeout (5MB max)
+    const maxSize = 5 * 1024 * 1024;
     if (uint8Array.length > maxSize) {
+      console.log("File too large:", uint8Array.length, "bytes");
       // Clean up the file
       await supabase.storage.from("annual-reports").remove([validatedPath]);
-      return createErrorResponse(400, "File too large for processing. Maximum size is 20MB. Please use a smaller file or copy/paste the text content.");
+      return createErrorResponse(
+        400, 
+        `This PDF is too large (${Math.round(uint8Array.length / 1024 / 1024)}MB). Maximum is 5MB. Please use the text paste option instead, or upload a smaller file.`
+      );
     }
 
     console.log("PDF size:", uint8Array.length, "bytes");
@@ -85,23 +87,21 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("PDF processing error:", error);
-    return createErrorResponse(500, "Failed to process PDF. The file may be too complex or large. Please try a smaller file or copy/paste the text content.", error);
+    return createErrorResponse(
+      500, 
+      "Failed to process PDF. This file may be too complex. Please use the text paste option instead, or try a simpler PDF.", 
+      error
+    );
   }
 });
 
 async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  // Strict limits to prevent CPU timeout
-  const maxPages = 30; // Limit to first 30 pages
-  const maxChars = 300_000; // Max characters to extract
+  // Very strict limits to prevent CPU timeout
+  const maxPages = 15; // Only first 15 pages
+  const maxChars = 150_000; // Max characters
 
-  const loadingTask = getDocument({ 
-    data: uint8Array,
-    useSystemFonts: true,
-    disableFontFace: true, // Reduces CPU usage
-    isEvalSupported: false, // Disable eval for security/performance
-  });
-  
-  const doc = await loadingTask.promise;
+  // @ts-ignore - pdfjs-serverless API
+  const doc = await pdfjs.getDocument({ data: uint8Array, useSystemFonts: true }).promise;
   const pagesToProcess = Math.min(doc.numPages, maxPages);
   
   console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
@@ -127,18 +127,11 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
           break;
         }
       }
-      
-      // Release page resources
-      page.cleanup();
     } catch (pageError) {
       console.warn(`Error processing page ${pageNum}:`, pageError);
       // Continue with other pages
     }
   }
-
-  // Clean up document resources
-  await doc.cleanup();
-  await doc.destroy();
 
   return parts.join("\n\n");
 }
@@ -160,7 +153,7 @@ function looksLikeExtractedText(text: string): boolean {
   const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
   if (controlChars / Math.max(1, text.length) > 0.01) return false;
 
-  // Require a minimal word count so we don't pass through short metadata-only results.
+  // Require a minimal word count
   const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
   return words >= 80;
 }
