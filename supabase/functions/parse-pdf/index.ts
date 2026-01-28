@@ -1,7 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getDocument } from "https://esm.sh/pdfjs-serverless";
+import { getDocument, GlobalWorkerOptions } from "https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.mjs";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
+
+// Disable worker for edge function environment
+GlobalWorkerOptions.workerSrc = "";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -49,19 +52,23 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Validate file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024;
+    // Validate file size (max 20MB for processing - larger files cause CPU timeouts)
+    const maxSize = 20 * 1024 * 1024;
     if (uint8Array.length > maxSize) {
-      return createErrorResponse(400, "File too large. Maximum size is 50MB.");
+      // Clean up the file
+      await supabase.storage.from("annual-reports").remove([validatedPath]);
+      return createErrorResponse(400, "File too large for processing. Maximum size is 20MB. Please use a smaller file or copy/paste the text content.");
     }
 
     console.log("PDF size:", uint8Array.length, "bytes");
 
-    // Extract text via PDF.js (serverless build)
+    // Extract text via PDF.js with strict limits
     const rawText = await extractTextFromPDF(uint8Array);
     const textContent = cleanExtractedText(rawText);
 
     if (!looksLikeExtractedText(textContent)) {
+      // Clean up the file
+      await supabase.storage.from("annual-reports").remove([validatedPath]);
       return createErrorResponse(
         400,
         "Could not extract readable text from this PDF. It may be image-based or protected. Please copy/paste the text content instead.",
@@ -77,33 +84,61 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return createErrorResponse(500, "Failed to process PDF. Please try again.", error);
+    console.error("PDF processing error:", error);
+    return createErrorResponse(500, "Failed to process PDF. The file may be too complex or large. Please try a smaller file or copy/paste the text content.", error);
   }
 });
 
 async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  // NOTE: annual reports can be long; we cap by extracted character count to avoid timeouts.
-  const maxChars = 480_000;
+  // Strict limits to prevent CPU timeout
+  const maxPages = 30; // Limit to first 30 pages
+  const maxChars = 300_000; // Max characters to extract
 
-  const doc = await getDocument({ data: uint8Array, useSystemFonts: true }).promise;
+  const loadingTask = getDocument({ 
+    data: uint8Array,
+    useSystemFonts: true,
+    disableFontFace: true, // Reduces CPU usage
+    isEvalSupported: false, // Disable eval for security/performance
+  });
+  
+  const doc = await loadingTask.promise;
+  const pagesToProcess = Math.min(doc.numPages, maxPages);
+  
+  console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
+  
   const parts: string[] = [];
   let total = 0;
 
-  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    const page = await doc.getPage(pageNum);
-    const content = await page.getTextContent();
+  for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
+    try {
+      const page = await doc.getPage(pageNum);
+      const content = await page.getTextContent();
 
-    const pageText = (content.items as any[])
-      .map((it) => (typeof it?.str === "string" ? it.str : ""))
-      .filter(Boolean)
-      .join(" ");
+      const pageText = (content.items as any[])
+        .map((it) => (typeof it?.str === "string" ? it.str : ""))
+        .filter(Boolean)
+        .join(" ");
 
-    if (pageText) {
-      parts.push(pageText);
-      total += pageText.length;
-      if (total >= maxChars) break;
+      if (pageText) {
+        parts.push(pageText);
+        total += pageText.length;
+        if (total >= maxChars) {
+          console.log(`Character limit reached at page ${pageNum}`);
+          break;
+        }
+      }
+      
+      // Release page resources
+      page.cleanup();
+    } catch (pageError) {
+      console.warn(`Error processing page ${pageNum}:`, pageError);
+      // Continue with other pages
     }
   }
+
+  // Clean up document resources
+  await doc.cleanup();
+  await doc.destroy();
 
   return parts.join("\n\n");
 }
