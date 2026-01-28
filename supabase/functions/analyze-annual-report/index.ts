@@ -366,11 +366,24 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                       type: "object",
                       properties: {
                         title: { type: "string", description: "Ambition title like 'Better efficiencies', 'Improve free cash flow', 'Grow the business'" },
+                        metric: { type: "string", description: "Target metric or KPI (e.g., '15% cost reduction', '$500M savings', 'Tbc' if not specified)" },
                         bullets: { type: "array", items: { type: "string" }, description: "2-4 specific objectives under this ambition" }
                       },
-                      required: ["title", "bullets"]
+                      required: ["title", "metric", "bullets"]
                     }, 
-                    description: "2-4 medium-term ambitions with specific objectives. Look for '2025 priorities', 'Medium-term targets', 'FY targets'." 
+                    description: "2-4 medium-term ambitions with metrics and objectives. Look for '2025 priorities', 'Medium-term targets', 'FY targets', value drivers." 
+                  },
+                  strategicObjectives: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        theme: { type: "string", description: "The transformation theme this objective supports" },
+                        bullets: { type: "array", items: { type: "string" }, description: "3-5 specific, actionable objectives. Each should start with a verb like 'Reduce', 'Improve', 'Enable', 'Simplify'" }
+                      },
+                      required: ["theme", "bullets"]
+                    },
+                    description: "Detailed strategic objectives organized by transformation theme. Look for 'We will...', 'Our objectives', operational excellence goals, cost reduction targets, automation goals."
                   },
                   strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements that demonstrate execution capability" },
                   executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" },

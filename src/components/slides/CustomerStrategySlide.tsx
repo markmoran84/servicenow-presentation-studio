@@ -7,38 +7,30 @@ export const CustomerStrategySlide = () => {
   const { basics, strategy, annualReport, generatedPlan } = data;
 
   // Get vision and purpose from annual report
-  const visionStatement = annualReport?.visionStatement || "A Connected Trip";
-  const purposeStatement = annualReport?.purposeStatement || "Our purpose is to make it easier for everyone to experience the world.";
+  const visionStatement = annualReport?.visionStatement || "";
+  const purposeStatement = annualReport?.purposeStatement || "";
 
-  // Get long-term aims
-  const longTermAims = annualReport?.longTermAims || [
-    "Deliver a fully connected trip across accommodation, flights, ground transport, attractions, and payments",
-    "Be the preferred platform for travelers and partners, at global scale",
-    "Build a high-margin, resilient marketplace through technology and data",
-    "Earn trust through security, privacy, and responsible AI",
-    "Grow sustainably with strong cash generation",
-    "Operate efficiently while scaling volume and complexity"
-  ];
+  // Get long-term aims (6 strategic aims)
+  const longTermAims = annualReport?.longTermAims || [];
 
   // Get transformation themes (tasks for current year)
   const transformationThemes = strategy.transformationThemes?.filter(
     t => t.title?.trim()
   ) || [];
 
-  // Get corporate strategy (objectives)
+  // Get strategic objectives organized by theme
+  const strategicObjectives = annualReport?.strategicObjectives || [];
+
+  // Get corporate strategy (fallback for objectives if strategicObjectives not available)
   const corporateStrategy = strategy.corporateStrategy?.filter(
     s => s.title?.trim()
   ) || [];
 
-  // Medium-term ambitions
-  const mediumTermAmbitions = annualReport?.mediumTermAmbitions || [
-    { title: "Better efficiencies", metric: "Tbc" },
-    { title: "Improve free cash flow", metric: "Tbc" },
-    { title: "Grow the business", metric: "Tbc" }
-  ];
+  // Medium-term ambitions with metrics
+  const mediumTermAmbitions = annualReport?.mediumTermAmbitions || [];
 
   const isAIGenerated = !!generatedPlan?.customerStrategySynthesis;
-  const hasData = visionStatement || transformationThemes.length > 0 || corporateStrategy.length > 0;
+  const hasData = visionStatement || transformationThemes.length > 0 || longTermAims.length > 0;
 
   return (
     <div className="min-h-screen p-8 md:p-10 pb-32">
@@ -68,95 +60,127 @@ export const CustomerStrategySlide = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Vision Banner */}
-            <div className="glass-card p-5 text-center opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
-              <h2 className="text-2xl md:text-3xl font-bold text-primary mb-3">
-                {visionStatement}
-              </h2>
-              <p className="text-muted-foreground">
-                <span className="font-semibold text-foreground">Our purpose</span> {purposeStatement}
-              </p>
-            </div>
+            {visionStatement && (
+              <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
+                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+                  {visionStatement}
+                </h2>
+                {purposeStatement && (
+                  <p className="text-muted-foreground text-sm">
+                    <span className="font-semibold text-foreground">Our purpose</span> {purposeStatement}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Long-term Aims Row */}
-            <div className="grid grid-cols-12 gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-              <div className="col-span-2 glass-card p-4 flex items-center">
-                <div>
-                  <p className="text-primary font-semibold text-sm">Our six longer-term aims</p>
-                  <p className="text-muted-foreground text-xs mt-1">Our ambition is...</p>
+            {longTermAims.length > 0 && (
+              <div className="grid grid-cols-12 gap-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
+                <div className="col-span-2 glass-card p-3 flex items-center">
+                  <div>
+                    <p className="text-primary font-semibold text-xs">Our {longTermAims.length} longer-term aims</p>
+                    <p className="text-muted-foreground text-[10px] mt-1">Our ambition is...</p>
+                  </div>
+                </div>
+                <div className="col-span-10 grid grid-cols-3 gap-2">
+                  {longTermAims.slice(0, 6).map((aim, index) => (
+                    <div key={index} className="glass-card p-2 flex items-center">
+                      <p className="text-foreground text-[11px] font-medium leading-snug">{aim}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="col-span-10 grid grid-cols-3 gap-3">
-                {longTermAims.slice(0, 6).map((aim, index) => (
-                  <div key={index} className="glass-card p-3 flex items-center">
-                    <p className="text-foreground text-xs font-medium leading-snug">{aim}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
 
             {/* Tasks Row - Transformation Themes */}
             {transformationThemes.length > 0 && (
-              <div className="grid grid-cols-12 gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
-                <div className="col-span-2 glass-card p-4 flex items-center">
+              <div className="grid grid-cols-12 gap-4 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
+                <div className="col-span-2 glass-card p-3 flex items-center">
                   <div>
-                    <p className="text-primary font-semibold text-sm">Our Tasks for 2025/26</p>
-                    <p className="text-muted-foreground text-xs mt-1">We must...</p>
+                    <p className="text-primary font-semibold text-xs">Our Tasks for 2025/26</p>
+                    <p className="text-muted-foreground text-[10px] mt-1">We must...</p>
                   </div>
                 </div>
-                <div className="col-span-10 grid grid-cols-4 gap-3">
-                  {transformationThemes.slice(0, 4).map((theme, index) => (
+                <div className={`col-span-10 grid gap-2 ${transformationThemes.length <= 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
+                  {transformationThemes.slice(0, 5).map((theme, index) => (
                     <div key={index} className="glass-card p-3 text-center">
-                      <p className="text-primary font-semibold text-sm">{theme.title}</p>
-                      <p className="text-muted-foreground text-[10px] mt-1">+ For more see page #xx</p>
+                      <p className="text-primary font-semibold text-xs">{theme.title}</p>
+                      {theme.description && (
+                        <p className="text-muted-foreground text-[9px] mt-1 line-clamp-2">{theme.description}</p>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Objectives Row - Corporate Strategy */}
-            {corporateStrategy.length > 0 && (
-              <div className="grid grid-cols-12 gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
-                <div className="col-span-2 glass-card p-4 flex items-center">
+            {/* Objectives Row - Detailed bullet points for each theme */}
+            {(strategicObjectives.length > 0 || corporateStrategy.length > 0) && (
+              <div className="grid grid-cols-12 gap-4 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
+                <div className="col-span-2 glass-card p-3 flex items-center">
                   <div>
-                    <p className="text-primary font-semibold text-sm">Our Objectives for 2026 +</p>
-                    <p className="text-muted-foreground text-xs mt-1">We will...</p>
+                    <p className="text-primary font-semibold text-xs">Our Objectives for 2026+</p>
+                    <p className="text-muted-foreground text-[10px] mt-1">We will...</p>
                   </div>
                 </div>
-                <div className="col-span-10 grid grid-cols-4 gap-3">
-                  {corporateStrategy.slice(0, 4).map((obj, index) => (
-                    <div key={index} className="glass-card p-3">
-                      <ul className="space-y-1">
-                        <li className="text-foreground text-xs leading-snug">• {obj.description || obj.title}</li>
-                      </ul>
+                <div className={`col-span-10 grid gap-2 ${
+                  strategicObjectives.length > 0 
+                    ? (strategicObjectives.length <= 4 ? 'grid-cols-4' : 'grid-cols-5')
+                    : (corporateStrategy.length <= 4 ? 'grid-cols-4' : 'grid-cols-5')
+                }`}>
+                  {strategicObjectives.length > 0 ? (
+                    strategicObjectives.slice(0, 5).map((obj, index) => (
+                      <div key={index} className="glass-card p-3">
+                        <ul className="space-y-1">
+                          {obj.bullets.slice(0, 4).map((bullet, bIndex) => (
+                            <li key={bIndex} className="text-foreground text-[10px] leading-snug flex items-start gap-1">
+                              <span className="text-primary mt-0.5">•</span>
+                              <span>{bullet}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))
+                  ) : (
+                    corporateStrategy.slice(0, 5).map((obj, index) => (
+                      <div key={index} className="glass-card p-3">
+                        <ul className="space-y-1">
+                          <li className="text-foreground text-[10px] leading-snug flex items-start gap-1">
+                            <span className="text-primary mt-0.5">•</span>
+                            <span>{obj.description || obj.title}</span>
+                          </li>
+                        </ul>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Medium-term Ambitions Row with Metrics */}
+            {mediumTermAmbitions.length > 0 && (
+              <div className="grid grid-cols-12 gap-4 opacity-0 animate-fade-in" style={{ animationDelay: "250ms" }}>
+                <div className="col-span-2 glass-card p-3 flex items-center">
+                  <div>
+                    <p className="text-primary font-semibold text-xs">Delivering on our medium-term ambitions</p>
+                  </div>
+                </div>
+                <div className={`col-span-10 grid gap-2 ${mediumTermAmbitions.length <= 3 ? 'grid-cols-3' : 'grid-cols-4'}`}>
+                  {mediumTermAmbitions.slice(0, 4).map((ambition, index) => (
+                    <div key={index} className="glass-card p-3 text-center">
+                      <p className="text-primary font-bold text-sm">{ambition.title}</p>
+                      <p className="text-muted-foreground text-xs mt-1">{ambition.metric || "Tbc"}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Medium-term Ambitions Row */}
-            <div className="grid grid-cols-12 gap-5 opacity-0 animate-fade-in" style={{ animationDelay: "250ms" }}>
-              <div className="col-span-2 glass-card p-4 flex items-center">
-                <div>
-                  <p className="text-primary font-semibold text-sm">Delivering on our medium-term ambitions</p>
-                </div>
-              </div>
-              <div className="col-span-10 grid grid-cols-4 gap-3">
-                {mediumTermAmbitions.map((ambition: any, index: number) => (
-                  <div key={index} className="glass-card p-4 text-center">
-                    <p className="text-primary font-bold text-lg">{ambition.title}</p>
-                    <p className="text-muted-foreground text-xs mt-2">{ambition.metric}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             {/* Footer Banner */}
-            <div className="rounded-xl bg-primary/20 border border-primary/30 p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-              <p className="text-foreground text-sm font-medium">
+            <div className="rounded-xl bg-primary/20 border border-primary/30 p-3 text-center opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
+              <p className="text-foreground text-xs font-medium">
                 Underpinned by Group governance, support services and risk management
               </p>
             </div>
