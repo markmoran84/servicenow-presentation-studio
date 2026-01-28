@@ -81,35 +81,38 @@ Deno.serve(async (req) => {
 
     const decisionDeadlines = safeText(accountData?.engagement?.decisionDeadlines, isSampleAccount, companyRef).trim() || "Unknown";
 
-    const prompt = `You are writing an internal account intelligence briefing note for enterprise sales.
-Tone: JOURNALISTIC and FACTUAL — like an analyst briefing, not a sales pitch.
+    const prompt = `You are writing a strategic initiative statement for a ServiceNow account plan.
+This is ServiceNow's perspective — what WE will deliver for the customer.
 
-THE BIG BET YOU ARE WRITING ABOUT:
+THE BIG BET:
 Title: "${betTitle}"
 Subtitle: ${betSubtitle}
 Target Close: ${betTargetClose}
 Investment: ${betInvestment}
 
-CRITICAL: Your insight MUST be specifically about "${betTitle}". The insight should explain WHY this particular initiative ("${betTitle}") matters to ${companyRef} and what drives it.
+VOICE & TONE (ServiceNow):
+- Confident but not arrogant
+- Action-oriented: "We will...", "ServiceNow will deliver...", "Our approach..."
+- Outcome-focused: emphasize business value, not features
+- Collaborative: "partnering with ${companyRef}...", "working alongside..."
 
-EXAMPLES (voice only — adapt to reference the specific Big Bet title above):
-- "${companyRef} is pursuing ${betTitle || "this initiative"} because Salesforce's current offerings aren't delivering required value. A final decision is expected in Q1."
-- "${companyRef}'s focus on ${betTitle || "this transformation"} stems from a long-standing CPQ challenge, with gaps still filled using Excel. Over 230 people maintain the existing system."
+EXAMPLES (adapt to the specific Big Bet title "${betTitle}"):
+- "We will deploy Now Assist across ${companyRef}'s service operations to accelerate case resolution by 40%, directly supporting their ${betTitle || "transformation"} goals."
+- "ServiceNow will deliver an integrated platform for ${betTitle}, enabling ${companyRef} to consolidate fragmented tools and reduce operational overhead by Q3."
+- "Our approach to ${betTitle} focuses on rapid time-to-value: phased deployment starting with quick wins in IT workflows, expanding to enterprise-wide automation within 12 months."
 
 STYLE RULES (mandatory):
-- Start with "${companyRef} is..." OR "${companyRef}'s [focus on ${betTitle}]..."
+- Start with "We will...", "ServiceNow will...", or "Our approach to ${betTitle}..."
 - 2–3 short declarative sentences total
-- MUST reference or directly relate to "${betTitle}" — do not write a generic insight
-- Include at least ONE concrete detail taken from the context below (a number, date/quarter, or a specific stated issue)
-- Include a decision timeline IF it is in the context
-- No buzzwords. No hype. No "leverage", "synergy", "transform"
-- Do NOT invent numbers. Only use numbers/dates explicitly present below.
-- Output ONLY the insight text (no bullets, no labels, no JSON, no quotes)
+- MUST directly reference "${betTitle}" — this is OUR initiative for ${companyRef}
+- Include at least ONE concrete outcome or metric (timeline, percentage, capability)
+- Connect to a customer pain point or strategic priority from the context below
+- No generic buzzwords. Be specific about what ServiceNow delivers.
 ${isSampleAccount ? "- IMPORTANT: Never use the word 'Maersk' or 'A.P. Møller'. Only refer to the company as 'the customer'." : ""}
 
 ANGLE TO EMPHASIZE: ${angle}
 
-ACCOUNT CONTEXT:
+CUSTOMER CONTEXT (use to align our initiative):
 Company: ${companyRef} (${industryRef})
 Current Contract: ${accountData?.basics?.currentContractValue || "Unknown"}
 FY Ambition: ${accountData?.basics?.nextFYAmbition || "Unknown"}
@@ -117,13 +120,13 @@ Decision Deadlines: ${decisionDeadlines}
 
 ${strategyNarrative ? `STRATEGY CONTEXT:\n${strategyNarrative}` : ""}
 
-PAIN POINTS:
+CUSTOMER PAIN POINTS (align our initiative to these):
 ${painPoints}
 
-CEO/BOARD PRIORITIES:
+CEO/BOARD PRIORITIES (show how we support these):
 ${boardPriorities}
 
-${priorInsight ? `PRIOR INSIGHT (do NOT restate; write something materially different):\n${priorInsight}` : ""}`;
+${priorInsight ? `PRIOR INSIGHT (do NOT repeat; write something materially different):\n${priorInsight}` : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
