@@ -1,1 +1,4 @@
 project_id = "ffnpfraolwjcmxodntoh"
+
+[functions.generate-field-suggestion]
+verify_jwt = false

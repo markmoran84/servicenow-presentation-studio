@@ -12,22 +12,29 @@ import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { PowerPointAnalyzer } from "@/components/PowerPointAnalyzer";
 import { ExtractedDataPreview } from "@/components/ExtractedDataPreview";
 import { StrategyConfidenceIndicator } from "@/components/StrategyConfidenceIndicator";
+import { SlideCompletionTracker } from "@/components/SlideCompletionTracker";
+import { MissingFieldsPrompt } from "@/components/MissingFieldsPrompt";
+import { useSlideCompletion, slideRequirements } from "@/hooks/useSlideCompletion";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
-  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2, Presentation
+  Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2, Presentation, CheckCircle2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface InputFormSlideProps {
   onGenerate?: () => void;
   onAcceptImprovedSlides?: () => void;
+  onNavigateToSlide?: (slideNumber: number) => void;
 }
 
-export const InputFormSlide = ({ onGenerate, onAcceptImprovedSlides }: InputFormSlideProps) => {
+export const InputFormSlide = ({ onGenerate, onAcceptImprovedSlides, onNavigateToSlide }: InputFormSlideProps) => {
   const { data, updateData, resetToDefaults, setGeneratedPlan } = useAccountData();
   const [activeTab, setActiveTab] = useState("aiAnalyzer");
   const [isGeneratingVision, setIsGeneratingVision] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [missingFieldsSlide, setMissingFieldsSlide] = useState<string | null>(null);
+  
+  const completion = useSlideCompletion(data);
 
   const handleGenerate = async () => {
     setIsGeneratingPlan(true);
@@ -182,22 +189,81 @@ export const InputFormSlide = ({ onGenerate, onAcceptImprovedSlides }: InputForm
 
           {/* AI Annual Report Analyzer */}
           <TabsContent value="aiAnalyzer" className="space-y-4">
-            <div className="grid lg:grid-cols-2 gap-4">
-              <AnnualReportAnalyzer onGeneratePlan={async () => {
-                // Navigate to first slide after generation
-                onGenerate?.();
-              }} />
-              <PowerPointAnalyzer 
-                onGenerateTalkingNotes={() => {
-                  // This would open the talking notes panel - handled by parent
-                  toast.info("Navigate to any slide and click 'Notes' in the navigation bar to generate talking notes");
-                }}
-                onAcceptChanges={onAcceptImprovedSlides}
-              />
+            <div className="grid lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2 grid lg:grid-cols-2 gap-4">
+                <AnnualReportAnalyzer onGeneratePlan={async () => {
+                  // Navigate to first slide after generation
+                  onGenerate?.();
+                }} />
+                <PowerPointAnalyzer 
+                  onGenerateTalkingNotes={() => {
+                    // This would open the talking notes panel - handled by parent
+                    toast.info("Navigate to any slide and click 'Notes' in the navigation bar to generate talking notes");
+                  }}
+                  onAcceptChanges={onAcceptImprovedSlides}
+                />
+              </div>
+              
+              {/* Slide Completion Tracker */}
+              <div className="space-y-4">
+                <SlideCompletionTracker 
+                  compact 
+                  onNavigateToSlide={onNavigateToSlide}
+                  onFillWithAI={(slideId) => setMissingFieldsSlide(slideId)}
+                />
+                
+                {/* Completion Summary Badge */}
+                <div className="glass-card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-foreground">Quick Status</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      completion.overallStatus === 'complete' ? 'bg-primary/20 text-primary' :
+                      completion.overallStatus === 'partial' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      {completion.overallPercentage}% Complete
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {completion.slides.filter(s => s.missingRequiredFields.length > 0).length > 0 ? (
+                      <>
+                        <AlertTriangle className="w-3 h-3 inline mr-1 text-yellow-400" />
+                        {completion.slides.filter(s => s.missingRequiredFields.length > 0).length} slides have missing required fields
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3 h-3 inline mr-1 text-primary" />
+                        All required fields are complete
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
+            
             {/* Extracted Data Preview - shows after annual report analysis */}
             <ExtractedDataPreview />
+            
+            {/* Strategy Confidence Indicator */}
+            {data.accountStrategy.metadata && (
+              <StrategyConfidenceIndicator />
+            )}
           </TabsContent>
+          
+          {/* Missing Fields Prompt Dialog */}
+          {missingFieldsSlide && (
+            <MissingFieldsPrompt
+              slideId={missingFieldsSlide}
+              missingFields={slideRequirements.find(r => r.slideId === missingFieldsSlide)?.fields.filter(f => {
+                const value = f.path.split('.').reduce((acc: any, key) => acc?.[key], data);
+                if (f.type === 'array') return !Array.isArray(value) || value.length === 0;
+                if (f.type === 'object') return !value || Object.keys(value).length === 0;
+                return !value || (typeof value === 'string' && value.trim() === '');
+              }) || []}
+              isOpen={!!missingFieldsSlide}
+              onClose={() => setMissingFieldsSlide(null)}
+            />
+          )}
 
           {/* Section A - Account Basics */}
           <TabsContent value="basics" className="space-y-4">
