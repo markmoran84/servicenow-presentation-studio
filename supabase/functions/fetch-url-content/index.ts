@@ -134,7 +134,7 @@ async function handlePdfUrl(pdfUrl: string): Promise<Response> {
     if (pdfSize > MAX_PDF_SIZE) {
       return createErrorResponse(
         400, 
-        `This PDF is too large (${Math.round(pdfSize / 1024 / 1024)}MB). Maximum is 5MB. Please download and upload a smaller file, or paste the text content.`
+        `This PDF is too large (${Math.round(pdfSize / 1024 / 1024)}MB). Maximum is ${Math.round(MAX_PDF_SIZE / 1024 / 1024)}MB. Please download and upload a smaller file, or paste the text content.`
       );
     }
     
@@ -168,25 +168,40 @@ async function handlePdfUrl(pdfUrl: string): Promise<Response> {
     const parseResponse = await fetch(`${supabaseUrl}/functions/v1/parse-pdf`, {
       method: "POST",
       headers: {
+        apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ filePath }),
     });
-    
-    const parseResult = await parseResponse.json();
+
+    let parseResult: any = null;
+    try {
+      parseResult = await parseResponse.json();
+    } catch {
+      // fall through; we'll handle based on status
+    }
+
+    if (!parseResponse.ok) {
+      console.error("parse-pdf HTTP error:", parseResponse.status, parseResult);
+      return createErrorResponse(
+        502,
+        parseResult?.error || parseResult?.message || `PDF parser failed (status ${parseResponse.status}). Please try uploading the PDF instead.`
+      );
+    }
     
     if (!parseResult.success) {
       console.error("PDF parsing failed:", parseResult.error);
       return createErrorResponse(500, parseResult.error || "Failed to extract text from PDF.");
     }
     
-    console.log("PDF parsed successfully, content length:", parseResult.text?.length || 0);
+    const extracted = parseResult.content || parseResult.text || "";
+    console.log("PDF parsed successfully, content length:", extracted.length || 0);
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        content: parseResult.text,
+        content: extracted,
         source: "pdf_url"
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

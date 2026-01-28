@@ -1,8 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-// @ts-ignore - pdfjs-serverless has runtime exports
-import pdfjs from "https://esm.sh/pdfjs-serverless@0.4.1";
+// pdfjs-serverless does not have a default export in edge runtime
+// @ts-ignore - pdfjs-serverless types/exports vary across runtimes
+import * as pdfjs from "https://esm.sh/pdfjs-serverless@0.4.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
+
+const MAX_PDF_SIZE = 15 * 1024 * 1024; // 15MB (URL import + uploads)
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -50,15 +53,14 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // Strict file size limit to prevent CPU timeout (5MB max)
-    const maxSize = 5 * 1024 * 1024;
-    if (uint8Array.length > maxSize) {
+    // File size limit to avoid CPU/memory spikes
+    if (uint8Array.length > MAX_PDF_SIZE) {
       console.log("File too large:", uint8Array.length, "bytes");
       // Clean up the file
       await supabase.storage.from("annual-reports").remove([validatedPath]);
       return createErrorResponse(
         400, 
-        `This PDF is too large (${Math.round(uint8Array.length / 1024 / 1024)}MB). Maximum is 5MB. Please use the text paste option instead, or upload a smaller file.`
+        `This PDF is too large (${Math.round(uint8Array.length / 1024 / 1024)}MB). Maximum is ${Math.round(MAX_PDF_SIZE / 1024 / 1024)}MB. Please use the text paste option instead, or upload a smaller file.`
       );
     }
 
@@ -82,7 +84,8 @@ serve(async (req) => {
     // Clean up the uploaded file
     await supabase.storage.from("annual-reports").remove([validatedPath]);
 
-    return new Response(JSON.stringify({ success: true, content: textContent }), {
+    // Return both keys for compatibility with any older callers.
+    return new Response(JSON.stringify({ success: true, content: textContent, text: textContent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
@@ -109,27 +112,45 @@ async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
   const parts: string[] = [];
   let total = 0;
 
-  for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
-    try {
-      const page = await doc.getPage(pageNum);
-      const content = await page.getTextContent();
+  try {
+    for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
+      try {
+        const page = await doc.getPage(pageNum);
+        const content = await page.getTextContent();
 
       const pageText = (content.items as any[])
         .map((it) => (typeof it?.str === "string" ? it.str : ""))
         .filter(Boolean)
         .join(" ");
 
-      if (pageText) {
-        parts.push(pageText);
-        total += pageText.length;
-        if (total >= maxChars) {
-          console.log(`Character limit reached at page ${pageNum}`);
-          break;
+        if (pageText) {
+          parts.push(pageText);
+          total += pageText.length;
+          if (total >= maxChars) {
+            console.log(`Character limit reached at page ${pageNum}`);
+            break;
+          }
         }
+
+        // Free page resources where supported
+        try {
+          // @ts-ignore
+          page.cleanup?.();
+        } catch {
+          // ignore
+        }
+      } catch (pageError) {
+        console.warn(`Error processing page ${pageNum}:`, pageError);
+        // Continue with other pages
       }
-    } catch (pageError) {
-      console.warn(`Error processing page ${pageNum}:`, pageError);
-      // Continue with other pages
+    }
+  } finally {
+    // Free document resources where supported
+    try {
+      // @ts-ignore
+      await doc.destroy?.();
+    } catch {
+      // ignore
     }
   }
 
