@@ -17,6 +17,7 @@ import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
 import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
 import { SWOTSlide } from "@/components/slides/SWOTSlide";
+import { BusinessCanvasSlide } from "@/components/slides/BusinessCanvasSlide";
 import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
 import { KeyRisksSlide } from "@/components/slides/KeyRisksSlide";
 import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
@@ -30,12 +31,13 @@ const staticSlidesBefore = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
   { component: CustomerSnapshotSlide, label: "1. Customer Snapshot" },
-  { component: FY1RetrospectiveSlide, label: "2. FY25 Retrospective" },
-  { component: AccountTeamSlide, label: "3. Account Team" },
-  { component: CustomerStrategySlide, label: "4. Customer Strategy" },
-  { component: StrategicPrioritiesSlide, label: "5. Strategic Priorities" },
-  { component: AccountStrategySlide, label: "6. Account Strategy" },
-  { component: BigBetsSlide, label: "7. Key Workstreams" },
+  { component: BusinessCanvasSlide, label: "2. Business Model" },
+  { component: FY1RetrospectiveSlide, label: "3. FY25 Retrospective" },
+  { component: AccountTeamSlide, label: "4. Account Team" },
+  { component: CustomerStrategySlide, label: "5. Customer Strategy" },
+  { component: StrategicPrioritiesSlide, label: "6. Strategic Priorities" },
+  { component: AccountStrategySlide, label: "7. Account Strategy" },
+  { component: BigBetsSlide, label: "8. Key Workstreams" },
 ];
 
 const staticSlidesAfter = [
