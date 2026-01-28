@@ -528,8 +528,9 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
       return;
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 50MB.");
+    // Keep this in sync with backend safeguards to avoid uploading files that cannot be processed.
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("File too large. Maximum size is 25MB.");
       return;
     }
 
@@ -545,16 +546,76 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
 
       toast.success("PDF uploaded! Extracting text...");
 
-      // Parse the PDF
-      const { data, error } = await supabase.functions.invoke("parse-pdf", {
-        body: { filePath: fileName }
-      });
+      // Parse the PDF (retry on transient backend compute limits)
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const maxAttempts = 3;
 
-      if (error) throw error;
-      if (!data.success) throw new Error(data.error || "Failed to parse PDF");
+      let parsed: any = null;
+      let lastErr: unknown = null;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const { data, error } = await supabase.functions.invoke("parse-pdf", {
+          body: { filePath: fileName },
+        });
+
+        if (!error && data?.success) {
+          parsed = data;
+          break;
+        }
+
+        // Try to detect WORKER_LIMIT reliably across different error shapes
+        const errorMessage =
+          (error as any)?.message || (error as any)?.toString?.() || "";
+        const maybeBody = (error as any)?.context?.body;
+        let isWorkerLimit = false;
+
+        if (typeof maybeBody === "string") {
+          try {
+            const bodyJson = JSON.parse(maybeBody);
+            isWorkerLimit = bodyJson?.code === "WORKER_LIMIT";
+          } catch {
+            // ignore
+          }
+        }
+
+        if (!isWorkerLimit) {
+          isWorkerLimit =
+            errorMessage.includes("WORKER_LIMIT") ||
+            JSON.stringify(error || {}).includes("WORKER_LIMIT") ||
+            (data && (data as any)?.code === "WORKER_LIMIT");
+        }
+
+        lastErr = error || data;
+
+        if (!isWorkerLimit || attempt === maxAttempts) {
+          break;
+        }
+
+        toast.message(`Backend is busy. Retrying PDF extraction (${attempt}/${maxAttempts})...`);
+
+        // Exponential backoff with a small jitter
+        const backoffMs = 800 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 250);
+        await sleep(backoffMs);
+      }
+
+      if (!parsed?.success) {
+        // Cleanup uploaded file on failure so retries don't leave orphaned uploads
+        try {
+          await supabase.storage.from("annual-reports").remove([fileName]);
+        } catch {
+          // ignore cleanup errors
+        }
+
+        // Prefer a clear user-facing message for compute-limit failures
+        const msg =
+          lastErr && JSON.stringify(lastErr).includes("WORKER_LIMIT")
+            ? "PDF parsing hit backend compute limits. Please try again (it often succeeds on retry), or use Paste Text for guaranteed results."
+            : "Failed to parse PDF";
+        throw new Error(msg);
+      }
 
       toast.success("Text extracted! Now analyzing...");
-      await analyzeContent(data.content);
+      await analyzeContent(parsed.content);
     } catch (error) {
       console.error("PDF upload error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to process PDF");
