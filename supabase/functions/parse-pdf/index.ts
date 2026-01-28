@@ -1,9 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { extractText, getDocumentProxy } from "https://esm.sh/unpdf@0.12.1";
+import { extractText } from "https://esm.sh/unpdf@0.12.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 const MAX_PDF_SIZE = 15 * 1024 * 1024; // 15MB (URL import + uploads)
+const MAX_PAGES = 20; // Limit pages to process
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -64,11 +65,16 @@ serve(async (req) => {
 
     console.log("PDF size:", uint8Array.length, "bytes");
 
-    // Extract text via PDF.js with strict limits
-    const rawText = await extractTextFromPDF(uint8Array);
-    const textContent = cleanExtractedText(rawText);
+    // Extract text using unpdf's simpler extractText function
+    const { text: rawText, totalPages } = await extractText(uint8Array, { mergePages: true });
+    console.log(`Extracted text from ${totalPages} pages, raw length: ${rawText?.length || 0}`);
+    
+    const textContent = cleanExtractedText(rawText || "");
+    console.log("Cleaned text length:", textContent.length);
 
-    if (!looksLikeExtractedText(textContent)) {
+    // Be more lenient - if we got any substantial text, use it
+    if (textContent.length < 100) {
+      console.log("Text too short, likely image-based PDF");
       // Clean up the file
       await supabase.storage.from("annual-reports").remove([validatedPath]);
       return createErrorResponse(
@@ -77,7 +83,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("PDF text extracted, length:", textContent.length);
+    console.log("PDF text extracted successfully, final length:", textContent.length);
 
     // Clean up the uploaded file
     await supabase.storage.from("annual-reports").remove([validatedPath]);
@@ -96,54 +102,7 @@ serve(async (req) => {
   }
 });
 
-async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  // Very strict limits to prevent CPU timeout
-  const maxPages = 15; // Only first 15 pages
-  const maxChars = 150_000; // Max characters
-
-  const doc = await getDocumentProxy(uint8Array);
-  const pagesToProcess = Math.min(doc.numPages, maxPages);
-  
-  console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
-  
-  const parts: string[] = [];
-  let total = 0;
-
-  try {
-    for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
-      try {
-        const page = await doc.getPage(pageNum);
-        const content = await page.getTextContent();
-
-        const pageText = (content.items as any[])
-          .map((it) => (typeof it?.str === "string" ? it.str : ""))
-          .filter(Boolean)
-          .join(" ");
-
-        if (pageText) {
-          parts.push(pageText);
-          total += pageText.length;
-          if (total >= maxChars) {
-            console.log(`Character limit reached at page ${pageNum}`);
-            break;
-          }
-        }
-      } catch (pageError) {
-        console.warn(`Error processing page ${pageNum}:`, pageError);
-        // Continue with other pages
-      }
-    }
-  } finally {
-    // Free document resources
-    try {
-      await (doc as any).destroy?.();
-    } catch {
-      // ignore
-    }
-  }
-
-  return parts.join("\n\n");
-}
+// Removed extractTextFromPDF - now using unpdf's extractText directly
 
 function cleanExtractedText(text: string): string {
   return text
@@ -152,17 +111,7 @@ function cleanExtractedText(text: string): string {
     .replace(/\t/g, " ")
     .replace(/\s{2,}/g, " ")
     .replace(/\n /g, "\n")
+    // Remove control characters
+    .replace(/[\x00-\x1f\x7f]/g, "")
     .trim();
-}
-
-function looksLikeExtractedText(text: string): boolean {
-  if (text.length < 200) return false;
-
-  // If there are too many control characters, it's almost certainly binary/garbage.
-  const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
-  if (controlChars / Math.max(1, text.length) > 0.01) return false;
-
-  // Require a minimal word count
-  const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
-  return words >= 80;
 }
