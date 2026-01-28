@@ -1,73 +1,61 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Sparkles, AlertCircle, CheckCircle, TrendingDown, TrendingUp, Timer } from "lucide-react";
+import { Sparkles, AlertCircle, CheckCircle, TrendingDown, TrendingUp, Timer, Info } from "lucide-react";
 
 export const AccountStrategySlide = () => {
   const { data } = useAccountData();
-  const { basics, strategy, opportunities, generatedPlan, accountStrategy } = data;
+  const { basics, strategy, opportunities, painPoints, generatedPlan, accountStrategy, annualReport, swot } = data;
 
-  const customerPriorities = strategy.ceoBoardPriorities?.slice(0, 4) || [];
-  const strategicOpportunities = opportunities.opportunities?.slice(0, 2) || [];
+  const companyName = basics.accountName || "Customer";
+  
+  // Check if we have AI-generated content
   const isAIGenerated = !!generatedPlan?.strategicAlignment || !!accountStrategy?.strategyNarrative;
   
-  // Vision from account strategy or generated
+  // Vision: prioritize input form → AI generated → contextual default
   const vision = accountStrategy?.strategyNarrative || 
-    `Our vision is to build the digital backbone that powers ${basics.accountName || "the customer"}'s Integrator Strategy, enabling AI-first execution at scale and delivering measurable improvements in customer cost, experience, and growth across a connected global logistics network.`;
+    generatedPlan?.strategicAlignment?.narrative ||
+    "";
 
-  // Strategic focus areas - What We'll Focus On
-  const focusAreas = [
-    {
-      title: "Lead with CRM",
-      description: "Building on the FY25 commercial evaluation to deliver a scalable, orchestrated customer service and commercial execution foundation that reduces cost-to-serve and enables growth",
-      whyNow: "The CRM decision window is imminent, and the customer is prioritising cost-to-serve reduction and more consistent customer journeys. FY26 is the moment to expand from CRM replacement to end-to-end customer and commercial orchestration."
-    },
-    {
-      title: "Anchor on AI Governance",
-      description: "Operationalising AI beyond isolated use cases to improve execution speed, decision quality, and productivity across customer, commercial, and operational workflows.",
-      whyNow: "AI-first ambition is clear, but current value is constrained by isolated use cases and fragmented execution. FY26 is the inflection point to embed AI in workflows with measurable productivity, decision-speed, and service outcomes."
-    },
-    {
-      title: "Expand Beyond IT",
-      description: "Broadening platform adoption beyond IT, using customer and service workflows as the entry point to enable enterprise-wide workflow orchestration aligned to Integrator strategy.",
-      whyNow: "Scaling integrated logistics and needs a common orchestration layer to connect Ocean, L&S and Terminals. FY26 is the right time to converge on one platform direction, one data model, and repeatable architecture patterns."
-    },
-    {
-      title: "Maturing The Strategic Partnership",
-      description: "Evolving the relationship from execution recovery toward long-term strategic partner underpinning digital, AI, and operating model ambition.",
-      whyNow: "Trust is re-established, and the focus must shift to long-term, strategic value creation with shared roadmaps, governance, and outcome accountability."
-    }
-  ];
+  // Focus Areas: derive from strategic priorities or CEO/Board priorities
+  const focusAreas = generatedPlan?.strategicPriorities?.slice(0, 4).map(p => ({
+    title: p.title,
+    description: p.winningLooks || "",
+    whyNow: p.whyNow || "",
+  })) || strategy.ceoBoardPriorities?.slice(0, 4).map(p => ({
+    title: p.title,
+    description: p.description,
+    whyNow: "",
+  })) || [];
 
-  // Winning moves - How We'll Win
-  const winningMoves = [
-    {
-      title: "Align Executives on a Single Narrative",
-      description: "Integrator Strategy → Digital Backbone → AI-first execution → customer and productivity outcomes"
-    },
-    {
-      title: "Land & Expand Through Quick Wins",
-      description: "Prove value fast, build momentum, unlock broader enterprise investment"
-    },
-    {
-      title: "Prove Value Through Visible, Measurable Outcomes",
-      description: "Measured through ROI, AI adoption, cycle time, automation rate, and service performance (NPS)."
-    },
-    {
-      title: "Co-create Multi-Year Roadmap and Governance Model",
-      description: "Reduce delivery risk and accelerates adoption across business domains."
-    }
-  ];
+  // Winning Moves: derive from strategic alignment or opportunities
+  const winningMoves = generatedPlan?.strategicAlignment?.alignments?.slice(0, 4).map(a => ({
+    title: a.customerObjective,
+    description: `${a.serviceNowCapability} → ${a.outcome}`,
+  })) || opportunities.opportunities?.slice(0, 4).map(o => ({
+    title: o.title,
+    description: o.description,
+  })) || [];
 
-  const hasData = customerPriorities.length > 0 || strategicOpportunities.length > 0 || vision;
+  // Target Metrics from generated plan
+  const metrics = generatedPlan?.successMetrics?.slice(0, 3) || [];
+
+  // Determine if we have meaningful content
+  const hasVision = vision.length > 0;
+  const hasFocusAreas = focusAreas.length > 0;
+  const hasWinningMoves = winningMoves.length > 0;
+  const hasContent = hasVision || hasFocusAreas || hasWinningMoves;
 
   return (
     <div className="min-h-screen p-8 md:p-10 pb-32">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary">
-            Account Strategy FY26 +
-          </h1>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-primary">
+              Account Strategy FY26+
+            </h1>
+            <p className="text-muted-foreground mt-1">Strategic approach for {companyName}</p>
+          </div>
           <div className="flex items-center gap-2">
             <RegenerateSectionButton section="strategicAlignment" />
             {isAIGenerated && (
@@ -79,27 +67,29 @@ export const AccountStrategySlide = () => {
           </div>
         </div>
 
-        {!hasData ? (
+        {!hasContent ? (
           <div className="glass-card p-12 text-center opacity-0 animate-fade-in">
-            <AlertCircle className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-2">No Strategy Data</h3>
-            <p className="text-sm text-muted-foreground/70 max-w-md mx-auto">
-              Complete the Customer Strategy and Opportunities sections to generate account strategy.
+            <Info className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-foreground mb-2">No Strategy Data</h3>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Complete the Account Strategy section in the Input Form, or click <span className="font-medium text-foreground">Generate with AI</span> to create a strategy based on your account data.
             </p>
           </div>
         ) : (
           <div className="space-y-5">
             {/* Vision Banner */}
-            <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
-              <div className="flex items-start gap-4">
-                <div className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary font-semibold text-sm flex-shrink-0">
-                  Vision
+            {hasVision && (
+              <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
+                <div className="flex items-start gap-4">
+                  <div className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary font-semibold text-sm flex-shrink-0">
+                    Vision
+                  </div>
+                  <p className="text-foreground leading-relaxed">
+                    {vision}
+                  </p>
                 </div>
-                <p className="text-foreground leading-relaxed">
-                  {vision}
-                </p>
               </div>
-            </div>
+            )}
 
             {/* Main Content - Two Columns */}
             <div className="grid grid-cols-12 gap-5">
@@ -110,26 +100,38 @@ export const AccountStrategySlide = () => {
                   <div className="flex-1 h-px bg-primary/30" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {focusAreas.map((area, index) => (
-                    <div 
-                      key={index}
-                      className="glass-card p-4 opacity-0 animate-fade-in"
-                      style={{ animationDelay: `${100 + index * 50}ms` }}
-                    >
-                      <h3 className="text-foreground font-semibold text-sm mb-2">{area.title}</h3>
-                      <p className="text-muted-foreground text-xs leading-relaxed mb-3">
-                        {area.description}
-                      </p>
-                      <div className="pt-3 border-t border-border/30">
-                        <p className="text-xs">
-                          <span className="text-amber-400 font-semibold">Why now:</span>{" "}
-                          <span className="text-muted-foreground">{area.whyNow}</span>
-                        </p>
+                {hasFocusAreas ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {focusAreas.map((area, index) => (
+                      <div 
+                        key={index}
+                        className="glass-card p-4 opacity-0 animate-fade-in"
+                        style={{ animationDelay: `${100 + index * 50}ms` }}
+                      >
+                        <h3 className="text-foreground font-semibold text-sm mb-2">{area.title}</h3>
+                        {area.description && (
+                          <p className="text-muted-foreground text-xs leading-relaxed mb-3">
+                            {area.description}
+                          </p>
+                        )}
+                        {area.whyNow && (
+                          <div className="pt-3 border-t border-border/30">
+                            <p className="text-xs">
+                              <span className="text-amber-400 font-semibold">Why now:</span>{" "}
+                              <span className="text-muted-foreground">{area.whyNow}</span>
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="glass-card p-8 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Add CEO/Board Priorities or generate strategic priorities with AI.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Right Column - How We'll Win */}
@@ -139,46 +141,71 @@ export const AccountStrategySlide = () => {
                   <div className="flex-1 h-px bg-primary/30" />
                 </div>
 
-                <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
-                  <div className="space-y-4">
-                    {winningMoves.map((move, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                {hasWinningMoves ? (
+                  <div className="glass-card p-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
+                    <div className="space-y-4">
+                      {winningMoves.map((move, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-foreground font-medium text-sm">{move.title}</p>
+                            <p className="text-muted-foreground text-xs mt-1">{move.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-foreground font-medium text-sm">{move.title}</p>
-                          <p className="text-muted-foreground text-xs mt-1">{move.description}</p>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="glass-card p-8 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Add Strategic Opportunities or generate with AI.
+                    </p>
+                  </div>
+                )}
+
+                {/* Target Metrics */}
+                {metrics.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    {metrics.map((metric, index) => (
+                      <div 
+                        key={index}
+                        className="glass-card p-4 text-center opacity-0 animate-fade-in" 
+                        style={{ animationDelay: `${300 + index * 50}ms` }}
+                      >
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <span className="text-lg font-bold text-primary">{metric.metric}</span>
                         </div>
+                        <p className="text-[10px] text-muted-foreground uppercase">{metric.label}</p>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Target Metrics */}
-                <div className="grid grid-cols-3 gap-3 mt-4">
-                  <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <TrendingDown className="w-4 h-4 text-primary" />
-                      <span className="text-lg font-bold text-primary">%</span>
+                ) : (
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <TrendingDown className="w-4 h-4 text-primary" />
+                        <span className="text-lg font-bold text-primary">%</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Cost Reduction</p>
                     </div>
-                    <p className="text-[10px] text-muted-foreground uppercase">Cost Reduction</p>
-                  </div>
-                  <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "350ms" }}>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <TrendingUp className="w-4 h-4 text-primary" />
-                      <span className="text-lg font-bold text-primary">%</span>
+                    <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "350ms" }}>
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                        <span className="text-lg font-bold text-primary">%</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Automation & AI</p>
                     </div>
-                    <p className="text-[10px] text-muted-foreground uppercase">Automation & AI</p>
-                  </div>
-                  <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "400ms" }}>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <Timer className="w-4 h-4 text-primary" />
-                      <span className="text-lg font-bold text-primary">%</span>
+                    <div className="glass-card p-4 text-center opacity-0 animate-fade-in" style={{ animationDelay: "400ms" }}>
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <Timer className="w-4 h-4 text-primary" />
+                        <span className="text-lg font-bold text-primary">%</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground uppercase">Faster Cycles</p>
                     </div>
-                    <p className="text-[10px] text-muted-foreground uppercase">Faster Cycles</p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
