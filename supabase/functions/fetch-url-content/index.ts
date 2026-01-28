@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, createErrorResponse, validateUrl } from "../_shared/validation.ts";
+
+const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB limit for PDFs
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,15 +20,15 @@ serve(async (req) => {
       return createErrorResponse(400, validationError instanceof Error ? validationError.message : 'Invalid URL');
     }
 
-    // Check if URL points to a PDF - Firecrawl cannot scrape PDFs
+    // Check if URL points to a PDF - handle differently
     const urlLower = validatedUrl.toLowerCase();
-    if (urlLower.endsWith('.pdf') || urlLower.includes('.pdf?')) {
-      return createErrorResponse(
-        400, 
-        "PDF files cannot be scraped directly. Please upload the PDF file instead, or paste the text content manually."
-      );
+    const isPdf = urlLower.endsWith('.pdf') || urlLower.includes('.pdf?') || urlLower.includes('/pdf/');
+    
+    if (isPdf) {
+      return await handlePdfUrl(validatedUrl);
     }
 
+    // Regular web page scraping via Firecrawl
     const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
     if (!apiKey) {
       console.error("FIRECRAWL_API_KEY not configured");
@@ -34,9 +37,8 @@ serve(async (req) => {
 
     console.log("Scraping URL:", validatedUrl);
 
-    // Add timeout to prevent long-running requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     try {
       const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
@@ -49,7 +51,7 @@ serve(async (req) => {
           url: validatedUrl,
           formats: ["markdown"],
           onlyMainContent: true,
-          timeout: 20000, // Tell Firecrawl to timeout after 20s
+          timeout: 20000,
         }),
         signal: controller.signal,
       });
@@ -95,3 +97,108 @@ serve(async (req) => {
     return createErrorResponse(500, "An error occurred. Please try again.", error);
   }
 });
+
+async function handlePdfUrl(pdfUrl: string): Promise<Response> {
+  console.log("Downloading PDF from URL:", pdfUrl);
+  
+  try {
+    // Download the PDF with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for download
+    
+    const pdfResponse = await fetch(pdfUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; AccountPlanBot/1.0)',
+      },
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!pdfResponse.ok) {
+      console.error("PDF download failed:", pdfResponse.status);
+      return createErrorResponse(502, `Could not download PDF (status ${pdfResponse.status}). Please download and upload the file manually.`);
+    }
+    
+    const contentType = pdfResponse.headers.get('content-type') || '';
+    if (!contentType.includes('pdf') && !contentType.includes('octet-stream')) {
+      console.log("Unexpected content type:", contentType);
+      // Continue anyway - some servers don't set correct content-type
+    }
+    
+    const arrayBuffer = await pdfResponse.arrayBuffer();
+    const pdfSize = arrayBuffer.byteLength;
+    
+    console.log("Downloaded PDF size:", pdfSize, "bytes");
+    
+    if (pdfSize > MAX_PDF_SIZE) {
+      return createErrorResponse(
+        400, 
+        `This PDF is too large (${Math.round(pdfSize / 1024 / 1024)}MB). Maximum is 5MB. Please download and upload a smaller file, or paste the text content.`
+      );
+    }
+    
+    if (pdfSize < 1000) {
+      return createErrorResponse(400, "Downloaded file is too small to be a valid PDF.");
+    }
+    
+    // Upload to Supabase storage temporarily
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const fileName = `url-import-${Date.now()}.pdf`;
+    const filePath = `temp/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from("annual-reports")
+      .upload(filePath, arrayBuffer, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+    
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      return createErrorResponse(500, "Failed to process PDF. Please try uploading the file directly.");
+    }
+    
+    console.log("PDF uploaded to storage:", filePath);
+    
+    // Call parse-pdf function to extract text
+    const parseResponse = await fetch(`${supabaseUrl}/functions/v1/parse-pdf`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ filePath }),
+    });
+    
+    const parseResult = await parseResponse.json();
+    
+    if (!parseResult.success) {
+      console.error("PDF parsing failed:", parseResult.error);
+      return createErrorResponse(500, parseResult.error || "Failed to extract text from PDF.");
+    }
+    
+    console.log("PDF parsed successfully, content length:", parseResult.text?.length || 0);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        content: parseResult.text,
+        source: "pdf_url"
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+    
+  } catch (error) {
+    console.error("PDF URL handling error:", error);
+    
+    if (error instanceof Error && error.name === 'AbortError') {
+      return createErrorResponse(504, "PDF download timed out. Please download and upload the file manually.");
+    }
+    
+    return createErrorResponse(500, "Failed to process PDF from URL. Please download and upload the file manually.");
+  }
+}
