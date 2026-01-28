@@ -319,6 +319,71 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                     }, 
                     description: "3-5 digital/operational transformation themes" 
                   },
+                  marketPositioning: {
+                    type: "object",
+                    properties: {
+                      marketLeadershipClaim: { type: "string", description: "How they describe their market position (e.g., 'global leader in...', '#1 in...', 'largest provider of...')" },
+                      targetMarkets: { type: "array", items: { type: "string" }, description: "Key markets/segments they target" },
+                      geographicFootprint: { type: "string", description: "Geographic presence and expansion focus" },
+                      customerSegments: { type: "array", items: { type: "string" }, description: "Primary customer segments they serve" },
+                      valueProposition: { type: "string", description: "Their stated unique value to customers" }
+                    },
+                    description: "Market positioning and go-to-market strategy"
+                  },
+                  competitiveDifferentiators: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        differentiator: { type: "string", description: "What makes them different (e.g., 'Integrated network', 'Technology platform')" },
+                        evidence: { type: "string", description: "Proof points they cite (metrics, scale, capabilities)" }
+                      },
+                      required: ["differentiator", "evidence"]
+                    },
+                    description: "3-5 competitive advantages they claim with supporting evidence"
+                  },
+                  competitiveLandscape: {
+                    type: "object",
+                    properties: {
+                      namedCompetitors: { type: "array", items: { type: "string" }, description: "Competitors explicitly mentioned in the report" },
+                      competitiveThreats: { type: "array", items: { type: "string" }, description: "Competitive threats or pressures mentioned" },
+                      marketDynamics: { type: "string", description: "How they describe their competitive environment" }
+                    },
+                    description: "Competitive landscape and market dynamics"
+                  },
+                  strategicBets: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        bet: { type: "string", description: "Major strategic bet or investment area" },
+                        rationale: { type: "string", description: "Why they're making this bet" },
+                        timeline: { type: "string", description: "Timeframe if mentioned (e.g., '2025', 'by 2030')" }
+                      },
+                      required: ["bet", "rationale"]
+                    },
+                    description: "3-5 major strategic bets or transformation investments"
+                  },
+                  operationalModel: {
+                    type: "object",
+                    properties: {
+                      businessModel: { type: "string", description: "Core business model description" },
+                      operatingSegments: { type: "array", items: { type: "string" }, description: "Key business units or operating segments" },
+                      integrationStrategy: { type: "string", description: "How different parts of the business work together" },
+                      partnerEcosystem: { type: "string", description: "Key partnerships or ecosystem strategy" }
+                    },
+                    description: "Operational and business model structure"
+                  },
+                  customerExperienceStrategy: {
+                    type: "object",
+                    properties: {
+                      cxVision: { type: "string", description: "Their stated customer experience vision or commitment" },
+                      cxInitiatives: { type: "array", items: { type: "string" }, description: "Key CX improvement initiatives" },
+                      digitalChannels: { type: "array", items: { type: "string" }, description: "Digital channels or platforms mentioned" },
+                      npsOrSatisfaction: { type: "string", description: "Customer satisfaction metrics if mentioned" }
+                    },
+                    description: "Customer experience and service strategy"
+                  },
                   painPoints: { 
                     type: "array", 
                     items: { 
