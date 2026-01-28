@@ -12,6 +12,14 @@ import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
 import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
 import { WorkstreamDetailSlide } from "@/components/slides/WorkstreamDetailSlide";
+import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
+import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
+import { ClosePlanSlide } from "@/components/slides/ClosePlanSlide";
+import { SWOTSlide } from "@/components/slides/SWOTSlide";
+import { KeyAsksSlide } from "@/components/slides/KeyAsksSlide";
+import { KeyRisksSlide } from "@/components/slides/KeyRisksSlide";
+import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
+import { ThankYouSlide } from "@/components/slides/ThankYouSlide";
 import { PresentationSlide } from "@/components/slides/PresentationSlide";
 import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
 import { useAccountData } from "@/context/AccountDataContext";
@@ -28,6 +36,14 @@ const defaultSlides = [
   { component: AccountStrategySlide, label: "6. Account Strategy" },
   { component: BigBetsSlide, label: "7. Key Workstreams" },
   { component: WorkstreamDetailSlide, label: "8. Workstream Detail" },
+  { component: RoadmapSlide, label: "9. Roadmap" },
+  { component: PursuitPlanSlide, label: "10. Pursuit Plan" },
+  { component: ClosePlanSlide, label: "11. Close Plan" },
+  { component: SWOTSlide, label: "12. SWOT Analysis" },
+  { component: KeyAsksSlide, label: "13. Key Asks" },
+  { component: KeyRisksSlide, label: "14. Key Risks" },
+  { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
+  { component: ThankYouSlide, label: "16. Thank You" },
 ];
 
 const Index = () => {
