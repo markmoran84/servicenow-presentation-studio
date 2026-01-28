@@ -349,6 +349,26 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                   threats: { type: "array", items: { type: "string" }, description: "4-6 threats combining market risks and competitive dynamics" },
                   netZeroTarget: { type: "string", description: "Sustainability/Net Zero commitment with year" },
                   keyMilestones: { type: "array", items: { type: "string" }, description: "3-5 key milestones or achievements from the year" },
+                  // Vision and Purpose extraction
+                  visionStatement: { type: "string", description: "The company's vision statement - a short aspirational phrase like 'All the way' or 'Making it easier for everyone to experience the world'. Look for 'Our vision', 'Our ambition', taglines in CEO letter." },
+                  purposeStatement: { type: "string", description: "The company's purpose statement - why they exist, e.g., 'Improving life for all by integrating the world'. Look for 'Our purpose', 'Our mission', 'Why we exist'." },
+                  longTermAims: { 
+                    type: "array", 
+                    items: { type: "string" }, 
+                    description: "4-6 long-term strategic aims/ambitions. Look for 'Our ambition is...', 'Long-term goals', 'Strategic aims', '2030 targets'. Each should be a complete strategic objective." 
+                  },
+                  mediumTermAmbitions: { 
+                    type: "array", 
+                    items: { 
+                      type: "object",
+                      properties: {
+                        title: { type: "string", description: "Ambition title like 'Better efficiencies', 'Improve free cash flow', 'Grow the business'" },
+                        bullets: { type: "array", items: { type: "string" }, description: "2-4 specific objectives under this ambition" }
+                      },
+                      required: ["title", "bullets"]
+                    }, 
+                    description: "2-4 medium-term ambitions with specific objectives. Look for '2025 priorities', 'Medium-term targets', 'FY targets'." 
+                  },
                   strategicAchievements: { type: "array", items: { type: "string" }, description: "3-5 strategic achievements that demonstrate execution capability" },
                   executiveSummaryNarrative: { type: "string", description: "2-3 sentence board-ready company summary describing market position, scale, and strategic direction" },
                   keyExecutives: {

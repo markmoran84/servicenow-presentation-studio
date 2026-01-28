@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { PowerPointAnalyzer } from "@/components/PowerPointAnalyzer";
+import { ExtractedDataPreview } from "@/components/ExtractedDataPreview";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
   Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2, Presentation
@@ -193,6 +194,8 @@ export const InputFormSlide = ({ onGenerate, onAcceptImprovedSlides }: InputForm
                 onAcceptChanges={onAcceptImprovedSlides}
               />
             </div>
+            {/* Extracted Data Preview - shows after annual report analysis */}
+            <ExtractedDataPreview />
           </TabsContent>
 
           {/* Section A - Account Basics */}
