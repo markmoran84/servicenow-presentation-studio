@@ -11,6 +11,7 @@ import { AccountStrategySlide } from "@/components/slides/AccountStrategySlide";
 import { AccountTeamSlide } from "@/components/slides/AccountTeamSlide";
 import { StrategicPrioritiesSlide } from "@/components/slides/StrategicPrioritiesSlide";
 import { BigBetsSlide } from "@/components/slides/BigBetsSlide";
+import { BigBetDeepDiveSlide } from "@/components/slides/BigBetDeepDiveSlide";
 import { WorkstreamDetailSlide } from "@/components/slides/WorkstreamDetailSlide";
 import { RoadmapSlide } from "@/components/slides/RoadmapSlide";
 import { PursuitPlanSlide } from "@/components/slides/PursuitPlanSlide";
@@ -22,10 +23,10 @@ import { RiskMitigationSlide } from "@/components/slides/RiskMitigationSlide";
 import { ThankYouSlide } from "@/components/slides/ThankYouSlide";
 import { PresentationSlide } from "@/components/slides/PresentationSlide";
 import { PPTSlideRenderer } from "@/components/slides/PPTSlideRenderer";
-import { useAccountData } from "@/context/AccountDataContext";
+import { useAccountData, BigBet } from "@/context/AccountDataContext";
 
-// Default slides in exact order matching uploaded templates
-const defaultSlides = [
+// Static slides that don't depend on big bets count
+const staticSlidesBefore = [
   { component: InputFormSlide, label: "Input Form", isForm: true },
   { component: CoverSlide, label: "Cover" },
   { component: CustomerSnapshotSlide, label: "1. Customer Snapshot" },
@@ -35,15 +36,18 @@ const defaultSlides = [
   { component: StrategicPrioritiesSlide, label: "5. Strategic Priorities" },
   { component: AccountStrategySlide, label: "6. Account Strategy" },
   { component: BigBetsSlide, label: "7. Key Workstreams" },
-  { component: WorkstreamDetailSlide, label: "8. Workstream Detail" },
-  { component: RoadmapSlide, label: "9. Roadmap" },
-  { component: PursuitPlanSlide, label: "10. Pursuit Plan" },
-  { component: ClosePlanSlide, label: "11. Close Plan" },
-  { component: SWOTSlide, label: "12. SWOT Analysis" },
-  { component: KeyAsksSlide, label: "13. Key Asks" },
-  { component: KeyRisksSlide, label: "14. Key Risks" },
-  { component: RiskMitigationSlide, label: "15. Risk & Mitigation" },
-  { component: ThankYouSlide, label: "16. Thank You" },
+];
+
+const staticSlidesAfter = [
+  { component: WorkstreamDetailSlide, label: "Workstream Summary" },
+  { component: RoadmapSlide, label: "Roadmap" },
+  { component: PursuitPlanSlide, label: "Pursuit Plan" },
+  { component: ClosePlanSlide, label: "Close Plan" },
+  { component: SWOTSlide, label: "SWOT Analysis" },
+  { component: KeyAsksSlide, label: "Key Asks" },
+  { component: KeyRisksSlide, label: "Key Risks" },
+  { component: RiskMitigationSlide, label: "Risk & Mitigation" },
+  { component: ThankYouSlide, label: "Thank You" },
 ];
 
 const Index = () => {
@@ -60,6 +64,22 @@ const Index = () => {
   const enhancedPresentation = data.enhancedPresentation;
   const isPPTMode = !!enhancedPresentation || !!data.improvedPresentation;
   const improvedPresentation = data.improvedPresentation;
+
+  // Get big bets for dynamic deep dive slides
+  const bigBets: BigBet[] = data.accountStrategy?.bigBets?.length > 0 
+    ? data.accountStrategy.bigBets
+    : data.generatedPlan?.keyWorkstreams?.map(ws => ({
+        title: ws.title,
+        subtitle: ws.subtitle || "Strategic Initiative",
+        sponsor: "",
+        dealStatus: (ws.dealStatus as BigBet["dealStatus"]) || "Pipeline",
+        targetClose: ws.targetClose,
+        netNewACV: ws.acv,
+        steadyStateBenefit: ws.steadyStateBenefit || "TBD",
+        insight: ws.insight,
+        people: ws.people || [],
+        products: [],
+      })) || [];
 
   // Build active slides based on mode
   const activeSlides = useMemo(() => {
@@ -86,9 +106,31 @@ const Index = () => {
         })),
       ];
     }
-    // Default mode: use standard slide deck
-    return defaultSlides;
-  }, [isPPTMode, improvedPresentation, enhancedPresentation]);
+    
+    // Default mode: build dynamic slides with deep dives for each big bet
+    const deepDiveSlides = bigBets.map((bet, index) => ({
+      component: () => <BigBetDeepDiveSlide betIndex={index} />,
+      label: `7.${index + 1}. ${bet.title}`,
+      isDeepDive: true,
+      betIndex: index,
+    }));
+
+    // Calculate slide numbers dynamically
+    const beforeCount = staticSlidesBefore.length; // 9 slides (including input form)
+    const deepDiveCount = deepDiveSlides.length;
+    
+    // Renumber the after slides
+    const numberedAfterSlides = staticSlidesAfter.map((slide, index) => ({
+      ...slide,
+      label: `${beforeCount + deepDiveCount + index}. ${slide.label.replace(/^\d+\.\s*/, '')}`,
+    }));
+
+    return [
+      ...staticSlidesBefore,
+      ...deepDiveSlides,
+      ...numberedAfterSlides,
+    ];
+  }, [isPPTMode, improvedPresentation, enhancedPresentation, bigBets]);
 
   // Get slide labels for navigation
   const slideLabels = useMemo(() => activeSlides.map((s) => s.label), [activeSlides]);
@@ -207,7 +249,7 @@ const Index = () => {
     if ("component" in currentSlideConfig && currentSlideConfig.component) {
       const CurrentSlideComponent = currentSlideConfig.component;
       
-      if (currentSlideConfig.isForm) {
+      if ("isForm" in currentSlideConfig && currentSlideConfig.isForm) {
         return (
           <CurrentSlideComponent 
             onGenerate={goToFirstSlide} 
