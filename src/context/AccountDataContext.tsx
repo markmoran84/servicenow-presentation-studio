@@ -149,6 +149,13 @@ export interface AnnualReportHighlights {
   strategicAchievements: string[];
   executiveSummaryNarrative: string;
   strategicPillars: StrategicPillar[];
+  // Customer vision & purpose extracted from annual report
+  visionStatement?: string;
+  purposeStatement?: string;
+  // Long-term strategic aims
+  longTermAims?: string[];
+  // Medium-term ambitions with descriptions
+  mediumTermAmbitions?: { title: string; bullets: string[] }[];
 }
 
 // Business Model Canvas (9 building blocks)
@@ -340,6 +347,10 @@ const defaultData: AccountData = {
     strategicAchievements: [],
     executiveSummaryNarrative: "",
     strategicPillars: [],
+    visionStatement: "",
+    purposeStatement: "",
+    longTermAims: [],
+    mediumTermAmbitions: [],
   },
   businessModel: {
     keyPartners: [],
