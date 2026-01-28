@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { extractText } from "https://esm.sh/unpdf@0.12.1";
+import { getResolvedPDFJS } from "https://esm.sh/unpdf@0.12.1";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
 
 serve(async (req) => {
@@ -83,27 +83,68 @@ serve(async (req) => {
 });
 
 async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  // Use unpdf which is lighter weight and edge-compatible
-  // Limit to first 40 pages to avoid memory issues
-  const maxPages = 40;
-  const maxChars = 400_000;
+  // IMPORTANT: Avoid `extractText()` which reads the entire PDF and can exceed
+  // edge CPU/memory limits. Instead, use the PDF.js API and only process the
+  // first N pages with an overall character cap.
+  const maxPages = 10;
+  const maxChars = 240_000;
 
+  const pdfjs = await getResolvedPDFJS();
+  const loadingTask = pdfjs.getDocument({
+    data: uint8Array,
+    useSystemFonts: true,
+    disableFontFace: true,
+    verbosity: 0,
+    stopAtErrors: true,
+  });
+
+  let doc: any;
   try {
-    const { text, totalPages } = await extractText(uint8Array, { 
-      mergePages: true 
-    });
-    
-    console.log(`Extracted text from PDF with ${totalPages} pages`);
-    
-    // Truncate if too long
-    if (text.length > maxChars) {
-      return text.slice(0, maxChars);
+    doc = await loadingTask.promise;
+    const pagesToRead = Math.min(doc.numPages || 0, maxPages);
+
+    const parts: string[] = [];
+    let total = 0;
+
+    for (let pageNum = 1; pageNum <= pagesToRead; pageNum++) {
+      const page = await doc.getPage(pageNum);
+      const content = await page.getTextContent();
+
+      const pageText = (content.items as any[])
+        .map((it) => (typeof it?.str === "string" ? it.str : ""))
+        .filter(Boolean)
+        .join(" ");
+
+      if (pageText) {
+        parts.push(pageText);
+        total += pageText.length;
+        if (total >= maxChars) break;
+      }
+
+      // Best-effort cleanup to reduce memory pressure
+      try {
+        page.cleanup?.();
+      } catch {
+        // ignore
+      }
     }
-    
-    return text;
+
+    console.log(`PDF pages processed: ${pagesToRead}/${doc.numPages}, chars: ${total}`);
+    return parts.join("\n\n");
   } catch (extractError) {
-    console.error("unpdf extraction failed:", extractError);
+    console.error("PDF extraction failed:", extractError);
     throw new Error("PDF text extraction failed");
+  } finally {
+    try {
+      await loadingTask.destroy?.();
+    } catch {
+      // ignore
+    }
+    try {
+      await doc?.destroy?.();
+    } catch {
+      // ignore
+    }
   }
 }
 
