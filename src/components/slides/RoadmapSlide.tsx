@@ -1,102 +1,87 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { Sparkles, ChevronRight, Target, Rocket, Zap, Globe, TrendingUp, Shield } from "lucide-react";
-
-const pillarIcons = [Target, Rocket, Zap, Globe, TrendingUp, Shield];
+import { Sparkles, ChevronRight } from "lucide-react";
 
 export const RoadmapSlide = () => {
   const { data } = useAccountData();
-  const { basics, strategy, generatedPlan } = data;
-  const companyName = basics.accountName || "the customer";
+  const companyName = data.basics.accountName || "the customer";
 
-  // Pull from context - corporate strategy becomes strategic pillars
-  const corporateStrategy = (strategy.corporateStrategy ?? []).filter(
-    (s) => (s.title || "").trim().length > 0
-  );
-  
-  // CEO/Board priorities become tasks
-  const ceoPriorities = (strategy.ceoBoardPriorities ?? []).filter(
-    (s) => (s.title || "").trim().length > 0
-  );
-  
-  // Digital strategies become transformation themes
-  const digitalStrategies = (strategy.digitalStrategies ?? []).filter(
-    (s) => (s.title || "").trim().length > 0
-  );
-  
-  // Transformation themes
-  const transformationThemes = (strategy.transformationThemes ?? []).filter(
-    (s) => (s.title || "").trim().length > 0
-  );
+  // Strategic pillars with objectives
+  const strategicPillars = [
+    {
+      id: 1,
+      title: "Strengthen customer focus and profitable growth",
+      color: "from-cyan-400 to-cyan-500",
+      objectives: [
+        "Reduce cost-to-serve through workflow automation and digital self-service",
+        "Release frontline capacity from manual case handling and rework",
+        "Improve service consistency while absorbing volume growth without proportional increases in operational cost"
+      ]
+    },
+    {
+      id: 2,
+      title: "Drive operational excellence across the network",
+      color: "from-teal-400 to-teal-500",
+      objectives: [
+        "Reduce manual coordination and exception handling across Ocean, L&S, and Terminals",
+        "Increase operational productivity and execution capacity through orchestration and automation",
+        "Improve reliability and response without adding structural overhead"
+      ]
+    },
+    {
+      id: 3,
+      title: "Accelerate technology & transformation",
+      color: "from-emerald-400 to-emerald-500",
+      objectives: [
+        "Simplify platforms and workflows to reduce dependency on manual intervention",
+        "Enable teams to scale execution through standardised, automated processes",
+        "Improve change velocity without increasing run cost"
+      ]
+    },
+    {
+      id: 4,
+      title: "Scale AI & data to power intelligent operations",
+      color: "from-green-400 to-green-500",
+      objectives: [
+        "Embed AI to augment teams and improve decision productivity",
+        "Reduce repetitive, low-value work through AI-assisted execution",
+        "Enable capacity uplift across customer and operational teams without additional headcount"
+      ]
+    }
+  ];
 
-  // AI-generated synthesis for additional context
-  const synthesis = generatedPlan?.customerStrategySynthesis;
-  const isAIGenerated = !!synthesis?.narrative || corporateStrategy.length > 0;
-
-  // Build strategic pillars from corporate strategy
-  const strategicPillars = corporateStrategy.slice(0, 4).map((item, index) => ({
-    id: index + 1,
-    title: item.title,
-    description: item.description || "",
-    color: [
-      "from-cyan-400 to-cyan-500",
-      "from-teal-400 to-teal-500", 
-      "from-emerald-400 to-emerald-500",
-      "from-green-400 to-green-500"
-    ][index % 4],
-    Icon: pillarIcons[index % pillarIcons.length]
-  }));
-
-  // Build long-term aims from CEO priorities + digital strategies
+  // Long-term aims (6 cells in 2 rows)
   const longTermAims = [
-    ...ceoPriorities.slice(0, 3).map(p => p.title + (p.description ? ` (${p.description.slice(0, 60)}...)` : "")),
-    ...digitalStrategies.slice(0, 3).map(d => d.title + (d.description ? ` (${d.description.slice(0, 60)}...)` : ""))
-  ].slice(0, 6);
-
-  // Build medium-term ambitions from transformation themes
-  const mediumTermAmbitions = transformationThemes.slice(0, 3).map(theme => ({
-    title: theme.title,
-    bullets: theme.description ? [theme.description] : []
-  }));
-
-  // Fallback content if no data
-  const hasData = strategicPillars.length > 0 || longTermAims.length > 0;
-
-  // Default pillars if no data extracted yet
-  const defaultPillars = [
-    { id: 1, title: "Customer & Commercial Excellence", description: "Strengthen customer focus and drive profitable growth", color: "from-cyan-400 to-cyan-500", Icon: Target },
-    { id: 2, title: "Operational Excellence", description: "Drive operational efficiency across the organization", color: "from-teal-400 to-teal-500", Icon: Rocket },
-    { id: 3, title: "Technology & Transformation", description: "Accelerate digital transformation initiatives", color: "from-emerald-400 to-emerald-500", Icon: Zap },
-    { id: 4, title: "AI & Data Intelligence", description: "Scale AI and data to power intelligent operations", color: "from-green-400 to-green-500", Icon: Globe }
+    "Lead as the global integrator of logistics (Ocean, L&S, Terminals working as one).",
+    "Build resilient, efficient networks (Gemini design; disciplined capacity)",
+    "Grow profitably with strong cost discipline (ROIC >7.5%; Ocean EBIT >6%)",
+    "Deliver reliable, connected customer experiences end-to-end",
+    "Digitise operations and decisions with data, automation and AI",
+    "Decarbonise at scale (green methanol fleet All the way to zero 2040)"
   ];
 
-  const displayPillars = strategicPillars.length > 0 ? strategicPillars : defaultPillars;
-
-  // Default aims if no data
-  const defaultAims = [
-    "Establish leadership position in core markets",
-    "Build resilient and efficient operations",
-    "Grow profitably with strong cost discipline",
-    "Deliver exceptional customer experiences",
-    "Digitise operations with data, automation and AI",
-    "Achieve sustainability and ESG commitments"
+  // Medium-term ambitions
+  const mediumTermAmbitions = [
+    {
+      title: "Better efficiencies",
+      bullets: [
+        "Sustained productivity improvements across customer and operational teams",
+        "Lower manual effort and rework",
+        "Increased execution capacity per team"
+      ]
+    },
+    {
+      title: "Improve free cash flow",
+      bullets: [
+        "Margin improvement driven by productivity and automation",
+        "Ability to scale volumes without proportional cost increases"
+      ]
+    },
+    {
+      title: "Grow the business",
+      bullets: []
+    }
   ];
-
-  const displayAims = longTermAims.length > 0 ? longTermAims : defaultAims;
-
-  // Default ambitions if no data
-  const defaultAmbitions = [
-    { title: "Improve Efficiency", bullets: ["Sustained productivity improvements", "Lower manual effort and rework"] },
-    { title: "Strengthen Cash Flow", bullets: ["Margin improvement through automation", "Scale without proportional cost"] },
-    { title: "Accelerate Growth", bullets: ["Expand market presence", "Drive new revenue streams"] }
-  ];
-
-  const displayAmbitions = mediumTermAmbitions.length > 0 ? mediumTermAmbitions : defaultAmbitions;
-
-  // Extract company tagline/purpose from synthesis or use generic
-  const companyPurpose = synthesis?.narrative 
-    ? synthesis.narrative.split('.')[0] + "."
-    : `${companyName}'s strategic vision and transformation priorities`;
 
   return (
     <div className="min-h-screen p-4 md:p-6 pb-32 bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900/30">
@@ -104,50 +89,56 @@ export const RoadmapSlide = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs text-slate-400 mb-1">{companyName}</p>
+            <p className="text-xs text-slate-400 mb-1">ServiceNow Internal Confidential</p>
             <h1 className="text-3xl md:text-4xl font-bold">
-              <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                Customer Strategy
+              <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent italic">
+                The Integrator
               </span>
+              <span className="text-emerald-400 ml-2">Strategy</span>
             </h1>
           </div>
           <div className="flex items-center gap-2">
-            <RegenerateSectionButton section="customerStrategySynthesis" />
-            {isAIGenerated && (
-              <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5 text-xs">
-                <Sparkles className="w-3 h-3" />
-                AI Generated
-              </span>
-            )}
+            <RegenerateSectionButton section="roadmapPhases" />
+            <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5 text-xs">
+              <Sparkles className="w-3 h-3" />
+              AI Generated
+            </span>
           </div>
         </div>
 
-        {/* Vision/Purpose Banner */}
-        <div className="bg-slate-700/40 rounded-lg py-3 px-4 mb-3">
-          <p className="text-sm md:text-base text-center text-slate-200 leading-relaxed">
-            {companyPurpose}
-          </p>
+        {/* All the way banner */}
+        <div className="bg-slate-700/40 rounded-lg py-2 px-4 mb-3 text-center">
+          <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+            All the way
+          </span>
+        </div>
+
+        {/* Purpose */}
+        <div className="bg-slate-700/30 border border-slate-600/30 rounded-lg py-2 px-4 mb-3 text-center">
+          <span className="text-slate-300 text-sm">
+            <span className="font-semibold text-white">Our purpose</span> Improving life for all by integrating the world
+          </span>
         </div>
 
         {/* Main Grid Structure */}
         <div className="space-y-3">
           
-          {/* Row: Long-term Strategic Aims */}
+          {/* Row: Long-term aims */}
           <div className="grid grid-cols-12 gap-3">
             {/* Label */}
             <div className="col-span-2 bg-slate-300 rounded-lg p-3 flex flex-col justify-center">
-              <div className="text-slate-800 font-bold text-sm">Strategic Aims</div>
-              <div className="text-slate-600 text-sm">Long-term vision</div>
+              <div className="text-slate-800 font-bold text-sm">Our six longer-term aims</div>
+              <div className="text-slate-600 text-sm">Our ambition is...</div>
               <ChevronRight className="w-5 h-5 text-slate-500 mt-1 self-end" />
             </div>
             {/* 6 aims in 2 rows of 3 */}
             <div className="col-span-10 grid grid-cols-3 gap-2">
-              {displayAims.slice(0, 3).map((aim, i) => (
+              {longTermAims.slice(0, 3).map((aim, i) => (
                 <div key={i} className="bg-cyan-700/60 border border-cyan-600/40 rounded-lg p-3 text-center">
                   <p className="text-white text-xs font-medium leading-snug">{aim}</p>
                 </div>
               ))}
-              {displayAims.slice(3, 6).map((aim, i) => (
+              {longTermAims.slice(3, 6).map((aim, i) => (
                 <div key={i + 3} className="bg-cyan-700/60 border border-cyan-600/40 rounded-lg p-3 text-center">
                   <p className="text-white text-xs font-medium leading-snug">{aim}</p>
                 </div>
@@ -155,74 +146,62 @@ export const RoadmapSlide = () => {
             </div>
           </div>
 
-          {/* Row: Strategic Pillars */}
+          {/* Row: Tasks for 2025/26 */}
           <div className="grid grid-cols-12 gap-3">
             {/* Label */}
             <div className="col-span-2 bg-amber-200 rounded-lg p-3 flex flex-col justify-center">
-              <div className="text-slate-800 font-bold text-sm">Strategic Pillars</div>
-              <div className="text-slate-600 text-sm">Key focus areas</div>
+              <div className="text-slate-800 font-bold text-sm">Our Tasks for 2025/26</div>
+              <div className="text-slate-600 text-sm">We must...</div>
               <ChevronRight className="w-5 h-5 text-slate-500 mt-1 self-end" />
             </div>
             {/* 4 pillars */}
             <div className="col-span-10 grid grid-cols-4 gap-2">
-              {displayPillars.map((pillar) => {
-                const Icon = pillar.Icon;
-                return (
-                  <div key={pillar.id} className="bg-slate-800/60 border border-slate-600/40 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-6 h-6 rounded-md bg-gradient-to-r ${pillar.color} flex items-center justify-center`}>
-                        <Icon className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <h4 className={`text-sm font-bold bg-gradient-to-r ${pillar.color} bg-clip-text text-transparent`}>
-                        {pillar.title}
-                      </h4>
-                    </div>
-                    {pillar.description && (
-                      <p className="text-[10px] text-slate-400 leading-snug">{pillar.description}</p>
-                    )}
-                  </div>
-                );
-              })}
+              {strategicPillars.map((pillar) => (
+                <div key={pillar.id} className="bg-slate-800/60 border border-slate-600/40 rounded-lg p-3">
+                  <h4 className={`text-sm font-bold bg-gradient-to-r ${pillar.color} bg-clip-text text-transparent text-center mb-2`}>
+                    {pillar.title}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 text-center">+ For more see page #xx</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Row: Transformation Priorities */}
+          {/* Row: Objectives for 2026+ */}
           <div className="grid grid-cols-12 gap-3">
             {/* Label */}
             <div className="col-span-2 bg-amber-200 rounded-lg p-3 flex flex-col justify-center">
-              <div className="text-slate-800 font-bold text-sm">Transformation Priorities</div>
-              <div className="text-slate-600 text-sm">How they'll achieve it</div>
+              <div className="text-slate-800 font-bold text-sm">Our Objectives for 2026 +</div>
+              <div className="text-slate-600 text-sm">We will...</div>
               <ChevronRight className="w-5 h-5 text-slate-500 mt-1 self-end" />
             </div>
             {/* 4 objective columns */}
             <div className="col-span-10 grid grid-cols-4 gap-2">
-              {displayPillars.map((pillar) => (
+              {strategicPillars.map((pillar) => (
                 <div key={pillar.id} className="bg-slate-800/80 border border-slate-600/50 rounded-lg p-3">
                   <ul className="space-y-2">
-                    {pillar.description ? (
-                      <li className="flex items-start gap-2">
+                    {pillar.objectives.map((obj, i) => (
+                      <li key={i} className="flex items-start gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${pillar.color} mt-1.5 flex-shrink-0`} />
-                        <span className="text-[11px] text-slate-300 leading-snug">{pillar.description}</span>
+                        <span className="text-[11px] text-slate-300 leading-snug">{obj}</span>
                       </li>
-                    ) : (
-                      <li className="text-[11px] text-slate-500 italic">Details to be extracted from report</li>
-                    )}
+                    ))}
                   </ul>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Row: Medium-term Ambitions */}
+          {/* Row: Medium-term ambitions */}
           <div className="grid grid-cols-12 gap-3">
             {/* Label */}
             <div className="col-span-2 bg-cyan-700 rounded-lg p-3 flex flex-col justify-center">
-              <div className="text-white font-bold text-sm">Medium-Term Outcomes</div>
+              <div className="text-white font-bold text-sm">Delivering on our medium-term ambitions</div>
               <ChevronRight className="w-5 h-5 text-cyan-300 mt-1 self-end" />
             </div>
-            {/* 3 ambition columns */}
+            {/* 3 ambition columns spanning 4 pillars */}
             <div className="col-span-10 grid grid-cols-3 gap-2">
-              {displayAmbitions.map((ambition, i) => (
+              {mediumTermAmbitions.map((ambition, i) => (
                 <div key={i} className="bg-slate-800/80 border border-slate-600/50 rounded-lg p-4">
                   <h4 className="text-cyan-400 font-bold text-sm mb-2">{ambition.title}</h4>
                   {ambition.bullets.length > 0 ? (
@@ -235,36 +214,18 @@ export const RoadmapSlide = () => {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-slate-500 text-xs italic">To be extracted</p>
+                    <p className="text-slate-500 text-xs">Tbc</p>
                   )}
                 </div>
               ))}
             </div>
           </div>
-
-          {/* ServiceNow Alignment Row - only show if AI synthesis available */}
-          {synthesis?.serviceNowAlignment && synthesis.serviceNowAlignment.length > 0 && (
-            <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-2 bg-emerald-600 rounded-lg p-3 flex flex-col justify-center">
-                <div className="text-white font-bold text-sm">ServiceNow Alignment</div>
-                <ChevronRight className="w-5 h-5 text-emerald-200 mt-1 self-end" />
-              </div>
-              <div className="col-span-10 grid grid-cols-3 gap-2">
-                {synthesis.serviceNowAlignment.slice(0, 3).map((alignment, i) => (
-                  <div key={i} className="bg-emerald-900/40 border border-emerald-600/30 rounded-lg p-3">
-                    <p className="text-emerald-300 text-xs font-medium mb-1">{alignment.customerPriority}</p>
-                    <p className="text-white text-xs">{alignment.serviceNowValue}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Footer */}
+        {/* Footer banner */}
         <div className="mt-4 bg-cyan-700/50 rounded-lg py-3 px-6 text-center">
           <span className="text-white text-sm font-medium">
-            {companyName} strategic direction and transformation priorities
+            Underpinned by Group governance, support services and risk management
           </span>
         </div>
       </div>

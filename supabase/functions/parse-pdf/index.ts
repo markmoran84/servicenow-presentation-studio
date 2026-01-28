@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getDocumentProxy } from "https://esm.sh/unpdf@0.12.1";
+import { getDocument } from "https://esm.sh/pdfjs-serverless";
 import { corsHeaders, createErrorResponse, validateFilePath } from "../_shared/validation.ts";
-
-const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB limit to stay within CPU limits
-const MAX_PAGES = 15; // Limit pages to prevent CPU timeout
-const MAX_CHARS = 100_000; // Stop early when we have enough text
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -53,89 +49,60 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // File size limit to avoid CPU/memory spikes
-    if (uint8Array.length > MAX_PDF_SIZE) {
-      console.log("File too large:", uint8Array.length, "bytes");
-      // Clean up the file
-      await supabase.storage.from("annual-reports").remove([validatedPath]);
-      return createErrorResponse(
-        400, 
-        `This PDF is too large (${Math.round(uint8Array.length / 1024 / 1024)}MB). Maximum is ${Math.round(MAX_PDF_SIZE / 1024 / 1024)}MB. Please use the text paste option instead, or upload a smaller file.`
-      );
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024;
+    if (uint8Array.length > maxSize) {
+      return createErrorResponse(400, "File too large. Maximum size is 50MB.");
     }
 
     console.log("PDF size:", uint8Array.length, "bytes");
 
-    // Extract text page by page with strict limits
+    // Extract text via PDF.js (serverless build)
     const rawText = await extractTextFromPDF(uint8Array);
     const textContent = cleanExtractedText(rawText);
-    console.log("Cleaned text length:", textContent.length);
 
-    // Be more lenient - if we got any substantial text, use it
-    if (textContent.length < 100) {
-      console.log("Text too short, likely image-based PDF");
-      await supabase.storage.from("annual-reports").remove([validatedPath]);
+    if (!looksLikeExtractedText(textContent)) {
       return createErrorResponse(
         400,
         "Could not extract readable text from this PDF. It may be image-based or protected. Please copy/paste the text content instead.",
       );
     }
 
-    console.log("PDF text extracted successfully, final length:", textContent.length);
+    console.log("PDF text extracted, length:", textContent.length);
 
     // Clean up the uploaded file
     await supabase.storage.from("annual-reports").remove([validatedPath]);
 
-    // Return both keys for compatibility with any older callers.
-    return new Response(JSON.stringify({ success: true, content: textContent, text: textContent }), {
+    return new Response(JSON.stringify({ success: true, content: textContent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("PDF processing error:", error);
-    return createErrorResponse(
-      500, 
-      "Failed to process PDF. This file may be too complex. Please use the text paste option instead, or try a simpler PDF.", 
-      error
-    );
+    return createErrorResponse(500, "Failed to process PDF. Please try again.", error);
   }
 });
 
 async function extractTextFromPDF(uint8Array: Uint8Array): Promise<string> {
-  const doc = await getDocumentProxy(uint8Array);
-  const pagesToProcess = Math.min(doc.numPages, MAX_PAGES);
-  
-  console.log(`Processing ${pagesToProcess} of ${doc.numPages} pages`);
-  
+  // NOTE: annual reports can be long; we cap by extracted character count to avoid timeouts.
+  const maxChars = 480_000;
+
+  const doc = await getDocument({ data: uint8Array, useSystemFonts: true }).promise;
   const parts: string[] = [];
   let total = 0;
 
-  try {
-    for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
-      try {
-        const page = await doc.getPage(pageNum);
-        const content = await page.getTextContent();
+  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+    const page = await doc.getPage(pageNum);
+    const content = await page.getTextContent();
 
-        const pageText = (content.items as any[])
-          .map((it) => (typeof it?.str === "string" ? it.str : ""))
-          .filter(Boolean)
-          .join(" ");
+    const pageText = (content.items as any[])
+      .map((it) => (typeof it?.str === "string" ? it.str : ""))
+      .filter(Boolean)
+      .join(" ");
 
-        if (pageText) {
-          parts.push(pageText);
-          total += pageText.length;
-          if (total >= MAX_CHARS) {
-            console.log(`Character limit reached at page ${pageNum}`);
-            break;
-          }
-        }
-      } catch (pageError) {
-        console.warn(`Error on page ${pageNum}:`, pageError);
-      }
+    if (pageText) {
+      parts.push(pageText);
+      total += pageText.length;
+      if (total >= maxChars) break;
     }
-  } finally {
-    try {
-      await (doc as any).destroy?.();
-    } catch { /* ignore */ }
   }
 
   return parts.join("\n\n");
@@ -148,6 +115,17 @@ function cleanExtractedText(text: string): string {
     .replace(/\t/g, " ")
     .replace(/\s{2,}/g, " ")
     .replace(/\n /g, "\n")
-    .replace(/[\x00-\x1f\x7f]/g, "")
     .trim();
+}
+
+function looksLikeExtractedText(text: string): boolean {
+  if (text.length < 200) return false;
+
+  // If there are too many control characters, it's almost certainly binary/garbage.
+  const controlChars = (text.match(/[\x00-\x1f\x7f]/g) || []).length;
+  if (controlChars / Math.max(1, text.length) > 0.01) return false;
+
+  // Require a minimal word count so we don't pass through short metadata-only results.
+  const words = (text.match(/[A-Za-z0-9][A-Za-z0-9'\-]*/g) || []).length;
+  return words >= 80;
 }

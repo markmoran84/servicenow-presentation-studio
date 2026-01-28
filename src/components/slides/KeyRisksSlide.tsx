@@ -1,6 +1,5 @@
 import { useAccountData } from "@/context/AccountDataContext";
 import { RegenerateSectionButton } from "@/components/RegenerateSectionButton";
-import { RiskDataImporter } from "@/components/RiskDataImporter";
 import { ShieldAlert, Sparkles, AlertCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -139,7 +138,6 @@ export const KeyRisksSlide = () => {
             </h1>
           </div>
           <div className="ml-auto flex items-center gap-4">
-            <RiskDataImporter />
             <RegenerateSectionButton section="keyRisks" />
             {isAIGenerated && (
               <span className="pill-badge bg-accent/20 text-accent border-accent/30 flex items-center gap-1.5">
