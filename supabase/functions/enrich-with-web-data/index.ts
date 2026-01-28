@@ -224,6 +224,18 @@ RULES:
                     type: "string",
                     description: "Company purpose/mission statement - why they exist"
                   },
+                  region: {
+                    type: "string",
+                    description: "Primary region/geography (e.g., 'EMEA', 'North America', 'APAC', 'Global')"
+                  },
+                  headquarters: {
+                    type: "string",
+                    description: "City and country of headquarters (e.g., 'Amsterdam, Netherlands')"
+                  },
+                  numberOfEmployees: {
+                    type: "string",
+                    description: "Number of employees (e.g., '85,000 employees')"
+                  },
                   longTermAims: {
                     type: "array",
                     items: { type: "string" },
@@ -312,6 +324,9 @@ RULES:
     if (enrichedData.netZeroTarget) enrichedFields.push('netZeroTarget');
     if (enrichedData.visionStatement) enrichedFields.push('visionStatement');
     if (enrichedData.purposeStatement) enrichedFields.push('purposeStatement');
+    if (enrichedData.region) enrichedFields.push('region');
+    if (enrichedData.headquarters) enrichedFields.push('headquarters');
+    if (enrichedData.numberOfEmployees) enrichedFields.push('numberOfEmployees');
     if (enrichedData.longTermAims?.length) enrichedFields.push('longTermAims');
     if (enrichedData.executives?.length) enrichedFields.push('executives');
     if (enrichedData.strategicPriorities?.length) enrichedFields.push('strategicPriorities');
