@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { AnnualReportAnalyzer } from "@/components/AnnualReportAnalyzer";
 import { PowerPointAnalyzer } from "@/components/PowerPointAnalyzer";
 import { ExtractedDataPreview } from "@/components/ExtractedDataPreview";
+import { StrategyConfidenceIndicator } from "@/components/StrategyConfidenceIndicator";
 import { 
   Building2, History, DollarSign, Target, AlertTriangle, 
   Lightbulb, Users, Shield, Save, RotateCcw, ArrowRight, FileText, Sparkles, LayoutGrid, Loader2, Globe, RefreshCw, Eye, Plus, X, Zap, Trash2, Presentation
@@ -1624,7 +1625,8 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
       if (!responseData?.success) throw new Error(responseData?.error || "Failed to generate strategy");
 
       updateData("accountStrategy", { 
-        strategyNarrative: responseData.strategyNarrative 
+        strategyNarrative: responseData.strategyNarrative,
+        metadata: responseData.metadata
       });
       
       toast.success("Account strategy generated!", { id: "gen-strategy" });
@@ -1834,6 +1836,13 @@ const AccountStrategyTab = ({ data, updateData }: AccountStrategyTabProps) => {
             placeholder="Our strategy for [Account] focuses on..."
             className="bg-background"
           />
+          
+          {/* Strategy Confidence Indicator */}
+          {data.accountStrategy?.metadata && (
+            <div className="mt-4 p-4 rounded-lg bg-secondary/30 border border-border/30">
+              <StrategyConfidenceIndicator metadata={data.accountStrategy.metadata} />
+            </div>
+          )}
         </CardContent>
       </Card>
 
