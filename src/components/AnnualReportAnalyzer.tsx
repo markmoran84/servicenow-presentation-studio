@@ -51,6 +51,8 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
           ...data.basics,
           ...(extractedData.accountName && { accountName: extractedData.accountName }),
           ...(extractedData.industry && { industry: extractedData.industry }),
+          ...(extractedData.region && { region: extractedData.region }),
+          ...(extractedData.numberOfEmployees && { numberOfEmployees: extractedData.numberOfEmployees }),
         },
         financial: {
           ...data.financial,
@@ -195,11 +197,13 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
 
       setDataSourceInfo({ documentFields, webFields, usedWebSearch });
 
-      // Update Basics tab
-      if (extracted.accountName || extracted.industry) {
+      // Update Basics tab - INCLUDING region and employees
+      if (extracted.accountName || extracted.industry || extracted.region || extracted.numberOfEmployees || extracted.headquarters) {
         updateData("basics", {
           ...(extracted.accountName && { accountName: extracted.accountName }),
           ...(extracted.industry && { industry: extracted.industry }),
+          ...(extracted.region && { region: extracted.region }),
+          ...(extracted.numberOfEmployees && { numberOfEmployees: extracted.numberOfEmployees }),
         });
       }
 
@@ -421,6 +425,15 @@ export const AnnualReportAnalyzer = ({ onGeneratePlan }: AnnualReportAnalyzerPro
           ...(enriched.revenue && !data.financial.customerRevenue && { customerRevenue: enriched.revenue }),
           ...(enriched.growthRate && !data.financial.growthRate && { growthRate: enriched.growthRate }),
           ...(enriched.marginEBIT && !data.financial.marginEBIT && { marginEBIT: enriched.marginEBIT }),
+        });
+        updatedCount++;
+      }
+
+      // Update Basics with region and employees from web enrichment
+      if (enriched.region || enriched.numberOfEmployees) {
+        updateData("basics", {
+          ...(enriched.region && !data.basics.region && { region: enriched.region }),
+          ...(enriched.numberOfEmployees && !data.basics.numberOfEmployees && { numberOfEmployees: enriched.numberOfEmployees }),
         });
         updatedCount++;
       }

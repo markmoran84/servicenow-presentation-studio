@@ -264,6 +264,9 @@ CRITICAL: Your accountName output MUST match exactly what is written in this doc
                 properties: {
                   accountName: { type: "string", description: "EXACT company name as written in the document header/title. Copy character-for-character. If document says 'ABC Ltd' output 'ABC Ltd' exactly." },
                   industry: { type: "string", description: "Primary industry/sector with specificity (e.g., 'Integrated Logistics & Container Shipping' not just 'Transportation')" },
+                  region: { type: "string", description: "Primary region/geography where the company is headquartered or operates (e.g., 'EMEA', 'North America', 'APAC', 'Global'). Look for 'headquartered in', 'based in', geographic references." },
+                  headquarters: { type: "string", description: "City and country of headquarters (e.g., 'Amsterdam, Netherlands', 'London, UK'). Look for 'headquartered in', 'head office', registered address." },
+                  numberOfEmployees: { type: "string", description: "Number of employees (e.g., '85,000 employees', '~50,000 FTEs'). Look for 'employees', 'workforce', 'team members', 'colleagues'." },
                   revenue: { type: "string", description: "Total revenue with currency and period (e.g., '$55.5B FY2024')" },
                   revenueComparison: { type: "string", description: "Prior year revenue for comparison" },
                   growthRate: { type: "string", description: "YoY growth rate with context (e.g., '+12% YoY' or '-8% due to market normalization')" },
